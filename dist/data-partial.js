@@ -15,11 +15,9 @@ var Attv;
 (function (Attv) {
     var DataPartial = /** @class */ (function (_super) {
         __extends(DataPartial, _super);
-        function DataPartial(attributeName, renderer) {
-            if (renderer === void 0) { renderer = new Attv.DataTemplate.Renderers.DefaultRenderer(); }
+        function DataPartial(attributeName) {
             var _this = _super.call(this, attributeName, true) || this;
             _this.attributeName = attributeName;
-            _this.renderer = renderer;
             return _this;
         }
         DataPartial.prototype.renderPartial = function (element, content) {
@@ -67,8 +65,6 @@ var Attv;
                     return true;
                 };
                 DefaultAttributeValue.prototype.render = function (element, content) {
-                    var dataPartial = this.dataAttribute;
-                    var renderer = dataPartial.renderer;
                     // get content
                     if (!content) {
                         var options = element.attr('data');
@@ -77,13 +73,29 @@ var Attv;
                                 ajaxOptions.callback(wasSuccessful, xhr);
                             }
                             content = xhr.response;
-                            renderer.render(dataPartial, element, content);
+                            doRender(content);
                         };
                         this.sendAjax(options);
                     }
                     else {
-                        renderer.render(dataPartial, element, content);
+                        doRender(content);
                     }
+                    function doRender(content) {
+                        var dataTemplate = Attv.getDataAttribute('data-template');
+                        var html = dataTemplate.renderContent(content, {});
+                        element.innerHTML = html;
+                        Attv.loadElements(element);
+                    }
+                };
+                DefaultAttributeValue.prototype.findRenderer = function (element) {
+                    var renderer;
+                    if (element.attr('data-render')) {
+                        // use template
+                    }
+                    if (!renderer) {
+                        renderer = new Attv.DataTemplate.Renderers.DefaultRenderer();
+                    }
+                    return renderer;
                 };
                 DefaultAttributeValue.prototype.sendAjax = function (options) {
                     options.method = options.method || 'get';

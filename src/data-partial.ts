@@ -1,4 +1,5 @@
 namespace Attv {
+
     export interface AjaxOptions {
         url: string;
         method?: 'post' | 'put' | 'delete' | 'patch' | 'get';
@@ -9,7 +10,7 @@ namespace Attv {
     
     export class DataPartial extends Attv.DataAttribute {
 
-        constructor (public attributeName: string, public renderer: DataTemplate.Renderers.Renderer = new DataTemplate.Renderers.DefaultRenderer()) {
+        constructor (public attributeName: string) {
             super(attributeName, true);
         }
 
@@ -68,9 +69,6 @@ namespace Attv {
             }
 
             render(element: HTMLElement, content?: string) {
-                let dataPartial = this.dataAttribute as DataPartial;
-                let renderer = dataPartial.renderer;
-
                 // get content
                 if (!content) {
                     let options = element.attr('data') as AjaxOptions;
@@ -80,14 +78,39 @@ namespace Attv {
                         }
 
                         content = xhr.response;
-                        renderer.render(dataPartial, element, content);
+                        
+                        doRender(content);
                     };
 
                     this.sendAjax(options);
                 }
                 else {
-                    renderer.render(dataPartial, element, content);
+                    doRender(content);
                 }
+
+                function doRender(content: string) {
+                    let dataTemplate = Attv.getDataAttribute('data-template') as DataTemplate;
+                    let html = dataTemplate.renderContent(content, {});
+
+                    element.innerHTML = html;
+
+                    Attv.loadElements(element);
+                }
+            }
+
+            protected findRenderer(element: HTMLElement): DataTemplate.Renderers.Renderer {
+                let renderer: DataTemplate.Renderers.Renderer;
+
+                if (element.attr('data-render')) {
+                    // use template
+
+                }
+
+                if (!renderer) {
+                    renderer = new DataTemplate.Renderers.DefaultRenderer();
+                }
+
+                return renderer;
             }
             
             protected sendAjax(options: AjaxOptions) {
@@ -130,7 +153,7 @@ namespace Attv {
 
 Attv.loader.pre.push(() => {
     Attv.registerDataAttribute('data-partial', (attributeName) => new Attv.DataPartial(attributeName));
-    
+
     Attv.registerAttributeValue('data-partial', dataAttribute => new Attv.DataPartial.Attributes.AutoAttributeValue(dataAttribute));
     Attv.registerAttributeValue('data-partial', dataAttribute => new Attv.DataPartial.Attributes.ClickAttributeValue(dataAttribute));
     Attv.registerAttributeValue('data-partial', dataAttribute => new Attv.DataPartial.Attributes.FormAttributeValue(dataAttribute));

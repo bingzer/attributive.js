@@ -248,6 +248,15 @@ var Attv;
         return typeof (any) === expectedType;
     }
     Attv.isType = isType;
+    function createHTMLElement(any) {
+        if (isString(any)) {
+            var htmlElement = document.createElement('div');
+            htmlElement.innerHTML = any;
+            any = htmlElement;
+        }
+        return any;
+    }
+    Attv.createHTMLElement = createHTMLElement;
     function parseJsonOrElse(any) {
         try {
             any = JSON.parse(any);

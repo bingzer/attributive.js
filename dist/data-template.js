@@ -15,13 +15,40 @@ var Attv;
 (function (Attv) {
     var DataTemplate = /** @class */ (function (_super) {
         __extends(DataTemplate, _super);
-        function DataTemplate(attributeName, renderer) {
-            if (renderer === void 0) { renderer = new DataTemplate.Renderers.DefaultRenderer(); }
+        function DataTemplate(attributeName) {
             var _this = _super.call(this, attributeName, true) || this;
             _this.attributeName = attributeName;
-            _this.renderer = renderer;
             return _this;
         }
+        DataTemplate.prototype.renderTemplate = function (sourceElementOrSelectorOrContent, model, renderer) {
+            var sourceElement = sourceElementOrSelectorOrContent;
+            if (Attv.isString(sourceElementOrSelectorOrContent)) {
+                sourceElement = document.querySelector(sourceElementOrSelectorOrContent);
+            }
+            // find renderer
+            if (!renderer && sourceElement.attr('data-renderer')) {
+                var rendererName = sourceElement.attr('data-renderer');
+                renderer = this.findRendererByName(rendererName);
+            }
+            var attributeValue = sourceElement.attr(this.attributeName);
+            var dataAttributeValue = Attv.getDataAttributeValue(attributeValue, this);
+            var templateHtmlElement = dataAttributeValue.getTemplate(sourceElement);
+            return this.renderContent(templateHtmlElement.innerHTML, model, renderer);
+        };
+        DataTemplate.prototype.renderContent = function (content, model, renderer) {
+            if (!renderer) {
+                renderer = new DataTemplate.Renderers.DefaultRenderer();
+            }
+            return renderer.render(content, model);
+        };
+        DataTemplate.prototype.findRendererByName = function (name) {
+            switch (name.toLocaleLowerCase()) {
+                case "simple":
+                    return new DataTemplate.Renderers.SimpleRenderer();
+                default:
+                    return new DataTemplate.Renderers.DefaultRenderer();
+            }
+        };
         return DataTemplate;
     }(Attv.DataAttribute));
     Attv.DataTemplate = DataTemplate;
@@ -43,19 +70,9 @@ var Attv;
                     element.innerHTML = '';
                     return true;
                 };
-                DefaultAttributeValue.prototype.render = function (element, template, model) {
-                    if (model instanceof Array) {
-                        var elements = this.findByAttribute(template, 'data-bind');
-                    }
-                    else {
-                    }
-                };
-                DefaultAttributeValue.prototype.findByAttribute = function (element, attributeName) {
-                    var elements = element.querySelectorAll("[" + attributeName + "]");
-                    if (element.attr(attributeName)) {
-                        elements.push(element);
-                    }
-                    return elements;
+                DefaultAttributeValue.prototype.getTemplate = function (element) {
+                    var html = element.attr('data-template-html');
+                    return Attv.createHTMLElement(html);
                 };
                 return DefaultAttributeValue;
             }(Attv.DataAttributeValue));
@@ -75,6 +92,10 @@ var Attv;
                     // we don't need to do anything
                     return true;
                 };
+                ScriptAttributeValue.prototype.getTemplate = function (element) {
+                    var html = element.innerHTML;
+                    return Attv.createHTMLElement(html);
+                };
                 return ScriptAttributeValue;
             }(Attv.DataAttributeValue));
             Attributes.ScriptAttributeValue = ScriptAttributeValue;
@@ -87,9 +108,8 @@ var Attv;
             var DefaultRenderer = /** @class */ (function () {
                 function DefaultRenderer() {
                 }
-                DefaultRenderer.prototype.render = function (dataAttribute, element, content) {
-                    element.innerHTML = content;
-                    Attv.loadElements(element);
+                DefaultRenderer.prototype.render = function (content, model) {
+                    return content;
                 };
                 return DefaultRenderer;
             }());
@@ -97,11 +117,75 @@ var Attv;
             var SimpleRenderer = /** @class */ (function () {
                 function SimpleRenderer() {
                 }
-                SimpleRenderer.prototype.render = function (dataAttribute, element, content) {
-                    var model = content;
-                    if (Attv.isString(content)) {
-                        model = Attv.parseJsonOrElse(content);
+                SimpleRenderer.prototype.render = function (content, model) {
+                    var templateElement = Attv.createHTMLElement(content);
+                    var rootElement = Attv.createHTMLElement('');
+                    this.bind(rootElement, templateElement, model);
+                    return rootElement.innerHTML;
+                };
+                SimpleRenderer.prototype.bind = function (element, template, model) {
+                    // -- Array
+                    if (model instanceof Array) {
+                        element.innerHTML = '';
+                        var array = model;
+                        for (var i = 0; i < array.length; i++) {
+                            var foreachElement = this.findByAttribute(template, 'data-bind-foreach', true)[0];
+                            if (!foreachElement)
+                                return;
+                            var forEachBind = foreachElement.cloneNode(true);
+                            this.bind(element, forEachBind, array[i]);
+                        }
                     }
+                    // -- Object
+                    else {
+                        var bindElements = this.findByAttribute(template, 'data-bind');
+                        for (var i = 0; i < bindElements.length; i++) {
+                            var bindElement = bindElements[i];
+                            // if the direct parent is the 'template'
+                            if (bindElement.closest('[data-bind-foreach]') === template) {
+                                // bind the value
+                                var propName = bindElement.attr('data-bind');
+                                var propValue = this.getPropertyValue(propName, model);
+                                bindElement.innerHTML = propValue; // TODO: sanitize
+                            }
+                            else {
+                                // another loop
+                                var foreachChild = bindElement.closest('[data-bind-foreach]');
+                                var foreachChildName = foreachChild.attr('data-bind-foreach');
+                                var foreachChildValue = this.getPropertyValue(foreachChildName, model);
+                                var foreachChildTemplate = foreachChild.cloneNode(true);
+                                this.bind(element, foreachChildTemplate, foreachChildValue);
+                            }
+                        }
+                        element.append(template);
+                    }
+                };
+                SimpleRenderer.prototype.findByAttribute = function (element, attributeName, includeSelf) {
+                    if (includeSelf === void 0) { includeSelf = false; }
+                    var elements = element.querySelectorAll("[" + attributeName + "]");
+                    if (includeSelf && element.attr(attributeName)) {
+                        elements.push(element);
+                    }
+                    return elements;
+                };
+                SimpleRenderer.prototype.getPropertyValue = function (propertyName, any) {
+                    var propertyValue = any;
+                    if (Attv.isUndefined(any))
+                        return undefined;
+                    if (propertyName === '$' || propertyName === '$root') {
+                        propertyValue = any;
+                    }
+                    else if (propertyName === '$json') {
+                        propertyValue = JSON.stringify(propertyValue);
+                        return propertyValue;
+                    }
+                    else {
+                        var propertyChilds = propertyName.split('.');
+                        for (var j = 0; j < propertyChilds.length; j++) {
+                            propertyValue = propertyValue[propertyChilds[j]];
+                        }
+                    }
+                    return Attv.parseJsonOrElse(propertyValue);
                 };
                 return SimpleRenderer;
             }());

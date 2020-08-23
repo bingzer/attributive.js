@@ -306,6 +306,17 @@ namespace Attv {
         return typeof(any) === expectedType;
     }
 
+    export function createHTMLElement(any: string | HTMLElement): HTMLElement {
+        if (isString(any)) {
+            let htmlElement = document.createElement('div');
+            htmlElement.innerHTML = any as string;
+
+            any = htmlElement;
+        }
+
+        return any as HTMLElement;
+    }
+
     export function parseJsonOrElse(any: any) {
         try {
             any = JSON.parse(any);

@@ -7,6 +7,7 @@
 		<div>
 			
 			<div data-partial="auto" data-url="partial.html"></div>
+
 <!-- 
 			<div data-partial="auto"></div>
 
@@ -17,9 +18,13 @@
 			<div data-partial="nothing" data-url="sample.json"></div> -->
 
 
-			<div id="template1" data-template="default">
+			<div id="template0" data-template="default">
+				Just a simple super simple template
+			</div>
+
+			<div id="template2" data-template="default" data-renderer="simple">
 				<h4><strong>This is from div template</strong></h4>
-				<ul data-bind="$root">
+				<ul data-bind-foreach="$root">
 					<li>
 						<p>
 							Name: <span data-bind="name"></span>
@@ -31,7 +36,7 @@
 						</p>
 						<p>
 							Friends
-							<ul data-bind="friends">
+							<ul data-bind-foreach="friends">
 								<li>
 									Friends number <span data-bind="id"></span>. name = <span data-bind="name"></span>
 								</li>
@@ -45,7 +50,7 @@
 
 			<script type="text/html" id="template1" data-template="script">
 				<h4><strong>This is from script template</strong></h4>
-				<ul data-foreach="$root">
+				<ul data-bind-foreach="$root">
 					<li>
 						<p>
 							Name: <span data-bind="name"></span>
@@ -57,7 +62,7 @@
 						</p>
 						<p>
 							Friends
-							<ul data-foreach="$root">
+							<ul data-bind-foreach="$root">
 								<li>
 									Friends number <span data-bind="id"></span>. name = <span data-bind="name"></span>
 								</li>
