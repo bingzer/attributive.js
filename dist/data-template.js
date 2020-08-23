@@ -25,6 +25,61 @@ var Attv;
         return DataTemplate;
     }(Attv.DataAttribute));
     Attv.DataTemplate = DataTemplate;
+    // --- AttributeValues
+    (function (DataTemplate) {
+        var Attributes;
+        (function (Attributes) {
+            /**
+             * [data-template]='default'
+             */
+            var DefaultAttributeValue = /** @class */ (function (_super) {
+                __extends(DefaultAttributeValue, _super);
+                function DefaultAttributeValue(dataAttribute) {
+                    return _super.call(this, 'default', dataAttribute) || this;
+                }
+                DefaultAttributeValue.prototype.loadElement = function (element) {
+                    var templateHtml = element.innerHTML;
+                    element.attr('data-template-html', templateHtml);
+                    element.innerHTML = '';
+                    return true;
+                };
+                DefaultAttributeValue.prototype.render = function (element, template, model) {
+                    if (model instanceof Array) {
+                        var elements = this.findByAttribute(template, 'data-bind');
+                    }
+                    else {
+                    }
+                };
+                DefaultAttributeValue.prototype.findByAttribute = function (element, attributeName) {
+                    var elements = element.querySelectorAll("[" + attributeName + "]");
+                    if (element.attr(attributeName)) {
+                        elements.push(element);
+                    }
+                    return elements;
+                };
+                return DefaultAttributeValue;
+            }(Attv.DataAttributeValue));
+            Attributes.DefaultAttributeValue = DefaultAttributeValue;
+            /**
+             * [data-template]='script'
+             */
+            var ScriptAttributeValue = /** @class */ (function (_super) {
+                __extends(ScriptAttributeValue, _super);
+                function ScriptAttributeValue(dataAttribute) {
+                    return _super.call(this, 'script', dataAttribute, [
+                        new Attv.Validators.RequiredElementValidator(['script']),
+                        new Attv.Validators.RequiredAttributeValidatorWithValue([{ name: 'type', value: 'text/html' }])
+                    ]) || this;
+                }
+                ScriptAttributeValue.prototype.loadElement = function (element) {
+                    // we don't need to do anything
+                    return true;
+                };
+                return ScriptAttributeValue;
+            }(Attv.DataAttributeValue));
+            Attributes.ScriptAttributeValue = ScriptAttributeValue;
+        })(Attributes = DataTemplate.Attributes || (DataTemplate.Attributes = {}));
+    })(DataTemplate = Attv.DataTemplate || (Attv.DataTemplate = {}));
     // --- DataPartial Renderer
     (function (DataTemplate) {
         var Renderers;
@@ -39,10 +94,24 @@ var Attv;
                 return DefaultRenderer;
             }());
             Renderers.DefaultRenderer = DefaultRenderer;
+            var SimpleRenderer = /** @class */ (function () {
+                function SimpleRenderer() {
+                }
+                SimpleRenderer.prototype.render = function (dataAttribute, element, content) {
+                    var model = content;
+                    if (Attv.isString(content)) {
+                        model = Attv.parseJsonOrElse(content);
+                    }
+                };
+                return SimpleRenderer;
+            }());
+            Renderers.SimpleRenderer = SimpleRenderer;
         })(Renderers = DataTemplate.Renderers || (DataTemplate.Renderers = {}));
     })(DataTemplate = Attv.DataTemplate || (Attv.DataTemplate = {}));
 })(Attv || (Attv = {}));
 Attv.loader.pre.push(function () {
     Attv.registerDataAttribute('data-template', function (attributeName) { return new Attv.DataTemplate(attributeName); });
+    Attv.registerAttributeValue('data-template', function (dataAttribute) { return new Attv.DataTemplate.Attributes.DefaultAttributeValue(dataAttribute); });
+    Attv.registerAttributeValue('data-template', function (dataAttribute) { return new Attv.DataTemplate.Attributes.ScriptAttributeValue(dataAttribute); });
 });
 //# sourceMappingURL=data-template.js.map

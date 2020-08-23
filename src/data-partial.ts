@@ -47,7 +47,7 @@ namespace Attv {
 
     }
 
-    // --- built-in attribute
+    // --- AttributeValues
 
     export namespace DataPartial.Attributes {
 
@@ -130,6 +130,7 @@ namespace Attv {
 
 Attv.loader.pre.push(() => {
     Attv.registerDataAttribute('data-partial', (attributeName) => new Attv.DataPartial(attributeName));
+    
     Attv.registerAttributeValue('data-partial', dataAttribute => new Attv.DataPartial.Attributes.AutoAttributeValue(dataAttribute));
     Attv.registerAttributeValue('data-partial', dataAttribute => new Attv.DataPartial.Attributes.ClickAttributeValue(dataAttribute));
     Attv.registerAttributeValue('data-partial', dataAttribute => new Attv.DataPartial.Attributes.FormAttributeValue(dataAttribute));

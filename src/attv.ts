@@ -77,6 +77,7 @@ HTMLElement.prototype.attr = function (name: string, value?: any): HTMLElement |
 
 interface String {
     startsWith: (text: string) => boolean;
+    equalsIgnoreCase: (other: string) => boolean;
     camelCaseToDash: () => string;
     dashToCamelCase: () => string;
 }
@@ -99,6 +100,12 @@ String.prototype.dashToCamelCase = function (): string {
     return text.toLowerCase().replace(/-(.)/g, function(match, group1) {
         return group1.toUpperCase();
     });
+}
+
+String.prototype.equalsIgnoreCase = function (other: string): boolean {
+    let text: String = this as String;
+
+    return text?.toLowerCase() === other?.toLowerCase();
 }
 
 ////////////////////////////////// Attv.DataAttv //////////////////////////////////////
@@ -131,8 +138,15 @@ namespace Attv {
             let isLoaded = element.attr(this.attributeLoadedName);
             return isLoaded === 'true';
         }
+
+        toString(): string {
+            return `[${this.attributeName}]`;
+        }
     }
 
+    /**
+     * Base class for DataAttribute-value
+     */
     export abstract class DataAttributeValue {
         
         constructor (public attributeValue: string, 
@@ -146,6 +160,10 @@ namespace Attv {
          * @param root the root
          */
         abstract loadElement(element: HTMLElement): boolean;
+
+        toString(): string {
+            return `[${this.dataAttribute.attributeName}]='${this.attributeValue}'`;
+        }
     }
 
     ////////////////////////////////// Validators //////////////////////////////////////
@@ -164,15 +182,63 @@ namespace Attv {
         
             validate(value: DataAttributeValue, element: HTMLElement): boolean {
                 let isValidated = true;
+
                 // check for other require attributes
-                for (var i = 0; i < this.requiredAttributes.length; i++) {
+                for (let i = 0; i < this.requiredAttributes.length; i++) {
                     let requiredAttributeName = this.requiredAttributes[i];
                     let requiredAttribute = element.attr(requiredAttributeName);
                     if (!requiredAttribute) {
-                        Attv.log('error', `[${value.dataAttribute.attributeName}] is requiring [${requiredAttributeName}] to be present in DOM`, element)
+                        Attv.log('error', `${value} is requiring [${requiredAttributeName}] to be present in DOM`, element)
                     }
 
                     isValidated = isValidated && !!requiredAttribute;
+                }
+
+                return isValidated;
+            }
+        }
+
+        export class RequiredAttributeValidatorWithValue implements DataAttributeValueValidator {
+
+            constructor (private requiredAttributes: { name: string, value: string}[]) {
+                // do nothing
+            }
+        
+            validate(value: DataAttributeValue, element: HTMLElement): boolean {
+                let isValidated = true;
+
+                // check for other require attributes
+                for (let i = 0; i < this.requiredAttributes.length; i++) {
+                    let attribute = this.requiredAttributes[i];
+                    let requiredAttribute = element.attr(attribute.name);
+                    if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
+                        Attv.log('error', `${value} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
+                    }
+
+                    isValidated = isValidated && !!requiredAttribute;
+                }
+
+                return isValidated;
+            }
+        }
+
+        export class RequiredElementValidator implements DataAttributeValueValidator {
+
+            constructor (private elementTagNames: string[]) {
+                // do nothing
+            }
+
+            validate(value: DataAttributeValue, element: Element): boolean {
+                let isValidated = true;
+
+                // check for element that this attribute belongs to
+                for (let i = 0; i < this.elementTagNames.length; i++) {
+                    let elementName = this.elementTagNames[i];
+                    isValidated = isValidated && element.tagName.equalsIgnoreCase(elementName);
+                }
+
+                if (!isValidated) {
+                    Attv.log('error', `${value} can only be attached to elements [${this.elementTagNames}]`, element)
                 }
 
                 return isValidated;
@@ -287,7 +353,7 @@ namespace Attv {
 
                     // #2. Check if the attribute value is supported
                     if (!dataAttributeValue) {
-                        Attv.log(Attv.configuration.attributeValueMissingLogLevel, `DataAttribute ${dataAttribute.attributeName} does not support [${dataAttribute.attributeName}]='${attributeValue}'`, element);
+                        Attv.log(Attv.configuration.attributeValueMissingLogLevel, `${dataAttribute} does not support ${dataAttribute}='${attributeValue}'`, element);
                         return;
                     }
 
@@ -307,7 +373,7 @@ namespace Attv {
                     element.attr(dataAttribute.attributeLoadedName, isLoaded);
                 }
                 catch (error) {
-                    Attv.log('error', `Unexpected error occurred when loading [${dataAttribute.attributeName}]`, element);
+                    Attv.log('error', `Unexpected error occurred when loading ${dataAttribute}`, error, element);
                 }
             });
         });
@@ -377,7 +443,7 @@ namespace Attv {
         for (var i = 0; i < dataAttributeFactory.length; i++) {
             let dataAttribute = dataAttributeFactory[i].create();
 
-            Attv.log(`Instantiating [${dataAttribute.attributeName}] to ${typeof dataAttribute}`, dataAttribute);
+            Attv.log(`Instantiating ${dataAttribute}`, dataAttribute);
             dataAttributes.push(dataAttribute);
         }
         
@@ -385,7 +451,7 @@ namespace Attv {
         for (var i = 0; i < dataAttributeValueFactory.length; i++) {
             let dataAttributeValue = dataAttributeValueFactory[i].create();
 
-            Attv.log(`Registering attributeValue: [${dataAttributeValue.dataAttribute.attributeName}]='${dataAttributeValue.attributeValue}'`, dataAttributeValue);
+            Attv.log(`Registering attributeValue: ${dataAttributeValue}`, dataAttributeValue);
             dataAttributeValues.push(dataAttributeValue);
         }
     }

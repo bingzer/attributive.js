@@ -50,7 +50,7 @@ var Attv;
         return DataPartial;
     }(Attv.DataAttribute));
     Attv.DataPartial = DataPartial;
-    // --- built-in attribute
+    // --- AttributeValues
     (function (DataPartial) {
         var Attributes;
         (function (Attributes) {

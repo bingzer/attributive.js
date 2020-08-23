@@ -71,6 +71,10 @@ String.prototype.dashToCamelCase = function () {
         return group1.toUpperCase();
     });
 };
+String.prototype.equalsIgnoreCase = function (other) {
+    var text = this;
+    return (text === null || text === void 0 ? void 0 : text.toLowerCase()) === (other === null || other === void 0 ? void 0 : other.toLowerCase());
+};
 ////////////////////////////////// Attv.DataAttv //////////////////////////////////////
 var Attv;
 (function (Attv) {
@@ -104,9 +108,15 @@ var Attv;
             var isLoaded = element.attr(this.attributeLoadedName);
             return isLoaded === 'true';
         };
+        DataAttribute.prototype.toString = function () {
+            return "[" + this.attributeName + "]";
+        };
         return DataAttribute;
     }());
     Attv.DataAttribute = DataAttribute;
+    /**
+     * Base class for DataAttribute-value
+     */
     var DataAttributeValue = /** @class */ (function () {
         function DataAttributeValue(attributeValue, dataAttribute, validators) {
             if (validators === void 0) { validators = []; }
@@ -115,6 +125,9 @@ var Attv;
             this.validators = validators;
             // do nothing
         }
+        DataAttributeValue.prototype.toString = function () {
+            return "[" + this.dataAttribute.attributeName + "]='" + this.attributeValue + "'";
+        };
         return DataAttributeValue;
     }());
     Attv.DataAttributeValue = DataAttributeValue;
@@ -133,7 +146,7 @@ var Attv;
                     var requiredAttributeName = this.requiredAttributes[i];
                     var requiredAttribute = element.attr(requiredAttributeName);
                     if (!requiredAttribute) {
-                        Attv.log('error', "[" + value.dataAttribute.attributeName + "] is requiring [" + requiredAttributeName + "] to be present in DOM", element);
+                        Attv.log('error', value + " is requiring [" + requiredAttributeName + "] to be present in DOM", element);
                     }
                     isValidated = isValidated && !!requiredAttribute;
                 }
@@ -142,6 +155,47 @@ var Attv;
             return RequiredAttributeValidator;
         }());
         Validators.RequiredAttributeValidator = RequiredAttributeValidator;
+        var RequiredAttributeValidatorWithValue = /** @class */ (function () {
+            function RequiredAttributeValidatorWithValue(requiredAttributes) {
+                this.requiredAttributes = requiredAttributes;
+                // do nothing
+            }
+            RequiredAttributeValidatorWithValue.prototype.validate = function (value, element) {
+                var isValidated = true;
+                // check for other require attributes
+                for (var i = 0; i < this.requiredAttributes.length; i++) {
+                    var attribute = this.requiredAttributes[i];
+                    var requiredAttribute = element.attr(attribute.name);
+                    if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
+                        Attv.log('error', value + " is requiring [" + attribute.name + "]='" + attribute.value + "' to be present in DOM", element);
+                    }
+                    isValidated = isValidated && !!requiredAttribute;
+                }
+                return isValidated;
+            };
+            return RequiredAttributeValidatorWithValue;
+        }());
+        Validators.RequiredAttributeValidatorWithValue = RequiredAttributeValidatorWithValue;
+        var RequiredElementValidator = /** @class */ (function () {
+            function RequiredElementValidator(elementTagNames) {
+                this.elementTagNames = elementTagNames;
+                // do nothing
+            }
+            RequiredElementValidator.prototype.validate = function (value, element) {
+                var isValidated = true;
+                // check for element that this attribute belongs to
+                for (var i = 0; i < this.elementTagNames.length; i++) {
+                    var elementName = this.elementTagNames[i];
+                    isValidated = isValidated && element.tagName.equalsIgnoreCase(elementName);
+                }
+                if (!isValidated) {
+                    Attv.log('error', value + " can only be attached to elements [" + this.elementTagNames + "]", element);
+                }
+                return isValidated;
+            };
+            return RequiredElementValidator;
+        }());
+        Validators.RequiredElementValidator = RequiredElementValidator;
     })(Validators = Attv.Validators || (Attv.Validators = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////// Config //////////////////////////////////////
@@ -242,7 +296,7 @@ var Attv;
                     var dataAttributeValue = Attv.getDataAttributeValue(attributeValue, dataAttribute);
                     // #2. Check if the attribute value is supported
                     if (!dataAttributeValue) {
-                        Attv.log(Attv.configuration.attributeValueMissingLogLevel, "DataAttribute " + dataAttribute.attributeName + " does not support [" + dataAttribute.attributeName + "]='" + attributeValue + "'", element);
+                        Attv.log(Attv.configuration.attributeValueMissingLogLevel, dataAttribute + " does not support " + dataAttribute + "='" + attributeValue + "'", element);
                         return;
                     }
                     // #3. Validate
@@ -259,7 +313,7 @@ var Attv;
                     element.attr(dataAttribute.attributeLoadedName, isLoaded);
                 }
                 catch (error) {
-                    Attv.log('error', "Unexpected error occurred when loading [" + dataAttribute.attributeName + "]", element);
+                    Attv.log('error', "Unexpected error occurred when loading " + dataAttribute, error, element);
                 }
             });
         });
@@ -326,13 +380,13 @@ var Attv;
         Attv.log('* DataAttributes');
         for (var i = 0; i < dataAttributeFactory.length; i++) {
             var dataAttribute = dataAttributeFactory[i].create();
-            Attv.log("Instantiating [" + dataAttribute.attributeName + "] to " + typeof dataAttribute, dataAttribute);
+            Attv.log("Instantiating " + dataAttribute, dataAttribute);
             Attv.dataAttributes.push(dataAttribute);
         }
         Attv.log('* DataAttributeValues');
         for (var i = 0; i < dataAttributeValueFactory.length; i++) {
             var dataAttributeValue = dataAttributeValueFactory[i].create();
-            Attv.log("Registering attributeValue: [" + dataAttributeValue.dataAttribute.attributeName + "]='" + dataAttributeValue.attributeValue + "'", dataAttributeValue);
+            Attv.log("Registering attributeValue: " + dataAttributeValue, dataAttributeValue);
             Attv.dataAttributeValues.push(dataAttributeValue);
         }
     }

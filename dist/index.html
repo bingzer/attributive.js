@@ -6,7 +6,7 @@
 	
 		<div>
 			
-			<div data-partially="auto" data-url="partial.html"></div>
+			<div data-partial="auto" data-url="partial.html"></div>
 <!-- 
 			<div data-partial="auto"></div>
 
@@ -15,6 +15,58 @@
 			<div data-partial="lazy" data-url="sample.json"></div>
 
 			<div data-partial="nothing" data-url="sample.json"></div> -->
+
+
+			<div id="template1" data-template="default">
+				<h4><strong>This is from div template</strong></h4>
+				<ul data-bind="$root">
+					<li>
+						<p>
+							Name: <span data-bind="name"></span>
+						</p>
+						<p>
+							contact <br/>
+							Email: <span data-bind="contact.email"></span><br/>
+							Phone: <span data-bind="contact.phone"></span><br/>
+						</p>
+						<p>
+							Friends
+							<ul data-bind="friends">
+								<li>
+									Friends number <span data-bind="id"></span>. name = <span data-bind="name"></span>
+								</li>
+							</ul>
+						</p>
+					</li>
+				</ul>
+			</div>
+
+				  
+
+			<script type="text/html" id="template1" data-template="script">
+				<h4><strong>This is from script template</strong></h4>
+				<ul data-foreach="$root">
+					<li>
+						<p>
+							Name: <span data-bind="name"></span>
+						</p>
+						<p>
+							contact <br/>
+							Email: <span data-bind="contact.email"></span><br/>
+							Phone: <span data-bind="contact.phone"></span><br/>
+						</p>
+						<p>
+							Friends
+							<ul data-foreach="$root">
+								<li>
+									Friends number <span data-bind="id"></span>. name = <span data-bind="name"></span>
+								</li>
+							</ul>
+						</p>
+					</li>
+				</ul>
+			</script>
+
 
 		</div>
 	
@@ -25,16 +77,16 @@
 		<script type="text/javascript" src="data-template.js"></script>
 
 		<script type="text/javascript" >
-			Attv.loader.pre.push(() => {
-				Attv.registerDataAttribute('data-partially', (attributeName) => new Attv.DataPartial(attributeName));
-				Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.AutoAttributeValue(dataAttribute));
-				Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.ClickAttributeValue(dataAttribute));
-				Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.FormAttributeValue(dataAttribute));
-				Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.DefaultAttributeValue('default', dataAttribute));
-				Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.DefaultAttributeValue('lazy', dataAttribute));
+			// Attv.loader.pre.push(() => {
+			// 	Attv.registerDataAttribute('data-partially', (attributeName) => new Attv.DataPartial(attributeName));
+			// 	Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.AutoAttributeValue(dataAttribute));
+			// 	Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.ClickAttributeValue(dataAttribute));
+			// 	Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.FormAttributeValue(dataAttribute));
+			// 	Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.DefaultAttributeValue('default', dataAttribute));
+			// 	Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.DefaultAttributeValue('lazy', dataAttribute));
 
-				Attv.unregisterDataAttribute('data-partial');
-			});
+			// 	//Attv.unregisterDataAttribute('data-partial');
+			// });
 		</script>
 	</body>
 </html>
