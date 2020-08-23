@@ -1,0 +1,40 @@
+<html>
+	<head>
+		<title>Test Usage</title>
+	</head>
+	<body>
+	
+		<div>
+			
+			<div data-partially="auto" data-url="partial.html"></div>
+<!-- 
+			<div data-partial="auto"></div>
+
+			<button data-partial="click" data-url="sample.json">Click me</button>
+
+			<div data-partial="lazy" data-url="sample.json"></div>
+
+			<div data-partial="nothing" data-url="sample.json"></div> -->
+
+		</div>
+	
+	
+		<script type="text/javascript" src="utils/utilities.js"></script>
+		<script type="text/javascript" src="attv.js"></script>
+		<script type="text/javascript" src="data-partial.js"></script>
+		<script type="text/javascript" src="data-template.js"></script>
+
+		<script type="text/javascript" >
+			Attv.loader.pre.push(() => {
+				Attv.registerDataAttribute('data-partially', (attributeName) => new Attv.DataPartial(attributeName));
+				Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.AutoAttributeValue(dataAttribute));
+				Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.ClickAttributeValue(dataAttribute));
+				Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.FormAttributeValue(dataAttribute));
+				Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.DefaultAttributeValue('default', dataAttribute));
+				Attv.registerAttributeValue('data-partially', dataAttribute => new Attv.DataPartial.Attributes.DefaultAttributeValue('lazy', dataAttribute));
+
+				Attv.unregisterDataAttribute('data-partial');
+			});
+		</script>
+	</body>
+</html>
