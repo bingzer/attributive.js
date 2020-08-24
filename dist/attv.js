@@ -6,6 +6,8 @@ var Attv;
     Attv.version = '0.0.1';
 })(Attv || (Attv = {}));
 HTMLElement.prototype.attr = function (name, value) {
+    var _a, _b;
+    name = (_b = (_a = name === null || name === void 0 ? void 0 : name.toString()) === null || _a === void 0 ? void 0 : _a.replace('[', '')) === null || _b === void 0 ? void 0 : _b.replace(']', '');
     var element = this;
     var datasetName = (name === null || name === void 0 ? void 0 : name.startsWith('data-')) && name.replace(/^data\-/, '').dashToCamelCase();
     // element.attr()
@@ -137,8 +139,9 @@ String.prototype.equalsIgnoreCase = function (other) {
             this.isAutoLoad = isAutoLoad;
             this.dependencies = new Dependency(this);
             this.attributeValues = [];
-            if (!attributeName.startsWith('data-'))
+            if (!attributeName.startsWith('data-')) {
                 attributeName = 'data-' + attributeName;
+            }
         }
         Object.defineProperty(DataAttribute.prototype, "attributeLoadedName", {
             /**
@@ -163,8 +166,17 @@ String.prototype.equalsIgnoreCase = function (other) {
          * @param element the element
          */
         DataAttribute.prototype.getDataAttributeValue = function (element) {
-            var value = element.attr(this.attributeName);
+            var value = element === null || element === void 0 ? void 0 : element.attr(this.attributeName);
             var attributeValue = this.attributeValues.filter(function (val) { return val.attributeValue === value; })[0];
+            // #1. if attribute is undefined
+            // find the one with the .isDefault == true
+            if (!attributeValue) {
+                attributeValue = this.attributeValues.filter(function (val) { return val.attributeValue === Attv.configuration.defaultTag; })[0];
+            }
+            if (!attributeValue) {
+                var rawAttributeValue = element === null || element === void 0 ? void 0 : element.attr(this.attributeName);
+                attributeValue = new DataAttributeValue(rawAttributeValue, this);
+            }
             return attributeValue;
         };
         /**
@@ -172,7 +184,7 @@ String.prototype.equalsIgnoreCase = function (other) {
          * @param element the element
          * @param value the value
          */
-        DataAttribute.prototype.addDependencyDataAttribute = function (element, uniqueId, any) {
+        DataAttribute.prototype.addDependencyDataAttribute = function (uniqueId, element, any) {
             var depedencyDataAttribute = this.dependencies.getDataAttribute(uniqueId);
             element.attr(depedencyDataAttribute.attributeName, any);
         };
@@ -181,7 +193,7 @@ String.prototype.equalsIgnoreCase = function (other) {
          * @param element the element
          * @param value the value
          */
-        DataAttribute.prototype.getDependencyDataAttribute = function (element, uniqueId) {
+        DataAttribute.prototype.getDependencyDataAttribute = function (uniqueId, element) {
             var dependencyDataAttribute = this.dependencies.getDataAttribute(uniqueId);
             return dependencyDataAttribute.getDataAttributeValue(element).attributeValue;
         };
@@ -190,7 +202,7 @@ String.prototype.equalsIgnoreCase = function (other) {
          * @param element element
          * @param uniqueId all unique ids
          */
-        DataAttribute.prototype.getFlattenDataAttributeNames = function (element) {
+        DataAttribute.prototype.getData = function (element) {
             var _this = this;
             var dataAttributes = this.dependencies.allDependencies().map(function (id) { return _this.dependencies.getDataAttribute(id); });
             var obj = {};
@@ -227,6 +239,13 @@ String.prototype.equalsIgnoreCase = function (other) {
             this.validators = validators;
             // do nothing
         }
+        /**
+         * Find all element and construct
+         * @param root the root
+         */
+        DataAttributeValue.prototype.loadElement = function (element) {
+            return true;
+        };
         /**
          * To string
          */
@@ -275,8 +294,8 @@ String.prototype.equalsIgnoreCase = function (other) {
                 // check for other require attributes
                 for (var i = 0; i < dataAttributes.length; i++) {
                     var dataAttribute = dataAttributes[i];
-                    var requiredAttribute = element.attr(dataAttribute.attributeName);
-                    if (!requiredAttribute) {
+                    var dataAttributeValue = dataAttribute.getDataAttributeValue(element);
+                    if (!(dataAttributeValue === null || dataAttributeValue === void 0 ? void 0 : dataAttributeValue.attributeValue)) {
                         Attv.log('error', value + " is requiring " + dataAttribute + " to be present in DOM", element);
                     }
                     isValidated = isValidated && !!dataAttribute;
@@ -338,6 +357,13 @@ String.prototype.equalsIgnoreCase = function (other) {
             this.isDebug = true;
             this.isLoggingEnabled = true;
         }
+        Object.defineProperty(DefaultConfiguration.prototype, "defaultTag", {
+            get: function () {
+                return "default";
+            },
+            enumerable: false,
+            configurable: true
+        });
         Object.defineProperty(DefaultConfiguration.prototype, "logLevels", {
             get: function () {
                 return ['log', 'warning', 'error', 'debug'];

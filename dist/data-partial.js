@@ -19,7 +19,7 @@ var Attv;
             var _this = _super.call(this, DataPartial.UniqueId, attributeName, DataPartial.Description, true) || this;
             _this.attributeName = attributeName;
             _this.dependencies.requires.push(Attv.DataUrl.UniqueId);
-            _this.dependencies.uses.push(Attv.DataTemplate.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId);
+            _this.dependencies.uses.push(Attv.DataTemplateSource.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId);
             return _this;
         }
         DataPartial.prototype.renderPartial = function (element, content) {
@@ -50,6 +50,9 @@ var Attv;
     Attv.DataPartial = DataPartial;
     // --- AttributeValues
     (function (DataPartial) {
+        /**
+         * [data-partial]="click"
+         */
         var DefaultAttributeValue = /** @class */ (function (_super) {
             __extends(DefaultAttributeValue, _super);
             function DefaultAttributeValue(attributeValue, dataAttribute, validators) {
@@ -58,16 +61,12 @@ var Attv;
                 ]; }
                 return _super.call(this, attributeValue, dataAttribute, validators) || this;
             }
-            DefaultAttributeValue.prototype.loadElement = function (element) {
-                this.render(element);
-                return true;
-            };
             DefaultAttributeValue.prototype.render = function (element, content) {
                 var _this = this;
                 // get content
                 if (!content) {
                     //let options = element.attr('data') as AjaxOptions;
-                    var options = this.dataAttribute.getFlattenDataAttributeNames(element);
+                    var options = this.dataAttribute.getData(element);
                     options._internalCallback = function (ajaxOptions, wasSuccessful, xhr) {
                         if (ajaxOptions.callback) {
                             ajaxOptions.callback(wasSuccessful, xhr);
@@ -82,9 +81,13 @@ var Attv;
                 }
             };
             DefaultAttributeValue.prototype.doRender = function (element, content) {
-                var dataTemplate = this.dataAttribute.dependencies.getDataAttribute(Attv.DataTemplate.UniqueId);
-                var html = dataTemplate.renderContent(content, {});
-                element.innerHTML = html;
+                // [data-template-source]
+                var dataTemplateSource = this.dataAttribute.dependencies.getDataAttribute(Attv.DataTemplateSource.UniqueId);
+                var html = dataTemplateSource.renderTemplate(element, content);
+                // [data-target]
+                var dataTarget = this.dataAttribute.dependencies.getDataAttribute(Attv.DataTarget.UniqueId);
+                var targetElement = (dataTarget === null || dataTarget === void 0 ? void 0 : dataTarget.getTargetElement(element)) || element;
+                targetElement.innerHTML = html;
                 Attv.loadElements(element);
             };
             DefaultAttributeValue.prototype.sendAjax = function (options) {
@@ -95,14 +98,24 @@ var Attv;
             return DefaultAttributeValue;
         }(Attv.DataAttributeValue));
         DataPartial.DefaultAttributeValue = DefaultAttributeValue;
+        /**
+         * [data-partial]="auto"
+         */
         var AutoAttributeValue = /** @class */ (function (_super) {
             __extends(AutoAttributeValue, _super);
             function AutoAttributeValue(dataAttribute) {
                 return _super.call(this, 'auto', dataAttribute) || this;
             }
+            AutoAttributeValue.prototype.loadElement = function (element) {
+                this.render(element);
+                return true;
+            };
             return AutoAttributeValue;
         }(DefaultAttributeValue));
         DataPartial.AutoAttributeValue = AutoAttributeValue;
+        /**
+         * [data-partial]="click"
+         */
         var ClickAttributeValue = /** @class */ (function (_super) {
             __extends(ClickAttributeValue, _super);
             function ClickAttributeValue(dataAttribute) {
@@ -111,11 +124,26 @@ var Attv;
             return ClickAttributeValue;
         }(DefaultAttributeValue));
         DataPartial.ClickAttributeValue = ClickAttributeValue;
+        /**
+         * [data-partial]="click"
+         */
         var FormAttributeValue = /** @class */ (function (_super) {
             __extends(FormAttributeValue, _super);
             function FormAttributeValue(dataAttribute) {
-                return _super.call(this, 'form', dataAttribute) || this;
+                return _super.call(this, 'form', dataAttribute, [
+                    new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId]),
+                    new Attv.Validators.RequiredElementValidator(['form'])
+                ]) || this;
             }
+            FormAttributeValue.prototype.loadElement = function (element) {
+                var _this = this;
+                var formElement = element;
+                formElement.onsubmit = function (ev) {
+                    _this.render(formElement);
+                    return false;
+                };
+                return true;
+            };
             return FormAttributeValue;
         }(DefaultAttributeValue));
         DataPartial.FormAttributeValue = FormAttributeValue;
@@ -130,7 +158,7 @@ Attv.loader.pre.push(function () {
         list.push(new Attv.DataPartial.AutoAttributeValue(dataAttribute));
         list.push(new Attv.DataPartial.ClickAttributeValue(dataAttribute));
         list.push(new Attv.DataPartial.FormAttributeValue(dataAttribute));
-        list.push(new Attv.DataPartial.DefaultAttributeValue('default', dataAttribute));
+        list.push(new Attv.DataPartial.DefaultAttributeValue(Attv.configuration.defaultTag, dataAttribute));
         list.push(new Attv.DataPartial.DefaultAttributeValue('lazy', dataAttribute));
     });
 });

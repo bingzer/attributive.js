@@ -11,23 +11,17 @@ namespace Attv {
             this.dependencies.requires.push(DataRenderer.UniqueId, DataTemplateHtml.UniqueId);
         }
 
-        renderTemplate(sourceElementOrSelectorOrContent: HTMLElement | string, model: any): string {
+        renderTemplate(sourceElementOrSelectorOrContent: HTMLElement | string, modelOrContent: any): string {
             let sourceElement = sourceElementOrSelectorOrContent as HTMLElement;
             if (Attv.isString(sourceElementOrSelectorOrContent)) {
                 sourceElement = document.querySelector(sourceElementOrSelectorOrContent as string) as HTMLElement;
             }
 
             let attributeValue = this.getDataAttributeValue<DataTemplate.DefaultAttributeValue>(sourceElement);
-            let content = attributeValue.getTemplate(sourceElement).innerHTML;
+            let content = attributeValue.getTemplate(sourceElement)?.innerHTML || modelOrContent;
             let dataRenderer = this.dependencies.getDataAttribute<DataRenderer>(DataRenderer.UniqueId);
 
-            return dataRenderer.render(content, model, sourceElement);
-        }
-
-        renderContent(content: string, model: any): string {            
-            let dataRenderer = this.dependencies.getDataAttribute<DataRenderer>(DataRenderer.UniqueId);
-
-            return dataRenderer.render(content, model);
+            return dataRenderer.render(content, modelOrContent, sourceElement);
         }
 
     }
@@ -41,14 +35,14 @@ namespace Attv {
          */
         export class DefaultAttributeValue extends Attv.DataAttributeValue {
             
-            constructor (dataAttribute: Attv.DataAttribute) {
-                super('default', dataAttribute)
+            constructor (attributeValue: string, dataAttribute: Attv.DataAttribute) {
+                super(attributeValue, dataAttribute)
             }
 
             loadElement(element: HTMLElement): boolean {
                 let templateHtml = element.innerHTML;
 
-                this.dataAttribute.addDependencyDataAttribute(element, DataTemplateHtml.UniqueId, templateHtml);
+                this.dataAttribute.addDependencyDataAttribute(DataTemplateHtml.UniqueId, element, templateHtml);
 
                 element.innerHTML = '';
                 
@@ -56,9 +50,8 @@ namespace Attv {
             }
             
             getTemplate(element: HTMLElement): HTMLElement {
-                this.dataAttribute.getDependencyDataAttribute(element, DataTemplateHtml.UniqueId);
+                let html = this.dataAttribute.getDependencyDataAttribute(DataTemplateHtml.UniqueId, element);
 
-                let html = element.attr('data-template-html');
                 return Attv.createHTMLElement(html);
             }
         }
@@ -89,7 +82,7 @@ namespace Attv {
     }
 
 
-    export class DataTemplateHtml extends RawDataAttribute {
+    export class DataTemplateHtml extends DataAttribute {
         static readonly UniqueId = 'DataTemplateHtml';
         static readonly Description = '';
 
@@ -97,14 +90,39 @@ namespace Attv {
             super(DataTemplateHtml.UniqueId, attributeName, DataTemplateHtml.Description, false);
         }
     }
+
+    export class DataTemplateSource extends DataAttribute {
+        static readonly UniqueId = 'DataTemplateSource';
+        static readonly Description = '';
+
+        constructor (public attributeName: string) {
+            super(DataTemplateSource.UniqueId, attributeName, DataTemplateSource.Description, false);
+
+            this.dependencies.uses.push(DataTemplate.UniqueId);
+        }
+
+        renderTemplate(element: HTMLElement, model: any): string {
+            let templateElement = this.getSourceElement(element);
+
+            let dataTemplate = this.dependencies.getDataAttribute<DataTemplate>(DataTemplate.UniqueId);
+            return dataTemplate.renderTemplate(templateElement, model);
+        }
+
+        protected getSourceElement(element: HTMLElement): HTMLElement {
+            let sourceElementSelector = this.getDataAttributeValue(element).attributeValue;
+
+            return document.querySelector(sourceElementSelector) as HTMLElement;
+        }
+    }
 }
 
 Attv.loader.pre.push(() => {
     Attv.registerDataAttribute('data-template-html',  (attributeName: string) => new Attv.DataTemplateHtml(attributeName));
+    Attv.registerDataAttribute('data-template-source',  (attributeName: string) => new Attv.DataTemplateSource(attributeName));
     Attv.registerDataAttribute('data-template', 
         (attributeName: string) => new Attv.DataTemplate(attributeName),
         (dataAttribute: Attv.DataAttribute, list: Attv.DataAttributeValue[]) => {
-            list.push(new Attv.DataTemplate.DefaultAttributeValue(dataAttribute));
+            list.push(new Attv.DataTemplate.DefaultAttributeValue(Attv.configuration.defaultTag, dataAttribute));
             list.push(new Attv.DataTemplate.ScriptAttributeValue(dataAttribute));
         });
 });

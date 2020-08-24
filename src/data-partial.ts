@@ -6,7 +6,7 @@ namespace Attv {
             super(DataPartial.UniqueId, attributeName, DataPartial.Description, true);
 
             this.dependencies.requires.push(DataUrl.UniqueId);
-            this.dependencies.uses.push(DataTemplate.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId);
+            this.dependencies.uses.push(DataTemplateSource.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId);
         }
 
         renderPartial(element: HTMLElement | string, content?: string) {
@@ -45,6 +45,9 @@ namespace Attv {
 
     export namespace DataPartial {
 
+        /**
+         * [data-partial]="click"
+         */
         export class DefaultAttributeValue extends Attv.DataAttributeValue {
             
             constructor (attributeValue: string, 
@@ -55,17 +58,11 @@ namespace Attv {
                 super(attributeValue, dataAttribute, validators)
             }
 
-            loadElement(element: HTMLElement): boolean {
-                this.render(element);
-
-                return true;
-            }
-
             render(element: HTMLElement, content?: string) {
                 // get content
                 if (!content) {
                     //let options = element.attr('data') as AjaxOptions;
-                    let options = this.dataAttribute.getFlattenDataAttributeNames<AjaxOptions>(element);
+                    let options = this.dataAttribute.getData<AjaxOptions>(element);
                     options._internalCallback = (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
                         if (ajaxOptions.callback) {
                             ajaxOptions.callback(wasSuccessful, xhr);
@@ -84,10 +81,15 @@ namespace Attv {
             }
 
             private doRender(element: HTMLElement, content: string) {
-                let dataTemplate = this.dataAttribute.dependencies.getDataAttribute<DataTemplate>(DataTemplate.UniqueId);
-                let html = dataTemplate.renderContent(content, {});
+                // [data-template-source]
+                let dataTemplateSource = this.dataAttribute.dependencies.getDataAttribute<DataTemplateSource>(DataTemplateSource.UniqueId);
+                let html = dataTemplateSource.renderTemplate(element, content);
 
-                element.innerHTML = html;
+                // [data-target]
+                let dataTarget = this.dataAttribute.dependencies.getDataAttribute<DataTarget>(DataTarget.UniqueId);
+                let targetElement = dataTarget?.getTargetElement(element) || element;
+
+                targetElement.innerHTML = html;
 
                 Attv.loadElements(element);
             }
@@ -102,14 +104,26 @@ namespace Attv {
 
         }
 
+        /**
+         * [data-partial]="auto"
+         */
         export class AutoAttributeValue extends DefaultAttributeValue {
             
             constructor (dataAttribute: Attv.DataAttribute) {
                 super('auto', dataAttribute)
             }
             
+
+            loadElement(element: HTMLElement): boolean {
+                this.render(element);
+
+                return true;
+            }
         }
 
+        /**
+         * [data-partial]="click"
+         */
         export class ClickAttributeValue extends DefaultAttributeValue {
             
             constructor (dataAttribute: Attv.DataAttribute) {
@@ -118,12 +132,27 @@ namespace Attv {
             
         }
 
+        /**
+         * [data-partial]="click"
+         */
         export class FormAttributeValue extends DefaultAttributeValue {
             
             constructor (dataAttribute: Attv.DataAttribute) {
-                super('form', dataAttribute)
+                super('form', dataAttribute, [
+                    new Validators.RequiredAttributeValidator([DataUrl.UniqueId]),
+                    new Validators.RequiredElementValidator(['form'])
+                ])
             }
-            
+
+            loadElement(element: HTMLElement): boolean {
+                let formElement = element as HTMLFormElement;
+                formElement.onsubmit = (ev: Event) => {
+                    this.render(formElement);
+                    return false;
+                }
+
+                return true;
+            }
         }
 
     }
@@ -150,7 +179,7 @@ Attv.loader.pre.push(() => {
             list.push(new Attv.DataPartial.AutoAttributeValue(dataAttribute));
             list.push(new Attv.DataPartial.ClickAttributeValue(dataAttribute));
             list.push(new Attv.DataPartial.FormAttributeValue(dataAttribute));
-            list.push(new Attv.DataPartial.DefaultAttributeValue('default', dataAttribute));
+            list.push(new Attv.DataPartial.DefaultAttributeValue(Attv.configuration.defaultTag, dataAttribute));
             list.push(new Attv.DataPartial.DefaultAttributeValue('lazy', dataAttribute));
         });
 });

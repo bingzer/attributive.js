@@ -5,9 +5,33 @@
 	<body>
 	
 		<div>
-			
 			<div data-partial="auto" data-url="partial.html"></div>
+<!-- 			
+			<div data-partial="auto" data-url="partial.html"></div> -->
 
+
+			<form action="sample.json"
+				data-partial="form"
+				data-template-source="#template1"
+				data-target="#container1">
+				
+				<button type="submit">Click here</button>
+
+				<div id="container1">
+					<p>Content should be here</p>
+				</div>
+			</form>
+			
+			<form action="sample.json"
+				data-partial="form"
+				data-target="#container2">
+				
+				<button type="submit">Click here</button>
+
+				<div id="container2">
+					<p>Content should be here *container2</p>
+				</div>
+			</form>
 <!-- 
 			<div data-partial="auto"></div>
 
@@ -21,9 +45,9 @@
 				Just a simple super simple template
 			</div>
 
-			<div id="template2" data-template="default" data-renderer="simple">
+			<div id="template2" data-template="default" data-renderer="json2html">
 				<h4><strong>This is from div template</strong></h4>
-				<ul data-bind-foreach="$root">
+				<ul data-bind="$root">
 					<li>
 						<p>
 							Name: <span data-bind="name"></span>
@@ -35,7 +59,7 @@
 						</p>
 						<p>
 							Friends
-							<ul data-bind-foreach="friends">
+							<ul data-bind="friends">
 								<li>
 									Friends number <span data-bind="id"></span>. name = <span data-bind="name"></span>
 								</li>
@@ -47,9 +71,9 @@
 
 				  
 
-			<script type="text/html" id="template1" data-template="script">
+			<script type="text/html" id="template1" data-template="script" data-renderer="json2html">
 				<h4><strong>This is from script template</strong></h4>
-				<ul data-bind-foreach="$root">
+				<ul data-bind="$root">
 					<li>
 						<p>
 							Name: <span data-bind="name"></span>
@@ -61,7 +85,7 @@
 						</p>
 						<p>
 							Friends
-							<ul data-bind-foreach="$root">
+							<ul data-bind="friends">
 								<li>
 									Friends number <span data-bind="id"></span>. name = <span data-bind="name"></span>
 								</li>
@@ -82,10 +106,6 @@
 
 		<script type="text/javascript" >
 			Attv.loader.pre.unshift(() => {
-				Attv.configuration = {
-					isLoggingEnabled: true,
-					isDebug: false
-				}
 			});
 		</script>
 	</body>

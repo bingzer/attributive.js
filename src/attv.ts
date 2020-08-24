@@ -15,10 +15,12 @@ interface HTMLElement  {
      * Attribute helper.
      * value can be an object
      */
-    attr: (name?: string, value?: any) => HTMLElement | any;
+    attr: (name?: string | Attv.DataAttribute, value?: any) => HTMLElement | any;
 }
 
 HTMLElement.prototype.attr = function (name: string, value?: any): HTMLElement | any {
+    name = name?.toString()?.replace('[', '')?.replace(']', '');
+
     let element = this as HTMLElement;
     let datasetName = name?.startsWith('data-') && name.replace(/^data\-/, '').dashToCamelCase();
 
@@ -162,10 +164,10 @@ namespace Attv {
     /**
     * Base class for data-attributes
     */
-    export abstract class DataAttribute {
+    export class DataAttribute {
 
         public readonly dependencies: Dependency = new Dependency(this);
-        protected attributeValues: DataAttributeValue[] = [];
+        public readonly attributeValues: DataAttributeValue[] = [];
 
         /**
          * 
@@ -179,8 +181,9 @@ namespace Attv {
             public attributeName: string, 
             public description: string,
             public isAutoLoad: boolean = true) {
-            if (!attributeName.startsWith('data-'))
+            if (!attributeName.startsWith('data-')) {
                 attributeName = 'data-' + attributeName;
+            }
         }
         
         /**
@@ -203,8 +206,19 @@ namespace Attv {
          * @param element the element
          */
         getDataAttributeValue<TDataAttributeValue extends DataAttributeValue>(element: HTMLElement): TDataAttributeValue {
-            let value = element.attr(this.attributeName);
+            let value = element?.attr(this.attributeName);
             let attributeValue = this.attributeValues.filter(val => val.attributeValue === value)[0] as TDataAttributeValue;
+
+            // #1. if attribute is undefined
+            // find the one with the .isDefault == true
+            if (!attributeValue) {
+                attributeValue = this.attributeValues.filter(val => val.attributeValue === Attv.configuration.defaultTag)[0] as TDataAttributeValue;
+            }
+
+            if (!attributeValue) {
+                let rawAttributeValue = element?.attr(this.attributeName) as string;
+                attributeValue = new DataAttributeValue(rawAttributeValue, this) as TDataAttributeValue;
+            }
 
             return attributeValue;
         }
@@ -214,7 +228,7 @@ namespace Attv {
          * @param element the element
          * @param value the value
          */
-        addDependencyDataAttribute(element: HTMLElement, uniqueId: string, any: string) {
+        addDependencyDataAttribute(uniqueId: string, element: HTMLElement, any: string) {
             let depedencyDataAttribute = this.dependencies.getDataAttribute(uniqueId);
             element.attr(depedencyDataAttribute.attributeName, any);
         }
@@ -224,7 +238,7 @@ namespace Attv {
          * @param element the element
          * @param value the value
          */
-        getDependencyDataAttribute(element: HTMLElement, uniqueId: string): string {
+        getDependencyDataAttribute(uniqueId: string, element: HTMLElement): string {
             let dependencyDataAttribute = this.dependencies.getDataAttribute(uniqueId);
             return dependencyDataAttribute.getDataAttributeValue(element).attributeValue;
         }
@@ -234,7 +248,7 @@ namespace Attv {
          * @param element element
          * @param uniqueId all unique ids
          */
-        getFlattenDataAttributeNames<TAny>(element: HTMLElement): TAny {
+        getData<TAny>(element: HTMLElement): TAny {
             let dataAttributes = this.dependencies.allDependencies().map(id => this.dependencies.getDataAttribute(id));
 
             let obj = { };
@@ -264,7 +278,7 @@ namespace Attv {
     /**
      * Base class for DataAttribute-value
      */
-    export abstract class DataAttributeValue {
+    export class DataAttributeValue {
         
         constructor (public attributeValue: string, 
             public dataAttribute: DataAttribute, 
@@ -276,7 +290,9 @@ namespace Attv {
          * Find all element and construct
          * @param root the root
          */
-        abstract loadElement(element: HTMLElement): boolean;
+        loadElement(element: HTMLElement): boolean {
+            return true;
+        }
 
         /**
          * To string
@@ -336,8 +352,8 @@ namespace Attv.Validators {
             // check for other require attributes
             for (let i = 0; i < dataAttributes.length; i++) {
                 let dataAttribute = dataAttributes[i];
-                let requiredAttribute = element.attr(dataAttribute.attributeName);
-                if (!requiredAttribute) {
+                let dataAttributeValue = dataAttribute.getDataAttributeValue(element);
+                if (!dataAttributeValue?.attributeValue) {
                     Attv.log('error', `${value} is requiring ${dataAttribute} to be present in DOM`, element)
                 }
 
@@ -408,6 +424,8 @@ namespace Attv {
 
         isLoggingEnabled: boolean;
 
+        readonly defaultTag: string;
+
         readonly logLevels: string[];
     }
 
@@ -416,6 +434,10 @@ namespace Attv {
         isDebug: boolean = true;
 
         isLoggingEnabled: boolean = true;
+
+        get defaultTag(): string  {
+            return "default";
+        }
 
         get logLevels(): string[] {
             return ['log', 'warning', 'error', 'debug'];
@@ -476,7 +498,7 @@ namespace Attv {
         }
 
         let level = data[0];
-        if (configuration.logLevels?.indexOf(level) >= 0) {
+        if (Attv.configuration.logLevels?.indexOf(level) >= 0) {
             data = data.splice(1);
         }
         
