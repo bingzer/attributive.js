@@ -410,6 +410,32 @@ namespace Attv.Validators {
             return isValidated;
         }
     }
+    
+    export class RequiredAnyElementsValidator implements DataAttributeValueValidator {
+
+        constructor (private elementTagNames: string[]) {
+            // do nothing
+        }
+
+        validate(value: DataAttributeValue, element: Element): boolean {
+            let isValidated = false;
+
+            // check for element that this attribute belongs to
+            for (let i = 0; i < this.elementTagNames.length; i++) {
+                let elementName = this.elementTagNames[i];
+                if (element.tagName.equalsIgnoreCase(elementName)) {
+                    isValidated = true;
+                    break;
+                }
+            }
+
+            if (!isValidated) {
+                Attv.log('error', `${value} can only be attached to elements [${this.elementTagNames}]`, element)
+            }
+
+            return isValidated;
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

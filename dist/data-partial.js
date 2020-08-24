@@ -51,7 +51,7 @@ var Attv;
     // --- AttributeValues
     (function (DataPartial) {
         /**
-         * [data-partial]="click"
+         * [data-partial]="lazy"
          */
         var DefaultAttributeValue = /** @class */ (function (_super) {
             __extends(DefaultAttributeValue, _super);
@@ -88,7 +88,7 @@ var Attv;
                 var dataTarget = this.dataAttribute.dependencies.getDataAttribute(Attv.DataTarget.UniqueId);
                 var targetElement = (dataTarget === null || dataTarget === void 0 ? void 0 : dataTarget.getTargetElement(element)) || element;
                 targetElement.innerHTML = html;
-                Attv.loadElements(element);
+                Attv.loadElements(targetElement);
             };
             DefaultAttributeValue.prototype.sendAjax = function (options) {
                 options.method = options.method || 'get';
@@ -119,8 +119,19 @@ var Attv;
         var ClickAttributeValue = /** @class */ (function (_super) {
             __extends(ClickAttributeValue, _super);
             function ClickAttributeValue(dataAttribute) {
-                return _super.call(this, 'click', dataAttribute) || this;
+                return _super.call(this, 'click', dataAttribute, [
+                    new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId]),
+                    new Attv.Validators.RequiredAnyElementsValidator(['button', 'a'])
+                ]) || this;
             }
+            ClickAttributeValue.prototype.loadElement = function (element) {
+                var _this = this;
+                element.onclick = function (ev) {
+                    _this.render(element);
+                    return false;
+                };
+                return true;
+            };
             return ClickAttributeValue;
         }(DefaultAttributeValue));
         DataPartial.ClickAttributeValue = ClickAttributeValue;

@@ -346,6 +346,29 @@ String.prototype.equalsIgnoreCase = function (other) {
             return RequiredElementValidator;
         }());
         Validators.RequiredElementValidator = RequiredElementValidator;
+        var RequiredAnyElementsValidator = /** @class */ (function () {
+            function RequiredAnyElementsValidator(elementTagNames) {
+                this.elementTagNames = elementTagNames;
+                // do nothing
+            }
+            RequiredAnyElementsValidator.prototype.validate = function (value, element) {
+                var isValidated = false;
+                // check for element that this attribute belongs to
+                for (var i = 0; i < this.elementTagNames.length; i++) {
+                    var elementName = this.elementTagNames[i];
+                    if (element.tagName.equalsIgnoreCase(elementName)) {
+                        isValidated = true;
+                        break;
+                    }
+                }
+                if (!isValidated) {
+                    Attv.log('error', value + " can only be attached to elements [" + this.elementTagNames + "]", element);
+                }
+                return isValidated;
+            };
+            return RequiredAnyElementsValidator;
+        }());
+        Validators.RequiredAnyElementsValidator = RequiredAnyElementsValidator;
     })(Validators = Attv.Validators || (Attv.Validators = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////

@@ -46,7 +46,7 @@ namespace Attv {
     export namespace DataPartial {
 
         /**
-         * [data-partial]="click"
+         * [data-partial]="lazy"
          */
         export class DefaultAttributeValue extends Attv.DataAttributeValue {
             
@@ -91,7 +91,7 @@ namespace Attv {
 
                 targetElement.innerHTML = html;
 
-                Attv.loadElements(element);
+                Attv.loadElements(targetElement);
             }
             
             protected sendAjax(options: AjaxOptions) {
@@ -127,9 +127,20 @@ namespace Attv {
         export class ClickAttributeValue extends DefaultAttributeValue {
             
             constructor (dataAttribute: Attv.DataAttribute) {
-                super('click', dataAttribute)
+                super('click', dataAttribute, [
+                    new Validators.RequiredAttributeValidator([DataUrl.UniqueId]),
+                    new Validators.RequiredAnyElementsValidator(['button', 'a'])
+                ])
             }
-            
+
+            loadElement(element: HTMLElement): boolean {
+                element.onclick = (ev: Event) => {
+                    this.render(element);
+                    return false;
+                }
+
+                return true;
+            }
         }
 
         /**
