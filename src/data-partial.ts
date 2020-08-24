@@ -64,13 +64,13 @@ namespace Attv {
                     //let options = element.attr('data') as AjaxOptions;
                     let options = this.dataAttribute.getData<AjaxOptions>(element);
                     options._internalCallback = (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
-                        if (ajaxOptions.callback) {
-                            ajaxOptions.callback(wasSuccessful, xhr);
-                        }
-
                         content = xhr.response;
                         
                         this.doRender(element, content);
+
+                        // [data-callback]
+                        let dataCallback = this.dataAttribute.dependencies.getDataAttribute<DataCallback>(DataCallback.UniqueId);
+                        dataCallback.callback(element);
                     };
 
                     this.sendAjax(options);

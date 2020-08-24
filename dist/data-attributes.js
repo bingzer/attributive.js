@@ -84,6 +84,10 @@ var Attv;
             _this.attributeName = attributeName;
             return _this;
         }
+        DataCallback.prototype.callback = function (element) {
+            var jsFunction = this.getDataAttributeValue(element).attributeValue;
+            return eval(jsFunction);
+        };
         DataCallback.UniqueId = 'DataCallback';
         DataCallback.Description = '';
         return DataCallback;

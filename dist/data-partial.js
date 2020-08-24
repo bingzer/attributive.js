@@ -68,11 +68,11 @@ var Attv;
                     //let options = element.attr('data') as AjaxOptions;
                     var options = this.dataAttribute.getData(element);
                     options._internalCallback = function (ajaxOptions, wasSuccessful, xhr) {
-                        if (ajaxOptions.callback) {
-                            ajaxOptions.callback(wasSuccessful, xhr);
-                        }
                         content = xhr.response;
                         _this.doRender(element, content);
+                        // [data-callback]
+                        var dataCallback = _this.dataAttribute.dependencies.getDataAttribute(Attv.DataCallback.UniqueId);
+                        dataCallback.callback(element);
                     };
                     this.sendAjax(options);
                 }

@@ -13,9 +13,10 @@
 			<form action="sample.json"
 				data-partial="form"
 				data-template-source="#template1"
-				data-target="#container1">
+				data-target="#container1"
+				data-callback="alert('hi')">
 				
-				<button type="submit">Click here</button>
+				<button type="submit">Click here 1</button>
 
 				<div id="container1">
 					<p>Content should be here</p>
@@ -26,7 +27,7 @@
 			<button type="submit"
 				data-partial="click"
 				data-url="partial.html"
-				data-target="#container2">Click here</button>
+				data-target="#container2">Click here 2222</button>
 
 			<div id="container2">
 				<p>Content should be here *container2</p>

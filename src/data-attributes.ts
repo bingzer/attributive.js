@@ -74,6 +74,11 @@ namespace Attv {
             super(DataCallback.UniqueId, attributeName, DataCallback.Description, false);
         }
 
+        callback(element: HTMLElement): any {
+            let jsFunction = this.getDataAttributeValue(element).attributeValue;
+            return eval(jsFunction);
+        }
+
     }
 
     /**
