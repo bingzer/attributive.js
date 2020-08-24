@@ -18,7 +18,8 @@ var Attv;
         function DataPartial(attributeName) {
             var _this = _super.call(this, DataPartial.UniqueId, attributeName, DataPartial.Description, true) || this;
             _this.attributeName = attributeName;
-            _this.dependencies.requires.push(Attv.DataTemplate.UniqueId);
+            _this.dependencies.requires.push(Attv.DataUrl.UniqueId);
+            _this.dependencies.uses.push(Attv.DataTemplate.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId);
             return _this;
         }
         DataPartial.prototype.renderPartial = function (element, content) {
@@ -26,7 +27,6 @@ var Attv;
                 element = document.querySelector(element);
             }
             var htmlElement = element;
-            // must get the content somehow
             var dataAttributeValue = this.getDataAttributeValue(htmlElement);
             dataAttributeValue.render(htmlElement, content);
         };
@@ -66,7 +66,8 @@ var Attv;
                 var _this = this;
                 // get content
                 if (!content) {
-                    var options = element.attr('data');
+                    //let options = element.attr('data') as AjaxOptions;
+                    var options = this.dataAttribute.getFlattenDataAttributeNames(element);
                     options._internalCallback = function (ajaxOptions, wasSuccessful, xhr) {
                         if (ajaxOptions.callback) {
                             ajaxOptions.callback(wasSuccessful, xhr);

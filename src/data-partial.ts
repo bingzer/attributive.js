@@ -5,7 +5,8 @@ namespace Attv {
         constructor (public attributeName: string) {
             super(DataPartial.UniqueId, attributeName, DataPartial.Description, true);
 
-            this.dependencies.requires.push(DataTemplate.UniqueId);
+            this.dependencies.requires.push(DataUrl.UniqueId);
+            this.dependencies.uses.push(DataTemplate.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId);
         }
 
         renderPartial(element: HTMLElement | string, content?: string) {
@@ -15,7 +16,6 @@ namespace Attv {
 
             let htmlElement = element as HTMLElement;
 
-            // must get the content somehow
             let dataAttributeValue = this.getDataAttributeValue<DataPartial.DefaultAttributeValue>(htmlElement);
 
             dataAttributeValue.render(htmlElement, content);
@@ -64,7 +64,8 @@ namespace Attv {
             render(element: HTMLElement, content?: string) {
                 // get content
                 if (!content) {
-                    let options = element.attr('data') as AjaxOptions;
+                    //let options = element.attr('data') as AjaxOptions;
+                    let options = this.dataAttribute.getFlattenDataAttributeNames<AjaxOptions>(element);
                     options._internalCallback = (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
                         if (ajaxOptions.callback) {
                             ajaxOptions.callback(wasSuccessful, xhr);

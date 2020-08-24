@@ -1,6 +1,10 @@
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// PROTOTYPES //////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
+var Attv;
+(function (Attv) {
+    /**
+     * Version. This should be replaced and updated by the CI/CD process
+     */
+    Attv.version = '0.0.1';
+})(Attv || (Attv = {}));
 HTMLElement.prototype.attr = function (name, value) {
     var element = this;
     var datasetName = (name === null || name === void 0 ? void 0 : name.startsWith('data-')) && name.replace(/^data\-/, '').dashToCamelCase();
@@ -80,10 +84,10 @@ String.prototype.equalsIgnoreCase = function (other) {
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Base classes ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
-var Attv;
 (function (Attv) {
     var Dependency = /** @class */ (function () {
-        function Dependency() {
+        function Dependency(dataAttribute) {
+            this.dataAttribute = dataAttribute;
             /**
              * List of DataAttribute Ids that we require
              */
@@ -92,19 +96,24 @@ var Attv;
              * List of DataAttribute Id that we use
              */
             this.uses = [];
+            // do nothing
         }
         /**
          * List of all dependencies
          */
         Dependency.prototype.allDependencies = function () {
-            return this.requires.concat(this.uses);
+            return this.requires.concat(this.uses).concat(this.dataAttribute.id);
         };
         /**
          * Returns the data attribute
          * @param dataAttributeId id
          */
         Dependency.prototype.getDataAttribute = function (dataAttributeId) {
-            return Attv.getDataAttribute(dataAttributeId);
+            var dependencyDataAttribute = Attv.getDataAttribute(dataAttributeId);
+            if (!this.allDependencies().some(function (dep) { return dep === dataAttributeId; })) {
+                Attv.log('warning', (dependencyDataAttribute || dataAttributeId) + " should be declared as the dependant in " + this.dataAttribute + ". This is for documentation purposes");
+            }
+            return dependencyDataAttribute;
         };
         return Dependency;
     }());
@@ -126,7 +135,7 @@ var Attv;
             this.attributeName = attributeName;
             this.description = description;
             this.isAutoLoad = isAutoLoad;
-            this.dependencies = new Dependency();
+            this.dependencies = new Dependency(this);
             this.attributeValues = [];
             if (!attributeName.startsWith('data-'))
                 attributeName = 'data-' + attributeName;
@@ -146,7 +155,8 @@ var Attv;
          * @param attributeValues attribute values
          */
         DataAttribute.prototype.registerAttributeValues = function (attributeValues) {
-            this.attributeValues = attributeValues;
+            var _a;
+            (_a = this.attributeValues).push.apply(_a, attributeValues);
         };
         /**
          * Returns the current attribute value
@@ -156,6 +166,41 @@ var Attv;
             var value = element.attr(this.attributeName);
             var attributeValue = this.attributeValues.filter(function (val) { return val.attributeValue === value; })[0];
             return attributeValue;
+        };
+        /**
+         * Adds a dependency data attribute to the 'element'
+         * @param element the element
+         * @param value the value
+         */
+        DataAttribute.prototype.addDependencyDataAttribute = function (element, uniqueId, any) {
+            var depedencyDataAttribute = this.dependencies.getDataAttribute(uniqueId);
+            element.attr(depedencyDataAttribute.attributeName, any);
+        };
+        /**
+         * Adds a dependency data attribute to the 'element'
+         * @param element the element
+         * @param value the value
+         */
+        DataAttribute.prototype.getDependencyDataAttribute = function (element, uniqueId) {
+            var dependencyDataAttribute = this.dependencies.getDataAttribute(uniqueId);
+            return dependencyDataAttribute.getDataAttributeValue(element).attributeValue;
+        };
+        /**
+         * Equivalent to calling element.attr('data'). However, we use dependencies om this method
+         * @param element element
+         * @param uniqueId all unique ids
+         */
+        DataAttribute.prototype.getFlattenDataAttributeNames = function (element) {
+            var _this = this;
+            var dataAttributes = this.dependencies.allDependencies().map(function (id) { return _this.dependencies.getDataAttribute(id); });
+            var obj = {};
+            dataAttributes.forEach(function (att) {
+                var _a;
+                var name = att.attributeName;
+                var datasetName = (name === null || name === void 0 ? void 0 : name.startsWith('data-')) && name.replace(/^data\-/, '').dashToCamelCase();
+                obj[datasetName] = (_a = att.getDataAttributeValue(element)) === null || _a === void 0 ? void 0 : _a.attributeValue;
+            });
+            return obj;
         };
         /**
          * Checks to see if element is loaded
@@ -182,6 +227,9 @@ var Attv;
             this.validators = validators;
             // do nothing
         }
+        /**
+         * To string
+         */
         DataAttributeValue.prototype.toString = function () {
             return "[" + this.dataAttribute.attributeName + "]='" + this.attributeValue + "'";
         };
@@ -285,22 +333,21 @@ var Attv;
 ////////////////////////////////// Configuration ///////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 (function (Attv) {
-    var Configuration = /** @class */ (function () {
-        function Configuration() {
+    var DefaultConfiguration = /** @class */ (function () {
+        function DefaultConfiguration() {
             this.isDebug = true;
             this.isLoggingEnabled = true;
-            this.attributeValueMissingLogLevel = 'warning';
         }
-        Object.defineProperty(Configuration.prototype, "logLevels", {
+        Object.defineProperty(DefaultConfiguration.prototype, "logLevels", {
             get: function () {
-                return ['log', 'warning', 'error'];
+                return ['log', 'warning', 'error', 'debug'];
             },
             enumerable: false,
             configurable: true
         });
-        return Configuration;
+        return DefaultConfiguration;
     }());
-    Attv.Configuration = Configuration;
+    Attv.DefaultConfiguration = DefaultConfiguration;
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Helper functions ////////////////////////////////
@@ -346,6 +393,7 @@ var Attv;
     }
     Attv.parseJsonOrElse = parseJsonOrElse;
     function log() {
+        var _a;
         var data = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             data[_i] = arguments[_i];
@@ -354,7 +402,7 @@ var Attv;
             return;
         }
         var level = data[0];
-        if (Attv.configuration.logLevels.indexOf(level) >= 0) {
+        if (((_a = Attv.configuration.logLevels) === null || _a === void 0 ? void 0 : _a.indexOf(level)) >= 0) {
             data = data.splice(1);
         }
         if (level === 'warning') {
@@ -362,6 +410,9 @@ var Attv;
         }
         else if (level === 'error') {
             console.error.apply(console, data);
+        }
+        else if (level === 'debug') {
+            console.debug.apply(console, data);
         }
         else {
             console.log.apply(console, data);
@@ -379,7 +430,6 @@ var Attv;
 ////////////////////////////////////////////////////////////////////////////////////
 (function (Attv) {
     Attv.dataAttributes = [];
-    Attv.configuration = new Attv.Configuration();
     Attv.loader = {
         pre: [],
         post: []
@@ -400,7 +450,7 @@ var Attv;
                     // #2. Check if the attribute value is supported
                     if (!dataAttributeValue) {
                         var attributeValue = element.attr(dataAttribute.attributeName);
-                        Attv.log(Attv.configuration.attributeValueMissingLogLevel, dataAttribute + " does not support " + dataAttribute + "='" + attributeValue + "'", element);
+                        Attv.log('warning', dataAttribute + " does not support " + dataAttribute + "='" + attributeValue + "'", element);
                         return;
                     }
                     // #3. Validate
@@ -448,11 +498,11 @@ var Attv;
         }
         DataAttributeFactory.prototype.create = function () {
             var dataAttribute = this.fn(this.attributeName);
-            Attv.log("Instantiating " + dataAttribute, dataAttribute);
+            Attv.log('debug', "* " + dataAttribute, dataAttribute);
             if (this.valuesFn) {
                 var attributeValues = [];
                 this.valuesFn(dataAttribute, attributeValues);
-                Attv.log(dataAttribute + " adding " + attributeValues);
+                Attv.log('debug', "** " + dataAttribute + " adding " + attributeValues, attributeValues);
                 dataAttribute.registerAttributeValues(attributeValues);
             }
             return dataAttribute;
@@ -460,7 +510,10 @@ var Attv;
         return DataAttributeFactory;
     }());
     function initialize() {
-        Attv.log('* DataAttributes');
+        if (!Attv.configuration) {
+            Attv.configuration = new Attv.DefaultConfiguration();
+        }
+        Attv.log('debug', 'Initialize...');
         for (var i = 0; i < dataAttributeFactory.length; i++) {
             var dataAttribute = dataAttributeFactory[i].create();
             Attv.dataAttributes.push(dataAttribute);

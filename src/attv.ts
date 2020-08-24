@@ -1,5 +1,10 @@
 
-
+namespace Attv {
+    /**
+     * Version. This should be replaced and updated by the CI/CD process
+     */
+    export const version: string = '0.0.1';
+}
 
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// PROTOTYPES //////////////////////////////////////
@@ -117,6 +122,7 @@ String.prototype.equalsIgnoreCase = function (other: string): boolean {
 namespace Attv {
 
     export class Dependency {
+
         /**
          * List of DataAttribute Ids that we require
          */
@@ -126,12 +132,16 @@ namespace Attv {
          * List of DataAttribute Id that we use
          */
         uses: string[] = [];
+        
+        constructor (private dataAttribute: DataAttribute) {
+            // do nothing
+        }
 
         /**
          * List of all dependencies
          */
         allDependencies(): string[] {
-            return this.requires.concat(this.uses);
+            return this.requires.concat(this.uses).concat(this.dataAttribute.id);
         }
 
         /**
@@ -139,7 +149,13 @@ namespace Attv {
          * @param dataAttributeId id
          */
         getDataAttribute<TDataAttribute extends DataAttribute>(dataAttributeId: string) {
-            return Attv.getDataAttribute(dataAttributeId) as TDataAttribute;
+            let dependencyDataAttribute = Attv.getDataAttribute(dataAttributeId) as TDataAttribute;
+
+            if (!this.allDependencies().some(dep => dep === dataAttributeId)) {
+                Attv.log('warning', `${dependencyDataAttribute || dataAttributeId} should be declared as the dependant in ${this.dataAttribute}. This is for documentation purposes`);
+            }
+
+            return dependencyDataAttribute;
         }
     }
     
@@ -148,7 +164,7 @@ namespace Attv {
     */
     export abstract class DataAttribute {
 
-        public readonly dependencies: Dependency = new Dependency();
+        public readonly dependencies: Dependency = new Dependency(this);
         protected attributeValues: DataAttributeValue[] = [];
 
         /**
@@ -179,7 +195,7 @@ namespace Attv {
          * @param attributeValues attribute values
          */
         registerAttributeValues(attributeValues: DataAttributeValue[]) {
-            this.attributeValues = attributeValues;
+            this.attributeValues.push(...attributeValues);
         }
 
         /**
@@ -188,9 +204,47 @@ namespace Attv {
          */
         getDataAttributeValue<TDataAttributeValue extends DataAttributeValue>(element: HTMLElement): TDataAttributeValue {
             let value = element.attr(this.attributeName);
-            let attributeValue = this.attributeValues.filter(val => val.attributeValue === value)[0];
+            let attributeValue = this.attributeValues.filter(val => val.attributeValue === value)[0] as TDataAttributeValue;
 
-            return attributeValue as TDataAttributeValue;
+            return attributeValue;
+        }
+
+        /**
+         * Adds a dependency data attribute to the 'element'
+         * @param element the element
+         * @param value the value
+         */
+        addDependencyDataAttribute(element: HTMLElement, uniqueId: string, any: string) {
+            let depedencyDataAttribute = this.dependencies.getDataAttribute(uniqueId);
+            element.attr(depedencyDataAttribute.attributeName, any);
+        }
+
+        /**
+         * Adds a dependency data attribute to the 'element'
+         * @param element the element
+         * @param value the value
+         */
+        getDependencyDataAttribute(element: HTMLElement, uniqueId: string): string {
+            let dependencyDataAttribute = this.dependencies.getDataAttribute(uniqueId);
+            return dependencyDataAttribute.getDataAttributeValue(element).attributeValue;
+        }
+
+        /**
+         * Equivalent to calling element.attr('data'). However, we use dependencies om this method
+         * @param element element
+         * @param uniqueId all unique ids
+         */
+        getFlattenDataAttributeNames<TAny>(element: HTMLElement): TAny {
+            let dataAttributes = this.dependencies.allDependencies().map(id => this.dependencies.getDataAttribute(id));
+
+            let obj = { };
+            dataAttributes.forEach((att) => {
+                let name = att.attributeName;
+                let datasetName = name?.startsWith('data-') && name.replace(/^data\-/, '').dashToCamelCase();
+                obj[datasetName] = att.getDataAttributeValue(element)?.attributeValue
+            });
+
+            return obj as TAny;
         }
 
         /**
@@ -224,6 +278,9 @@ namespace Attv {
          */
         abstract loadElement(element: HTMLElement): boolean;
 
+        /**
+         * To string
+         */
         toString(): string {
             return `[${this.dataAttribute.attributeName}]='${this.attributeValue}'`;
         }
@@ -345,16 +402,23 @@ namespace Attv.Validators {
 
 namespace Attv {
 
-    export class Configuration {
+    export interface Configuration {
+
+        isDebug: boolean;
+
+        isLoggingEnabled: boolean;
+
+        readonly logLevels: string[];
+    }
+
+    export class DefaultConfiguration implements Configuration {
 
         isDebug: boolean = true;
 
         isLoggingEnabled: boolean = true;
 
-        attributeValueMissingLogLevel: 'warning'|'ignore' = 'warning';
-
         get logLevels(): string[] {
-            return ['log', 'warning', 'error'];
+            return ['log', 'warning', 'error', 'debug'];
         }
     }
 }
@@ -412,7 +476,7 @@ namespace Attv {
         }
 
         let level = data[0];
-        if (configuration.logLevels.indexOf(level) >= 0) {
+        if (configuration.logLevels?.indexOf(level) >= 0) {
             data = data.splice(1);
         }
         
@@ -420,6 +484,8 @@ namespace Attv {
             console.warn(...data);
         } else if (level === 'error') {
             console.error(...data);
+        } else if (level === 'debug') {
+            console.debug(...data);
         } else {
             console.log(...data);
         }
@@ -440,8 +506,8 @@ namespace Attv {
 
 namespace Attv {
 
+    export var configuration: Configuration;
     export const dataAttributes: DataAttribute[] = [];
-    export const configuration: Configuration = new Configuration();
 
     export const loader: {
         pre: (() => void)[],
@@ -472,7 +538,7 @@ namespace Attv {
                     // #2. Check if the attribute value is supported
                     if (!dataAttributeValue) {
                         let attributeValue = element.attr(dataAttribute.attributeName);
-                        Attv.log(Attv.configuration.attributeValueMissingLogLevel, `${dataAttribute} does not support ${dataAttribute}='${attributeValue}'`, element);
+                        Attv.log('warning', `${dataAttribute} does not support ${dataAttribute}='${attributeValue}'`, element);
                         return;
                     }
 
@@ -528,14 +594,14 @@ namespace Attv {
         create(): DataAttribute {
             let dataAttribute = this.fn(this.attributeName);
             
-            Attv.log(`Instantiating ${dataAttribute}`, dataAttribute);
+            Attv.log('debug', `* ${dataAttribute}`, dataAttribute);
 
             if (this.valuesFn) {
                 let attributeValues = [];
 
                 this.valuesFn(dataAttribute, attributeValues);
 
-                Attv.log(`${dataAttribute} adding ${attributeValues}`);
+                Attv.log('debug', `** ${dataAttribute} adding ${attributeValues}`, attributeValues);
     
                 dataAttribute.registerAttributeValues(attributeValues);
             }
@@ -545,7 +611,11 @@ namespace Attv {
     }
 
     function initialize() {
-        Attv.log('* DataAttributes');
+        if (!Attv.configuration) {
+            Attv.configuration = new DefaultConfiguration();
+        }
+
+        Attv.log('debug', 'Initialize...');
         for (var i = 0; i < dataAttributeFactory.length; i++) {
             let dataAttribute = dataAttributeFactory[i].create();
 

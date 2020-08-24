@@ -81,7 +81,12 @@
 		<script type="text/javascript" src="data-template.js"></script>
 
 		<script type="text/javascript" >
-		
+			Attv.loader.pre.unshift(() => {
+				Attv.configuration = {
+					isLoggingEnabled: true,
+					isDebug: false
+				}
+			});
 		</script>
 	</body>
 </html>

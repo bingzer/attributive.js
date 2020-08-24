@@ -22,11 +22,11 @@ namespace Attv {
          * Returns the current attribute value
          * @param element the element
          */
-        getDataAttributeValue<TDataAttributeValue extends DataAttributeValue>(element: HTMLElement): TDataAttributeValue {
+        getDataAttributeValue<TDataAttributeValue extends DataAttributeValue>(element?: HTMLElement): TDataAttributeValue {
             let rawAttributeValue = element.attr(this.attributeName) as string;
-            let attributeValue = new RawDataAttributeValue(rawAttributeValue, this);
+            let attributeValue = new RawDataAttributeValue(rawAttributeValue, this) as TDataAttributeValue;
 
-            return attributeValue as TDataAttributeValue;
+            return attributeValue;
         }
     }
 

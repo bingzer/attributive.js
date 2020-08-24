@@ -2,11 +2,13 @@ namespace Attv {
 
 
     export class DataTemplate extends Attv.DataAttribute {
+        static readonly UniqueId = 'DataTemplate';
+        static readonly Description = '';
 
         constructor (public attributeName: string) {
             super(DataTemplate.UniqueId, attributeName, DataTemplate.Description, true);
 
-            this.dependencies.requires.push(DataRenderer.UniqueId);
+            this.dependencies.requires.push(DataRenderer.UniqueId, DataTemplateHtml.UniqueId);
         }
 
         renderTemplate(sourceElementOrSelectorOrContent: HTMLElement | string, model: any): string {
@@ -45,13 +47,17 @@ namespace Attv {
 
             loadElement(element: HTMLElement): boolean {
                 let templateHtml = element.innerHTML;
-                element.attr('data-template-html', templateHtml);
+
+                this.dataAttribute.addDependencyDataAttribute(element, DataTemplateHtml.UniqueId, templateHtml);
+
                 element.innerHTML = '';
                 
                 return true;
             }
             
             getTemplate(element: HTMLElement): HTMLElement {
+                this.dataAttribute.getDependencyDataAttribute(element, DataTemplateHtml.UniqueId);
+
                 let html = element.attr('data-template-html');
                 return Attv.createHTMLElement(html);
             }
@@ -82,14 +88,19 @@ namespace Attv {
         }
     }
 
-    export namespace DataTemplate {
-        export const UniqueId: string = "DataTemplate";
-        export const Description: string = "For templating and stuffs";
-    }
 
+    export class DataTemplateHtml extends RawDataAttribute {
+        static readonly UniqueId = 'DataTemplateHtml';
+        static readonly Description = '';
+
+        constructor (public attributeName: string) {
+            super(DataTemplateHtml.UniqueId, attributeName, DataTemplateHtml.Description, false);
+        }
+    }
 }
 
 Attv.loader.pre.push(() => {
+    Attv.registerDataAttribute('data-template-html',  (attributeName: string) => new Attv.DataTemplateHtml(attributeName));
     Attv.registerDataAttribute('data-template', 
         (attributeName: string) => new Attv.DataTemplate(attributeName),
         (dataAttribute: Attv.DataAttribute, list: Attv.DataAttributeValue[]) => {
