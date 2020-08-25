@@ -15,7 +15,7 @@ interface HTMLElement  {
      * Attribute helper.
      * value can be an object
      */
-    attr: (name?: string | Attv.DataAttribute, value?: any) => HTMLElement | any;
+    attr: (name?: string | Attv.Attribute, value?: any) => HTMLElement | any;
 }
 
 HTMLElement.prototype.attr = function (name: string, value?: any): HTMLElement | any {
@@ -123,19 +123,19 @@ String.prototype.equalsIgnoreCase = function (other: string): boolean {
 
 namespace Attv {
 
-    export class Dependency {
+    export class AttributeResolver {
 
         /**
-         * List of DataAttribute Ids that we require
+         * List of attribute Ids that we require
          */
         requires: string[] = [];
 
         /**
-         * List of DataAttribute Id that we use
+         * List of attribute Id that we use
          */
         uses: string[] = [];
         
-        constructor (private dataAttribute: DataAttribute) {
+        constructor (private attributeValue: AttributeValue) {
             // do nothing
         }
 
@@ -143,61 +143,62 @@ namespace Attv {
          * List of all dependencies
          */
         allDependencies(): string[] {
-            return this.requires.concat(this.uses).concat(this.dataAttribute.id);
+            return this.requires.concat(this.uses).concat(this.attributeValue.attribute.uniqueId);
         }
 
         /**
          * Returns the data attribute
-         * @param dataAttributeId id
+         * @param attributeId id
          */
-        getDataAttribute<TDataAttribute extends DataAttribute>(dataAttributeId: string) {
-            let dependencyDataAttribute = Attv.getDataAttribute(dataAttributeId) as TDataAttribute;
+        resolve<TAttribute extends Attribute>(attributeId: string) {
+            let attribute = Attv.getAttribute(attributeId) as TAttribute;
 
-            if (!this.allDependencies().some(dep => dep === dataAttributeId)) {
-                Attv.log('warning', `${dependencyDataAttribute || dataAttributeId} should be declared as the dependant in ${this.dataAttribute}. This is for documentation purposes`);
+            if (!this.allDependencies().some(dep => dep === attributeId)) {
+                Attv.log('warning', `${attribute || attributeId} should be declared as the dependant in ${this.attributeValue.attribute}. This is for documentation purposes`);
             }
 
-            return dependencyDataAttribute;
+            return attribute;
+        }
+
+        /**
+         * Adds a dependency data attribute to the 'element'
+         * @param element the element
+         * @param value the value
+         */
+        addAttribute(uniqueId: string, element: HTMLElement, any: string) {
+            let attribute = this.resolve(uniqueId);
+            element.attr(attribute.name, any);
         }
     }
     
     /**
     * Base class for data-attributes
     */
-    export class DataAttribute {
+    export class Attribute {
+        public readonly attributeValues: AttributeValue[] = [];
 
-        public readonly dependencies: Dependency = new Dependency(this);
-        public readonly attributeValues: DataAttributeValue[] = [];
+        public readonly description: string;
+        public readonly loadedName: string;
 
         /**
          * 
-         * @param id unique id
-         * @param attributeName  the attribute name
+         * @param uniqueId unique id
+         * @param name  the attribute name
          * @param description description
          * @param isAutoLoad is auto-load
          */
         constructor (
-            public id: string,
-            public attributeName: string, 
-            public description: string,
+            public uniqueId: string,
+            public name: string, 
             public isAutoLoad: boolean = true) {
-            if (!attributeName.startsWith('data-')) {
-                attributeName = 'data-' + attributeName;
-            }
-        }
-        
-        /**
-         * Attribute when it's loaded
-         */
-        get attributeLoadedName(): string {
-            return this.attributeName + "-loaded";
+            this.loadedName = this.name + "-loaded";
         }
         
         /**
          * Register attribute values
          * @param attributeValues attribute values
          */
-        registerAttributeValues(attributeValues: DataAttributeValue[]) {
+        registerAttributeValues(attributeValues: AttributeValue[]) {
             this.attributeValues.push(...attributeValues);
         }
 
@@ -205,60 +206,28 @@ namespace Attv {
          * Returns the current attribute value
          * @param element the element
          */
-        getDataAttributeValue<TDataAttributeValue extends DataAttributeValue>(element: HTMLElement): TDataAttributeValue {
-            let value = element?.attr(this.attributeName);
-            let attributeValue = this.attributeValues.filter(val => val.attributeValue === value)[0] as TDataAttributeValue;
+        getValue<TAttributeValue extends AttributeValue>(element: HTMLElement): TAttributeValue {
+            let value = element?.attr(this.name);
+            let attributeValue = this.attributeValues.filter(val => val.getRawValue(element) === value)[0] as TAttributeValue;
 
             // #1. if attribute is undefined
-            // find the one with the .isDefault == true
+            // find the one with the default tag
             if (!attributeValue) {
-                attributeValue = this.attributeValues.filter(val => val.attributeValue === Attv.configuration.defaultTag)[0] as TDataAttributeValue;
+                attributeValue = this.attributeValues.filter(val => val.getRawValue(element) === Attv.configuration.defaultTag)[0] as TAttributeValue;
             }
 
+            // #2. find the first attribute
             if (!attributeValue) {
-                let rawAttributeValue = element?.attr(this.attributeName) as string;
-                attributeValue = new DataAttributeValue(rawAttributeValue, this) as TDataAttributeValue;
+                attributeValue = this.attributeValues[0] as TAttributeValue;
+            }
+
+            // #3. generic attribute
+            if (!attributeValue) {
+                let rawAttributeValue = element?.attr(this.name) as string;
+                attributeValue = new AttributeValue(rawAttributeValue, this) as TAttributeValue;
             }
 
             return attributeValue;
-        }
-
-        /**
-         * Adds a dependency data attribute to the 'element'
-         * @param element the element
-         * @param value the value
-         */
-        addDependencyDataAttribute(uniqueId: string, element: HTMLElement, any: string) {
-            let depedencyDataAttribute = this.dependencies.getDataAttribute(uniqueId);
-            element.attr(depedencyDataAttribute.attributeName, any);
-        }
-
-        /**
-         * Adds a dependency data attribute to the 'element'
-         * @param element the element
-         * @param value the value
-         */
-        getDependencyDataAttribute(uniqueId: string, element: HTMLElement): string {
-            let dependencyDataAttribute = this.dependencies.getDataAttribute(uniqueId);
-            return dependencyDataAttribute.getDataAttributeValue(element).attributeValue;
-        }
-
-        /**
-         * Equivalent to calling element.attr('data'). However, we use dependencies om this method
-         * @param element element
-         * @param uniqueId all unique ids
-         */
-        getData<TAny>(element: HTMLElement): TAny {
-            let dataAttributes = this.dependencies.allDependencies().map(id => this.dependencies.getDataAttribute(id));
-
-            let obj = { };
-            dataAttributes.forEach((att) => {
-                let name = att.attributeName;
-                let datasetName = name?.startsWith('data-') && name.replace(/^data\-/, '').dashToCamelCase();
-                obj[datasetName] = att.getDataAttributeValue(element)?.attributeValue
-            });
-
-            return obj as TAny;
         }
 
         /**
@@ -266,24 +235,35 @@ namespace Attv {
          * @param element element to check
          */
         isElementLoaded(element: HTMLElement): boolean {
-            let isLoaded = element.attr(this.attributeLoadedName);
+            let isLoaded = element.attr(this.loadedName);
             return isLoaded === 'true';
         }
 
+        /**
+         * String representation
+         */
         toString(): string {
-            return `[${this.attributeName}]`;
+            return `[${this.name}]`;
         }
     }
 
     /**
-     * Base class for DataAttribute-value
+     * Base class for attribute-value
      */
-    export class DataAttributeValue {
+    export class AttributeValue {
+        public readonly resolver: AttributeResolver = new AttributeResolver(this);
         
-        constructor (public attributeValue: string, 
-            public dataAttribute: DataAttribute, 
-            public validators: Validators.DataAttributeValueValidator[] = []) {
+        constructor (private value: string, 
+            public attribute: Attribute, 
+            public validators: Validators.AttributeValidator[] = []) {
             // do nothing
+        }
+
+        /**
+         * Returns raw string
+         */
+        getRawValue(element: HTMLElement): string {
+            return this.value || element?.attr(this.attribute.name);
         }
     
         /**
@@ -295,10 +275,28 @@ namespace Attv {
         }
 
         /**
+         * Equivalent to calling element.attr('data'). However, we use dependencies om this method
+         * @param element element
+         * @param uniqueId all unique ids
+         */
+        getData<TAny>(element: HTMLElement): TAny {
+            let attributes = this.resolver.allDependencies().map(id => this.resolver.resolve(id));
+
+            let obj = { };
+            attributes.forEach((att) => {
+                let name = att.name;
+                let datasetName = name?.startsWith('data-') && name.replace(/^data\-/, '').dashToCamelCase();
+                obj[datasetName] = att.getValue(element)?.getRawValue(element)
+            });
+
+            return obj as TAny;
+        }
+
+        /**
          * To string
          */
         toString(): string {
-            return `[${this.dataAttribute.attributeName}]='${this.attributeValue}'`;
+            return `[${this.attribute.name}]='${this.value || ''}'`;
         }
     }
 
@@ -310,17 +308,17 @@ namespace Attv {
 
 namespace Attv.Validators {
 
-    export interface DataAttributeValueValidator {
-        validate(value: DataAttributeValue, element: Element): boolean;
+    export interface AttributeValidator {
+        validate(value: AttributeValue, element: Element): boolean;
     }
 
-    export class RequiredRawAttributeValidator implements DataAttributeValueValidator {
+    export class RequiredRawAttributeValidator implements AttributeValidator {
 
         constructor (private requiredRawAttributes: string[]) {
             // do nothing
         }
     
-        validate(value: DataAttributeValue, element: HTMLElement): boolean {
+        validate(value: AttributeValue, element: HTMLElement): boolean {
             let isValidated = true;
 
             // check for other require attributes
@@ -338,39 +336,39 @@ namespace Attv.Validators {
         }
     }
 
-    export class RequiredAttributeValidator implements DataAttributeValueValidator {
+    export class RequiredAttributeValidator implements AttributeValidator {
 
         constructor (private requiredAttributeIds: string[]) {
             // do nothing
         }
     
-        validate(value: DataAttributeValue, element: HTMLElement): boolean {
+        validate(value: AttributeValue, element: HTMLElement): boolean {
             let isValidated = true;
 
-            let dataAttributes = this.requiredAttributeIds.map(attId => Attv.getDataAttribute(attId));
+            let attributes = this.requiredAttributeIds.map(attId => Attv.getAttribute(attId));
 
             // check for other require attributes
-            for (let i = 0; i < dataAttributes.length; i++) {
-                let dataAttribute = dataAttributes[i];
-                let dataAttributeValue = dataAttribute.getDataAttributeValue(element);
-                if (!dataAttributeValue?.attributeValue) {
-                    Attv.log('error', `${value} is requiring ${dataAttribute} to be present in DOM`, element)
+            for (let i = 0; i < attributes.length; i++) {
+                let attribute = attributes[i];
+                let attributeValue = attribute.getValue(element);
+                if (!attributeValue?.getRawValue(element)) {
+                    Attv.log('error', `${value} is requiring ${attribute} to be present in DOM`, element)
                 }
 
-                isValidated = isValidated && !!dataAttribute;
+                isValidated = isValidated && !!attribute;
             }
 
             return isValidated;
         }
     }
 
-    export class RequiredAttributeValidatorWithValue implements DataAttributeValueValidator {
+    export class RequiredAttributeValidatorWithValue implements AttributeValidator {
 
         constructor (private requiredAttributes: { name: string, value: string}[]) {
             // do nothing
         }
     
-        validate(value: DataAttributeValue, element: HTMLElement): boolean {
+        validate(value: AttributeValue, element: HTMLElement): boolean {
             let isValidated = true;
 
             // check for other require attributes
@@ -388,13 +386,13 @@ namespace Attv.Validators {
         }
     }
 
-    export class RequiredElementValidator implements DataAttributeValueValidator {
+    export class RequiredElementValidator implements AttributeValidator {
 
         constructor (private elementTagNames: string[]) {
             // do nothing
         }
 
-        validate(value: DataAttributeValue, element: Element): boolean {
+        validate(value: AttributeValue, element: Element): boolean {
             let isValidated = true;
 
             // check for element that this attribute belongs to
@@ -411,13 +409,13 @@ namespace Attv.Validators {
         }
     }
     
-    export class RequiredAnyElementsValidator implements DataAttributeValueValidator {
+    export class RequiredAnyElementsValidator implements AttributeValidator {
 
         constructor (private elementTagNames: string[]) {
             // do nothing
         }
 
-        validate(value: DataAttributeValue, element: Element): boolean {
+        validate(value: AttributeValue, element: Element): boolean {
             let isValidated = false;
 
             // check for element that this attribute belongs to
@@ -555,7 +553,7 @@ namespace Attv {
 namespace Attv {
 
     export var configuration: Configuration;
-    export const dataAttributes: DataAttribute[] = [];
+    export const attributes: Attribute[] = [];
 
     export const loader: {
         pre: (() => void)[],
@@ -565,7 +563,7 @@ namespace Attv {
         post: []
     };
 
-    let dataAttributeFactory: DataAttributeFactory[] = [];
+    let attributeFactory: AttributeFactory[] = [];
 
 
     export function loadElements(root?: HTMLElement): void {
@@ -574,27 +572,27 @@ namespace Attv {
         }
 
         // auto load all attvs that are marked auto load
-        dataAttributes.filter(dataAttribute => dataAttribute.isAutoLoad).forEach((dataAttribute, index) => {
-            root.querySelectorAll(`[${dataAttribute.attributeName}]`).forEach((element: HTMLElement, index) => {
+        attributes.filter(attribute => attribute.isAutoLoad).forEach((attribute, index) => {
+            root.querySelectorAll(`${attribute}`).forEach((element: HTMLElement, index) => {
                 try {
                     // #1. If it's already loaded return
-                    if (dataAttribute.isElementLoaded(element))
+                    if (attribute.isElementLoaded(element))
                         return;
 
-                    let dataAttributeValue = dataAttribute.getDataAttributeValue(element);
+                    let attributeValue = attribute.getValue(element);
 
                     // #2. Check if the attribute value is supported
-                    if (!dataAttributeValue) {
-                        let attributeValue = element.attr(dataAttribute.attributeName);
-                        Attv.log('warning', `${dataAttribute} does not support ${dataAttribute}='${attributeValue}'`, element);
+                    if (!attributeValue) {
+                        let attributeValue = element.attr(attribute.name);
+                        Attv.log('warning', `${attribute} does not support ${attribute}='${attributeValue}'`, element);
                         return;
                     }
 
                     // #3. Validate
                     let isValidated = true;
-                    for (var i = 0; i < dataAttributeValue.validators.length; i++) {
-                        let validator = dataAttributeValue.validators[i];
-                        isValidated = isValidated = validator.validate(dataAttributeValue, element);
+                    for (var i = 0; i < attributeValue.validators.length; i++) {
+                        let validator = attributeValue.validators[i];
+                        isValidated = isValidated = validator.validate(attributeValue, element);
                     }
 
                     if (!isValidated) {
@@ -602,59 +600,59 @@ namespace Attv {
                     }
 
                     // #4. Load the stuff!
-                    let isLoaded = dataAttributeValue.loadElement(element);
-                    element.attr(dataAttribute.attributeLoadedName, isLoaded);
+                    let isLoaded = attributeValue.loadElement(element);
+                    element.attr(attribute.loadedName, isLoaded);
                 }
                 catch (error) {
-                    Attv.log('error', `Unexpected error occurred when loading ${dataAttribute}`, error, element);
+                    Attv.log('error', `Unexpected error occurred when loading ${attribute}`, error, element);
                 }
             });
         });
     }
 
-    export function getDataAttribute(id: string): DataAttribute {
-        return dataAttributes.filter(att => att.id == id)[0];
+    export function getAttribute(id: string): Attribute {
+        return attributes.filter(att => att.uniqueId == id)[0];
     }
     
-    export function registerDataAttribute(attributeName: string, 
-        fn: (attributeName: string) => DataAttribute,
-        valuesFn?: (dataAttribute: DataAttribute, list: DataAttributeValue[]) => void): void {
-        let factory = new DataAttributeFactory(attributeName, fn, valuesFn);
+    export function registerAttribute(attributeName: string, 
+        fn: (attributeName: string) => Attribute,
+        valuesFn?: (attribute: Attribute, list: AttributeValue[]) => void): void {
+        let factory = new AttributeFactory(attributeName, fn, valuesFn);
 
-        dataAttributeFactory.push(factory);
+        attributeFactory.push(factory);
     }
     
-    export function unregisterDataAttribute(attributeName: string): void {
-        let attributes = dataAttributeFactory.filter(factory => factory.attributeName !== attributeName);
-        dataAttributeFactory.splice(0, dataAttributeFactory.length);
-        dataAttributeFactory.push(...attributes);
+    export function unregisterAttribute(attributeName: string): void {
+        let attributes = attributeFactory.filter(factory => factory.attributeName !== attributeName);
+        attributeFactory.splice(0, attributeFactory.length);
+        attributeFactory.push(...attributes);
     }
 
     // -- helper class 
 
-    class DataAttributeFactory {
+    class AttributeFactory {
         constructor (public attributeName: string, 
-            private fn: (attributeName: string) => DataAttribute,
-            private valuesFn?: (dataAttribute: DataAttribute, list: DataAttributeValue[]) => void) {
+            private fn: (attributeName: string) => Attribute,
+            private valuesFn?: (attribute: Attribute, list: AttributeValue[]) => void) {
             // do nothing
         }
 
-        create(): DataAttribute {
-            let dataAttribute = this.fn(this.attributeName);
+        create(): Attribute {
+            let attribute = this.fn(this.attributeName);
             
-            Attv.log('debug', `* ${dataAttribute}`, dataAttribute);
+            Attv.log('debug', `* ${attribute}`, attribute);
 
             if (this.valuesFn) {
                 let attributeValues = [];
 
-                this.valuesFn(dataAttribute, attributeValues);
+                this.valuesFn(attribute, attributeValues);
 
-                Attv.log('debug', `** ${dataAttribute} adding ${attributeValues}`, attributeValues);
+                Attv.log('debug', `** ${attribute} adding ${attributeValues}`, attributeValues);
     
-                dataAttribute.registerAttributeValues(attributeValues);
+                attribute.registerAttributeValues(attributeValues);
             }
 
-            return dataAttribute;
+            return attribute;
         }
     }
 
@@ -664,10 +662,10 @@ namespace Attv {
         }
 
         Attv.log('debug', 'Initialize...');
-        for (var i = 0; i < dataAttributeFactory.length; i++) {
-            let dataAttribute = dataAttributeFactory[i].create();
+        for (var i = 0; i < attributeFactory.length; i++) {
+            let attribute = attributeFactory[i].create();
 
-            dataAttributes.push(dataAttribute);
+            attributes.push(attribute);
         }
     }
 

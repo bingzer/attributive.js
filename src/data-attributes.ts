@@ -1,121 +1,158 @@
+
 namespace Attv {
 
     /**
-    * data-url
-    */
-    export class DataUrl extends DataAttribute {
+     * [data-url]='*'
+     */
+    export class DataUrl extends Attv.Attribute {
         static readonly UniqueId = 'DataUrl';
-        static readonly Description = '';
 
-        constructor (public attributeName: string) {
-            super(DataUrl.UniqueId, attributeName, DataUrl.Description, false);
+        constructor (name: string) {
+            super(DataUrl.UniqueId, name, false);
         }
+    }
 
-        /**
-         * Returns the current attribute value
-         * @param element the element
-         */
-        getDataAttributeValue<TDataAttributeValue extends DataAttributeValue>(element: HTMLElement): TDataAttributeValue {
-            let attributeValue = super.getDataAttributeValue(element) as TDataAttributeValue;
-            
-            if (!attributeValue?.attributeValue && element?.tagName.equalsIgnoreCase('form')) {
-                // get it from the 'action' attribute
-                let actionAttributeValue = element.attr('action');
-                attributeValue = new DataAttributeValue(actionAttributeValue, this) as TDataAttributeValue;
+    export namespace DataUrl {
+
+        export class DefaultAttributeValue extends AttributeValue {
+            constructor (attribute: Attribute) {
+                super(undefined, attribute);
             }
-            
-            return attributeValue;
-        }
 
+            getRawValue(element: HTMLElement): string {
+                let rawValue = super.getRawValue(element);
+
+                if (!rawValue && element?.tagName?.equalsIgnoreCase('form')) {
+                    // get from action attribute
+                    rawValue = element.attr('action');
+                }
+
+                return rawValue;
+            }
+        }
     }
 
     /**
-    * data-method
-    */
-    export class DataMethod extends DataAttribute {
+     * [data-method]='*'
+     */
+    export class DataMethod extends Attv.Attribute {
         static readonly UniqueId = 'DataMethod';
-        static readonly Description = '';
         static readonly DefaultMethod = 'get';
 
-        constructor (public attributeName: string) {
-            super(DataMethod.UniqueId, attributeName, DataMethod.Description, false);
+        constructor (name: string) {
+            super(DataMethod.UniqueId, name, false);
         }
-
-        /**
-         * Returns the current attribute value
-         * @param element the element
-         */
-        getDataAttributeValue<TDataAttributeValue extends DataAttributeValue>(element: HTMLElement): TDataAttributeValue {
-            let attributeValue = super.getDataAttributeValue(element) as TDataAttributeValue;
-            
-            if (!attributeValue?.attributeValue && element?.tagName.equalsIgnoreCase('form')) {
-                // get it from the 'method' attribute
-                let actionAttributeValue = element.attr('method');
-                attributeValue = new DataAttributeValue(actionAttributeValue, this) as TDataAttributeValue;
+    }
+    export namespace DataMethod {
+        export class DefaultAttributeValue extends AttributeValue {
+            constructor (attribute: Attribute) {
+                super(undefined, attribute)
             }
 
-            // otherwise
-            if (!attributeValue?.attributeValue) {
-                attributeValue = new DataAttributeValue(DataMethod.DefaultMethod, this) as TDataAttributeValue;
+            getRawValue(element: HTMLElement): string {
+                let rawValue = super.getRawValue(element);
+
+                if (!rawValue && element?.tagName?.equalsIgnoreCase('form')) {
+                    // get from method attribute
+                    rawValue = element.attr('method') || DataMethod.DefaultMethod;
+                }
+
+                return rawValue;
             }
-            
-            return attributeValue;
         }
     }
 
     /**
-    * data-callback
-    */
-    export class DataCallback extends DataAttribute {
+     * [data-callback]='*'
+     */
+    export class DataCallback extends Attv.Attribute {
         static readonly UniqueId = 'DataCallback';
-        static readonly Description = '';
 
-        constructor (public attributeName: string) {
-            super(DataCallback.UniqueId, attributeName, DataCallback.Description, false);
+        constructor (name: string) {
+            super(DataCallback.UniqueId, name, false);
         }
 
         callback(element: HTMLElement): any {
-            let jsFunction = this.getDataAttributeValue(element).attributeValue;
+            let jsFunction = this.getValue(element).getRawValue(element);
             return eval(jsFunction);
         }
-
     }
 
     /**
-    * data-loading
-    */
-    export class DataLoading extends DataAttribute {
+     * [data-loading]='*'
+     */
+    export class DataLoading extends Attv.Attribute {
         static readonly UniqueId = 'DataLoading';
-        static readonly Description = '';
 
-        constructor (public attributeName: string) {
-            super(DataLoading.UniqueId, attributeName, DataLoading.Description, false);
+        constructor (name: string) {
+            super(DataLoading.UniqueId, name, false);
         }
-
     }
 
     /**
-    * data-message
-    */
-    export class DataMessage extends DataAttribute {
+     * [data-nessage]='*'
+     */
+    export class DataMessage extends Attv.Attribute {
         static readonly UniqueId = 'DataMessage';
-        static readonly Description = '';
 
-        constructor (public attributeName: string) {
-            super(DataMessage.UniqueId, attributeName, DataMessage.Description, false);
+        constructor (name: string) {
+            super(DataMessage.UniqueId, name, false);
         }
 
+        getTargetElement(element: HTMLElement): HTMLElement {
+            let selector = this.getValue(element).getRawValue(element);
+
+            return document.querySelector(selector) as HTMLElement;
+        }
     }
 
     /**
-    * data-bind
-    */
-    export class DataBind extends DataAttribute {
-        static readonly UniqueId = 'DataBind';
-        static readonly Description = '';
+     * [data-target]='*'
+     */
+    export class DataTarget extends Attv.Attribute {
+        static readonly UniqueId = 'DataTarget';
 
-        constructor (public attributeName: string) {
-            super(DataBind.UniqueId, attributeName, DataBind.Description, false);
+        constructor (name: string) {
+            super(DataTarget.UniqueId, name, false);
+        }
+
+        getTargetElement(element: HTMLElement): HTMLElement {
+            let selector = this.getValue(element).getRawValue(element);
+
+            return document.querySelector(selector) as HTMLElement;
+        }
+    }
+
+    /**
+     * [data-timeout]='*'
+     */
+    export class DataTimeout extends Attv.Attribute {
+        static readonly UniqueId = 'DataTimeout';
+
+        constructor (name: string) {
+            super(DataTimeout.UniqueId, name, false);
+        }
+    }
+
+    /**
+     * [data-timeout]='*'
+     */
+    export class DataData extends Attv.Attribute {
+        static readonly UniqueId = 'DataData';
+
+        constructor (name: string) {
+            super(DataData.UniqueId, name, false);
+        }
+    }
+
+    /**
+     * [data-timeout]='*'
+     */
+    export class DataBind extends Attv.Attribute {
+        static readonly UniqueId = 'DataBind';
+
+        constructor (name: string) {
+            super(DataBind.UniqueId, name, false);
         }
 
         bind(element: HTMLElement, any: any) {
@@ -123,60 +160,26 @@ namespace Attv {
         }
     }
 
-    /**
-    * data-target
-    */
-    export class DataTarget extends DataAttribute {
-        static readonly UniqueId = 'DataTarget';
-        static readonly Description = '';
-
-        constructor (public attributeName: string) {
-            super(DataTarget.UniqueId, attributeName, DataTarget.Description, false);
-        }
-
-        getTargetElement(element: HTMLElement): HTMLElement {
-            let targetElementSelector = this.getDataAttributeValue(element).attributeValue;
-
-            return document.querySelector(targetElementSelector) as HTMLElement;
-        }
-    }
-
-    /**
-    * data-timeout
-    */
-    export class DataTimeout extends DataAttribute {
-        static readonly UniqueId = 'DataTimeout';
-        static readonly Description = '';
-
-        constructor (public attributeName: string) {
-            super(DataTimeout.UniqueId, attributeName, DataTimeout.Description, false);
-        }
-    }
-
-    /**
-    * data-data
-    */
-    export class DataData extends DataAttribute {
-        static readonly UniqueId = 'DataData';
-        static readonly Description = '';
-
-        constructor (public attributeName: string) {
-            super(DataData.UniqueId, attributeName, DataData.Description, false);
-        }
-    }
-
 }
 
 Attv.loader.pre.push(() => {
-    Attv.registerDataAttribute('data-url', (attributeName: string) => new Attv.DataUrl(attributeName));
-    Attv.registerDataAttribute('data-method', (attributeName: string) => new Attv.DataMethod(attributeName));
-    Attv.registerDataAttribute('data-callback', (attributeName: string) => new Attv.DataCallback(attributeName));
-    Attv.registerDataAttribute('data-loading', (attributeName: string) => new Attv.DataLoading(attributeName));
-    Attv.registerDataAttribute('data-target', (attributeName: string) => new Attv.DataTarget(attributeName));
-    Attv.registerDataAttribute('data-message', (attributeName: string) => new Attv.DataMethod(attributeName));
-    Attv.registerDataAttribute('data-data', (attributeName: string) => new Attv.DataData(attributeName));
-    Attv.registerDataAttribute('data-timeout', (attributeName: string) => new Attv.DataTimeout(attributeName));
-    Attv.registerDataAttribute('data-bind', (attributeName: string) => new Attv.DataBind(attributeName));
+    Attv.registerAttribute('data-url', 
+        (name: string) => new Attv.DataUrl(name),
+        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
+            list.push(new Attv.DataUrl.DefaultAttributeValue(attribute));
+        });
+    Attv.registerAttribute('data-method', 
+        (name: string) => new Attv.DataMethod(name),
+        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
+            list.push(new Attv.DataMethod.DefaultAttributeValue(attribute));
+        });
+    Attv.registerAttribute('data-callback', (name: string) => new Attv.DataCallback(name));
+    Attv.registerAttribute('data-loading', (name: string) => new Attv.DataLoading(name));
+    Attv.registerAttribute('data-target',  (name: string) => new Attv.DataTarget(name));
+    Attv.registerAttribute('data-message', (name: string) => new Attv.DataMessage(name));
+    Attv.registerAttribute('data-timeout', (name: string) => new Attv.DataTimeout(name));
+    Attv.registerAttribute('data-data', (name: string) => new Attv.DataData(name));
+    Attv.registerAttribute('data-bind', (name: string) => new Attv.DataBind(name));
 });
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -188,22 +191,19 @@ namespace Attv {
     /**
     * data-renderer
     */
-    export class DataRenderer extends Attv.DataAttribute {
+    export class DataRenderer extends Attv.Attribute {
         static readonly UniqueId = 'DataRenderer';
-        static readonly Description = 'For rendering stuffs';
 
-        constructor (public attributeName: string) {
-            super(DataRenderer.UniqueId, attributeName, DataRenderer.Description, false);
-
-            this.dependencies.uses.push(DataBind.UniqueId);
+        constructor (name: string) {
+            super(DataRenderer.UniqueId, name, false);
         }
 
-        render(content: string, model: any, element?: HTMLElement, dataRendererValue?: DataRenderer.DefaultAttributeValue): string {       
-            if (!dataRendererValue) {
-                dataRendererValue = this.getDataAttributeValue<DataRenderer.DefaultAttributeValue>(element);
+        render(content: string, model: any, element?: HTMLElement, attributeValue?: DataRenderer.DefaultAttributeValue): string {       
+            if (!attributeValue) {
+                attributeValue = this.getValue<DataRenderer.DefaultAttributeValue>(element);
             }
 
-            return dataRendererValue.render(content, model);
+            return attributeValue.render(content, model);
         }
     }
 
@@ -212,18 +212,19 @@ namespace Attv {
         /**
          * [data-renderer]='default'
          */
-        export class DefaultAttributeValue extends Attv.DataAttributeValue  {
+        export class DefaultAttributeValue extends Attv.AttributeValue  {
             
-            constructor (attributeValue: string, dataAttribute: Attv.DataAttribute) {
-                super(attributeValue, dataAttribute)
+            constructor (attributeValue: string, attribute: Attv.Attribute) {
+                super(attributeValue, attribute);
             }
     
             loadElement(element: HTMLElement): boolean {
                 return true;
             }
-    
-            render(templatedContent: string, model?: any): string {
-                return templatedContent;
+            
+
+            render(content: string, model: any, element?: HTMLElement): string {  
+                return content;
             }
         }
 
@@ -234,10 +235,11 @@ namespace Attv {
     
             private dataBind: DataBind;
             
-            constructor (dataAttribute: Attv.DataAttribute) {
-                super('json2html', dataAttribute);
-    
-                this.dataBind = this.dataAttribute.dependencies.getDataAttribute<DataBind>(DataBind.UniqueId);
+            constructor (attribute: Attv.Attribute) {
+                super('json2html', attribute);
+
+                this.resolver.requires.push(DataBind.UniqueId);
+                this.dataBind = this.resolver.resolve<DataBind>(DataBind.UniqueId);
             }
     
             loadElement(element: HTMLElement): boolean {
@@ -275,6 +277,7 @@ namespace Attv {
                         }
                     }
                     else {
+                        // bind
                         this.dataBind.bind(bindElement, propValue);
                         
                         parent.append(template);
@@ -316,10 +319,10 @@ namespace Attv {
 }
 
 Attv.loader.pre.push(() => {
-    Attv.registerDataAttribute('data-renderer', 
-        (attributeName: string) => new Attv.DataRenderer(attributeName),
-        (dataAttribute: Attv.DataAttribute, list: Attv.DataAttributeValue[]) => {
-            list.push(new Attv.DataRenderer.DefaultAttributeValue(Attv.configuration.defaultTag, dataAttribute));
-            list.push(new Attv.DataRenderer.Json2HtmlAttributeValue(dataAttribute));
+    Attv.registerAttribute('data-renderer', 
+        (name: string) => new Attv.DataRenderer(name),
+        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
+            list.push(new Attv.DataRenderer.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
+            list.push(new Attv.DataRenderer.Json2HtmlAttributeValue(attribute));
         });
 });

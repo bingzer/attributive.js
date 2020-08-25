@@ -1,12 +1,10 @@
 namespace Attv {
     
-    export class DataPartial extends Attv.DataAttribute {
+    export class DataPartial extends Attv.Attribute {
+        static readonly UniqueId = "DataPartial";
 
-        constructor (public attributeName: string) {
-            super(DataPartial.UniqueId, attributeName, DataPartial.Description, true);
-
-            this.dependencies.requires.push(DataUrl.UniqueId);
-            this.dependencies.uses.push(DataTemplateSource.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId);
+        constructor (public name: string) {
+            super(DataPartial.UniqueId, name, true);
         }
 
         renderPartial(element: HTMLElement | string, content?: string) {
@@ -16,9 +14,9 @@ namespace Attv {
 
             let htmlElement = element as HTMLElement;
 
-            let dataAttributeValue = this.getDataAttributeValue<DataPartial.DefaultAttributeValue>(htmlElement);
+            let attributeValue = this.getValue<DataPartial.DefaultAttributeValue>(htmlElement);
 
-            dataAttributeValue.render(htmlElement, content);
+            attributeValue.render(htmlElement, content);
         }
         
         sendAjax(options: AjaxOptions) {
@@ -48,28 +46,31 @@ namespace Attv {
         /**
          * [data-partial]="lazy"
          */
-        export class DefaultAttributeValue extends Attv.DataAttributeValue {
+        export class DefaultAttributeValue extends Attv.AttributeValue {
             
             constructor (attributeValue: string, 
-                dataAttribute: Attv.DataAttribute, 
-                validators: Validators.DataAttributeValueValidator[] = [
+                attribute: Attv.Attribute, 
+                validators: Validators.AttributeValidator[] = [
                     new Validators.RequiredAttributeValidator([DataUrl.UniqueId])
                 ]) {
-                super(attributeValue, dataAttribute, validators)
+                super(attributeValue, attribute, validators);
+
+                this.resolver.requires.push(DataUrl.UniqueId);
+                this.resolver.uses.push(DataTemplateSource.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId);
             }
 
             render(element: HTMLElement, content?: string) {
                 // get content
                 if (!content) {
                     //let options = element.attr('data') as AjaxOptions;
-                    let options = this.dataAttribute.getData<AjaxOptions>(element);
+                    let options = this.getData<AjaxOptions>(element);
                     options._internalCallback = (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
                         content = xhr.response;
                         
                         this.doRender(element, content);
 
                         // [data-callback]
-                        let dataCallback = this.dataAttribute.dependencies.getDataAttribute<DataCallback>(DataCallback.UniqueId);
+                        let dataCallback = this.resolver.resolve<DataCallback>(DataCallback.UniqueId);
                         dataCallback.callback(element);
                     };
 
@@ -82,11 +83,11 @@ namespace Attv {
 
             private doRender(element: HTMLElement, content: string) {
                 // [data-template-source]
-                let dataTemplateSource = this.dataAttribute.dependencies.getDataAttribute<DataTemplateSource>(DataTemplateSource.UniqueId);
+                let dataTemplateSource = this.resolver.resolve<DataTemplateSource>(DataTemplateSource.UniqueId);
                 let html = dataTemplateSource.renderTemplate(element, content);
 
                 // [data-target]
-                let dataTarget = this.dataAttribute.dependencies.getDataAttribute<DataTarget>(DataTarget.UniqueId);
+                let dataTarget = this.resolver.resolve<DataTarget>(DataTarget.UniqueId);
                 let targetElement = dataTarget?.getTargetElement(element) || element;
 
                 targetElement.innerHTML = html;
@@ -97,7 +98,7 @@ namespace Attv {
             protected sendAjax(options: AjaxOptions) {
                 options.method = options.method || 'get';
 
-                let dataPartial = this.dataAttribute as DataPartial;
+                let dataPartial = this.attribute as DataPartial;
 
                 dataPartial.sendAjax(options);
             }
@@ -109,8 +110,8 @@ namespace Attv {
          */
         export class AutoAttributeValue extends DefaultAttributeValue {
             
-            constructor (dataAttribute: Attv.DataAttribute) {
-                super('auto', dataAttribute)
+            constructor (attribute: Attv.Attribute) {
+                super('auto', attribute)
             }
             
 
@@ -126,8 +127,8 @@ namespace Attv {
          */
         export class ClickAttributeValue extends DefaultAttributeValue {
             
-            constructor (dataAttribute: Attv.DataAttribute) {
-                super('click', dataAttribute, [
+            constructor (attribute: Attv.Attribute) {
+                super('click', attribute, [
                     new Validators.RequiredAttributeValidator([DataUrl.UniqueId]),
                     new Validators.RequiredAnyElementsValidator(['button', 'a'])
                 ])
@@ -148,8 +149,8 @@ namespace Attv {
          */
         export class FormAttributeValue extends DefaultAttributeValue {
             
-            constructor (dataAttribute: Attv.DataAttribute) {
-                super('form', dataAttribute, [
+            constructor (attribute: Attv.Attribute) {
+                super('form', attribute, [
                     new Validators.RequiredAttributeValidator([DataUrl.UniqueId]),
                     new Validators.RequiredElementValidator(['form'])
                 ])
@@ -175,22 +176,17 @@ namespace Attv {
 
         _internalCallback: (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest) => void;
     }
-
-    export namespace DataPartial {
-        export const UniqueId: string = "DataPartial";
-        export const Description: string = "Data partial for ajax and stuffs";
-    }
 }
 
 
 Attv.loader.pre.push(() => {
-    Attv.registerDataAttribute('data-partial', 
+    Attv.registerAttribute('data-partial', 
         (attributeName: string) => new Attv.DataPartial(attributeName),
-        (dataAttribute: Attv.DataAttribute, list: Attv.DataAttributeValue[]) => {
-            list.push(new Attv.DataPartial.AutoAttributeValue(dataAttribute));
-            list.push(new Attv.DataPartial.ClickAttributeValue(dataAttribute));
-            list.push(new Attv.DataPartial.FormAttributeValue(dataAttribute));
-            list.push(new Attv.DataPartial.DefaultAttributeValue(Attv.configuration.defaultTag, dataAttribute));
-            list.push(new Attv.DataPartial.DefaultAttributeValue('lazy', dataAttribute));
+        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
+            list.push(new Attv.DataPartial.AutoAttributeValue(attribute));
+            list.push(new Attv.DataPartial.ClickAttributeValue(attribute));
+            list.push(new Attv.DataPartial.FormAttributeValue(attribute));
+            list.push(new Attv.DataPartial.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
+            list.push(new Attv.DataPartial.DefaultAttributeValue('lazy', attribute));
         });
 });

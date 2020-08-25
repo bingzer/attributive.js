@@ -14,194 +14,183 @@ var __extends = (this && this.__extends) || (function () {
 var Attv;
 (function (Attv) {
     /**
-    * data-url
-    */
+     * [data-url]='*'
+     */
     var DataUrl = /** @class */ (function (_super) {
         __extends(DataUrl, _super);
-        function DataUrl(attributeName) {
-            var _this = _super.call(this, DataUrl.UniqueId, attributeName, DataUrl.Description, false) || this;
-            _this.attributeName = attributeName;
-            return _this;
+        function DataUrl(name) {
+            return _super.call(this, DataUrl.UniqueId, name, false) || this;
         }
-        /**
-         * Returns the current attribute value
-         * @param element the element
-         */
-        DataUrl.prototype.getDataAttributeValue = function (element) {
-            var attributeValue = _super.prototype.getDataAttributeValue.call(this, element);
-            if (!(attributeValue === null || attributeValue === void 0 ? void 0 : attributeValue.attributeValue) && (element === null || element === void 0 ? void 0 : element.tagName.equalsIgnoreCase('form'))) {
-                // get it from the 'action' attribute
-                var actionAttributeValue = element.attr('action');
-                attributeValue = new Attv.DataAttributeValue(actionAttributeValue, this);
-            }
-            return attributeValue;
-        };
         DataUrl.UniqueId = 'DataUrl';
-        DataUrl.Description = '';
         return DataUrl;
-    }(Attv.DataAttribute));
+    }(Attv.Attribute));
     Attv.DataUrl = DataUrl;
+    (function (DataUrl) {
+        var DefaultAttributeValue = /** @class */ (function (_super) {
+            __extends(DefaultAttributeValue, _super);
+            function DefaultAttributeValue(attribute) {
+                return _super.call(this, undefined, attribute) || this;
+            }
+            DefaultAttributeValue.prototype.getRawValue = function (element) {
+                var _a;
+                var rawValue = _super.prototype.getRawValue.call(this, element);
+                if (!rawValue && ((_a = element === null || element === void 0 ? void 0 : element.tagName) === null || _a === void 0 ? void 0 : _a.equalsIgnoreCase('form'))) {
+                    // get from action attribute
+                    rawValue = element.attr('action');
+                }
+                return rawValue;
+            };
+            return DefaultAttributeValue;
+        }(Attv.AttributeValue));
+        DataUrl.DefaultAttributeValue = DefaultAttributeValue;
+    })(DataUrl = Attv.DataUrl || (Attv.DataUrl = {}));
     /**
-    * data-method
-    */
+     * [data-method]='*'
+     */
     var DataMethod = /** @class */ (function (_super) {
         __extends(DataMethod, _super);
-        function DataMethod(attributeName) {
-            var _this = _super.call(this, DataMethod.UniqueId, attributeName, DataMethod.Description, false) || this;
-            _this.attributeName = attributeName;
-            return _this;
+        function DataMethod(name) {
+            return _super.call(this, DataMethod.UniqueId, name, false) || this;
         }
-        /**
-         * Returns the current attribute value
-         * @param element the element
-         */
-        DataMethod.prototype.getDataAttributeValue = function (element) {
-            var attributeValue = _super.prototype.getDataAttributeValue.call(this, element);
-            if (!(attributeValue === null || attributeValue === void 0 ? void 0 : attributeValue.attributeValue) && (element === null || element === void 0 ? void 0 : element.tagName.equalsIgnoreCase('form'))) {
-                // get it from the 'method' attribute
-                var actionAttributeValue = element.attr('method');
-                attributeValue = new Attv.DataAttributeValue(actionAttributeValue, this);
-            }
-            // otherwise
-            if (!(attributeValue === null || attributeValue === void 0 ? void 0 : attributeValue.attributeValue)) {
-                attributeValue = new Attv.DataAttributeValue(DataMethod.DefaultMethod, this);
-            }
-            return attributeValue;
-        };
         DataMethod.UniqueId = 'DataMethod';
-        DataMethod.Description = '';
         DataMethod.DefaultMethod = 'get';
         return DataMethod;
-    }(Attv.DataAttribute));
+    }(Attv.Attribute));
     Attv.DataMethod = DataMethod;
+    (function (DataMethod) {
+        var DefaultAttributeValue = /** @class */ (function (_super) {
+            __extends(DefaultAttributeValue, _super);
+            function DefaultAttributeValue(attribute) {
+                return _super.call(this, undefined, attribute) || this;
+            }
+            DefaultAttributeValue.prototype.getRawValue = function (element) {
+                var _a;
+                var rawValue = _super.prototype.getRawValue.call(this, element);
+                if (!rawValue && ((_a = element === null || element === void 0 ? void 0 : element.tagName) === null || _a === void 0 ? void 0 : _a.equalsIgnoreCase('form'))) {
+                    // get from method attribute
+                    rawValue = element.attr('method') || DataMethod.DefaultMethod;
+                }
+                return rawValue;
+            };
+            return DefaultAttributeValue;
+        }(Attv.AttributeValue));
+        DataMethod.DefaultAttributeValue = DefaultAttributeValue;
+    })(DataMethod = Attv.DataMethod || (Attv.DataMethod = {}));
     /**
-    * data-callback
-    */
+     * [data-callback]='*'
+     */
     var DataCallback = /** @class */ (function (_super) {
         __extends(DataCallback, _super);
-        function DataCallback(attributeName) {
-            var _this = _super.call(this, DataCallback.UniqueId, attributeName, DataCallback.Description, false) || this;
-            _this.attributeName = attributeName;
-            return _this;
+        function DataCallback(name) {
+            return _super.call(this, DataCallback.UniqueId, name, false) || this;
         }
         DataCallback.prototype.callback = function (element) {
-            var jsFunction = this.getDataAttributeValue(element).attributeValue;
+            var jsFunction = this.getValue(element).getRawValue(element);
             return eval(jsFunction);
         };
         DataCallback.UniqueId = 'DataCallback';
-        DataCallback.Description = '';
         return DataCallback;
-    }(Attv.DataAttribute));
+    }(Attv.Attribute));
     Attv.DataCallback = DataCallback;
     /**
-    * data-loading
-    */
+     * [data-loading]='*'
+     */
     var DataLoading = /** @class */ (function (_super) {
         __extends(DataLoading, _super);
-        function DataLoading(attributeName) {
-            var _this = _super.call(this, DataLoading.UniqueId, attributeName, DataLoading.Description, false) || this;
-            _this.attributeName = attributeName;
-            return _this;
+        function DataLoading(name) {
+            return _super.call(this, DataLoading.UniqueId, name, false) || this;
         }
         DataLoading.UniqueId = 'DataLoading';
-        DataLoading.Description = '';
         return DataLoading;
-    }(Attv.DataAttribute));
+    }(Attv.Attribute));
     Attv.DataLoading = DataLoading;
     /**
-    * data-message
-    */
+     * [data-nessage]='*'
+     */
     var DataMessage = /** @class */ (function (_super) {
         __extends(DataMessage, _super);
-        function DataMessage(attributeName) {
-            var _this = _super.call(this, DataMessage.UniqueId, attributeName, DataMessage.Description, false) || this;
-            _this.attributeName = attributeName;
-            return _this;
+        function DataMessage(name) {
+            return _super.call(this, DataMessage.UniqueId, name, false) || this;
         }
+        DataMessage.prototype.getTargetElement = function (element) {
+            var selector = this.getValue(element).getRawValue(element);
+            return document.querySelector(selector);
+        };
         DataMessage.UniqueId = 'DataMessage';
-        DataMessage.Description = '';
         return DataMessage;
-    }(Attv.DataAttribute));
+    }(Attv.Attribute));
     Attv.DataMessage = DataMessage;
     /**
-    * data-bind
-    */
+     * [data-target]='*'
+     */
+    var DataTarget = /** @class */ (function (_super) {
+        __extends(DataTarget, _super);
+        function DataTarget(name) {
+            return _super.call(this, DataTarget.UniqueId, name, false) || this;
+        }
+        DataTarget.prototype.getTargetElement = function (element) {
+            var selector = this.getValue(element).getRawValue(element);
+            return document.querySelector(selector);
+        };
+        DataTarget.UniqueId = 'DataTarget';
+        return DataTarget;
+    }(Attv.Attribute));
+    Attv.DataTarget = DataTarget;
+    /**
+     * [data-timeout]='*'
+     */
+    var DataTimeout = /** @class */ (function (_super) {
+        __extends(DataTimeout, _super);
+        function DataTimeout(name) {
+            return _super.call(this, DataTimeout.UniqueId, name, false) || this;
+        }
+        DataTimeout.UniqueId = 'DataTimeout';
+        return DataTimeout;
+    }(Attv.Attribute));
+    Attv.DataTimeout = DataTimeout;
+    /**
+     * [data-timeout]='*'
+     */
+    var DataData = /** @class */ (function (_super) {
+        __extends(DataData, _super);
+        function DataData(name) {
+            return _super.call(this, DataData.UniqueId, name, false) || this;
+        }
+        DataData.UniqueId = 'DataData';
+        return DataData;
+    }(Attv.Attribute));
+    Attv.DataData = DataData;
+    /**
+     * [data-timeout]='*'
+     */
     var DataBind = /** @class */ (function (_super) {
         __extends(DataBind, _super);
-        function DataBind(attributeName) {
-            var _this = _super.call(this, DataBind.UniqueId, attributeName, DataBind.Description, false) || this;
-            _this.attributeName = attributeName;
-            return _this;
+        function DataBind(name) {
+            return _super.call(this, DataBind.UniqueId, name, false) || this;
         }
         DataBind.prototype.bind = function (element, any) {
             var _a;
             element.innerHTML = (_a = any === null || any === void 0 ? void 0 : any.toString()) !== null && _a !== void 0 ? _a : '';
         };
         DataBind.UniqueId = 'DataBind';
-        DataBind.Description = '';
         return DataBind;
-    }(Attv.DataAttribute));
+    }(Attv.Attribute));
     Attv.DataBind = DataBind;
-    /**
-    * data-target
-    */
-    var DataTarget = /** @class */ (function (_super) {
-        __extends(DataTarget, _super);
-        function DataTarget(attributeName) {
-            var _this = _super.call(this, DataTarget.UniqueId, attributeName, DataTarget.Description, false) || this;
-            _this.attributeName = attributeName;
-            return _this;
-        }
-        DataTarget.prototype.getTargetElement = function (element) {
-            var targetElementSelector = this.getDataAttributeValue(element).attributeValue;
-            return document.querySelector(targetElementSelector);
-        };
-        DataTarget.UniqueId = 'DataTarget';
-        DataTarget.Description = '';
-        return DataTarget;
-    }(Attv.DataAttribute));
-    Attv.DataTarget = DataTarget;
-    /**
-    * data-timeout
-    */
-    var DataTimeout = /** @class */ (function (_super) {
-        __extends(DataTimeout, _super);
-        function DataTimeout(attributeName) {
-            var _this = _super.call(this, DataTimeout.UniqueId, attributeName, DataTimeout.Description, false) || this;
-            _this.attributeName = attributeName;
-            return _this;
-        }
-        DataTimeout.UniqueId = 'DataTimeout';
-        DataTimeout.Description = '';
-        return DataTimeout;
-    }(Attv.DataAttribute));
-    Attv.DataTimeout = DataTimeout;
-    /**
-    * data-data
-    */
-    var DataData = /** @class */ (function (_super) {
-        __extends(DataData, _super);
-        function DataData(attributeName) {
-            var _this = _super.call(this, DataData.UniqueId, attributeName, DataData.Description, false) || this;
-            _this.attributeName = attributeName;
-            return _this;
-        }
-        DataData.UniqueId = 'DataData';
-        DataData.Description = '';
-        return DataData;
-    }(Attv.DataAttribute));
-    Attv.DataData = DataData;
 })(Attv || (Attv = {}));
 Attv.loader.pre.push(function () {
-    Attv.registerDataAttribute('data-url', function (attributeName) { return new Attv.DataUrl(attributeName); });
-    Attv.registerDataAttribute('data-method', function (attributeName) { return new Attv.DataMethod(attributeName); });
-    Attv.registerDataAttribute('data-callback', function (attributeName) { return new Attv.DataCallback(attributeName); });
-    Attv.registerDataAttribute('data-loading', function (attributeName) { return new Attv.DataLoading(attributeName); });
-    Attv.registerDataAttribute('data-target', function (attributeName) { return new Attv.DataTarget(attributeName); });
-    Attv.registerDataAttribute('data-message', function (attributeName) { return new Attv.DataMethod(attributeName); });
-    Attv.registerDataAttribute('data-data', function (attributeName) { return new Attv.DataData(attributeName); });
-    Attv.registerDataAttribute('data-timeout', function (attributeName) { return new Attv.DataTimeout(attributeName); });
-    Attv.registerDataAttribute('data-bind', function (attributeName) { return new Attv.DataBind(attributeName); });
+    Attv.registerAttribute('data-url', function (name) { return new Attv.DataUrl(name); }, function (attribute, list) {
+        list.push(new Attv.DataUrl.DefaultAttributeValue(attribute));
+    });
+    Attv.registerAttribute('data-method', function (name) { return new Attv.DataMethod(name); }, function (attribute, list) {
+        list.push(new Attv.DataMethod.DefaultAttributeValue(attribute));
+    });
+    Attv.registerAttribute('data-callback', function (name) { return new Attv.DataCallback(name); });
+    Attv.registerAttribute('data-loading', function (name) { return new Attv.DataLoading(name); });
+    Attv.registerAttribute('data-target', function (name) { return new Attv.DataTarget(name); });
+    Attv.registerAttribute('data-message', function (name) { return new Attv.DataMessage(name); });
+    Attv.registerAttribute('data-timeout', function (name) { return new Attv.DataTimeout(name); });
+    Attv.registerAttribute('data-data', function (name) { return new Attv.DataData(name); });
+    Attv.registerAttribute('data-bind', function (name) { return new Attv.DataBind(name); });
 });
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// DataRenderer ////////////////////////////////////
@@ -212,22 +201,18 @@ Attv.loader.pre.push(function () {
     */
     var DataRenderer = /** @class */ (function (_super) {
         __extends(DataRenderer, _super);
-        function DataRenderer(attributeName) {
-            var _this = _super.call(this, DataRenderer.UniqueId, attributeName, DataRenderer.Description, false) || this;
-            _this.attributeName = attributeName;
-            _this.dependencies.uses.push(Attv.DataBind.UniqueId);
-            return _this;
+        function DataRenderer(name) {
+            return _super.call(this, DataRenderer.UniqueId, name, false) || this;
         }
-        DataRenderer.prototype.render = function (content, model, element, dataRendererValue) {
-            if (!dataRendererValue) {
-                dataRendererValue = this.getDataAttributeValue(element);
+        DataRenderer.prototype.render = function (content, model, element, attributeValue) {
+            if (!attributeValue) {
+                attributeValue = this.getValue(element);
             }
-            return dataRendererValue.render(content, model);
+            return attributeValue.render(content, model);
         };
         DataRenderer.UniqueId = 'DataRenderer';
-        DataRenderer.Description = 'For rendering stuffs';
         return DataRenderer;
-    }(Attv.DataAttribute));
+    }(Attv.Attribute));
     Attv.DataRenderer = DataRenderer;
     (function (DataRenderer) {
         /**
@@ -235,26 +220,27 @@ Attv.loader.pre.push(function () {
          */
         var DefaultAttributeValue = /** @class */ (function (_super) {
             __extends(DefaultAttributeValue, _super);
-            function DefaultAttributeValue(attributeValue, dataAttribute) {
-                return _super.call(this, attributeValue, dataAttribute) || this;
+            function DefaultAttributeValue(attributeValue, attribute) {
+                return _super.call(this, attributeValue, attribute) || this;
             }
             DefaultAttributeValue.prototype.loadElement = function (element) {
                 return true;
             };
-            DefaultAttributeValue.prototype.render = function (templatedContent, model) {
-                return templatedContent;
+            DefaultAttributeValue.prototype.render = function (content, model, element) {
+                return content;
             };
             return DefaultAttributeValue;
-        }(Attv.DataAttributeValue));
+        }(Attv.AttributeValue));
         DataRenderer.DefaultAttributeValue = DefaultAttributeValue;
         /**
          * [data-renderer]='json2html'
          */
         var Json2HtmlAttributeValue = /** @class */ (function (_super) {
             __extends(Json2HtmlAttributeValue, _super);
-            function Json2HtmlAttributeValue(dataAttribute) {
-                var _this = _super.call(this, 'json2html', dataAttribute) || this;
-                _this.dataBind = _this.dataAttribute.dependencies.getDataAttribute(Attv.DataBind.UniqueId);
+            function Json2HtmlAttributeValue(attribute) {
+                var _this = _super.call(this, 'json2html', attribute) || this;
+                _this.resolver.requires.push(Attv.DataBind.UniqueId);
+                _this.dataBind = _this.resolver.resolve(Attv.DataBind.UniqueId);
                 return _this;
             }
             Json2HtmlAttributeValue.prototype.loadElement = function (element) {
@@ -283,6 +269,7 @@ Attv.loader.pre.push(function () {
                         }
                     }
                     else {
+                        // bind
                         this.dataBind.bind(bindElement, propValue);
                         parent.append(template);
                     }
@@ -318,9 +305,9 @@ Attv.loader.pre.push(function () {
     })(DataRenderer = Attv.DataRenderer || (Attv.DataRenderer = {}));
 })(Attv || (Attv = {}));
 Attv.loader.pre.push(function () {
-    Attv.registerDataAttribute('data-renderer', function (attributeName) { return new Attv.DataRenderer(attributeName); }, function (dataAttribute, list) {
-        list.push(new Attv.DataRenderer.DefaultAttributeValue(Attv.configuration.defaultTag, dataAttribute));
-        list.push(new Attv.DataRenderer.Json2HtmlAttributeValue(dataAttribute));
+    Attv.registerAttribute('data-renderer', function (name) { return new Attv.DataRenderer(name); }, function (attribute, list) {
+        list.push(new Attv.DataRenderer.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
+        list.push(new Attv.DataRenderer.Json2HtmlAttributeValue(attribute));
     });
 });
 //# sourceMappingURL=data-attributes.js.map

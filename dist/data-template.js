@@ -15,27 +15,22 @@ var Attv;
 (function (Attv) {
     var DataTemplate = /** @class */ (function (_super) {
         __extends(DataTemplate, _super);
-        function DataTemplate(attributeName) {
-            var _this = _super.call(this, DataTemplate.UniqueId, attributeName, DataTemplate.Description, true) || this;
-            _this.attributeName = attributeName;
-            _this.dependencies.requires.push(Attv.DataRenderer.UniqueId, DataTemplateHtml.UniqueId);
+        function DataTemplate(name) {
+            var _this = _super.call(this, DataTemplate.UniqueId, name, true) || this;
+            _this.name = name;
             return _this;
         }
-        DataTemplate.prototype.renderTemplate = function (sourceElementOrSelectorOrContent, modelOrContent) {
-            var _a;
-            var sourceElement = sourceElementOrSelectorOrContent;
-            if (Attv.isString(sourceElementOrSelectorOrContent)) {
-                sourceElement = document.querySelector(sourceElementOrSelectorOrContent);
+        DataTemplate.prototype.renderTemplate = function (sourceElementOrSelector, modelOrContent) {
+            var sourceElement = sourceElementOrSelector;
+            if (Attv.isString(sourceElementOrSelector)) {
+                sourceElement = document.querySelector(sourceElementOrSelector);
             }
-            var attributeValue = this.getDataAttributeValue(sourceElement);
-            var content = ((_a = attributeValue.getTemplate(sourceElement)) === null || _a === void 0 ? void 0 : _a.innerHTML) || modelOrContent;
-            var dataRenderer = this.dependencies.getDataAttribute(Attv.DataRenderer.UniqueId);
-            return dataRenderer.render(content, modelOrContent, sourceElement);
+            var attributeValue = this.getValue(sourceElement);
+            return attributeValue.render(sourceElement, modelOrContent);
         };
         DataTemplate.UniqueId = 'DataTemplate';
-        DataTemplate.Description = '';
         return DataTemplate;
-    }(Attv.DataAttribute));
+    }(Attv.Attribute));
     Attv.DataTemplate = DataTemplate;
     // --- AttributeValues
     (function (DataTemplate) {
@@ -44,29 +39,38 @@ var Attv;
          */
         var DefaultAttributeValue = /** @class */ (function (_super) {
             __extends(DefaultAttributeValue, _super);
-            function DefaultAttributeValue(attributeValue, dataAttribute) {
-                return _super.call(this, attributeValue, dataAttribute) || this;
+            function DefaultAttributeValue(attributeValue, attribute, validators) {
+                if (validators === void 0) { validators = []; }
+                var _this = _super.call(this, attributeValue, attribute, validators) || this;
+                _this.resolver.uses.push(Attv.DataRenderer.UniqueId, DataTemplateHtml.UniqueId);
+                return _this;
             }
             DefaultAttributeValue.prototype.loadElement = function (element) {
                 var templateHtml = element.innerHTML;
-                this.dataAttribute.addDependencyDataAttribute(DataTemplateHtml.UniqueId, element, templateHtml);
+                this.resolver.addAttribute(DataTemplateHtml.UniqueId, element, templateHtml);
                 element.innerHTML = '';
                 return true;
             };
             DefaultAttributeValue.prototype.getTemplate = function (element) {
-                var html = this.dataAttribute.getDependencyDataAttribute(DataTemplateHtml.UniqueId, element);
+                var html = this.resolver.resolve(DataTemplateHtml.UniqueId).getValue(element).getRawValue(element);
                 return Attv.createHTMLElement(html);
             };
+            DefaultAttributeValue.prototype.render = function (element, modelOrContent) {
+                var _a;
+                var content = ((_a = this.getTemplate(element)) === null || _a === void 0 ? void 0 : _a.innerHTML) || modelOrContent;
+                var dataRenderer = this.resolver.resolve(Attv.DataRenderer.UniqueId);
+                return dataRenderer.render(content, modelOrContent, element);
+            };
             return DefaultAttributeValue;
-        }(Attv.DataAttributeValue));
+        }(Attv.AttributeValue));
         DataTemplate.DefaultAttributeValue = DefaultAttributeValue;
         /**
          * [data-template]='script'
          */
         var ScriptAttributeValue = /** @class */ (function (_super) {
             __extends(ScriptAttributeValue, _super);
-            function ScriptAttributeValue(dataAttribute) {
-                return _super.call(this, 'script', dataAttribute, [
+            function ScriptAttributeValue(attribute) {
+                return _super.call(this, 'script', attribute, [
                     new Attv.Validators.RequiredElementValidator(['script']),
                     new Attv.Validators.RequiredAttributeValidatorWithValue([{ name: 'type', value: 'text/html' }])
                 ]) || this;
@@ -80,50 +84,51 @@ var Attv;
                 return Attv.createHTMLElement(html);
             };
             return ScriptAttributeValue;
-        }(Attv.DataAttributeValue));
+        }(DefaultAttributeValue));
         DataTemplate.ScriptAttributeValue = ScriptAttributeValue;
     })(DataTemplate = Attv.DataTemplate || (Attv.DataTemplate = {}));
     var DataTemplateHtml = /** @class */ (function (_super) {
         __extends(DataTemplateHtml, _super);
-        function DataTemplateHtml(attributeName) {
-            var _this = _super.call(this, DataTemplateHtml.UniqueId, attributeName, DataTemplateHtml.Description, false) || this;
-            _this.attributeName = attributeName;
+        function DataTemplateHtml(name) {
+            var _this = _super.call(this, DataTemplateHtml.UniqueId, name, false) || this;
+            _this.name = name;
             return _this;
         }
         DataTemplateHtml.UniqueId = 'DataTemplateHtml';
-        DataTemplateHtml.Description = '';
         return DataTemplateHtml;
-    }(Attv.DataAttribute));
+    }(Attv.Attribute));
     Attv.DataTemplateHtml = DataTemplateHtml;
     var DataTemplateSource = /** @class */ (function (_super) {
         __extends(DataTemplateSource, _super);
-        function DataTemplateSource(attributeName) {
-            var _this = _super.call(this, DataTemplateSource.UniqueId, attributeName, DataTemplateSource.Description, false) || this;
-            _this.attributeName = attributeName;
-            _this.dependencies.uses.push(DataTemplate.UniqueId);
+        function DataTemplateSource(name) {
+            var _this = _super.call(this, DataTemplateSource.UniqueId, name, false) || this;
+            _this.name = name;
             return _this;
         }
         DataTemplateSource.prototype.renderTemplate = function (element, model) {
             var templateElement = this.getSourceElement(element);
-            var dataTemplate = this.dependencies.getDataAttribute(DataTemplate.UniqueId);
+            var dataTemplate = this.getValue(element).resolver.resolve(DataTemplate.UniqueId);
             return dataTemplate.renderTemplate(templateElement, model);
         };
         DataTemplateSource.prototype.getSourceElement = function (element) {
-            var sourceElementSelector = this.getDataAttributeValue(element).attributeValue;
+            var sourceElementSelector = this.getValue(element).getRawValue(element);
             return document.querySelector(sourceElementSelector);
         };
         DataTemplateSource.UniqueId = 'DataTemplateSource';
-        DataTemplateSource.Description = '';
         return DataTemplateSource;
-    }(Attv.DataAttribute));
+    }(Attv.Attribute));
     Attv.DataTemplateSource = DataTemplateSource;
 })(Attv || (Attv = {}));
 Attv.loader.pre.push(function () {
-    Attv.registerDataAttribute('data-template-html', function (attributeName) { return new Attv.DataTemplateHtml(attributeName); });
-    Attv.registerDataAttribute('data-template-source', function (attributeName) { return new Attv.DataTemplateSource(attributeName); });
-    Attv.registerDataAttribute('data-template', function (attributeName) { return new Attv.DataTemplate(attributeName); }, function (dataAttribute, list) {
-        list.push(new Attv.DataTemplate.DefaultAttributeValue(Attv.configuration.defaultTag, dataAttribute));
-        list.push(new Attv.DataTemplate.ScriptAttributeValue(dataAttribute));
+    Attv.registerAttribute('data-template-html', function (attributeName) { return new Attv.DataTemplateHtml(attributeName); });
+    Attv.registerAttribute('data-template-source', function (attributeName) { return new Attv.DataTemplateSource(attributeName); }, function (attribute, list) {
+        var attributeValue = new Attv.AttributeValue(undefined, attribute);
+        attributeValue.resolver.uses.push(Attv.DataTemplate.UniqueId);
+        list.push(attributeValue);
+    });
+    Attv.registerAttribute('data-template', function (attributeName) { return new Attv.DataTemplate(attributeName); }, function (attribute, list) {
+        list.push(new Attv.DataTemplate.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
+        list.push(new Attv.DataTemplate.ScriptAttributeValue(attribute));
     });
 });
 //# sourceMappingURL=data-template.js.map

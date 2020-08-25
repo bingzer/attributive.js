@@ -15,11 +15,9 @@ var Attv;
 (function (Attv) {
     var DataPartial = /** @class */ (function (_super) {
         __extends(DataPartial, _super);
-        function DataPartial(attributeName) {
-            var _this = _super.call(this, DataPartial.UniqueId, attributeName, DataPartial.Description, true) || this;
-            _this.attributeName = attributeName;
-            _this.dependencies.requires.push(Attv.DataUrl.UniqueId);
-            _this.dependencies.uses.push(Attv.DataTemplateSource.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId);
+        function DataPartial(name) {
+            var _this = _super.call(this, DataPartial.UniqueId, name, true) || this;
+            _this.name = name;
             return _this;
         }
         DataPartial.prototype.renderPartial = function (element, content) {
@@ -27,8 +25,8 @@ var Attv;
                 element = document.querySelector(element);
             }
             var htmlElement = element;
-            var dataAttributeValue = this.getDataAttributeValue(htmlElement);
-            dataAttributeValue.render(htmlElement, content);
+            var attributeValue = this.getValue(htmlElement);
+            attributeValue.render(htmlElement, content);
         };
         DataPartial.prototype.sendAjax = function (options) {
             var xhr = new XMLHttpRequest();
@@ -45,8 +43,9 @@ var Attv;
             xhr.open(options.method, options.url, true);
             xhr.send();
         };
+        DataPartial.UniqueId = "DataPartial";
         return DataPartial;
-    }(Attv.DataAttribute));
+    }(Attv.Attribute));
     Attv.DataPartial = DataPartial;
     // --- AttributeValues
     (function (DataPartial) {
@@ -55,23 +54,26 @@ var Attv;
          */
         var DefaultAttributeValue = /** @class */ (function (_super) {
             __extends(DefaultAttributeValue, _super);
-            function DefaultAttributeValue(attributeValue, dataAttribute, validators) {
+            function DefaultAttributeValue(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = [
                     new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId])
                 ]; }
-                return _super.call(this, attributeValue, dataAttribute, validators) || this;
+                var _this = _super.call(this, attributeValue, attribute, validators) || this;
+                _this.resolver.requires.push(Attv.DataUrl.UniqueId);
+                _this.resolver.uses.push(Attv.DataTemplateSource.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId);
+                return _this;
             }
             DefaultAttributeValue.prototype.render = function (element, content) {
                 var _this = this;
                 // get content
                 if (!content) {
                     //let options = element.attr('data') as AjaxOptions;
-                    var options = this.dataAttribute.getData(element);
+                    var options = this.getData(element);
                     options._internalCallback = function (ajaxOptions, wasSuccessful, xhr) {
                         content = xhr.response;
                         _this.doRender(element, content);
                         // [data-callback]
-                        var dataCallback = _this.dataAttribute.dependencies.getDataAttribute(Attv.DataCallback.UniqueId);
+                        var dataCallback = _this.resolver.resolve(Attv.DataCallback.UniqueId);
                         dataCallback.callback(element);
                     };
                     this.sendAjax(options);
@@ -82,29 +84,29 @@ var Attv;
             };
             DefaultAttributeValue.prototype.doRender = function (element, content) {
                 // [data-template-source]
-                var dataTemplateSource = this.dataAttribute.dependencies.getDataAttribute(Attv.DataTemplateSource.UniqueId);
+                var dataTemplateSource = this.resolver.resolve(Attv.DataTemplateSource.UniqueId);
                 var html = dataTemplateSource.renderTemplate(element, content);
                 // [data-target]
-                var dataTarget = this.dataAttribute.dependencies.getDataAttribute(Attv.DataTarget.UniqueId);
+                var dataTarget = this.resolver.resolve(Attv.DataTarget.UniqueId);
                 var targetElement = (dataTarget === null || dataTarget === void 0 ? void 0 : dataTarget.getTargetElement(element)) || element;
                 targetElement.innerHTML = html;
                 Attv.loadElements(targetElement);
             };
             DefaultAttributeValue.prototype.sendAjax = function (options) {
                 options.method = options.method || 'get';
-                var dataPartial = this.dataAttribute;
+                var dataPartial = this.attribute;
                 dataPartial.sendAjax(options);
             };
             return DefaultAttributeValue;
-        }(Attv.DataAttributeValue));
+        }(Attv.AttributeValue));
         DataPartial.DefaultAttributeValue = DefaultAttributeValue;
         /**
          * [data-partial]="auto"
          */
         var AutoAttributeValue = /** @class */ (function (_super) {
             __extends(AutoAttributeValue, _super);
-            function AutoAttributeValue(dataAttribute) {
-                return _super.call(this, 'auto', dataAttribute) || this;
+            function AutoAttributeValue(attribute) {
+                return _super.call(this, 'auto', attribute) || this;
             }
             AutoAttributeValue.prototype.loadElement = function (element) {
                 this.render(element);
@@ -118,8 +120,8 @@ var Attv;
          */
         var ClickAttributeValue = /** @class */ (function (_super) {
             __extends(ClickAttributeValue, _super);
-            function ClickAttributeValue(dataAttribute) {
-                return _super.call(this, 'click', dataAttribute, [
+            function ClickAttributeValue(attribute) {
+                return _super.call(this, 'click', attribute, [
                     new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId]),
                     new Attv.Validators.RequiredAnyElementsValidator(['button', 'a'])
                 ]) || this;
@@ -140,8 +142,8 @@ var Attv;
          */
         var FormAttributeValue = /** @class */ (function (_super) {
             __extends(FormAttributeValue, _super);
-            function FormAttributeValue(dataAttribute) {
-                return _super.call(this, 'form', dataAttribute, [
+            function FormAttributeValue(attribute) {
+                return _super.call(this, 'form', attribute, [
                     new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId]),
                     new Attv.Validators.RequiredElementValidator(['form'])
                 ]) || this;
@@ -159,18 +161,14 @@ var Attv;
         }(DefaultAttributeValue));
         DataPartial.FormAttributeValue = FormAttributeValue;
     })(DataPartial = Attv.DataPartial || (Attv.DataPartial = {}));
-    (function (DataPartial) {
-        DataPartial.UniqueId = "DataPartial";
-        DataPartial.Description = "Data partial for ajax and stuffs";
-    })(DataPartial = Attv.DataPartial || (Attv.DataPartial = {}));
 })(Attv || (Attv = {}));
 Attv.loader.pre.push(function () {
-    Attv.registerDataAttribute('data-partial', function (attributeName) { return new Attv.DataPartial(attributeName); }, function (dataAttribute, list) {
-        list.push(new Attv.DataPartial.AutoAttributeValue(dataAttribute));
-        list.push(new Attv.DataPartial.ClickAttributeValue(dataAttribute));
-        list.push(new Attv.DataPartial.FormAttributeValue(dataAttribute));
-        list.push(new Attv.DataPartial.DefaultAttributeValue(Attv.configuration.defaultTag, dataAttribute));
-        list.push(new Attv.DataPartial.DefaultAttributeValue('lazy', dataAttribute));
+    Attv.registerAttribute('data-partial', function (attributeName) { return new Attv.DataPartial(attributeName); }, function (attribute, list) {
+        list.push(new Attv.DataPartial.AutoAttributeValue(attribute));
+        list.push(new Attv.DataPartial.ClickAttributeValue(attribute));
+        list.push(new Attv.DataPartial.FormAttributeValue(attribute));
+        list.push(new Attv.DataPartial.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
+        list.push(new Attv.DataPartial.DefaultAttributeValue('lazy', attribute));
     });
 });
 //# sourceMappingURL=data-partial.js.map

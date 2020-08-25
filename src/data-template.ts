@@ -1,27 +1,21 @@
 namespace Attv {
 
 
-    export class DataTemplate extends Attv.DataAttribute {
+    export class DataTemplate extends Attv.Attribute {
         static readonly UniqueId = 'DataTemplate';
-        static readonly Description = '';
 
-        constructor (public attributeName: string) {
-            super(DataTemplate.UniqueId, attributeName, DataTemplate.Description, true);
-
-            this.dependencies.requires.push(DataRenderer.UniqueId, DataTemplateHtml.UniqueId);
+        constructor (public name: string) {
+            super(DataTemplate.UniqueId, name, true);
         }
 
-        renderTemplate(sourceElementOrSelectorOrContent: HTMLElement | string, modelOrContent: any): string {
-            let sourceElement = sourceElementOrSelectorOrContent as HTMLElement;
-            if (Attv.isString(sourceElementOrSelectorOrContent)) {
-                sourceElement = document.querySelector(sourceElementOrSelectorOrContent as string) as HTMLElement;
+        renderTemplate(sourceElementOrSelector: HTMLElement | string, modelOrContent: any): string {
+            let sourceElement = sourceElementOrSelector as HTMLElement;
+            if (Attv.isString(sourceElementOrSelector)) {
+                sourceElement = document.querySelector(sourceElementOrSelector as string) as HTMLElement;
             }
 
-            let attributeValue = this.getDataAttributeValue<DataTemplate.DefaultAttributeValue>(sourceElement);
-            let content = attributeValue.getTemplate(sourceElement)?.innerHTML || modelOrContent;
-            let dataRenderer = this.dependencies.getDataAttribute<DataRenderer>(DataRenderer.UniqueId);
-
-            return dataRenderer.render(content, modelOrContent, sourceElement);
+            let attributeValue = this.getValue<DataTemplate.DefaultAttributeValue>(sourceElement);
+            return attributeValue.render(sourceElement, modelOrContent);
         }
 
     }
@@ -33,16 +27,18 @@ namespace Attv {
         /**
          * [data-template]='default'
          */
-        export class DefaultAttributeValue extends Attv.DataAttributeValue {
+        export class DefaultAttributeValue extends Attv.AttributeValue {
             
-            constructor (attributeValue: string, dataAttribute: Attv.DataAttribute) {
-                super(attributeValue, dataAttribute)
+            constructor (attributeValue: string, attribute: Attv.Attribute, validators: Validators.AttributeValidator[] = []) {
+                super(attributeValue, attribute, validators);
+
+                this.resolver.uses.push(DataRenderer.UniqueId, DataTemplateHtml.UniqueId);
             }
 
             loadElement(element: HTMLElement): boolean {
                 let templateHtml = element.innerHTML;
 
-                this.dataAttribute.addDependencyDataAttribute(DataTemplateHtml.UniqueId, element, templateHtml);
+                this.resolver.addAttribute(DataTemplateHtml.UniqueId, element, templateHtml);
 
                 element.innerHTML = '';
                 
@@ -50,19 +46,26 @@ namespace Attv {
             }
             
             getTemplate(element: HTMLElement): HTMLElement {
-                let html = this.dataAttribute.getDependencyDataAttribute(DataTemplateHtml.UniqueId, element);
+                let html = this.resolver.resolve(DataTemplateHtml.UniqueId).getValue(element).getRawValue(element);
 
                 return Attv.createHTMLElement(html);
+            }
+
+            render(element: HTMLElement, modelOrContent: string): string {
+                let content = this.getTemplate(element)?.innerHTML || modelOrContent;
+                let dataRenderer = this.resolver.resolve<DataRenderer>(DataRenderer.UniqueId);
+    
+                return dataRenderer.render(content, modelOrContent, element);
             }
         }
 
         /**
          * [data-template]='script'
          */
-        export class ScriptAttributeValue extends Attv.DataAttributeValue {
+        export class ScriptAttributeValue extends DefaultAttributeValue {
             
-            constructor (dataAttribute: Attv.DataAttribute) {
-                super('script', dataAttribute, [ 
+            constructor (attribute: Attv.Attribute) {
+                super('script', attribute, [ 
                     new Validators.RequiredElementValidator(['script']),
                     new Validators.RequiredAttributeValidatorWithValue([{ name: 'type', value: 'text/html'}])
                 ])
@@ -82,34 +85,30 @@ namespace Attv {
     }
 
 
-    export class DataTemplateHtml extends DataAttribute {
+    export class DataTemplateHtml extends Attribute {
         static readonly UniqueId = 'DataTemplateHtml';
-        static readonly Description = '';
 
-        constructor (public attributeName: string) {
-            super(DataTemplateHtml.UniqueId, attributeName, DataTemplateHtml.Description, false);
+        constructor (public name: string) {
+            super(DataTemplateHtml.UniqueId, name, false);
         }
     }
 
-    export class DataTemplateSource extends DataAttribute {
+    export class DataTemplateSource extends Attribute {
         static readonly UniqueId = 'DataTemplateSource';
-        static readonly Description = '';
 
-        constructor (public attributeName: string) {
-            super(DataTemplateSource.UniqueId, attributeName, DataTemplateSource.Description, false);
-
-            this.dependencies.uses.push(DataTemplate.UniqueId);
+        constructor (public name: string) {
+            super(DataTemplateSource.UniqueId, name, false);
         }
 
         renderTemplate(element: HTMLElement, model: any): string {
             let templateElement = this.getSourceElement(element);
 
-            let dataTemplate = this.dependencies.getDataAttribute<DataTemplate>(DataTemplate.UniqueId);
+            let dataTemplate = this.getValue(element).resolver.resolve<DataTemplate>(DataTemplate.UniqueId);
             return dataTemplate.renderTemplate(templateElement, model);
         }
 
         protected getSourceElement(element: HTMLElement): HTMLElement {
-            let sourceElementSelector = this.getDataAttributeValue(element).attributeValue;
+            let sourceElementSelector = this.getValue(element).getRawValue(element);
 
             return document.querySelector(sourceElementSelector) as HTMLElement;
         }
@@ -117,12 +116,19 @@ namespace Attv {
 }
 
 Attv.loader.pre.push(() => {
-    Attv.registerDataAttribute('data-template-html',  (attributeName: string) => new Attv.DataTemplateHtml(attributeName));
-    Attv.registerDataAttribute('data-template-source',  (attributeName: string) => new Attv.DataTemplateSource(attributeName));
-    Attv.registerDataAttribute('data-template', 
+    Attv.registerAttribute('data-template-html',  (attributeName: string) => new Attv.DataTemplateHtml(attributeName));
+    Attv.registerAttribute('data-template-source', 
+        (attributeName: string) => new Attv.DataTemplateSource(attributeName),
+        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
+            let attributeValue = new Attv.AttributeValue(undefined, attribute);
+            attributeValue.resolver.uses.push(Attv.DataTemplate.UniqueId);
+
+            list.push(attributeValue);
+        });
+    Attv.registerAttribute('data-template', 
         (attributeName: string) => new Attv.DataTemplate(attributeName),
-        (dataAttribute: Attv.DataAttribute, list: Attv.DataAttributeValue[]) => {
-            list.push(new Attv.DataTemplate.DefaultAttributeValue(Attv.configuration.defaultTag, dataAttribute));
-            list.push(new Attv.DataTemplate.ScriptAttributeValue(dataAttribute));
+        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
+            list.push(new Attv.DataTemplate.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
+            list.push(new Attv.DataTemplate.ScriptAttributeValue(attribute));
         });
 });

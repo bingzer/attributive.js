@@ -1,6 +1,6 @@
 namespace Attv {
     
-    export class DataWall extends Attv.DataAttribute {
+    export class DataWall extends Attv.Attribute {
 
     }
     

@@ -87,15 +87,15 @@ String.prototype.equalsIgnoreCase = function (other) {
 ////////////////////////////////// Base classes ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 (function (Attv) {
-    var Dependency = /** @class */ (function () {
-        function Dependency(dataAttribute) {
-            this.dataAttribute = dataAttribute;
+    var AttributeResolver = /** @class */ (function () {
+        function AttributeResolver(attributeValue) {
+            this.attributeValue = attributeValue;
             /**
-             * List of DataAttribute Ids that we require
+             * List of attribute Ids that we require
              */
             this.requires = [];
             /**
-             * List of DataAttribute Id that we use
+             * List of attribute Id that we use
              */
             this.uses = [];
             // do nothing
@@ -103,61 +103,56 @@ String.prototype.equalsIgnoreCase = function (other) {
         /**
          * List of all dependencies
          */
-        Dependency.prototype.allDependencies = function () {
-            return this.requires.concat(this.uses).concat(this.dataAttribute.id);
+        AttributeResolver.prototype.allDependencies = function () {
+            return this.requires.concat(this.uses).concat(this.attributeValue.attribute.uniqueId);
         };
         /**
          * Returns the data attribute
-         * @param dataAttributeId id
+         * @param attributeId id
          */
-        Dependency.prototype.getDataAttribute = function (dataAttributeId) {
-            var dependencyDataAttribute = Attv.getDataAttribute(dataAttributeId);
-            if (!this.allDependencies().some(function (dep) { return dep === dataAttributeId; })) {
-                Attv.log('warning', (dependencyDataAttribute || dataAttributeId) + " should be declared as the dependant in " + this.dataAttribute + ". This is for documentation purposes");
+        AttributeResolver.prototype.resolve = function (attributeId) {
+            var attribute = Attv.getAttribute(attributeId);
+            if (!this.allDependencies().some(function (dep) { return dep === attributeId; })) {
+                Attv.log('warning', (attribute || attributeId) + " should be declared as the dependant in " + this.attributeValue.attribute + ". This is for documentation purposes");
             }
-            return dependencyDataAttribute;
+            return attribute;
         };
-        return Dependency;
+        /**
+         * Adds a dependency data attribute to the 'element'
+         * @param element the element
+         * @param value the value
+         */
+        AttributeResolver.prototype.addAttribute = function (uniqueId, element, any) {
+            var attribute = this.resolve(uniqueId);
+            element.attr(attribute.name, any);
+        };
+        return AttributeResolver;
     }());
-    Attv.Dependency = Dependency;
+    Attv.AttributeResolver = AttributeResolver;
     /**
     * Base class for data-attributes
     */
-    var DataAttribute = /** @class */ (function () {
+    var Attribute = /** @class */ (function () {
         /**
          *
-         * @param id unique id
-         * @param attributeName  the attribute name
+         * @param uniqueId unique id
+         * @param name  the attribute name
          * @param description description
          * @param isAutoLoad is auto-load
          */
-        function DataAttribute(id, attributeName, description, isAutoLoad) {
+        function Attribute(uniqueId, name, isAutoLoad) {
             if (isAutoLoad === void 0) { isAutoLoad = true; }
-            this.id = id;
-            this.attributeName = attributeName;
-            this.description = description;
+            this.uniqueId = uniqueId;
+            this.name = name;
             this.isAutoLoad = isAutoLoad;
-            this.dependencies = new Dependency(this);
             this.attributeValues = [];
-            if (!attributeName.startsWith('data-')) {
-                attributeName = 'data-' + attributeName;
-            }
+            this.loadedName = this.name + "-loaded";
         }
-        Object.defineProperty(DataAttribute.prototype, "attributeLoadedName", {
-            /**
-             * Attribute when it's loaded
-             */
-            get: function () {
-                return this.attributeName + "-loaded";
-            },
-            enumerable: false,
-            configurable: true
-        });
         /**
          * Register attribute values
          * @param attributeValues attribute values
          */
-        DataAttribute.prototype.registerAttributeValues = function (attributeValues) {
+        Attribute.prototype.registerAttributeValues = function (attributeValues) {
             var _a;
             (_a = this.attributeValues).push.apply(_a, attributeValues);
         };
@@ -165,96 +160,93 @@ String.prototype.equalsIgnoreCase = function (other) {
          * Returns the current attribute value
          * @param element the element
          */
-        DataAttribute.prototype.getDataAttributeValue = function (element) {
-            var value = element === null || element === void 0 ? void 0 : element.attr(this.attributeName);
-            var attributeValue = this.attributeValues.filter(function (val) { return val.attributeValue === value; })[0];
+        Attribute.prototype.getValue = function (element) {
+            var value = element === null || element === void 0 ? void 0 : element.attr(this.name);
+            var attributeValue = this.attributeValues.filter(function (val) { return val.getRawValue(element) === value; })[0];
             // #1. if attribute is undefined
-            // find the one with the .isDefault == true
+            // find the one with the default tag
             if (!attributeValue) {
-                attributeValue = this.attributeValues.filter(function (val) { return val.attributeValue === Attv.configuration.defaultTag; })[0];
+                attributeValue = this.attributeValues.filter(function (val) { return val.getRawValue(element) === Attv.configuration.defaultTag; })[0];
             }
+            // #2. find the first attribute
             if (!attributeValue) {
-                var rawAttributeValue = element === null || element === void 0 ? void 0 : element.attr(this.attributeName);
-                attributeValue = new DataAttributeValue(rawAttributeValue, this);
+                attributeValue = this.attributeValues[0];
+            }
+            // #3. generic attribute
+            if (!attributeValue) {
+                var rawAttributeValue = element === null || element === void 0 ? void 0 : element.attr(this.name);
+                attributeValue = new AttributeValue(rawAttributeValue, this);
             }
             return attributeValue;
         };
         /**
-         * Adds a dependency data attribute to the 'element'
-         * @param element the element
-         * @param value the value
+         * Checks to see if element is loaded
+         * @param element element to check
          */
-        DataAttribute.prototype.addDependencyDataAttribute = function (uniqueId, element, any) {
-            var depedencyDataAttribute = this.dependencies.getDataAttribute(uniqueId);
-            element.attr(depedencyDataAttribute.attributeName, any);
+        Attribute.prototype.isElementLoaded = function (element) {
+            var isLoaded = element.attr(this.loadedName);
+            return isLoaded === 'true';
         };
         /**
-         * Adds a dependency data attribute to the 'element'
-         * @param element the element
-         * @param value the value
+         * String representation
          */
-        DataAttribute.prototype.getDependencyDataAttribute = function (uniqueId, element) {
-            var dependencyDataAttribute = this.dependencies.getDataAttribute(uniqueId);
-            return dependencyDataAttribute.getDataAttributeValue(element).attributeValue;
+        Attribute.prototype.toString = function () {
+            return "[" + this.name + "]";
+        };
+        return Attribute;
+    }());
+    Attv.Attribute = Attribute;
+    /**
+     * Base class for attribute-value
+     */
+    var AttributeValue = /** @class */ (function () {
+        function AttributeValue(value, attribute, validators) {
+            if (validators === void 0) { validators = []; }
+            this.value = value;
+            this.attribute = attribute;
+            this.validators = validators;
+            this.resolver = new AttributeResolver(this);
+            // do nothing
+        }
+        /**
+         * Returns raw string
+         */
+        AttributeValue.prototype.getRawValue = function (element) {
+            return this.value || (element === null || element === void 0 ? void 0 : element.attr(this.attribute.name));
+        };
+        /**
+         * Find all element and construct
+         * @param root the root
+         */
+        AttributeValue.prototype.loadElement = function (element) {
+            return true;
         };
         /**
          * Equivalent to calling element.attr('data'). However, we use dependencies om this method
          * @param element element
          * @param uniqueId all unique ids
          */
-        DataAttribute.prototype.getData = function (element) {
+        AttributeValue.prototype.getData = function (element) {
             var _this = this;
-            var dataAttributes = this.dependencies.allDependencies().map(function (id) { return _this.dependencies.getDataAttribute(id); });
+            var attributes = this.resolver.allDependencies().map(function (id) { return _this.resolver.resolve(id); });
             var obj = {};
-            dataAttributes.forEach(function (att) {
+            attributes.forEach(function (att) {
                 var _a;
-                var name = att.attributeName;
+                var name = att.name;
                 var datasetName = (name === null || name === void 0 ? void 0 : name.startsWith('data-')) && name.replace(/^data\-/, '').dashToCamelCase();
-                obj[datasetName] = (_a = att.getDataAttributeValue(element)) === null || _a === void 0 ? void 0 : _a.attributeValue;
+                obj[datasetName] = (_a = att.getValue(element)) === null || _a === void 0 ? void 0 : _a.getRawValue(element);
             });
             return obj;
         };
         /**
-         * Checks to see if element is loaded
-         * @param element element to check
-         */
-        DataAttribute.prototype.isElementLoaded = function (element) {
-            var isLoaded = element.attr(this.attributeLoadedName);
-            return isLoaded === 'true';
-        };
-        DataAttribute.prototype.toString = function () {
-            return "[" + this.attributeName + "]";
-        };
-        return DataAttribute;
-    }());
-    Attv.DataAttribute = DataAttribute;
-    /**
-     * Base class for DataAttribute-value
-     */
-    var DataAttributeValue = /** @class */ (function () {
-        function DataAttributeValue(attributeValue, dataAttribute, validators) {
-            if (validators === void 0) { validators = []; }
-            this.attributeValue = attributeValue;
-            this.dataAttribute = dataAttribute;
-            this.validators = validators;
-            // do nothing
-        }
-        /**
-         * Find all element and construct
-         * @param root the root
-         */
-        DataAttributeValue.prototype.loadElement = function (element) {
-            return true;
-        };
-        /**
          * To string
          */
-        DataAttributeValue.prototype.toString = function () {
-            return "[" + this.dataAttribute.attributeName + "]='" + this.attributeValue + "'";
+        AttributeValue.prototype.toString = function () {
+            return "[" + this.attribute.name + "]='" + (this.value || '') + "'";
         };
-        return DataAttributeValue;
+        return AttributeValue;
     }());
-    Attv.DataAttributeValue = DataAttributeValue;
+    Attv.AttributeValue = AttributeValue;
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Validators /////////////////////////////////////
@@ -290,15 +282,15 @@ String.prototype.equalsIgnoreCase = function (other) {
             }
             RequiredAttributeValidator.prototype.validate = function (value, element) {
                 var isValidated = true;
-                var dataAttributes = this.requiredAttributeIds.map(function (attId) { return Attv.getDataAttribute(attId); });
+                var attributes = this.requiredAttributeIds.map(function (attId) { return Attv.getAttribute(attId); });
                 // check for other require attributes
-                for (var i = 0; i < dataAttributes.length; i++) {
-                    var dataAttribute = dataAttributes[i];
-                    var dataAttributeValue = dataAttribute.getDataAttributeValue(element);
-                    if (!(dataAttributeValue === null || dataAttributeValue === void 0 ? void 0 : dataAttributeValue.attributeValue)) {
-                        Attv.log('error', value + " is requiring " + dataAttribute + " to be present in DOM", element);
+                for (var i = 0; i < attributes.length; i++) {
+                    var attribute = attributes[i];
+                    var attributeValue = attribute.getValue(element);
+                    if (!(attributeValue === null || attributeValue === void 0 ? void 0 : attributeValue.getRawValue(element))) {
+                        Attv.log('error', value + " is requiring " + attribute + " to be present in DOM", element);
                     }
-                    isValidated = isValidated && !!dataAttribute;
+                    isValidated = isValidated && !!attribute;
                 }
                 return isValidated;
             };
@@ -478,94 +470,94 @@ String.prototype.equalsIgnoreCase = function (other) {
 ////////////////////////////////// Attv Functions ///////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 (function (Attv) {
-    Attv.dataAttributes = [];
+    Attv.attributes = [];
     Attv.loader = {
         pre: [],
         post: []
     };
-    var dataAttributeFactory = [];
+    var attributeFactory = [];
     function loadElements(root) {
         if (Attv.isUndefined(root)) {
             root = document.querySelector('body');
         }
         // auto load all attvs that are marked auto load
-        Attv.dataAttributes.filter(function (dataAttribute) { return dataAttribute.isAutoLoad; }).forEach(function (dataAttribute, index) {
-            root.querySelectorAll("[" + dataAttribute.attributeName + "]").forEach(function (element, index) {
+        Attv.attributes.filter(function (attribute) { return attribute.isAutoLoad; }).forEach(function (attribute, index) {
+            root.querySelectorAll("" + attribute).forEach(function (element, index) {
                 try {
                     // #1. If it's already loaded return
-                    if (dataAttribute.isElementLoaded(element))
+                    if (attribute.isElementLoaded(element))
                         return;
-                    var dataAttributeValue = dataAttribute.getDataAttributeValue(element);
+                    var attributeValue = attribute.getValue(element);
                     // #2. Check if the attribute value is supported
-                    if (!dataAttributeValue) {
-                        var attributeValue = element.attr(dataAttribute.attributeName);
-                        Attv.log('warning', dataAttribute + " does not support " + dataAttribute + "='" + attributeValue + "'", element);
+                    if (!attributeValue) {
+                        var attributeValue_1 = element.attr(attribute.name);
+                        Attv.log('warning', attribute + " does not support " + attribute + "='" + attributeValue_1 + "'", element);
                         return;
                     }
                     // #3. Validate
                     var isValidated = true;
-                    for (var i = 0; i < dataAttributeValue.validators.length; i++) {
-                        var validator = dataAttributeValue.validators[i];
-                        isValidated = isValidated = validator.validate(dataAttributeValue, element);
+                    for (var i = 0; i < attributeValue.validators.length; i++) {
+                        var validator = attributeValue.validators[i];
+                        isValidated = isValidated = validator.validate(attributeValue, element);
                     }
                     if (!isValidated) {
                         return;
                     }
                     // #4. Load the stuff!
-                    var isLoaded = dataAttributeValue.loadElement(element);
-                    element.attr(dataAttribute.attributeLoadedName, isLoaded);
+                    var isLoaded = attributeValue.loadElement(element);
+                    element.attr(attribute.loadedName, isLoaded);
                 }
                 catch (error) {
-                    Attv.log('error', "Unexpected error occurred when loading " + dataAttribute, error, element);
+                    Attv.log('error', "Unexpected error occurred when loading " + attribute, error, element);
                 }
             });
         });
     }
     Attv.loadElements = loadElements;
-    function getDataAttribute(id) {
-        return Attv.dataAttributes.filter(function (att) { return att.id == id; })[0];
+    function getAttribute(id) {
+        return Attv.attributes.filter(function (att) { return att.uniqueId == id; })[0];
     }
-    Attv.getDataAttribute = getDataAttribute;
-    function registerDataAttribute(attributeName, fn, valuesFn) {
-        var factory = new DataAttributeFactory(attributeName, fn, valuesFn);
-        dataAttributeFactory.push(factory);
+    Attv.getAttribute = getAttribute;
+    function registerAttribute(attributeName, fn, valuesFn) {
+        var factory = new AttributeFactory(attributeName, fn, valuesFn);
+        attributeFactory.push(factory);
     }
-    Attv.registerDataAttribute = registerDataAttribute;
-    function unregisterDataAttribute(attributeName) {
-        var attributes = dataAttributeFactory.filter(function (factory) { return factory.attributeName !== attributeName; });
-        dataAttributeFactory.splice(0, dataAttributeFactory.length);
-        dataAttributeFactory.push.apply(dataAttributeFactory, attributes);
+    Attv.registerAttribute = registerAttribute;
+    function unregisterAttribute(attributeName) {
+        var attributes = attributeFactory.filter(function (factory) { return factory.attributeName !== attributeName; });
+        attributeFactory.splice(0, attributeFactory.length);
+        attributeFactory.push.apply(attributeFactory, attributes);
     }
-    Attv.unregisterDataAttribute = unregisterDataAttribute;
+    Attv.unregisterAttribute = unregisterAttribute;
     // -- helper class 
-    var DataAttributeFactory = /** @class */ (function () {
-        function DataAttributeFactory(attributeName, fn, valuesFn) {
+    var AttributeFactory = /** @class */ (function () {
+        function AttributeFactory(attributeName, fn, valuesFn) {
             this.attributeName = attributeName;
             this.fn = fn;
             this.valuesFn = valuesFn;
             // do nothing
         }
-        DataAttributeFactory.prototype.create = function () {
-            var dataAttribute = this.fn(this.attributeName);
-            Attv.log('debug', "* " + dataAttribute, dataAttribute);
+        AttributeFactory.prototype.create = function () {
+            var attribute = this.fn(this.attributeName);
+            Attv.log('debug', "* " + attribute, attribute);
             if (this.valuesFn) {
                 var attributeValues = [];
-                this.valuesFn(dataAttribute, attributeValues);
-                Attv.log('debug', "** " + dataAttribute + " adding " + attributeValues, attributeValues);
-                dataAttribute.registerAttributeValues(attributeValues);
+                this.valuesFn(attribute, attributeValues);
+                Attv.log('debug', "** " + attribute + " adding " + attributeValues, attributeValues);
+                attribute.registerAttributeValues(attributeValues);
             }
-            return dataAttribute;
+            return attribute;
         };
-        return DataAttributeFactory;
+        return AttributeFactory;
     }());
     function initialize() {
         if (!Attv.configuration) {
             Attv.configuration = new Attv.DefaultConfiguration();
         }
         Attv.log('debug', 'Initialize...');
-        for (var i = 0; i < dataAttributeFactory.length; i++) {
-            var dataAttribute = dataAttributeFactory[i].create();
-            Attv.dataAttributes.push(dataAttribute);
+        for (var i = 0; i < attributeFactory.length; i++) {
+            var attribute = attributeFactory[i].create();
+            Attv.attributes.push(attribute);
         }
     }
     Attv.loader.post.push(initialize);

@@ -19,7 +19,7 @@ var Attv;
             return _super !== null && _super.apply(this, arguments) || this;
         }
         return DataWall;
-    }(Attv.DataAttribute));
+    }(Attv.Attribute));
     Attv.DataWall = DataWall;
 })(Attv || (Attv = {}));
 //# sourceMappingURL=data-wall.js.map
