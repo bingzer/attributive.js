@@ -73,14 +73,18 @@ HTMLElement.prototype.attr = function (name, value) {
         value = element.dataset[datasetName];
         if (!value) {
             // get from the attrbitue
-            value = element.getAttribute(name);
+            value = element.getAttribute(name) || undefined;
         }
         return Attv.parseJsonOrElse(value);
     }
 };
-String.prototype.startsWith = function (text) {
+String.prototype.contains = function (text) {
     var obj = this;
     return obj.indexOf(text) >= 0;
+};
+String.prototype.startsWith = function (text) {
+    var obj = this;
+    return obj.indexOf(text) == 0;
 };
 String.prototype.endsWith = function (text) {
     var obj = this;
@@ -193,6 +197,9 @@ String.prototype.equalsIgnoreCase = function (other) {
             var attribute = Attv.getAttribute(attributeId);
             if (!this.allDependencies().some(function (dep) { return dep === attributeId; })) {
                 Attv.log('warning', (attribute || attributeId) + " should be declared as the dependant in " + this.attributeValue.attribute + ". This is for documentation purposes");
+            }
+            if (!attribute) {
+                throw new Error((attribute || attributeId) + " can not be found. Did you register " + (attribute || attributeId) + "?");
             }
             return attribute;
         };
@@ -500,6 +507,10 @@ String.prototype.equalsIgnoreCase = function (other) {
         return typeof (any) === expectedType;
     }
     Attv.isType = isType;
+    function isEvaluatable(any) {
+        return (any === null || any === void 0 ? void 0 : any.startsWith('(')) && (any === null || any === void 0 ? void 0 : any.endsWith(')'));
+    }
+    Attv.isEvaluatable = isEvaluatable;
     function createHTMLElement(any) {
         if (isString(any)) {
             var htmlElement = document.createElement('div');

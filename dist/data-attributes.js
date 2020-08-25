@@ -20,7 +20,7 @@ var Attv;
         __extends(DataUrl, _super);
         function DataUrl(name) {
             var _this = _super.call(this, DataUrl.UniqueId, name, false) || this;
-            _this.dependency.requires.push(DataMethod.UniqueId, DataData.UniqueId);
+            _this.dependency.requires.push(DataMethod.UniqueId, DataData.UniqueId, DataCache.UniqueId);
             return _this;
         }
         DataUrl.prototype.getUrl = function (element) {
@@ -34,6 +34,16 @@ var Attv;
                 var dataData = attributeValue.resolver.resolve(DataData.UniqueId);
                 var data = dataData.getData(element);
                 url = Attv.Ajax.buildUrl({ url: url, method: method, data: data });
+            }
+            // [data-cache]
+            var dataCache = attributeValue.resolver.resolve(DataCache.UniqueId);
+            if (!dataCache.useCache(element)) {
+                if (url.contains('?')) {
+                    url += "&_=" + Date.now();
+                }
+                else {
+                    url += "?_=" + Date.now();
+                }
             }
             return url;
         };
@@ -98,6 +108,24 @@ var Attv;
         }(Attv.AttributeValue));
         DataMethod.DefaultAttributeValue = DefaultAttributeValue;
     })(DataMethod = Attv.DataMethod || (Attv.DataMethod = {}));
+    /**
+     * [data-cache]='true|false'
+     */
+    var DataCache = /** @class */ (function (_super) {
+        __extends(DataCache, _super);
+        function DataCache(name) {
+            return _super.call(this, DataCache.UniqueId, name, false) || this;
+        }
+        DataCache.prototype.useCache = function (element) {
+            var value = this.getValue(element).getRawValue(element);
+            if (Attv.isUndefined(value) || value === null)
+                return true;
+            return value === 'true';
+        };
+        DataCache.UniqueId = 'DataCache';
+        return DataCache;
+    }(Attv.Attribute));
+    Attv.DataCache = DataCache;
     /**
      * [data-callback]='*'
      */
@@ -189,7 +217,7 @@ var Attv;
         }
         DataData.prototype.getData = function (element) {
             var rawValue = this.getValue(element).getRawValue(element);
-            if ((rawValue === null || rawValue === void 0 ? void 0 : rawValue.startsWith('(')) && (rawValue === null || rawValue === void 0 ? void 0 : rawValue.endsWith(')'))) {
+            if (Attv.isEvaluatable(rawValue)) {
                 //do eval
                 rawValue = eval(rawValue);
             }
@@ -229,6 +257,7 @@ Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-message', function (name) { return new Attv.DataMessage(name); });
     Attv.registerAttribute('data-timeout', function (name) { return new Attv.DataTimeout(name); });
     Attv.registerAttribute('data-data', function (name) { return new Attv.DataData(name); });
+    Attv.registerAttribute('data-cache', function (name) { return new Attv.DataCache(name); });
     Attv.registerAttribute('data-bind', function (name) { return new Attv.DataBind(name); });
 });
 ////////////////////////////////////////////////////////////////////////////////////

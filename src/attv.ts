@@ -77,7 +77,7 @@ HTMLElement.prototype.attr = function (name: string, value?: any): HTMLElement |
         value = element.dataset[datasetName];
         if (!value) {
             // get from the attrbitue
-            value = element.getAttribute(name);
+            value = element.getAttribute(name) || undefined;
         }
 
         return Attv.parseJsonOrElse(value);
@@ -85,6 +85,7 @@ HTMLElement.prototype.attr = function (name: string, value?: any): HTMLElement |
 }
 
 interface String {
+    contains: (text: string) => boolean;
     startsWith: (text: string) => boolean;
     endsWith: (text: string) => boolean;
     equalsIgnoreCase: (other: string) => boolean;
@@ -92,10 +93,16 @@ interface String {
     dashToCamelCase: () => string;
 }
 
-String.prototype.startsWith = function (text: string): boolean {
+String.prototype.contains = function (text: string): boolean {
     let obj: String = this as String;
 
     return obj.indexOf(text) >= 0;
+}
+
+String.prototype.startsWith = function (text: string): boolean {
+    let obj: String = this as String;
+
+    return obj.indexOf(text) == 0;
 }
 
 String.prototype.endsWith = function (text: string): boolean {
@@ -235,6 +242,10 @@ namespace Attv {
 
             if (!this.allDependencies().some(dep => dep === attributeId)) {
                 Attv.log('warning', `${attribute || attributeId} should be declared as the dependant in ${this.attributeValue.attribute}. This is for documentation purposes`);
+            }
+
+            if (!attribute) {
+                throw new Error(`${attribute || attributeId} can not be found. Did you register ${attribute || attributeId}?`);
             }
 
             return attribute;
@@ -581,6 +592,10 @@ namespace Attv {
 
     export function isType(any: any, expectedType: 'undefined' | 'string' | 'boolean' | 'number' | 'object'): boolean {
         return typeof(any) === expectedType;
+    }
+
+    export function isEvaluatable(any: string) {
+        return any?.startsWith('(') && any?.endsWith(')');
     }
 
     export function createHTMLElement(any: string | HTMLElement): HTMLElement {

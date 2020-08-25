@@ -7,6 +7,11 @@
 		<div>
 			<div data-partial="auto" data-url="partial.html"
 				data-data="({name: 'value'})">uses [data-partial]</div>
+
+
+			<div data-partial="auto" data-url="datetime.html" data-refresh="1000" data-data="({ now: Date.now()})">
+				Loading content
+			</div>
 <!-- 			
 			<div data-partial="auto" data-url="partial.html"></div> -->
 
@@ -16,7 +21,7 @@
 				data-template-source="#template1"
 				data-target="#container1"
 				data-callback="alert('hi')"
-				data-timeout="5000">
+				data-timeout="2000">
 				
 				<button type="submit">Click here 1</button>
 

@@ -10,7 +10,7 @@ namespace Attv {
         constructor (name: string) {
             super(DataUrl.UniqueId, name, false);
 
-            this.dependency.requires.push(DataMethod.UniqueId, DataData.UniqueId);
+            this.dependency.requires.push(DataMethod.UniqueId, DataData.UniqueId, DataCache.UniqueId);
         }
 
         getUrl(element: HTMLElement): string {
@@ -27,6 +27,16 @@ namespace Attv {
                 let data = dataData.getData(element);
 
                 url = Attv.Ajax.buildUrl({ url: url, method: method, data: data });
+            }
+
+            // [data-cache]
+            let dataCache = attributeValue.resolver.resolve<DataCache>(DataCache.UniqueId);
+            if (!dataCache.useCache(element)) {
+                if (url.contains('?')) {
+                    url += `&_=${Date.now()}`;
+                } else {
+                    url += `?_=${Date.now()}`;
+                }
             }
 
             return url;
@@ -88,6 +98,24 @@ namespace Attv {
 
                 return rawValue;
             }
+        }
+    }
+
+    /**
+     * [data-cache]='true|false'
+     */
+    export class DataCache extends Attv.Attribute {
+        static readonly UniqueId = 'DataCache';
+
+        constructor (name: string) {
+            super(DataCache.UniqueId, name, false);
+        }
+
+        useCache(element: HTMLElement): boolean {
+            let value = this.getValue(element).getRawValue(element);
+            if (isUndefined(value) || value === null)
+                return true;
+            return value === 'true';
         }
     }
 
@@ -186,7 +214,7 @@ namespace Attv {
         getData(element: HTMLElement): any {
             let rawValue = this.getValue(element).getRawValue(element);
 
-            if (rawValue?.startsWith('(') && rawValue?.endsWith(')')) {
+            if (Attv.isEvaluatable(rawValue)) {
                 //do eval
                 rawValue = eval(rawValue);
             }
@@ -229,6 +257,7 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-message', (name: string) => new Attv.DataMessage(name));
     Attv.registerAttribute('data-timeout', (name: string) => new Attv.DataTimeout(name));
     Attv.registerAttribute('data-data', (name: string) => new Attv.DataData(name));
+    Attv.registerAttribute('data-cache', (name: string) => new Attv.DataCache(name));
     Attv.registerAttribute('data-bind', (name: string) => new Attv.DataBind(name));
 });
 

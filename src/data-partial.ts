@@ -5,6 +5,8 @@ namespace Attv {
 
         constructor (public name: string) {
             super(DataPartial.UniqueId, name, true);
+
+            this.dependency.requires.push(DataUrl.UniqueId);
         }
 
         renderPartial(element: HTMLElement | string, content?: string) {
@@ -37,7 +39,6 @@ namespace Attv {
                 ]) {
                 super(attributeValue, attribute, validators);
 
-                this.resolver.requires.push(DataUrl.UniqueId);
                 this.resolver.uses.push(DataTemplateSource.UniqueId, DataTimeout.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId);
             }
 

@@ -18,6 +18,7 @@ var Attv;
         function DataPartial(name) {
             var _this = _super.call(this, DataPartial.UniqueId, name, true) || this;
             _this.name = name;
+            _this.dependency.requires.push(Attv.DataUrl.UniqueId);
             return _this;
         }
         DataPartial.prototype.renderPartial = function (element, content) {
@@ -44,7 +45,6 @@ var Attv;
                     new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId])
                 ]; }
                 var _this = _super.call(this, attributeValue, attribute, validators) || this;
-                _this.resolver.requires.push(Attv.DataUrl.UniqueId);
                 _this.resolver.uses.push(Attv.DataTemplateSource.UniqueId, Attv.DataTimeout.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId);
                 return _this;
             }
