@@ -39,7 +39,7 @@ namespace Attv {
                 ]) {
                 super(attributeValue, attribute, validators);
 
-                this.resolver.uses.push(DataTemplateSource.UniqueId, DataTimeout.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId);
+                this.resolver.uses.push(DataTemplateSource.UniqueId, DataTimeout.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId, DataInterval.UniqueId);
             }
 
             render(element: HTMLElement, content?: string) {
@@ -76,7 +76,7 @@ namespace Attv {
                 // [data-target]
                 let targetElement = this.resolver.resolve<DataTarget>(DataTarget.UniqueId).getTargetElement(element) || element;
 
-                targetElement.innerHTML = html;
+                targetElement.html(html);
 
                 Attv.loadElements(targetElement);
             }
@@ -85,7 +85,10 @@ namespace Attv {
                 // [data-timeout]
                 let dataTimeout = this.resolver.resolve<DataTimeout>(DataTimeout.UniqueId);
                 dataTimeout.timeout(element, () => {
-                    Attv.Ajax.sendAjax(options);
+                    let dataInterval = this.resolver.resolve<DataInterval>(DataInterval.UniqueId);
+                    dataInterval.interval(element, () => {
+                        Attv.Ajax.sendAjax(options);
+                    });
                 });
             }
 

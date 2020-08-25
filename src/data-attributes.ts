@@ -53,9 +53,15 @@ namespace Attv {
             getRawValue(element: HTMLElement): string {
                 let rawValue = super.getRawValue(element);
 
+                // <form action='/'></form>
                 if (!rawValue && element?.tagName?.equalsIgnoreCase('form')) {
                     // get from action attribute
                     rawValue = element.attr('action');
+                }
+
+                // <a href='/'></form>
+                if (!rawValue && element?.tagName?.equalsIgnoreCase('a')) {
+                    rawValue = element.attr('href');
                 }
 
                 return rawValue;
@@ -131,7 +137,7 @@ namespace Attv {
 
         callback(element: HTMLElement): any {
             let jsFunction = this.getValue(element).getRawValue(element);
-            return eval(jsFunction);
+            return Attv.eval(jsFunction);
         }
     }
 
@@ -147,19 +153,19 @@ namespace Attv {
     }
 
     /**
-     * [data-nessage]='*'
+     * [data-content]='*'
      */
-    export class DataMessage extends Attv.Attribute {
-        static readonly UniqueId = 'DataMessage';
+    export class DataContent extends Attv.Attribute {
+        static readonly UniqueId = 'DataContent';
 
         constructor (name: string) {
-            super(DataMessage.UniqueId, name, false);
+            super(DataContent.UniqueId, name, false);
         }
 
-        getTargetElement(element: HTMLElement): HTMLElement {
-            let selector = this.getValue(element).getRawValue(element);
+        getContent(element: HTMLElement): any {
+            let rawValue = this.getValue(element).getRawValue(element);
 
-            return document.querySelector(selector) as HTMLElement;
+            return rawValue;
         }
     }
 
@@ -202,6 +208,56 @@ namespace Attv {
     }
 
     /**
+     * [data-interval]='*'
+     */
+    export class DataInterval extends Attv.Attribute {
+        static readonly UniqueId = 'DataInterval';
+
+        constructor (name: string) {
+            super(DataInterval.UniqueId, name, false);
+        }
+
+        interval(element: HTMLElement, fn: () => void) {
+            let ms = parseInt(this.getValue(element).getRawValue(element));
+
+            if (ms) {
+                let timer = new DataInterval.IntervalTimer(ms, fn);
+                DataInterval.step(timer, ms);
+            } else {
+                fn();
+            }
+        }
+
+        private static step(intervalTimer: DataInterval.IntervalTimer, timestamp: number) {
+            if (intervalTimer.start == undefined) {
+                intervalTimer.start = timestamp;
+            }
+
+            const elapsed = timestamp - intervalTimer.start;
+            if (elapsed > intervalTimer.timer) {
+                intervalTimer.fn();
+                intervalTimer.start = timestamp;
+                DataInterval.requestAnimationFrame(intervalTimer);
+            }
+
+            DataInterval.requestAnimationFrame(intervalTimer);
+        }
+
+        private static requestAnimationFrame(intervalTimer: DataInterval.IntervalTimer) {
+            window.requestAnimationFrame(timestamp => {
+                this.step(intervalTimer, timestamp);
+            });
+        }
+    }
+    export namespace DataInterval {
+        export class IntervalTimer {
+            constructor (public timer: number, public fn: () => void, public start?: number) {
+                // do nothing
+            }
+        }
+    }
+
+    /**
      * [data-data]='*'
      */
     export class DataData extends Attv.Attribute {
@@ -224,7 +280,7 @@ namespace Attv {
     }
 
     /**
-     * [data-timeout]='*'
+     * [data-bind]='*'
      */
     export class DataBind extends Attv.Attribute {
         static readonly UniqueId = 'DataBind';
@@ -234,7 +290,7 @@ namespace Attv {
         }
 
         bind(element: HTMLElement, any: any) {
-            element.innerHTML = any?.toString() ?? '';
+            element.html(any?.toString() || '');
         }
     }
 
@@ -254,8 +310,9 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-callback', (name: string) => new Attv.DataCallback(name));
     Attv.registerAttribute('data-loading', (name: string) => new Attv.DataLoading(name));
     Attv.registerAttribute('data-target',  (name: string) => new Attv.DataTarget(name));
-    Attv.registerAttribute('data-message', (name: string) => new Attv.DataMessage(name));
+    Attv.registerAttribute('data-content', (name: string) => new Attv.DataContent(name));
     Attv.registerAttribute('data-timeout', (name: string) => new Attv.DataTimeout(name));
+    Attv.registerAttribute('data-interval', (name: string) => new Attv.DataInterval(name));
     Attv.registerAttribute('data-data', (name: string) => new Attv.DataData(name));
     Attv.registerAttribute('data-cache', (name: string) => new Attv.DataCache(name));
     Attv.registerAttribute('data-bind', (name: string) => new Attv.DataBind(name));
@@ -333,7 +390,7 @@ namespace Attv {
     
                 this.bind(rootElement, templateElement, model);
     
-                return rootElement.innerHTML;
+                return rootElement.html();
             }
     
             protected bind(parent: HTMLElement, template: HTMLElement, model: any) {

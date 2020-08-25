@@ -45,7 +45,7 @@ var Attv;
                     new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId])
                 ]; }
                 var _this = _super.call(this, attributeValue, attribute, validators) || this;
-                _this.resolver.uses.push(Attv.DataTemplateSource.UniqueId, Attv.DataTimeout.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId);
+                _this.resolver.uses.push(Attv.DataTemplateSource.UniqueId, Attv.DataTimeout.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId, Attv.DataInterval.UniqueId);
                 return _this;
             }
             DefaultAttributeValue.prototype.render = function (element, content) {
@@ -75,14 +75,18 @@ var Attv;
                 var html = this.resolver.resolve(Attv.DataTemplateSource.UniqueId).renderTemplate(element, content);
                 // [data-target]
                 var targetElement = this.resolver.resolve(Attv.DataTarget.UniqueId).getTargetElement(element) || element;
-                targetElement.innerHTML = html;
+                targetElement.html(html);
                 Attv.loadElements(targetElement);
             };
             DefaultAttributeValue.prototype.sendAjax = function (element, options) {
+                var _this = this;
                 // [data-timeout]
                 var dataTimeout = this.resolver.resolve(Attv.DataTimeout.UniqueId);
                 dataTimeout.timeout(element, function () {
-                    Attv.Ajax.sendAjax(options);
+                    var dataInterval = _this.resolver.resolve(Attv.DataInterval.UniqueId);
+                    dataInterval.interval(element, function () {
+                        Attv.Ajax.sendAjax(options);
+                    });
                 });
             };
             return DefaultAttributeValue;

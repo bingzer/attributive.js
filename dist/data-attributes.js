@@ -58,11 +58,16 @@ var Attv;
                 return _super.call(this, undefined, attribute) || this;
             }
             DefaultAttributeValue.prototype.getRawValue = function (element) {
-                var _a;
+                var _a, _b;
                 var rawValue = _super.prototype.getRawValue.call(this, element);
+                // <form action='/'></form>
                 if (!rawValue && ((_a = element === null || element === void 0 ? void 0 : element.tagName) === null || _a === void 0 ? void 0 : _a.equalsIgnoreCase('form'))) {
                     // get from action attribute
                     rawValue = element.attr('action');
+                }
+                // <a href='/'></form>
+                if (!rawValue && ((_b = element === null || element === void 0 ? void 0 : element.tagName) === null || _b === void 0 ? void 0 : _b.equalsIgnoreCase('a'))) {
+                    rawValue = element.attr('href');
                 }
                 return rawValue;
             };
@@ -136,7 +141,7 @@ var Attv;
         }
         DataCallback.prototype.callback = function (element) {
             var jsFunction = this.getValue(element).getRawValue(element);
-            return eval(jsFunction);
+            return Attv.eval(jsFunction);
         };
         DataCallback.UniqueId = 'DataCallback';
         return DataCallback;
@@ -155,21 +160,21 @@ var Attv;
     }(Attv.Attribute));
     Attv.DataLoading = DataLoading;
     /**
-     * [data-nessage]='*'
+     * [data-content]='*'
      */
-    var DataMessage = /** @class */ (function (_super) {
-        __extends(DataMessage, _super);
-        function DataMessage(name) {
-            return _super.call(this, DataMessage.UniqueId, name, false) || this;
+    var DataContent = /** @class */ (function (_super) {
+        __extends(DataContent, _super);
+        function DataContent(name) {
+            return _super.call(this, DataContent.UniqueId, name, false) || this;
         }
-        DataMessage.prototype.getTargetElement = function (element) {
-            var selector = this.getValue(element).getRawValue(element);
-            return document.querySelector(selector);
+        DataContent.prototype.getContent = function (element) {
+            var rawValue = this.getValue(element).getRawValue(element);
+            return rawValue;
         };
-        DataMessage.UniqueId = 'DataMessage';
-        return DataMessage;
+        DataContent.UniqueId = 'DataContent';
+        return DataContent;
     }(Attv.Attribute));
-    Attv.DataMessage = DataMessage;
+    Attv.DataContent = DataContent;
     /**
      * [data-target]='*'
      */
@@ -208,6 +213,58 @@ var Attv;
     }(Attv.Attribute));
     Attv.DataTimeout = DataTimeout;
     /**
+     * [data-interval]='*'
+     */
+    var DataInterval = /** @class */ (function (_super) {
+        __extends(DataInterval, _super);
+        function DataInterval(name) {
+            return _super.call(this, DataInterval.UniqueId, name, false) || this;
+        }
+        DataInterval.prototype.interval = function (element, fn) {
+            var ms = parseInt(this.getValue(element).getRawValue(element));
+            if (ms) {
+                var timer = new DataInterval.IntervalTimer(ms, fn);
+                DataInterval.step(timer, ms);
+            }
+            else {
+                fn();
+            }
+        };
+        DataInterval.step = function (intervalTimer, timestamp) {
+            if (intervalTimer.start == undefined) {
+                intervalTimer.start = timestamp;
+            }
+            var elapsed = timestamp - intervalTimer.start;
+            if (elapsed > intervalTimer.timer) {
+                intervalTimer.fn();
+                intervalTimer.start = timestamp;
+                DataInterval.requestAnimationFrame(intervalTimer);
+            }
+            DataInterval.requestAnimationFrame(intervalTimer);
+        };
+        DataInterval.requestAnimationFrame = function (intervalTimer) {
+            var _this = this;
+            window.requestAnimationFrame(function (timestamp) {
+                _this.step(intervalTimer, timestamp);
+            });
+        };
+        DataInterval.UniqueId = 'DataInterval';
+        return DataInterval;
+    }(Attv.Attribute));
+    Attv.DataInterval = DataInterval;
+    (function (DataInterval) {
+        var IntervalTimer = /** @class */ (function () {
+            function IntervalTimer(timer, fn, start) {
+                this.timer = timer;
+                this.fn = fn;
+                this.start = start;
+                // do nothing
+            }
+            return IntervalTimer;
+        }());
+        DataInterval.IntervalTimer = IntervalTimer;
+    })(DataInterval = Attv.DataInterval || (Attv.DataInterval = {}));
+    /**
      * [data-data]='*'
      */
     var DataData = /** @class */ (function (_super) {
@@ -219,7 +276,7 @@ var Attv;
             var rawValue = this.getValue(element).getRawValue(element);
             if (Attv.isEvaluatable(rawValue)) {
                 //do eval
-                rawValue = eval(rawValue);
+                rawValue = Attv.eval(rawValue);
             }
             return Attv.parseJsonOrElse(rawValue);
         };
@@ -228,7 +285,7 @@ var Attv;
     }(Attv.Attribute));
     Attv.DataData = DataData;
     /**
-     * [data-timeout]='*'
+     * [data-bind]='*'
      */
     var DataBind = /** @class */ (function (_super) {
         __extends(DataBind, _super);
@@ -236,8 +293,7 @@ var Attv;
             return _super.call(this, DataBind.UniqueId, name, false) || this;
         }
         DataBind.prototype.bind = function (element, any) {
-            var _a;
-            element.innerHTML = (_a = any === null || any === void 0 ? void 0 : any.toString()) !== null && _a !== void 0 ? _a : '';
+            element.html((any === null || any === void 0 ? void 0 : any.toString()) || '');
         };
         DataBind.UniqueId = 'DataBind';
         return DataBind;
@@ -254,8 +310,9 @@ Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-callback', function (name) { return new Attv.DataCallback(name); });
     Attv.registerAttribute('data-loading', function (name) { return new Attv.DataLoading(name); });
     Attv.registerAttribute('data-target', function (name) { return new Attv.DataTarget(name); });
-    Attv.registerAttribute('data-message', function (name) { return new Attv.DataMessage(name); });
+    Attv.registerAttribute('data-content', function (name) { return new Attv.DataContent(name); });
     Attv.registerAttribute('data-timeout', function (name) { return new Attv.DataTimeout(name); });
+    Attv.registerAttribute('data-interval', function (name) { return new Attv.DataInterval(name); });
     Attv.registerAttribute('data-data', function (name) { return new Attv.DataData(name); });
     Attv.registerAttribute('data-cache', function (name) { return new Attv.DataCache(name); });
     Attv.registerAttribute('data-bind', function (name) { return new Attv.DataBind(name); });
@@ -319,7 +376,7 @@ Attv.loader.pre.push(function () {
                 var templateElement = Attv.createHTMLElement(templatedContent);
                 var rootElement = Attv.createHTMLElement('');
                 this.bind(rootElement, templateElement, model);
-                return rootElement.innerHTML;
+                return rootElement.html();
             };
             Json2HtmlAttributeValue.prototype.bind = function (parent, template, model) {
                 var allbinds = template.querySelectorAll(this.dataBind.toString());

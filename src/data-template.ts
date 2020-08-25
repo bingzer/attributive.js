@@ -36,11 +36,11 @@ namespace Attv {
             }
 
             loadElement(element: HTMLElement): boolean {
-                let templateHtml = element.innerHTML;
+                let templateHtml = element.html();
 
                 this.resolver.addAttribute(DataTemplateHtml.UniqueId, element, templateHtml);
 
-                element.innerHTML = '';
+                element.html('');
                 
                 return true;
             }
@@ -52,7 +52,7 @@ namespace Attv {
             }
 
             render(element: HTMLElement, modelOrContent: string): string {
-                let content = this.getTemplate(element)?.innerHTML || modelOrContent;
+                let content = this.getTemplate(element)?.html() || modelOrContent;
                 let dataRenderer = this.resolver.resolve<DataRenderer>(DataRenderer.UniqueId);
     
                 return dataRenderer.render(content, modelOrContent, element);
@@ -77,7 +77,7 @@ namespace Attv {
             }
             
             getTemplate(element: HTMLElement): HTMLElement {
-                let html = element.innerHTML;
+                let html = element.html();
                 return Attv.createHTMLElement(html);
             }
             

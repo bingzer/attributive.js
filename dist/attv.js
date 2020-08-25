@@ -78,6 +78,23 @@ HTMLElement.prototype.attr = function (name, value) {
         return Attv.parseJsonOrElse(value);
     }
 };
+HTMLElement.prototype.html = function (html) {
+    var element = this;
+    if (!html) {
+        return element.innerHTML;
+    }
+    else {
+        element.innerHTML = html;
+        if (html) {
+            // look for scripts
+            var innerHtmlElement = Attv.createHTMLElement(html);
+            var scripts = innerHtmlElement.querySelectorAll('script');
+            for (var i = 0; i < scripts.length; i++) {
+                eval(scripts[i].text);
+            }
+        }
+    }
+};
 String.prototype.contains = function (text) {
     var obj = this;
     return obj.indexOf(text) >= 0;
@@ -172,12 +189,16 @@ String.prototype.equalsIgnoreCase = function (other) {
              * List of attribute Id that we use
              */
             this.uses = [];
+            /**
+             * List of attribute Id that we internvally use
+             */
+            this.internals = [];
         }
         /**
          * List of all dependencies
          */
         AttributeDepenency.prototype.allDependencies = function () {
-            return this.requires.concat(this.uses);
+            return this.requires.concat(this.uses).concat(this.internals);
         };
         return AttributeDepenency;
     }());
@@ -240,14 +261,15 @@ String.prototype.equalsIgnoreCase = function (other) {
          * @param attributeValues attribute values
          */
         Attribute.prototype.registerAttributeValues = function (attributeValues) {
-            var _a, _b, _c;
+            var _a, _b, _c, _d;
             // add dependency
             for (var i = 0; i < attributeValues.length; i++) {
                 // add dependency
                 (_a = attributeValues[i].resolver.requires).push.apply(_a, this.dependency.requires);
                 (_b = attributeValues[i].resolver.uses).push.apply(_b, this.dependency.uses);
+                (_c = attributeValues[i].resolver.internals).push.apply(_c, this.dependency.internals);
             }
-            (_c = this.attributeValues).push.apply(_c, attributeValues);
+            (_d = this.attributeValues).push.apply(_d, attributeValues);
         };
         /**
          * Returns the current attribute value
@@ -335,7 +357,7 @@ String.prototype.equalsIgnoreCase = function (other) {
          * To string
          */
         AttributeValue.prototype.toString = function () {
-            return "[" + this.attribute.name + "]='" + (this.value || '') + "'";
+            return "[" + this.attribute.name + "]='" + (this.value || '*') + "'";
         };
         return AttributeValue;
     }());
@@ -511,6 +533,19 @@ String.prototype.equalsIgnoreCase = function (other) {
         return (any === null || any === void 0 ? void 0 : any.startsWith('(')) && (any === null || any === void 0 ? void 0 : any.endsWith(')'));
     }
     Attv.isEvaluatable = isEvaluatable;
+    function eval(any) {
+        return window.eval(any);
+    }
+    Attv.eval = eval;
+    function navigate(url, target) {
+        if (target) {
+            window.open(url, target);
+        }
+        else {
+            window.location.href = url;
+        }
+    }
+    Attv.navigate = navigate;
     function createHTMLElement(any) {
         if (isString(any)) {
             var htmlElement = document.createElement('div');
@@ -636,11 +671,11 @@ String.prototype.equalsIgnoreCase = function (other) {
         }
         AttributeFactory.prototype.create = function () {
             var attribute = this.fn(this.attributeName);
-            Attv.log('debug', "* " + attribute, attribute);
+            Attv.log('debug', "" + attribute, attribute);
             if (this.valuesFn) {
                 var attributeValues = [];
                 this.valuesFn(attribute, attributeValues);
-                Attv.log('debug', "** " + attribute + " adding " + attributeValues, attributeValues);
+                Attv.log('debug', "" + attributeValues, attributeValues);
                 attribute.registerAttributeValues(attributeValues);
             }
             return attribute;

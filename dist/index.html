@@ -3,15 +3,29 @@
 		<title>Test Usage</title>
 	</head>
 	<body>
+
+		<div>
+			<a href="#" data-wall="alert" data-content="HI">Click for alert</a>
+			
+			<button onclick="alert('ola')" data-wall="alert" data-content="before ola">Click me for alert</button>
+		</div>
+
+		<div>
+			<a href="#" data-wall="confirm" data-content="are you sure?">Click for confirm</a>
+			
+			<button onclick="alert('ola')" data-wall="confirm" data-content="before ola. are you sure?">Click me for confirm</button>
+		</div>
+
 	
 		<div>
 			<div data-partial="auto" data-url="partial.html"
 				data-data="({name: 'value'})">uses [data-partial]</div>
 
-
-			<div data-partial="auto" data-url="datetime.html" data-refresh="1000" data-data="({ now: Date.now()})">
+<!-- 
+			<div data-partial="auto" data-url="datetime.html" data-refresh="1000"
+				data-interval="1000" data-data="({ now: Date.now()})">
 				Loading content
-			</div>
+			</div> -->
 <!-- 			
 			<div data-partial="auto" data-url="partial.html"></div> -->
 
@@ -108,6 +122,7 @@
 	
 		<script type="text/javascript" src="attv.js"></script>
 		<script type="text/javascript" src="data-attributes.js"></script>
+		<script type="text/javascript" src="data-wall.js"></script>
 		<script type="text/javascript" src="data-partial.js"></script>
 		<script type="text/javascript" src="data-template.js"></script>
 

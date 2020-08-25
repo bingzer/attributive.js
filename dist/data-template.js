@@ -46,9 +46,9 @@ var Attv;
                 return _this;
             }
             DefaultAttributeValue.prototype.loadElement = function (element) {
-                var templateHtml = element.innerHTML;
+                var templateHtml = element.html();
                 this.resolver.addAttribute(DataTemplateHtml.UniqueId, element, templateHtml);
-                element.innerHTML = '';
+                element.html('');
                 return true;
             };
             DefaultAttributeValue.prototype.getTemplate = function (element) {
@@ -57,7 +57,7 @@ var Attv;
             };
             DefaultAttributeValue.prototype.render = function (element, modelOrContent) {
                 var _a;
-                var content = ((_a = this.getTemplate(element)) === null || _a === void 0 ? void 0 : _a.innerHTML) || modelOrContent;
+                var content = ((_a = this.getTemplate(element)) === null || _a === void 0 ? void 0 : _a.html()) || modelOrContent;
                 var dataRenderer = this.resolver.resolve(Attv.DataRenderer.UniqueId);
                 return dataRenderer.render(content, modelOrContent, element);
             };
@@ -80,7 +80,7 @@ var Attv;
                 return true;
             };
             ScriptAttributeValue.prototype.getTemplate = function (element) {
-                var html = element.innerHTML;
+                var html = element.html();
                 return Attv.createHTMLElement(html);
             };
             return ScriptAttributeValue;

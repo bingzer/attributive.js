@@ -16,6 +16,12 @@ interface HTMLElement  {
      * value can be an object
      */
     attr: (name?: string | Attv.Attribute, value?: any) => HTMLElement | any;
+
+    /**
+     * Gets/Sets html.
+     * Will execute javascript inside also
+     */
+    html: (html?: string) => string | any;
 }
 
 HTMLElement.prototype.attr = function (name: string, value?: any): HTMLElement | any {
@@ -81,6 +87,25 @@ HTMLElement.prototype.attr = function (name: string, value?: any): HTMLElement |
         }
 
         return Attv.parseJsonOrElse(value);
+    }
+}
+
+HTMLElement.prototype.html = function (html?: string): string | any {
+    let element = this as HTMLElement;
+
+    if (!html) {
+        return element.innerHTML;
+    } else {
+        element.innerHTML = html;
+
+        if (html) {
+            // look for scripts
+            let innerHtmlElement = Attv.createHTMLElement(html);
+            let scripts = innerHtmlElement.querySelectorAll('script');
+            for (let i = 0; i < scripts.length; i++) {
+                eval(scripts[i].text);
+            }
+        }
     }
 }
 
@@ -212,18 +237,23 @@ namespace Attv {
         /**
          * List of attribute Ids that we require
          */
-        requires: string[] = [];
+        readonly requires: string[] = [];
 
         /**
          * List of attribute Id that we use
          */
-        uses: string[] = [];
+        readonly uses: string[] = [];
+
+        /**
+         * List of attribute Id that we internvally use
+         */
+        readonly internals: string[] = [];
 
         /**
          * List of all dependencies
          */
         allDependencies(): string[] {
-            return this.requires.concat(this.uses);
+            return this.requires.concat(this.uses).concat(this.internals);
         }
     }
 
@@ -296,6 +326,7 @@ namespace Attv {
                 // add dependency
                 attributeValues[i].resolver.requires.push(...this.dependency.requires);
                 attributeValues[i].resolver.uses.push(...this.dependency.uses);
+                attributeValues[i].resolver.internals.push(...this.dependency.internals);
             }
 
             this.attributeValues.push(...attributeValues);
@@ -395,7 +426,7 @@ namespace Attv {
          * To string
          */
         toString(): string {
-            return `[${this.attribute.name}]='${this.value || ''}'`;
+            return `[${this.attribute.name}]='${this.value || '*'}'`;
         }
     }
 
@@ -598,6 +629,18 @@ namespace Attv {
         return any?.startsWith('(') && any?.endsWith(')');
     }
 
+    export function eval(any: string) {
+        return window.eval(any);
+    }
+
+    export function navigate(url: any, target?: string) {
+        if (target) {
+            window.open(url, target);
+        } else {
+            window.location.href = url;
+        }
+    }
+
     export function createHTMLElement(any: string | HTMLElement): HTMLElement {
         if (isString(any)) {
             let htmlElement = document.createElement('div');
@@ -743,14 +786,14 @@ namespace Attv {
         create(): Attribute {
             let attribute = this.fn(this.attributeName);
             
-            Attv.log('debug', `* ${attribute}`, attribute);
+            Attv.log('debug', `${attribute}`, attribute);
 
             if (this.valuesFn) {
                 let attributeValues = [];
 
                 this.valuesFn(attribute, attributeValues);
 
-                Attv.log('debug', `** ${attribute} adding ${attributeValues}`, attributeValues);
+                Attv.log('debug', `${attributeValues}`, attributeValues);
     
                 attribute.registerAttributeValues(attributeValues);
             }
