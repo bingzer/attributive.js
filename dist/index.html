@@ -131,8 +131,16 @@
 		<script type="text/javascript" src="data-dialog.js"></script>
 
 		<script type="text/javascript" >
-			Attv.loader.pre.unshift(() => {
-			});
+			// // example How to rename attribute
+			// // in this example, we rename data-url to data-urlx
+			// Attv.loader.pre.push(() => {
+			// 	Attv.unregisterAttribute('data-url');
+			// 	Attv.registerAttribute('data-urlx', 
+			// 		(name) => new Attv.DataUrl(name),
+			// 		(attribute, list) => {
+			// 			list.push(new Attv.DataUrl.DefaultAttributeValue(attribute));
+			// 		});
+			// });
 		</script>
 	</body>
 </html>

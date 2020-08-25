@@ -194,11 +194,18 @@ namespace Attv.Ajax {
         // header
         options.headers?.forEach(header => xhr.setRequestHeader(header.name, header.value));
 
+        // last check
+        if (isUndefined(options.url))
+            throw new Error('url is empty');
+
         xhr.open(options.method, options.url, true);
         xhr.send();
     }
 
     export function buildUrl(option: AjaxOptions): string {
+        if (isUndefined(option.url))
+            return undefined;
+
         let url = option.url;
         if (option.method === 'get') {
             url += `?${objectToQuerystring(option.data)}`;
@@ -235,7 +242,7 @@ namespace Attv.Ajax {
 
 namespace Attv {
 
-    export class AttributeDepenency {
+    export class AttributeDependency {
 
         /**
          * List of attribute Ids that we require
@@ -260,7 +267,7 @@ namespace Attv {
         }
     }
 
-    export class AttributeResolver extends AttributeDepenency {
+    export class AttributeResolver extends AttributeDependency {
         
         constructor (private attributeValue: AttributeValue) {
             super();
@@ -303,7 +310,7 @@ namespace Attv {
 
         public readonly description: string;
         public readonly loadedName: string;
-        public readonly dependency: AttributeDepenency = new AttributeDepenency();
+        public readonly dependency: AttributeDependency = new AttributeDependency();
 
         /**
          * 
@@ -705,9 +712,22 @@ namespace Attv {
     export const attributes: Attribute[] = [];
 
     export const loader: {
+        /**
+         * Initialization. Reserved for internal use
+         */
+        init: (() => void)[],
+
+        /**
+         * Before attribute registrations
+         */
         pre: (() => void)[],
+
+        /**
+         * During attribute registrations
+         */
         post: (() => void)[]
     } = {
+        init: [],
         pre: [],
         post: []
     };
@@ -771,6 +791,10 @@ namespace Attv {
         attributeFactory.push(factory);
     }
     
+    /**
+     * This only work during loader.pre
+     * @param attributeName attribute name
+     */
     export function unregisterAttribute(attributeName: string): void {
         let attributes = attributeFactory.filter(factory => factory.attributeName !== attributeName);
         attributeFactory.splice(0, attributeFactory.length);
@@ -809,8 +833,13 @@ namespace Attv {
         if (!Attv.configuration) {
             Attv.configuration = new DefaultConfiguration();
         }
+    }
 
-        Attv.log('debug', 'Initialize...');
+    function preRegister() {
+        Attv.log('Attv v.' + Attv.version);
+    }
+
+    function register() {
         for (var i = 0; i < attributeFactory.length; i++) {
             let attribute = attributeFactory[i].create();
 
@@ -818,11 +847,17 @@ namespace Attv {
         }
     }
 
-    Attv.loader.post.push(initialize);
+    Attv.loader.init.push(initialize);
+    Attv.loader.pre.push(preRegister);
+    Attv.loader.post.push(register);
     Attv.loader.post.push(loadElements);
 }
 
 Attv.onDocumentReady(() => {
+    for (var i = 0; i < Attv.loader.init.length; i++) {
+        Attv.loader.init[i]();
+    }
+
     for (var i = 0; i < Attv.loader.pre.length; i++) {
         Attv.loader.pre[i]();
     }

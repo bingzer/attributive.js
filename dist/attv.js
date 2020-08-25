@@ -142,11 +142,16 @@ String.prototype.equalsIgnoreCase = function (other) {
             };
             // header
             (_a = options.headers) === null || _a === void 0 ? void 0 : _a.forEach(function (header) { return xhr.setRequestHeader(header.name, header.value); });
+            // last check
+            if (Attv.isUndefined(options.url))
+                throw new Error('url is empty');
             xhr.open(options.method, options.url, true);
             xhr.send();
         }
         Ajax.sendAjax = sendAjax;
         function buildUrl(option) {
+            if (Attv.isUndefined(option.url))
+                return undefined;
             var url = option.url;
             if (option.method === 'get') {
                 url += "?" + objectToQuerystring(option.data);
@@ -179,8 +184,8 @@ String.prototype.equalsIgnoreCase = function (other) {
 ////////////////////////////////// Base classes ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 (function (Attv) {
-    var AttributeDepenency = /** @class */ (function () {
-        function AttributeDepenency() {
+    var AttributeDependency = /** @class */ (function () {
+        function AttributeDependency() {
             /**
              * List of attribute Ids that we require
              */
@@ -197,12 +202,12 @@ String.prototype.equalsIgnoreCase = function (other) {
         /**
          * List of all dependencies
          */
-        AttributeDepenency.prototype.allDependencies = function () {
+        AttributeDependency.prototype.allDependencies = function () {
             return this.requires.concat(this.uses).concat(this.internals);
         };
-        return AttributeDepenency;
+        return AttributeDependency;
     }());
-    Attv.AttributeDepenency = AttributeDepenency;
+    Attv.AttributeDependency = AttributeDependency;
     var AttributeResolver = /** @class */ (function (_super) {
         __extends(AttributeResolver, _super);
         function AttributeResolver(attributeValue) {
@@ -234,7 +239,7 @@ String.prototype.equalsIgnoreCase = function (other) {
             element.attr(attribute.name, any);
         };
         return AttributeResolver;
-    }(AttributeDepenency));
+    }(AttributeDependency));
     Attv.AttributeResolver = AttributeResolver;
     /**
     * Base class for data-attributes
@@ -253,7 +258,7 @@ String.prototype.equalsIgnoreCase = function (other) {
             this.name = name;
             this.isAutoLoad = isAutoLoad;
             this.attributeValues = [];
-            this.dependency = new AttributeDepenency();
+            this.dependency = new AttributeDependency();
             this.loadedName = this.name + "-loaded";
         }
         /**
@@ -605,6 +610,7 @@ String.prototype.equalsIgnoreCase = function (other) {
 (function (Attv) {
     Attv.attributes = [];
     Attv.loader = {
+        init: [],
         pre: [],
         post: []
     };
@@ -656,6 +662,10 @@ String.prototype.equalsIgnoreCase = function (other) {
         attributeFactory.push(factory);
     }
     Attv.registerAttribute = registerAttribute;
+    /**
+     * This only work during loader.pre
+     * @param attributeName attribute name
+     */
     function unregisterAttribute(attributeName) {
         var attributes = attributeFactory.filter(function (factory) { return factory.attributeName !== attributeName; });
         attributeFactory.splice(0, attributeFactory.length);
@@ -687,16 +697,25 @@ String.prototype.equalsIgnoreCase = function (other) {
         if (!Attv.configuration) {
             Attv.configuration = new Attv.DefaultConfiguration();
         }
-        Attv.log('debug', 'Initialize...');
+    }
+    function preRegister() {
+        Attv.log('Attv v.' + Attv.version);
+    }
+    function register() {
         for (var i = 0; i < attributeFactory.length; i++) {
             var attribute = attributeFactory[i].create();
             Attv.attributes.push(attribute);
         }
     }
-    Attv.loader.post.push(initialize);
+    Attv.loader.init.push(initialize);
+    Attv.loader.pre.push(preRegister);
+    Attv.loader.post.push(register);
     Attv.loader.post.push(loadElements);
 })(Attv || (Attv = {}));
 Attv.onDocumentReady(function () {
+    for (var i = 0; i < Attv.loader.init.length; i++) {
+        Attv.loader.init[i]();
+    }
     for (var i = 0; i < Attv.loader.pre.length; i++) {
         Attv.loader.pre[i]();
     }
