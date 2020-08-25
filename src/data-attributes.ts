@@ -9,6 +9,27 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataUrl.UniqueId, name, false);
+
+            this.dependency.requires.push(DataMethod.UniqueId, DataData.UniqueId);
+        }
+
+        getUrl(element: HTMLElement): string {
+            let attributeValue = this.getValue(element);
+            let url = attributeValue.getRawValue(element);
+
+            // [data-method]
+            let dataMethod = attributeValue.resolver.resolve<DataMethod>(DataMethod.UniqueId);
+            let method = dataMethod.getMethod(element);
+
+            if (method === 'get') {
+                // [data-data]
+                let dataData = attributeValue.resolver.resolve<DataData>(DataData.UniqueId);
+                let data = dataData.getData(element);
+
+                url = Attv.Ajax.buildUrl({ url: url, method: method, data: data });
+            }
+
+            return url;
         }
     }
 
@@ -42,6 +63,10 @@ namespace Attv {
         constructor (name: string) {
             super(DataMethod.UniqueId, name, false);
         }
+
+        getMethod(element: HTMLElement): Ajax.AjaxMethod {
+            return this.getValue(element).getRawValue(element) as Ajax.AjaxMethod;
+        }
     }
     export namespace DataMethod {
         export class DefaultAttributeValue extends AttributeValue {
@@ -54,7 +79,11 @@ namespace Attv {
 
                 if (!rawValue && element?.tagName?.equalsIgnoreCase('form')) {
                     // get from method attribute
-                    rawValue = element.attr('method') || DataMethod.DefaultMethod;
+                    rawValue = element.attr('method');
+                }
+
+                if (!rawValue) {
+                    rawValue = DataMethod.DefaultMethod;
                 }
 
                 return rawValue;
@@ -132,16 +161,37 @@ namespace Attv {
         constructor (name: string) {
             super(DataTimeout.UniqueId, name, false);
         }
+
+        timeout(element: HTMLElement, fn: () => void) {
+            let ms = parseInt(this.getValue(element).getRawValue(element));
+
+            if (ms) {
+                window.setTimeout(fn, ms);
+            } else {
+                fn();
+            }
+        }
     }
 
     /**
-     * [data-timeout]='*'
+     * [data-data]='*'
      */
     export class DataData extends Attv.Attribute {
         static readonly UniqueId = 'DataData';
 
         constructor (name: string) {
             super(DataData.UniqueId, name, false);
+        }
+        
+        getData(element: HTMLElement): any {
+            let rawValue = this.getValue(element).getRawValue(element);
+
+            if (rawValue?.startsWith('(') && rawValue?.endsWith(')')) {
+                //do eval
+                rawValue = eval(rawValue);
+            }
+
+            return parseJsonOrElse(rawValue);
         }
     }
 

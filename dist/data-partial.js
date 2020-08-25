@@ -28,21 +28,6 @@ var Attv;
             var attributeValue = this.getValue(htmlElement);
             attributeValue.render(htmlElement, content);
         };
-        DataPartial.prototype.sendAjax = function (options) {
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function (e) {
-                var xhr = this;
-                if (xhr.readyState == 4) {
-                    var wasSuccessful = this.status >= 200 && this.status < 400;
-                    options._internalCallback(options, wasSuccessful, xhr);
-                }
-            };
-            xhr.onerror = function (e) {
-                options._internalCallback(options, false, xhr);
-            };
-            xhr.open(options.method, options.url, true);
-            xhr.send();
-        };
         DataPartial.UniqueId = "DataPartial";
         return DataPartial;
     }(Attv.Attribute));
@@ -60,15 +45,18 @@ var Attv;
                 ]; }
                 var _this = _super.call(this, attributeValue, attribute, validators) || this;
                 _this.resolver.requires.push(Attv.DataUrl.UniqueId);
-                _this.resolver.uses.push(Attv.DataTemplateSource.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId);
+                _this.resolver.uses.push(Attv.DataTemplateSource.UniqueId, Attv.DataTimeout.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId);
                 return _this;
             }
             DefaultAttributeValue.prototype.render = function (element, content) {
                 var _this = this;
                 // get content
                 if (!content) {
-                    //let options = element.attr('data') as AjaxOptions;
-                    var options = this.getData(element);
+                    // data-url
+                    var options = {};
+                    // [data-url]
+                    options.url = this.resolver.resolve(Attv.DataUrl.UniqueId).getUrl(element);
+                    options.method = this.resolver.resolve(Attv.DataMethod.UniqueId).getMethod(element);
                     options._internalCallback = function (ajaxOptions, wasSuccessful, xhr) {
                         content = xhr.response;
                         _this.doRender(element, content);
@@ -76,26 +64,26 @@ var Attv;
                         var dataCallback = _this.resolver.resolve(Attv.DataCallback.UniqueId);
                         dataCallback.callback(element);
                     };
-                    this.sendAjax(options);
+                    this.sendAjax(element, options);
                 }
                 else {
                     this.doRender(element, content);
                 }
             };
             DefaultAttributeValue.prototype.doRender = function (element, content) {
-                // [data-template-source]
-                var dataTemplateSource = this.resolver.resolve(Attv.DataTemplateSource.UniqueId);
-                var html = dataTemplateSource.renderTemplate(element, content);
+                // [data-template-source]                
+                var html = this.resolver.resolve(Attv.DataTemplateSource.UniqueId).renderTemplate(element, content);
                 // [data-target]
-                var dataTarget = this.resolver.resolve(Attv.DataTarget.UniqueId);
-                var targetElement = (dataTarget === null || dataTarget === void 0 ? void 0 : dataTarget.getTargetElement(element)) || element;
+                var targetElement = this.resolver.resolve(Attv.DataTarget.UniqueId).getTargetElement(element) || element;
                 targetElement.innerHTML = html;
                 Attv.loadElements(targetElement);
             };
-            DefaultAttributeValue.prototype.sendAjax = function (options) {
-                options.method = options.method || 'get';
-                var dataPartial = this.attribute;
-                dataPartial.sendAjax(options);
+            DefaultAttributeValue.prototype.sendAjax = function (element, options) {
+                // [data-timeout]
+                var dataTimeout = this.resolver.resolve(Attv.DataTimeout.UniqueId);
+                dataTimeout.timeout(element, function () {
+                    Attv.Ajax.sendAjax(options);
+                });
             };
             return DefaultAttributeValue;
         }(Attv.AttributeValue));

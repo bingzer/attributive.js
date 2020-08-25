@@ -1,3 +1,16 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Attv;
 (function (Attv) {
     /**
@@ -69,6 +82,10 @@ String.prototype.startsWith = function (text) {
     var obj = this;
     return obj.indexOf(text) >= 0;
 };
+String.prototype.endsWith = function (text) {
+    var obj = this;
+    return obj.indexOf(text, this.length - text.length) !== -1;
+};
 String.prototype.camelCaseToDash = function () {
     var text = this;
     return text.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
@@ -84,12 +101,65 @@ String.prototype.equalsIgnoreCase = function (other) {
     return (text === null || text === void 0 ? void 0 : text.toLowerCase()) === (other === null || other === void 0 ? void 0 : other.toLowerCase());
 };
 ////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////// Attv.Ajax ///////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
+    var Ajax;
+    (function (Ajax) {
+        function sendAjax(options) {
+            var _a;
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function (e) {
+                var xhr = this;
+                if (xhr.readyState == 4) {
+                    var wasSuccessful = this.status >= 200 && this.status < 400;
+                    options === null || options === void 0 ? void 0 : options._internalCallback(options, wasSuccessful, xhr);
+                }
+            };
+            xhr.onerror = function (e) {
+                options === null || options === void 0 ? void 0 : options._internalCallback(options, false, xhr);
+            };
+            // header
+            (_a = options.headers) === null || _a === void 0 ? void 0 : _a.forEach(function (header) { return xhr.setRequestHeader(header.name, header.value); });
+            xhr.open(options.method, options.url, true);
+            xhr.send();
+        }
+        Ajax.sendAjax = sendAjax;
+        function buildUrl(option) {
+            var url = option.url;
+            if (option.method === 'get') {
+                url += "?" + objectToQuerystring(option.data);
+            }
+            return url;
+        }
+        Ajax.buildUrl = buildUrl;
+        function objectToQuerystring(any) {
+            if (!any)
+                return '';
+            if (Attv.isString(any)) {
+                any = Attv.parseJsonOrElse(any);
+                if (Attv.isString(any)) {
+                    return any;
+                }
+            }
+            return Object.keys(any)
+                .sort()
+                .map(function (key) {
+                return window.encodeURIComponent(key)
+                    + '='
+                    + window.encodeURIComponent(any[key]);
+            })
+                .join('&');
+        }
+        Ajax.objectToQuerystring = objectToQuerystring;
+    })(Ajax = Attv.Ajax || (Attv.Ajax = {}));
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Base classes ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 (function (Attv) {
-    var AttributeResolver = /** @class */ (function () {
-        function AttributeResolver(attributeValue) {
-            this.attributeValue = attributeValue;
+    var AttributeDepenency = /** @class */ (function () {
+        function AttributeDepenency() {
             /**
              * List of attribute Ids that we require
              */
@@ -98,14 +168,23 @@ String.prototype.equalsIgnoreCase = function (other) {
              * List of attribute Id that we use
              */
             this.uses = [];
-            // do nothing
         }
         /**
          * List of all dependencies
          */
-        AttributeResolver.prototype.allDependencies = function () {
-            return this.requires.concat(this.uses).concat(this.attributeValue.attribute.uniqueId);
+        AttributeDepenency.prototype.allDependencies = function () {
+            return this.requires.concat(this.uses);
         };
+        return AttributeDepenency;
+    }());
+    Attv.AttributeDepenency = AttributeDepenency;
+    var AttributeResolver = /** @class */ (function (_super) {
+        __extends(AttributeResolver, _super);
+        function AttributeResolver(attributeValue) {
+            var _this = _super.call(this) || this;
+            _this.attributeValue = attributeValue;
+            return _this;
+        }
         /**
          * Returns the data attribute
          * @param attributeId id
@@ -127,7 +206,7 @@ String.prototype.equalsIgnoreCase = function (other) {
             element.attr(attribute.name, any);
         };
         return AttributeResolver;
-    }());
+    }(AttributeDepenency));
     Attv.AttributeResolver = AttributeResolver;
     /**
     * Base class for data-attributes
@@ -146,6 +225,7 @@ String.prototype.equalsIgnoreCase = function (other) {
             this.name = name;
             this.isAutoLoad = isAutoLoad;
             this.attributeValues = [];
+            this.dependency = new AttributeDepenency();
             this.loadedName = this.name + "-loaded";
         }
         /**
@@ -153,8 +233,14 @@ String.prototype.equalsIgnoreCase = function (other) {
          * @param attributeValues attribute values
          */
         Attribute.prototype.registerAttributeValues = function (attributeValues) {
-            var _a;
-            (_a = this.attributeValues).push.apply(_a, attributeValues);
+            var _a, _b, _c;
+            // add dependency
+            for (var i = 0; i < attributeValues.length; i++) {
+                // add dependency
+                (_a = attributeValues[i].resolver.requires).push.apply(_a, this.dependency.requires);
+                (_b = attributeValues[i].resolver.uses).push.apply(_b, this.dependency.uses);
+            }
+            (_c = this.attributeValues).push.apply(_c, attributeValues);
         };
         /**
          * Returns the current attribute value

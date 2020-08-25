@@ -18,24 +18,6 @@ namespace Attv {
 
             attributeValue.render(htmlElement, content);
         }
-        
-        sendAjax(options: AjaxOptions) {
-            let xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function (e: Event) {
-                let xhr = this as XMLHttpRequest;
-                if (xhr.readyState == 4) {
-                    let wasSuccessful = this.status >= 200 && this.status < 400;
-
-                    options._internalCallback(options, wasSuccessful, xhr);
-                }
-            };
-            xhr.onerror = function (e: ProgressEvent<EventTarget>) {
-                options._internalCallback(options, false, xhr);
-            }
-
-            xhr.open(options.method, options.url, true);
-            xhr.send();
-        }
 
     }
 
@@ -56,15 +38,20 @@ namespace Attv {
                 super(attributeValue, attribute, validators);
 
                 this.resolver.requires.push(DataUrl.UniqueId);
-                this.resolver.uses.push(DataTemplateSource.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId);
+                this.resolver.uses.push(DataTemplateSource.UniqueId, DataTimeout.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId);
             }
 
             render(element: HTMLElement, content?: string) {
                 // get content
                 if (!content) {
-                    //let options = element.attr('data') as AjaxOptions;
-                    let options = this.getData<AjaxOptions>(element);
-                    options._internalCallback = (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
+                    // data-url
+                    let options = { } as Ajax.AjaxOptions;
+
+                    // [data-url]
+                    options.url = this.resolver.resolve<DataUrl>(DataUrl.UniqueId).getUrl(element);
+                    options.method = this.resolver.resolve<DataMethod>(DataMethod.UniqueId).getMethod(element);
+
+                    options._internalCallback = (ajaxOptions: Attv.Ajax.AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
                         content = xhr.response;
                         
                         this.doRender(element, content);
@@ -74,7 +61,7 @@ namespace Attv {
                         dataCallback.callback(element);
                     };
 
-                    this.sendAjax(options);
+                    this.sendAjax(element, options);
                 }
                 else {
                     this.doRender(element, content);
@@ -82,25 +69,23 @@ namespace Attv {
             }
 
             private doRender(element: HTMLElement, content: string) {
-                // [data-template-source]
-                let dataTemplateSource = this.resolver.resolve<DataTemplateSource>(DataTemplateSource.UniqueId);
-                let html = dataTemplateSource.renderTemplate(element, content);
+                // [data-template-source]                
+                let html = this.resolver.resolve<DataTemplateSource>(DataTemplateSource.UniqueId).renderTemplate(element, content);
 
                 // [data-target]
-                let dataTarget = this.resolver.resolve<DataTarget>(DataTarget.UniqueId);
-                let targetElement = dataTarget?.getTargetElement(element) || element;
+                let targetElement = this.resolver.resolve<DataTarget>(DataTarget.UniqueId).getTargetElement(element) || element;
 
                 targetElement.innerHTML = html;
 
                 Attv.loadElements(targetElement);
             }
             
-            protected sendAjax(options: AjaxOptions) {
-                options.method = options.method || 'get';
-
-                let dataPartial = this.attribute as DataPartial;
-
-                dataPartial.sendAjax(options);
+            private sendAjax(element: HTMLElement, options: Attv.Ajax.AjaxOptions) {
+                // [data-timeout]
+                let dataTimeout = this.resolver.resolve<DataTimeout>(DataTimeout.UniqueId);
+                dataTimeout.timeout(element, () => {
+                    Attv.Ajax.sendAjax(options);
+                });
             }
 
         }
@@ -167,14 +152,6 @@ namespace Attv {
             }
         }
 
-    }
-
-    export interface AjaxOptions {
-        url: string;
-        method?: 'post' | 'put' | 'delete' | 'patch' | 'get';
-        callback: (wasSuccessful: boolean, xhr: XMLHttpRequest) => void;
-
-        _internalCallback: (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest) => void;
     }
 }
 

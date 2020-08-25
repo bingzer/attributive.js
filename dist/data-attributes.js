@@ -19,8 +19,24 @@ var Attv;
     var DataUrl = /** @class */ (function (_super) {
         __extends(DataUrl, _super);
         function DataUrl(name) {
-            return _super.call(this, DataUrl.UniqueId, name, false) || this;
+            var _this = _super.call(this, DataUrl.UniqueId, name, false) || this;
+            _this.dependency.requires.push(DataMethod.UniqueId, DataData.UniqueId);
+            return _this;
         }
+        DataUrl.prototype.getUrl = function (element) {
+            var attributeValue = this.getValue(element);
+            var url = attributeValue.getRawValue(element);
+            // [data-method]
+            var dataMethod = attributeValue.resolver.resolve(DataMethod.UniqueId);
+            var method = dataMethod.getMethod(element);
+            if (method === 'get') {
+                // [data-data]
+                var dataData = attributeValue.resolver.resolve(DataData.UniqueId);
+                var data = dataData.getData(element);
+                url = Attv.Ajax.buildUrl({ url: url, method: method, data: data });
+            }
+            return url;
+        };
         DataUrl.UniqueId = 'DataUrl';
         return DataUrl;
     }(Attv.Attribute));
@@ -52,6 +68,9 @@ var Attv;
         function DataMethod(name) {
             return _super.call(this, DataMethod.UniqueId, name, false) || this;
         }
+        DataMethod.prototype.getMethod = function (element) {
+            return this.getValue(element).getRawValue(element);
+        };
         DataMethod.UniqueId = 'DataMethod';
         DataMethod.DefaultMethod = 'get';
         return DataMethod;
@@ -68,7 +87,10 @@ var Attv;
                 var rawValue = _super.prototype.getRawValue.call(this, element);
                 if (!rawValue && ((_a = element === null || element === void 0 ? void 0 : element.tagName) === null || _a === void 0 ? void 0 : _a.equalsIgnoreCase('form'))) {
                     // get from method attribute
-                    rawValue = element.attr('method') || DataMethod.DefaultMethod;
+                    rawValue = element.attr('method');
+                }
+                if (!rawValue) {
+                    rawValue = DataMethod.DefaultMethod;
                 }
                 return rawValue;
             };
@@ -144,18 +166,35 @@ var Attv;
         function DataTimeout(name) {
             return _super.call(this, DataTimeout.UniqueId, name, false) || this;
         }
+        DataTimeout.prototype.timeout = function (element, fn) {
+            var ms = parseInt(this.getValue(element).getRawValue(element));
+            if (ms) {
+                window.setTimeout(fn, ms);
+            }
+            else {
+                fn();
+            }
+        };
         DataTimeout.UniqueId = 'DataTimeout';
         return DataTimeout;
     }(Attv.Attribute));
     Attv.DataTimeout = DataTimeout;
     /**
-     * [data-timeout]='*'
+     * [data-data]='*'
      */
     var DataData = /** @class */ (function (_super) {
         __extends(DataData, _super);
         function DataData(name) {
             return _super.call(this, DataData.UniqueId, name, false) || this;
         }
+        DataData.prototype.getData = function (element) {
+            var rawValue = this.getValue(element).getRawValue(element);
+            if ((rawValue === null || rawValue === void 0 ? void 0 : rawValue.startsWith('(')) && (rawValue === null || rawValue === void 0 ? void 0 : rawValue.endsWith(')'))) {
+                //do eval
+                rawValue = eval(rawValue);
+            }
+            return Attv.parseJsonOrElse(rawValue);
+        };
         DataData.UniqueId = 'DataData';
         return DataData;
     }(Attv.Attribute));

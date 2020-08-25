@@ -86,6 +86,7 @@ HTMLElement.prototype.attr = function (name: string, value?: any): HTMLElement |
 
 interface String {
     startsWith: (text: string) => boolean;
+    endsWith: (text: string) => boolean;
     equalsIgnoreCase: (other: string) => boolean;
     camelCaseToDash: () => string;
     dashToCamelCase: () => string;
@@ -95,6 +96,12 @@ String.prototype.startsWith = function (text: string): boolean {
     let obj: String = this as String;
 
     return obj.indexOf(text) >= 0;
+}
+
+String.prototype.endsWith = function (text: string): boolean {
+    let obj: String = this as String;
+
+    return obj.indexOf(text, this.length - text.length) !== -1;
 }
 
 String.prototype.camelCaseToDash = function (): string {
@@ -118,12 +125,82 @@ String.prototype.equalsIgnoreCase = function (other: string): boolean {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////// Attv.Ajax ///////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv.Ajax {
+
+    export type AjaxMethod = 'post' | 'put' | 'delete' | 'patch' | 'get' | 'option';
+
+    export interface AjaxOptions {
+        url: string;
+        method?: AjaxMethod;
+        data?: any;
+        callback?: (wasSuccessful: boolean, xhr: XMLHttpRequest) => void;
+        headers?: {name: string, value: string}[];
+
+        _internalCallback?: (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest) => void;
+    }
+        
+    export function sendAjax(options: AjaxOptions) {
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function (e: Event) {
+            let xhr = this as XMLHttpRequest;
+            if (xhr.readyState == 4) {
+                let wasSuccessful = this.status >= 200 && this.status < 400;
+
+                options?._internalCallback(options, wasSuccessful, xhr);
+            }
+        };
+        xhr.onerror = function (e: ProgressEvent<EventTarget>) {
+            options?._internalCallback(options, false, xhr);
+        }
+
+        // header
+        options.headers?.forEach(header => xhr.setRequestHeader(header.name, header.value));
+
+        xhr.open(options.method, options.url, true);
+        xhr.send();
+    }
+
+    export function buildUrl(option: AjaxOptions): string {
+        let url = option.url;
+        if (option.method === 'get') {
+            url += `?${objectToQuerystring(option.data)}`;
+        } 
+        
+        return url;
+    }
+
+    export function objectToQuerystring(any: any): string {
+        if (!any)
+            return '';
+
+        if (isString(any)) {
+            any = parseJsonOrElse(any);
+            if (isString(any)) {
+                return any;
+            }
+        }
+
+        return Object.keys(any)
+                .sort()
+                .map(key => {
+                    return window.encodeURIComponent(key)
+                        + '='
+                        + window.encodeURIComponent(any[key]);
+                })
+                .join('&');
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Base classes ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
 namespace Attv {
 
-    export class AttributeResolver {
+    export class AttributeDepenency {
 
         /**
          * List of attribute Ids that we require
@@ -134,16 +211,19 @@ namespace Attv {
          * List of attribute Id that we use
          */
         uses: string[] = [];
-        
-        constructor (private attributeValue: AttributeValue) {
-            // do nothing
-        }
 
         /**
          * List of all dependencies
          */
         allDependencies(): string[] {
-            return this.requires.concat(this.uses).concat(this.attributeValue.attribute.uniqueId);
+            return this.requires.concat(this.uses);
+        }
+    }
+
+    export class AttributeResolver extends AttributeDepenency {
+        
+        constructor (private attributeValue: AttributeValue) {
+            super();
         }
 
         /**
@@ -179,6 +259,7 @@ namespace Attv {
 
         public readonly description: string;
         public readonly loadedName: string;
+        public readonly dependency: AttributeDepenency = new AttributeDepenency();
 
         /**
          * 
@@ -199,6 +280,13 @@ namespace Attv {
          * @param attributeValues attribute values
          */
         registerAttributeValues(attributeValues: AttributeValue[]) {
+            // add dependency
+            for (let i = 0; i < attributeValues.length; i++) {
+                // add dependency
+                attributeValues[i].resolver.requires.push(...this.dependency.requires);
+                attributeValues[i].resolver.uses.push(...this.dependency.uses);
+            }
+
             this.attributeValues.push(...attributeValues);
         }
 
