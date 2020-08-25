@@ -272,10 +272,54 @@ namespace Attv {
 
             if (Attv.isEvaluatable(rawValue)) {
                 //do eval
-                rawValue = eval(rawValue);
+                rawValue = Attv.eval(rawValue);
             }
 
             return parseJsonOrElse(rawValue);
+        }
+    }
+
+    /**
+     * [data-options]='*'
+     */
+    export class DataOptions extends Attv.Attribute {
+        static readonly UniqueId = 'DataOptions';
+
+        constructor (name: string) {
+            super(DataOptions.UniqueId, name, false);
+        }
+        
+        /**
+         * Returns the option object (json)
+         * @param element the element
+         */
+        getOptions<TOptions>(element: HTMLElement): TOptions {
+            let rawValue = this.getValue(element).getRawValue(element);
+
+            if (Attv.isEvaluatable(rawValue)) {
+                //do eval
+                rawValue = Attv.eval(rawValue);
+            }
+
+            let options = parseJsonOrElse(rawValue) || {} as TOptions;
+
+            return options;
+        }
+    }
+
+    /**
+     * [data-title]='*'
+     */
+    export class DataTitle extends Attv.Attribute {
+        static readonly UniqueId = 'DataTitle';
+
+        constructor (name: string) {
+            super(DataTitle.UniqueId, name, false);
+        }
+        
+        getTitle(element: HTMLElement): string {
+            let title = this.getValue(element).getRawValue(element);
+            return title;
         }
     }
 
@@ -314,7 +358,9 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-timeout', (name: string) => new Attv.DataTimeout(name));
     Attv.registerAttribute('data-interval', (name: string) => new Attv.DataInterval(name));
     Attv.registerAttribute('data-data', (name: string) => new Attv.DataData(name));
+    Attv.registerAttribute('data-options', (name: string) => new Attv.DataOptions(name));
     Attv.registerAttribute('data-cache', (name: string) => new Attv.DataCache(name));
+    Attv.registerAttribute('data-title', (name: string) => new Attv.DataTitle(name));
     Attv.registerAttribute('data-bind', (name: string) => new Attv.DataBind(name));
 });
 

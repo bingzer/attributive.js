@@ -16,6 +16,11 @@
 			<button onclick="alert('ola')" data-wall="confirm" data-content="before ola. are you sure?">Click me for confirm</button>
 		</div>
 
+		<div>
+			<a href="#" data-dialog="default" data-content="This is the content" data-title="This is the title" data-modal="true">Click to show dialog (modal)</a>
+			<button data-dialog="default" data-content="This is the content" data-title="This is the title" data-modal="false">Click to show dialog (non-modal)</button>
+			<button data-dialog="default" data-options="( { title: 'This is the title', content: 'From data-options' } )">Click to show dialog (with data-options)</button>
+		</div>
 	
 		<div>
 			<div data-partial="auto" data-url="partial.html"
@@ -32,10 +37,8 @@
 
 			<form action="sample.json"
 				data-partial="form"
-				data-template-source="#template1"
-				data-target="#container1"
-				data-callback="alert('hi')"
-				data-timeout="2000">
+				data-template-source="#template2"
+				data-target="#container1">
 				
 				<button type="submit">Click here 1</button>
 
@@ -125,6 +128,7 @@
 		<script type="text/javascript" src="data-wall.js"></script>
 		<script type="text/javascript" src="data-partial.js"></script>
 		<script type="text/javascript" src="data-template.js"></script>
+		<script type="text/javascript" src="data-dialog.js"></script>
 
 		<script type="text/javascript" >
 			Attv.loader.pre.unshift(() => {

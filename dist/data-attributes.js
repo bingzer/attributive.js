@@ -285,6 +285,47 @@ var Attv;
     }(Attv.Attribute));
     Attv.DataData = DataData;
     /**
+     * [data-options]='*'
+     */
+    var DataOptions = /** @class */ (function (_super) {
+        __extends(DataOptions, _super);
+        function DataOptions(name) {
+            return _super.call(this, DataOptions.UniqueId, name, false) || this;
+        }
+        /**
+         * Returns the option object (json)
+         * @param element the element
+         */
+        DataOptions.prototype.getOptions = function (element) {
+            var rawValue = this.getValue(element).getRawValue(element);
+            if (Attv.isEvaluatable(rawValue)) {
+                //do eval
+                rawValue = Attv.eval(rawValue);
+            }
+            var options = Attv.parseJsonOrElse(rawValue) || {};
+            return options;
+        };
+        DataOptions.UniqueId = 'DataOptions';
+        return DataOptions;
+    }(Attv.Attribute));
+    Attv.DataOptions = DataOptions;
+    /**
+     * [data-title]='*'
+     */
+    var DataTitle = /** @class */ (function (_super) {
+        __extends(DataTitle, _super);
+        function DataTitle(name) {
+            return _super.call(this, DataTitle.UniqueId, name, false) || this;
+        }
+        DataTitle.prototype.getTitle = function (element) {
+            var title = this.getValue(element).getRawValue(element);
+            return title;
+        };
+        DataTitle.UniqueId = 'DataTitle';
+        return DataTitle;
+    }(Attv.Attribute));
+    Attv.DataTitle = DataTitle;
+    /**
      * [data-bind]='*'
      */
     var DataBind = /** @class */ (function (_super) {
@@ -314,7 +355,9 @@ Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-timeout', function (name) { return new Attv.DataTimeout(name); });
     Attv.registerAttribute('data-interval', function (name) { return new Attv.DataInterval(name); });
     Attv.registerAttribute('data-data', function (name) { return new Attv.DataData(name); });
+    Attv.registerAttribute('data-options', function (name) { return new Attv.DataOptions(name); });
     Attv.registerAttribute('data-cache', function (name) { return new Attv.DataCache(name); });
+    Attv.registerAttribute('data-title', function (name) { return new Attv.DataTitle(name); });
     Attv.registerAttribute('data-bind', function (name) { return new Attv.DataBind(name); });
 });
 ////////////////////////////////////////////////////////////////////////////////////

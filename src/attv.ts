@@ -10,18 +10,40 @@ namespace Attv {
 ////////////////////////////////// PROTOTYPES //////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
-interface HTMLElement  {
-    /**
-     * Attribute helper.
-     * value can be an object
-     */
-    attr: (name?: string | Attv.Attribute, value?: any) => HTMLElement | any;
+interface Element {
 
     /**
      * Gets/Sets html.
      * Will execute javascript inside also
      */
     html: (html?: string) => string | any;
+}
+
+Element.prototype.html = function (html?: string): string | any {
+    let element = this as HTMLElement;
+
+    if (Attv.isUndefined(html)) {
+        return element.innerHTML;
+    } else {
+        element.innerHTML = html;
+
+        if (html) {
+            // look for scripts
+            let innerHtmlElement = Attv.createHTMLElement(html);
+            let scripts = innerHtmlElement.querySelectorAll('script');
+            for (let i = 0; i < scripts.length; i++) {
+                eval(scripts[i].text);
+            }
+        }
+    }
+}
+
+interface HTMLElement  {
+    /**
+     * Attribute helper.
+     * value can be an object
+     */
+    attr: (name?: string | Attv.Attribute, value?: any) => HTMLElement | any;
 }
 
 HTMLElement.prototype.attr = function (name: string, value?: any): HTMLElement | any {
@@ -87,25 +109,6 @@ HTMLElement.prototype.attr = function (name: string, value?: any): HTMLElement |
         }
 
         return Attv.parseJsonOrElse(value);
-    }
-}
-
-HTMLElement.prototype.html = function (html?: string): string | any {
-    let element = this as HTMLElement;
-
-    if (!html) {
-        return element.innerHTML;
-    } else {
-        element.innerHTML = html;
-
-        if (html) {
-            // look for scripts
-            let innerHtmlElement = Attv.createHTMLElement(html);
-            let scripts = innerHtmlElement.querySelectorAll('script');
-            for (let i = 0; i < scripts.length; i++) {
-                eval(scripts[i].text);
-            }
-        }
     }
 }
 
@@ -393,7 +396,7 @@ namespace Attv {
          * Returns raw string
          */
         getRawValue(element: HTMLElement): string {
-            return this.value || element?.attr(this.attribute.name);
+            return this.value?.toString() || element?.attr(this.attribute.name);
         }
     
         /**

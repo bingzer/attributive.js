@@ -18,6 +18,23 @@ var Attv;
      */
     Attv.version = '0.0.1';
 })(Attv || (Attv = {}));
+Element.prototype.html = function (html) {
+    var element = this;
+    if (Attv.isUndefined(html)) {
+        return element.innerHTML;
+    }
+    else {
+        element.innerHTML = html;
+        if (html) {
+            // look for scripts
+            var innerHtmlElement = Attv.createHTMLElement(html);
+            var scripts = innerHtmlElement.querySelectorAll('script');
+            for (var i = 0; i < scripts.length; i++) {
+                eval(scripts[i].text);
+            }
+        }
+    }
+};
 HTMLElement.prototype.attr = function (name, value) {
     var _a, _b;
     name = (_b = (_a = name === null || name === void 0 ? void 0 : name.toString()) === null || _a === void 0 ? void 0 : _a.replace('[', '')) === null || _b === void 0 ? void 0 : _b.replace(']', '');
@@ -76,23 +93,6 @@ HTMLElement.prototype.attr = function (name, value) {
             value = element.getAttribute(name) || undefined;
         }
         return Attv.parseJsonOrElse(value);
-    }
-};
-HTMLElement.prototype.html = function (html) {
-    var element = this;
-    if (!html) {
-        return element.innerHTML;
-    }
-    else {
-        element.innerHTML = html;
-        if (html) {
-            // look for scripts
-            var innerHtmlElement = Attv.createHTMLElement(html);
-            var scripts = innerHtmlElement.querySelectorAll('script');
-            for (var i = 0; i < scripts.length; i++) {
-                eval(scripts[i].text);
-            }
-        }
     }
 };
 String.prototype.contains = function (text) {
@@ -327,7 +327,8 @@ String.prototype.equalsIgnoreCase = function (other) {
          * Returns raw string
          */
         AttributeValue.prototype.getRawValue = function (element) {
-            return this.value || (element === null || element === void 0 ? void 0 : element.attr(this.attribute.name));
+            var _a;
+            return ((_a = this.value) === null || _a === void 0 ? void 0 : _a.toString()) || (element === null || element === void 0 ? void 0 : element.attr(this.attribute.name));
         };
         /**
          * Find all element and construct

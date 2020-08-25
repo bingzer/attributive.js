@@ -6,3 +6,6 @@ Unobtrusive Vanilla javascript
 * Plug N Play
 * Extensible
 * Self Documenting
+
+# What is it?
+A library that uses DOM attributes to ...

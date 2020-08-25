@@ -32,7 +32,8 @@ namespace Attv {
             constructor (attributeValue: string, attribute: Attv.Attribute, validators: Validators.AttributeValidator[] = []) {
                 super(attributeValue, attribute, validators);
 
-                this.resolver.uses.push(DataRenderer.UniqueId, DataTemplateHtml.UniqueId);
+                this.resolver.uses.push(DataRenderer.UniqueId);
+                this.resolver.internals.push(DataTemplateHtml.UniqueId);
             }
 
             loadElement(element: HTMLElement): boolean {
@@ -85,6 +86,9 @@ namespace Attv {
     }
 
 
+    /**
+     * [data-template-html]="*"
+     */
     export class DataTemplateHtml extends Attribute {
         static readonly UniqueId = 'DataTemplateHtml';
 
@@ -93,6 +97,9 @@ namespace Attv {
         }
     }
 
+    /**
+     * [data-template-source]="*"
+     */
     export class DataTemplateSource extends Attribute {
         static readonly UniqueId = 'DataTemplateSource';
 

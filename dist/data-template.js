@@ -42,7 +42,8 @@ var Attv;
             function DefaultAttributeValue(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = []; }
                 var _this = _super.call(this, attributeValue, attribute, validators) || this;
-                _this.resolver.uses.push(Attv.DataRenderer.UniqueId, DataTemplateHtml.UniqueId);
+                _this.resolver.uses.push(Attv.DataRenderer.UniqueId);
+                _this.resolver.internals.push(DataTemplateHtml.UniqueId);
                 return _this;
             }
             DefaultAttributeValue.prototype.loadElement = function (element) {
@@ -87,6 +88,9 @@ var Attv;
         }(DefaultAttributeValue));
         DataTemplate.ScriptAttributeValue = ScriptAttributeValue;
     })(DataTemplate = Attv.DataTemplate || (Attv.DataTemplate = {}));
+    /**
+     * [data-template-html]="*"
+     */
     var DataTemplateHtml = /** @class */ (function (_super) {
         __extends(DataTemplateHtml, _super);
         function DataTemplateHtml(name) {
@@ -98,6 +102,9 @@ var Attv;
         return DataTemplateHtml;
     }(Attv.Attribute));
     Attv.DataTemplateHtml = DataTemplateHtml;
+    /**
+     * [data-template-source]="*"
+     */
     var DataTemplateSource = /** @class */ (function (_super) {
         __extends(DataTemplateSource, _super);
         function DataTemplateSource(name) {
