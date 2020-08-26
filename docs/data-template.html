@@ -1,0 +1,33 @@
+<div>
+    <h3><code>[data-template]</code></h3>
+
+    <div id="template0" data-template="default">
+        Just a simple super simple template
+    </div>
+
+    <div id="template2" data-template="default" data-renderer="json2html">
+        <h4><strong>This is from div template</strong></h4>
+        <ul data-bind="$root">
+            <li>
+                <p>
+                    Name: <span data-bind="name"></span>
+                </p>
+                <p>
+                    contact <br/>
+                    Email: <span data-bind="contact.email"></span><br/>
+                    Phone: <span data-bind="contact.phone"></span><br/>
+                </p>
+                <p>
+                    Friends
+                    <ul data-bind="friends">
+                        <li>
+                            Friends number <span data-bind="id"></span>. name = <span data-bind="name"></span>
+                        </li>
+                    </ul>
+                </p>
+            </li>
+        </ul>
+    </div>
+
+
+</div>

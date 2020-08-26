@@ -32,7 +32,9 @@ Element.prototype.html = function (html?: string): string | any {
             let innerHtmlElement = Attv.createHTMLElement(html);
             let scripts = innerHtmlElement.querySelectorAll('script');
             for (let i = 0; i < scripts.length; i++) {
-                eval(scripts[i].text);
+                if(scripts[i].type?.toLowerCase()?.contains('javascript')) {
+                    eval(scripts[i].text);
+                }
             }
         }
     }
@@ -861,6 +863,8 @@ namespace Attv {
             root = document.querySelector('html');
         }
 
+        Attv.log('debug', 'Loading element', root);
+        
         // auto load all attvs that are marked auto load
         attributes.filter(attribute => attribute.isAutoLoad).forEach((attribute, index) => {
             let elements = root.querySelectorAll(`${attribute}`);

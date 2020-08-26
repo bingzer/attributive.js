@@ -42,19 +42,17 @@ namespace Attv.DataTab {
             element.querySelectorAll(dataTabNav.toString()).forEach((navElement: HTMLElement) => {
                 let dataActive = this.resolver.resolve<DataActive>(DataActive.UniqueId);
 
-                navElement.onclick = (evt: Event) => this.displayContent(navElement)
+                navElement.onclick = (evt: Event) => this.displayContent(element.parentElement, navElement)
 
                 if (dataActive.isActive(navElement)) {
-                    this.displayContent(navElement);
+                    this.displayContent(element.parentElement, navElement);
                 }
             });
-
-
 
             return true;
         }
 
-        private displayContent(navElement: HTMLElement): boolean {
+        private displayContent(tabElement: HTMLElement, navElement: HTMLElement): boolean {
             let dataActive = this.resolver.resolve<DataActive>(DataActive.UniqueId);
             let dataTabNav = this.resolver.resolve<DataTabNav>(DataTabNav.UniqueId);
             let dataTabContent = this.resolver.resolve<DataTabContent>(DataTabContent.UniqueId);
@@ -63,7 +61,7 @@ namespace Attv.DataTab {
             navElement.parentElement.querySelectorAll(dataTabNav.toString()).forEach((e: HTMLElement) => e.attr(dataActive, false));
 
             let contentName = dataTabNav.getValue(navElement).getRawValue(navElement);
-            let contentElement = document.querySelector(`[${dataTabContent.name}="${contentName}"]`) as HTMLElement;
+            let contentElement = tabElement.querySelector(`[${dataTabContent.name}="${contentName}"]`) as HTMLElement;
             if (contentElement) {
                 let parentElement = contentElement.parentElement;
                 // hide all children
@@ -94,6 +92,8 @@ namespace Attv.DataTab {
                 dataPartial.renderPartial(contentElement);
                 return;
             }
+
+            Attv.loadElements(contentElement);
         }
     }
 

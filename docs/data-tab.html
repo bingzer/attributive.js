@@ -1,0 +1,22 @@
+<div>
+    <h3><code>[data-tab]</code></h3>
+
+    <div>
+        <ul data-tab="default">
+            <li data-tab-nav="intro" data-active="true">Existing content</li>
+            <li data-tab-nav="data-content">Using [data-content]</li>
+            <li data-tab-nav="data-url">Using [data-url]</li>
+        </ul>
+        <div>
+            <div data-tab-content="intro">
+                <h3>This is content from inside the html</h3>
+            </div>
+            <div data-tab-content="data-wall" data-content="This is the content from inside the attribute">
+                <div data-loading="default"></div>
+            </div>
+            <div data-tab-content="data-url" data-partial="tab" data-url="/samples/partial.html">
+                <div data-loading="default"></div>
+            </div>
+        </div>
+    </div>
+</div>

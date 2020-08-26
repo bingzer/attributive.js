@@ -1,0 +1,62 @@
+<div>
+    <h3><code>[data-partial]</code></h3>
+
+    <div data-partial="auto" data-url="/docs/samples/partial.html" data-data="({name: 'value'})">uses [data-partial]</div>
+
+
+    <form action="/docs/samples/sample.json"
+        data-partial="form"
+        data-template-source="#template1"
+        data-target="#container1">
+        
+        <button type="submit">Click here (using #template1)</button>
+
+        <div id="container1">
+            <p>Content should be here</p>
+        </div>
+    </form>
+    
+        
+    <button type="submit"
+        data-partial="click"
+        data-url="/docs/samples/partial.html"
+        data-target="#container2">Click here 2222</button>
+
+    <div id="container2">
+        <p>Content should be here *container2</p>
+    </div>
+    <!-- 
+    <div data-partial="auto"></div>
+
+    <button data-partial="click" data-url="sample.json">Click me</button>
+
+    <div data-partial="lazy" data-url="sample.json"></div>
+
+    <div data-partial="nothing" data-url="sample.json"></div> -->
+
+    
+</div>
+
+<script type="text/html" id="template1" data-template="script" data-renderer="json2html">
+    <h4><strong>This is from script template</strong></h4>
+    <ul data-bind="$root">
+        <li>
+            <p>
+                Name: <span data-bind="name"></span>
+            </p>
+            <p>
+                contact <br/>
+                Email: <span data-bind="contact.email"></span><br/>
+                Phone: <span data-bind="contact.phone"></span><br/>
+            </p>
+            <p>
+                Friends
+                <ul data-bind="friends">
+                    <li>
+                        Friends number <span data-bind="id"></span>. name = <span data-bind="name"></span>
+                    </li>
+                </ul>
+            </p>
+        </li>
+    </ul>
+</script>
