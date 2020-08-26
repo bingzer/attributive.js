@@ -13,6 +13,9 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var Attv;
 (function (Attv) {
+    /**
+     * [data-partial]
+     */
     var DataPartial = /** @class */ (function (_super) {
         __extends(DataPartial, _super);
         function DataPartial(name) {

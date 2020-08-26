@@ -311,6 +311,7 @@ namespace Attv {
         public readonly description: string;
         public readonly loadedName: string;
         public readonly dependency: AttributeDependency = new AttributeDependency();
+        public configuration: AttributeConfiguration;
 
         /**
          * 
@@ -433,7 +434,7 @@ namespace Attv {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// Validators /////////////////////////////////////
+////////////////////////////////// Validators //////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
 namespace Attv.Validators {
@@ -597,6 +598,32 @@ namespace Attv {
             return ['log', 'warning', 'error', 'debug'];
         }
     }
+    
+    /**
+     * Attribute configuration
+     */
+    export class AttributeConfiguration {
+        style: string;
+
+        constructor (private attribute: Attribute) {
+            // do nothing
+        }
+    
+        commit() {
+            if (this.style) {
+                let elementId = this.attribute.name;
+                let styleElement = document.querySelector(`style#${elementId}`) as HTMLStyleElement;
+                if (!styleElement) {
+                    styleElement = Attv.createHTMLElement('<style>') as HTMLStyleElement;
+                    styleElement.id = elementId;
+        
+                    document.head.append(styleElement);
+                }
+        
+                styleElement.innerHTML = this.style;
+            }
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -604,6 +631,7 @@ namespace Attv {
 ////////////////////////////////////////////////////////////////////////////////////
 
 namespace Attv {
+    let idCounter = 0;
 
     export function isUndefined(any: any): boolean {
         return isType(any, 'undefined');
@@ -643,8 +671,19 @@ namespace Attv {
 
     export function createHTMLElement(any: string | HTMLElement): HTMLElement {
         if (isString(any)) {
-            let htmlElement = document.createElement('div');
-            htmlElement.innerHTML = any as string;
+            let tag: string = any.toString();
+            if (tag.startsWith('<') && tag.endsWith('>')) {
+                tag = tag.substring(1, tag.length - 1);
+            }
+
+            let htmlElement: HTMLElement;
+
+            try {
+                htmlElement = document.createElement(tag as string);
+            } catch (e) {
+                htmlElement = document.createElement('div');
+                htmlElement.innerHTML = tag as string;
+            }
 
             any = htmlElement;
         }
@@ -660,6 +699,12 @@ namespace Attv {
         }
 
         return any;
+    }
+
+    export function generateElementId(attributeId: string) {
+        attributeId = attributeId.camelCaseToDash();
+        idCounter++;
+        return attributeId + '-' + idCounter;
     }
 
     export function log(...data: any[]) {
@@ -831,6 +876,9 @@ namespace Attv {
                 Attv.log('debug', `${attributeValues}`, attributeValues);
             }
 
+            // commit configuration if any
+            attribute.configuration?.commit();
+
             return attribute;
         }
     }
@@ -884,4 +932,8 @@ Attv.onDocumentReady(() => {
     for (var i = 0; i < Attv.loader.post.length; i++) {
         Attv.loader.post[i]();
     }
+
+    Attv.loader.init = [];
+    Attv.loader.pre = [];
+    Attv.loader.post = [];
 });

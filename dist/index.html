@@ -143,6 +143,12 @@
 			// 			list.push(new Attv.DataUrl.DefaultAttributeValue(attribute));
 			// 		});
 			// });
+			
+			Attv.loader.post.push(() => {
+				let dataDialog = Attv.getAttribute('DataDialog');
+				dataDialog.configuration.style = 'dialog.attv-dialog { border: 1px solid blue }';
+				dataDialog.configuration.commit();
+			});
 		</script>
 	</body>
 </html>

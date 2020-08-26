@@ -360,7 +360,7 @@ String.prototype.equalsIgnoreCase = function (other) {
     Attv.AttributeValue = AttributeValue;
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// Validators /////////////////////////////////////
+////////////////////////////////// Validators //////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 (function (Attv) {
     var Validators;
@@ -500,11 +500,35 @@ String.prototype.equalsIgnoreCase = function (other) {
         return DefaultConfiguration;
     }());
     Attv.DefaultConfiguration = DefaultConfiguration;
+    /**
+     * Attribute configuration
+     */
+    var AttributeConfiguration = /** @class */ (function () {
+        function AttributeConfiguration(attribute) {
+            this.attribute = attribute;
+            // do nothing
+        }
+        AttributeConfiguration.prototype.commit = function () {
+            if (this.style) {
+                var elementId = this.attribute.name;
+                var styleElement = document.querySelector("style#" + elementId);
+                if (!styleElement) {
+                    styleElement = Attv.createHTMLElement('<style>');
+                    styleElement.id = elementId;
+                    document.head.append(styleElement);
+                }
+                styleElement.innerHTML = this.style;
+            }
+        };
+        return AttributeConfiguration;
+    }());
+    Attv.AttributeConfiguration = AttributeConfiguration;
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Helper functions ////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 (function (Attv) {
+    var idCounter = 0;
     function isUndefined(any) {
         return isType(any, 'undefined');
     }
@@ -544,8 +568,18 @@ String.prototype.equalsIgnoreCase = function (other) {
     Attv.navigate = navigate;
     function createHTMLElement(any) {
         if (isString(any)) {
-            var htmlElement = document.createElement('div');
-            htmlElement.innerHTML = any;
+            var tag = any.toString();
+            if (tag.startsWith('<') && tag.endsWith('>')) {
+                tag = tag.substring(1, tag.length - 1);
+            }
+            var htmlElement = void 0;
+            try {
+                htmlElement = document.createElement(tag);
+            }
+            catch (e) {
+                htmlElement = document.createElement('div');
+                htmlElement.innerHTML = tag;
+            }
             any = htmlElement;
         }
         return any;
@@ -561,6 +595,12 @@ String.prototype.equalsIgnoreCase = function (other) {
         return any;
     }
     Attv.parseJsonOrElse = parseJsonOrElse;
+    function generateElementId(attributeId) {
+        attributeId = attributeId.camelCaseToDash();
+        idCounter++;
+        return attributeId + '-' + idCounter;
+    }
+    Attv.generateElementId = generateElementId;
     function log() {
         var _a;
         var data = [];
@@ -681,6 +721,7 @@ String.prototype.equalsIgnoreCase = function (other) {
             // do nothing
         }
         AttributeRegistration.prototype.register = function () {
+            var _a;
             var attribute = this.fn(this.attributeName);
             Attv.log('debug', "" + attribute, attribute);
             var attributeValues = [];
@@ -695,6 +736,8 @@ String.prototype.equalsIgnoreCase = function (other) {
             if (attributeValues.length > 0) {
                 Attv.log('debug', "" + attributeValues, attributeValues);
             }
+            // commit configuration if any
+            (_a = attribute.configuration) === null || _a === void 0 ? void 0 : _a.commit();
             return attribute;
         };
         return AttributeRegistration;
@@ -741,5 +784,8 @@ Attv.onDocumentReady(function () {
     for (var i = 0; i < Attv.loader.post.length; i++) {
         Attv.loader.post[i]();
     }
+    Attv.loader.init = [];
+    Attv.loader.pre = [];
+    Attv.loader.post = [];
 });
 //# sourceMappingURL=attv.js.map

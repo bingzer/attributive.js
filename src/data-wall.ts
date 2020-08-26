@@ -1,5 +1,8 @@
 namespace Attv {
     
+    /**
+     * [data-wall]="alert"
+     */
     export class DataWall extends Attv.Attribute {
         static readonly UniqueId = "DataWall";
 
@@ -11,6 +14,8 @@ namespace Attv {
         }
 
     }
+
+    // --- AttributeValues
 
     export namespace DataWall {
 

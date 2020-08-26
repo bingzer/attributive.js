@@ -85,7 +85,6 @@ namespace Attv {
         }
     }
 
-
     /**
      * [data-template-html]="*"
      */

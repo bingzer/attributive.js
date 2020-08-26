@@ -1,5 +1,8 @@
 namespace Attv {
     
+    /**
+     * [data-partial]
+     */
     export class DataPartial extends Attv.Attribute {
         static readonly UniqueId = "DataPartial";
 

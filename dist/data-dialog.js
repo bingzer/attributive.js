@@ -13,13 +13,16 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var Attv;
 (function (Attv) {
+    /**
+     * [data-dialog]
+     */
     var DataDialog = /** @class */ (function (_super) {
         __extends(DataDialog, _super);
         function DataDialog(name) {
             var _this = _super.call(this, DataDialog.UniqueId, name, true) || this;
-            _this.configuration = new DataDialog.DialogConfiguration();
             _this.dependency.uses.push(Attv.DataContent.UniqueId, Attv.DataUrl.UniqueId, DataModal.UniqueId, Attv.DataTitle.UniqueId, Attv.DataOptions.UniqueId, Attv.DataPartial.UniqueId);
             _this.dependency.internals.push(Attv.DataCallback.UniqueId);
+            _this.configuration = new DataDialog.AttributeConfiguration(_this);
             return _this;
         }
         DataDialog.prototype.show = function (element) {
@@ -29,6 +32,7 @@ var Attv;
         return DataDialog;
     }(Attv.Attribute));
     Attv.DataDialog = DataDialog;
+    // --- AttributeValues
     (function (DataDialog) {
         /**
          * [data-dialog]="default|click"
@@ -51,7 +55,6 @@ var Attv;
                 return true;
             };
             DefaultAttributeValue.prototype.show = function (optionsOrElements) {
-                var dataDialog = this.attribute;
                 var options;
                 if (optionsOrElements instanceof HTMLElement) {
                     var htmlElement_1 = optionsOrElements;
@@ -71,10 +74,11 @@ var Attv;
                 else {
                     options = optionsOrElements;
                 }
-                options.templateHtml = dataDialog.configuration.templateHtml;
-                options.templateStyle = dataDialog.configuration.templateStyle;
-                options.titleSelector = dataDialog.configuration.titleSelector;
-                options.contentSelector = dataDialog.configuration.contentSelector;
+                var configuration = this.attribute.configuration;
+                options.templateHtml = configuration.templateHtml;
+                options.style = configuration.style;
+                options.titleSelector = configuration.titleSelector;
+                options.contentSelector = configuration.contentSelector;
                 return this.doShow(options);
             };
             DefaultAttributeValue.prototype.doShow = function (options) {
@@ -101,16 +105,51 @@ var Attv;
             return DefaultAttributeValue;
         }(Attv.AttributeValue));
         DataDialog.DefaultAttributeValue = DefaultAttributeValue;
-        var DialogConfiguration = /** @class */ (function () {
-            function DialogConfiguration() {
-                this.templateHtml = "\n<dialog class=\"attv-dialog\">\n <div class=\"attv-dialog-header\">\n  <div class=\"attv-dialog-header-content\">\n   <h3 class=\"attv-dialog-header-title\"></h3>\n  </div>\n </div>\n <div class=\"attv-dialog-body\">\n  <div class=\"attv-dialog-body-content\"></div>\n </div>\n <div class=\"attv-dialog-footer\">\n  <div class=\"attv-dialog-footer-content\"></div>\n </div>\n</dialog>";
-                this.titleSelector = "h3.attv-dialog-header-title";
-                this.contentSelector = '.attv-dialog-body-content';
-                this.templateStyle = "";
+    })(DataDialog = Attv.DataDialog || (Attv.DataDialog = {}));
+    /**
+     * [data-modal]="true|false"
+     */
+    var DataModal = /** @class */ (function (_super) {
+        __extends(DataModal, _super);
+        function DataModal(name) {
+            return _super.call(this, DataModal.UniqueId, name, false) || this;
+        }
+        DataModal.prototype.isModal = function (element) {
+            var rawValue = this.getValue(element).getRawValue(element);
+            return rawValue === 'true';
+        };
+        DataModal.UniqueId = "DataModal";
+        return DataModal;
+    }(Attv.Attribute));
+    Attv.DataModal = DataModal;
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////// AttributeConfiguration ////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
+    var DataDialog;
+    (function (DataDialog) {
+        var AttributeConfiguration = /** @class */ (function (_super) {
+            __extends(AttributeConfiguration, _super);
+            function AttributeConfiguration() {
+                var _this = _super !== null && _super.apply(this, arguments) || this;
+                _this.style = "\ndialog.attv-dialog {\n    border: 1px solid gray;\n}\n";
+                _this.templateHtml = "\n<dialog class=\"attv-dialog\">\n<div class=\"attv-dialog-header\">\n<div class=\"attv-dialog-header-content\">\n<h3 class=\"attv-dialog-header-title\"></h3>\n</div>\n</div>\n<div class=\"attv-dialog-body\">\n<div class=\"attv-dialog-body-content\"></div>\n</div>\n<div class=\"attv-dialog-footer\">\n<div class=\"attv-dialog-footer-content\"></div>\n</div>\n</dialog>";
+                _this.titleSelector = "h3.attv-dialog-header-title";
+                _this.contentSelector = '.attv-dialog-body-content';
+                return _this;
             }
-            return DialogConfiguration;
-        }());
-        DataDialog.DialogConfiguration = DialogConfiguration;
+            return AttributeConfiguration;
+        }(Attv.AttributeConfiguration));
+        DataDialog.AttributeConfiguration = AttributeConfiguration;
+    })(DataDialog = Attv.DataDialog || (Attv.DataDialog = {}));
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////// Attributevalues /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
+    var DataDialog;
+    (function (DataDialog) {
         /**
          * [data-partial]="dialog"
          */
@@ -132,23 +171,10 @@ var Attv;
         }(Attv.DataPartial.DefaultAttributeValue));
         DataDialog.DataPartialDialogAttributeValue = DataPartialDialogAttributeValue;
     })(DataDialog = Attv.DataDialog || (Attv.DataDialog = {}));
-    /**
-     * [data-modal]="true|false"
-     */
-    var DataModal = /** @class */ (function (_super) {
-        __extends(DataModal, _super);
-        function DataModal(name) {
-            return _super.call(this, DataModal.UniqueId, name, false) || this;
-        }
-        DataModal.prototype.isModal = function (element) {
-            var rawValue = this.getValue(element).getRawValue(element);
-            return rawValue === 'true';
-        };
-        DataModal.UniqueId = "DataModal";
-        return DataModal;
-    }(Attv.Attribute));
-    Attv.DataModal = DataModal;
 })(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// Loader ////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-dialog', function (attributeName) { return new Attv.DataDialog(attributeName); }, function (attribute, list) {
         list.push(new Attv.DataDialog.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));

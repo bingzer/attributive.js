@@ -13,6 +13,9 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var Attv;
 (function (Attv) {
+    /**
+     * [data-wall]="alert"
+     */
     var DataWall = /** @class */ (function (_super) {
         __extends(DataWall, _super);
         function DataWall(name) {
@@ -26,6 +29,7 @@ var Attv;
         return DataWall;
     }(Attv.Attribute));
     Attv.DataWall = DataWall;
+    // --- AttributeValues
     (function (DataWall) {
         /**
          * [data-wall]="alert"

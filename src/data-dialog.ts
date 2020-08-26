@@ -1,20 +1,25 @@
 namespace Attv {
     
+    /**
+     * [data-dialog]
+     */
     export class DataDialog extends Attv.Attribute {
         static readonly UniqueId = "DataDialog";
-        public configuration = new DataDialog.DialogConfiguration();
 
         constructor (name: string) {
             super(DataDialog.UniqueId, name, true);
 
             this.dependency.uses.push(DataContent.UniqueId, DataUrl.UniqueId, DataModal.UniqueId, DataTitle.UniqueId, DataOptions.UniqueId, DataPartial.UniqueId);
             this.dependency.internals.push(DataCallback.UniqueId);
+            this.configuration = new DataDialog.AttributeConfiguration(this);
         }
 
         show(element: HTMLElement): HTMLDialogElement {
             return this.getValue<DataDialog.DefaultAttributeValue>(element).show(element);
         }
     }
+
+    // --- AttributeValues
 
     export namespace DataDialog {
 
@@ -43,8 +48,6 @@ namespace Attv {
             }
 
             show(optionsOrElements: DataDialog.DialogOptions | HTMLElement): HTMLDialogElement {
-                let dataDialog = this.attribute as DataDialog;
-
                 let options: DataDialog.DialogOptions;
 
                 if (optionsOrElements instanceof HTMLElement) {
@@ -66,10 +69,11 @@ namespace Attv {
                     options = optionsOrElements as DataDialog.DialogOptions;
                 }
 
-                options.templateHtml = dataDialog.configuration.templateHtml;
-                options.templateStyle = dataDialog.configuration.templateStyle;
-                options.titleSelector = dataDialog.configuration.titleSelector;
-                options.contentSelector = dataDialog.configuration.contentSelector;
+                let configuration = this.attribute.configuration as DataDialog.AttributeConfiguration;
+                options.templateHtml = configuration.templateHtml;
+                options.style = configuration.style;
+                options.titleSelector = configuration.titleSelector;
+                options.contentSelector = configuration.contentSelector;
 
                 return this.doShow(options);
             }
@@ -101,59 +105,6 @@ namespace Attv {
                 return dialogElement;
             }
         }
-        
-        export class DialogConfiguration {
-            templateHtml = `
-<dialog class="attv-dialog">
- <div class="attv-dialog-header">
-  <div class="attv-dialog-header-content">
-   <h3 class="attv-dialog-header-title"></h3>
-  </div>
- </div>
- <div class="attv-dialog-body">
-  <div class="attv-dialog-body-content"></div>
- </div>
- <div class="attv-dialog-footer">
-  <div class="attv-dialog-footer-content"></div>
- </div>
-</dialog>`;
-            titleSelector = "h3.attv-dialog-header-title";
-            contentSelector = '.attv-dialog-body-content';
-            templateStyle = ``;
-        }
-
-        export interface DialogOptions extends DialogConfiguration {
-            isModal: boolean;
-            content: string;
-            title?: string;
-            closeOnEscape?: boolean;
-            closeOnOutsideClick?: boolean;
-            size: string;
-
-            callback: (contentElement: HTMLElement) => void;
-        }
-
-        /**
-         * [data-partial]="dialog"
-         */
-        export class DataPartialDialogAttributeValue extends Attv.DataPartial.DefaultAttributeValue {
-            
-            constructor (attribute: Attv.Attribute) {
-                super('dialog', attribute)
-            }
-
-            protected doRender(element: HTMLElement, content?: string, options?: Ajax.AjaxOptions) {
-                // [data-template-source]                
-                let html = this.resolver.resolve<DataTemplateSource>(DataTemplateSource.UniqueId).renderTemplate(element, content);
-
-                // [data-target]
-                let targetElement = this.resolver.resolve<DataTarget>(DataTarget.UniqueId).getTargetElement(element) || (options as any)?.targetElement as HTMLElement;
-
-                targetElement.html(html);
-
-                Attv.loadElements(targetElement);
-            }
-        }
     }
 
     /**
@@ -173,6 +124,82 @@ namespace Attv {
         }
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////// AttributeConfiguration ////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv.DataDialog {
+        
+    export class AttributeConfiguration extends Attv.AttributeConfiguration {
+        style = `
+dialog.attv-dialog {
+    border: 1px solid gray;
+}
+`;
+        templateHtml = `
+<dialog class="attv-dialog">
+<div class="attv-dialog-header">
+<div class="attv-dialog-header-content">
+<h3 class="attv-dialog-header-title"></h3>
+</div>
+</div>
+<div class="attv-dialog-body">
+<div class="attv-dialog-body-content"></div>
+</div>
+<div class="attv-dialog-footer">
+<div class="attv-dialog-footer-content"></div>
+</div>
+</dialog>`;
+        titleSelector = "h3.attv-dialog-header-title";
+        contentSelector = '.attv-dialog-body-content';
+    }
+
+    export interface DialogOptions extends AttributeConfiguration {
+        isModal: boolean;
+        content: string;
+        title?: string;
+        closeOnEscape?: boolean;
+        closeOnOutsideClick?: boolean;
+        size: string;
+
+        callback: (contentElement: HTMLElement) => void;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////// Attributevalues /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv.DataDialog {
+
+    /**
+     * [data-partial]="dialog"
+     */
+    export class DataPartialDialogAttributeValue extends Attv.DataPartial.DefaultAttributeValue {
+        
+        constructor (attribute: Attv.Attribute) {
+            super('dialog', attribute)
+        }
+
+        protected doRender(element: HTMLElement, content?: string, options?: Ajax.AjaxOptions) {
+            // [data-template-source]                
+            let html = this.resolver.resolve<DataTemplateSource>(DataTemplateSource.UniqueId).renderTemplate(element, content);
+
+            // [data-target]
+            let targetElement = this.resolver.resolve<DataTarget>(DataTarget.UniqueId).getTargetElement(element) || (options as any)?.targetElement as HTMLElement;
+
+            targetElement.html(html);
+
+            Attv.loadElements(targetElement);
+        }
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// Loader ////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-dialog', 
