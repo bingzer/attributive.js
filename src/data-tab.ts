@@ -9,6 +9,8 @@ namespace Attv {
         constructor (public name: string) {
             super(DataTab.UniqueId, name, true);
 
+            this.isStrict = true;
+
             this.dependency.uses.push(DataTabContent.UniqueId, DataTabNav.UniqueId);
             this.configuration = new DataTab.AttributeConfiguration(this);
         }
@@ -135,7 +137,7 @@ namespace Attv {
         static readonly UniqueId = 'DataTabNav';
 
         constructor (public name: string) {
-            super(DataTabNav.UniqueId, name, true);
+            super(DataTabNav.UniqueId, name);
         }
 
     }
@@ -154,7 +156,7 @@ namespace Attv {
         static readonly UniqueId = 'DataTabContent';
 
         constructor (public name: string) {
-            super(DataTabContent.UniqueId, name, true);
+            super(DataTabContent.UniqueId, name);
         }
 
     }
@@ -206,17 +208,6 @@ namespace Attv.DataTab {
     border-top: none;
 }
 `;
-    }
-
-    export interface DialogOptions extends AttributeConfiguration {
-        isModal: boolean;
-        content: string;
-        title?: string;
-        closeOnEscape?: boolean;
-        closeOnOutsideClick?: boolean;
-        size: string;
-
-        callback: (contentElement: HTMLElement) => void;
     }
 }
 

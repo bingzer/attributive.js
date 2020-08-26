@@ -20,6 +20,7 @@ var Attv;
         __extends(DataDialog, _super);
         function DataDialog(name) {
             var _this = _super.call(this, DataDialog.UniqueId, name, true) || this;
+            _this.isStrict = true;
             _this.dependency.uses.push(Attv.DataContent.UniqueId, Attv.DataUrl.UniqueId, Attv.DataModal.UniqueId, Attv.DataTitle.UniqueId, Attv.DataOptions.UniqueId, Attv.DataPartial.UniqueId);
             _this.dependency.internals.push(Attv.DataCallback.UniqueId);
             _this.configuration = new DataDialog.AttributeConfiguration(_this);

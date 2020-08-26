@@ -9,6 +9,8 @@ namespace Attv {
         constructor (public name: string) {
             super(DataWall.UniqueId, name, true);
 
+            this.isStrict = true;
+
             this.dependency.uses.push(DataContent.UniqueId, DataUrl.UniqueId);
             this.dependency.internals.push(DataCallback.UniqueId);
         }
@@ -72,9 +74,10 @@ namespace Attv {
          * [data-wall]="confirm"
          */
         export class ConfirmAttributeValue extends DefaultAttributeValue {
-            constructor (attribute: Attv.Attribute, 
+            constructor (attributeValue: string,
+                attribute: Attv.Attribute, 
                 validators: Validators.AttributeValidator[] = []) {
-                super('confirm', attribute, validators);
+                super(attributeValue, attribute, validators);
             }
 
             protected onclick(element: HTMLElement, ev: Event): boolean {
@@ -97,6 +100,8 @@ Attv.loader.pre.push(() => {
         (attributeName: string) => new Attv.DataWall(attributeName),
         (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
             list.push(new Attv.DataWall.DefaultAttributeValue('alert', attribute));
-            list.push(new Attv.DataWall.ConfirmAttributeValue(attribute));
+            list.push(new Attv.DataWall.DefaultAttributeValue('native-alert', attribute));
+            list.push(new Attv.DataWall.ConfirmAttributeValue('confirm', attribute));
+            list.push(new Attv.DataWall.ConfirmAttributeValue('native-confirm', attribute));
         });
 });

@@ -21,6 +21,7 @@ var Attv;
         function DataWall(name) {
             var _this = _super.call(this, DataWall.UniqueId, name, true) || this;
             _this.name = name;
+            _this.isStrict = true;
             _this.dependency.uses.push(Attv.DataContent.UniqueId, Attv.DataUrl.UniqueId);
             _this.dependency.internals.push(Attv.DataCallback.UniqueId);
             return _this;
@@ -79,9 +80,9 @@ var Attv;
          */
         var ConfirmAttributeValue = /** @class */ (function (_super) {
             __extends(ConfirmAttributeValue, _super);
-            function ConfirmAttributeValue(attribute, validators) {
+            function ConfirmAttributeValue(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = []; }
-                return _super.call(this, 'confirm', attribute, validators) || this;
+                return _super.call(this, attributeValue, attribute, validators) || this;
             }
             ConfirmAttributeValue.prototype.onclick = function (element, ev) {
                 var dataContent = this.resolver.resolve(Attv.DataContent.UniqueId);
@@ -99,7 +100,9 @@ var Attv;
 Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-wall', function (attributeName) { return new Attv.DataWall(attributeName); }, function (attribute, list) {
         list.push(new Attv.DataWall.DefaultAttributeValue('alert', attribute));
-        list.push(new Attv.DataWall.ConfirmAttributeValue(attribute));
+        list.push(new Attv.DataWall.DefaultAttributeValue('native-alert', attribute));
+        list.push(new Attv.DataWall.ConfirmAttributeValue('confirm', attribute));
+        list.push(new Attv.DataWall.ConfirmAttributeValue('native-confirm', attribute));
     });
 });
 //# sourceMappingURL=data-wall.js.map

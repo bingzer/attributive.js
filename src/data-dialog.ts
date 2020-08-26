@@ -9,6 +9,8 @@ namespace Attv {
         constructor (name: string) {
             super(DataDialog.UniqueId, name, true);
 
+            this.isStrict = true;
+
             this.dependency.uses.push(DataContent.UniqueId, DataUrl.UniqueId, DataModal.UniqueId, DataTitle.UniqueId, DataOptions.UniqueId, DataPartial.UniqueId);
             this.dependency.internals.push(DataCallback.UniqueId);
             this.configuration = new DataDialog.AttributeConfiguration(this);

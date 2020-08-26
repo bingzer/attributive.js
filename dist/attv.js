@@ -11,6 +11,13 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 var Attv;
 (function (Attv) {
     /**
@@ -272,12 +279,13 @@ String.prototype.equalsIgnoreCase = function (other) {
          * @param isAutoLoad is auto-load
          */
         function Attribute(uniqueId, name, isAutoLoad) {
-            if (isAutoLoad === void 0) { isAutoLoad = true; }
+            if (isAutoLoad === void 0) { isAutoLoad = false; }
             this.uniqueId = uniqueId;
             this.name = name;
             this.isAutoLoad = isAutoLoad;
             this.attributeValues = [];
             this.dependency = new AttributeDependency();
+            this.isStrict = false;
             this.loadedName = this.name + "-loaded";
         }
         /**
@@ -309,6 +317,11 @@ String.prototype.equalsIgnoreCase = function (other) {
         Attribute.prototype.getValue = function (element) {
             var value = element === null || element === void 0 ? void 0 : element.attr(this.name);
             var attributeValue = this.attributeValues.filter(function (val) { return val.getRawValue(element) === value; })[0];
+            // Print/throw an error
+            // when no 'attributeValue' found and there's 'element' to evaluate and isStrict is marked true
+            if (!attributeValue && this.isStrict) {
+                Attv.log('fatal', this + "='" + (value || '') + "' is not valid", element);
+            }
             // #1. if attribute is undefined
             // find the one with the default tag
             if (!attributeValue) {
@@ -519,7 +532,7 @@ String.prototype.equalsIgnoreCase = function (other) {
         });
         Object.defineProperty(DefaultConfiguration.prototype, "logLevels", {
             get: function () {
-                return ['log', 'warning', 'error', 'debug'];
+                return ['log', 'warning', 'error', 'debug', 'fatal'];
             },
             enumerable: false,
             configurable: true
@@ -536,6 +549,7 @@ String.prototype.equalsIgnoreCase = function (other) {
             // do nothing
         }
         AttributeConfiguration.prototype.commit = function () {
+            var _this = this;
             if (this.style) {
                 var elementId = this.attribute.name;
                 var styleElement = document.querySelector("style#" + elementId);
@@ -545,6 +559,37 @@ String.prototype.equalsIgnoreCase = function (other) {
                     document.head.append(styleElement);
                 }
                 styleElement.innerHTML = this.style;
+            }
+            if (this.styleUrls) {
+                this.styleUrls.forEach(function (styleUrl) {
+                    var _a, _b;
+                    var elementId = _this.attribute.name + '-' + styleUrl.name;
+                    var linkElement = document.querySelector("link#" + elementId);
+                    if (!linkElement) {
+                        linkElement = Attv.createHTMLElement('<link>');
+                        document.head.append(linkElement);
+                    }
+                    linkElement.id = elementId;
+                    linkElement.rel = "stylesheet";
+                    linkElement.href = styleUrl.url;
+                    linkElement.integrity = (_a = styleUrl.options) === null || _a === void 0 ? void 0 : _a.integrity;
+                    linkElement.crossOrigin = (_b = styleUrl.options) === null || _b === void 0 ? void 0 : _b.crossorigin;
+                });
+            }
+            if (this.jsUrls) {
+                this.jsUrls.forEach(function (jsUrl) {
+                    var _a, _b;
+                    var elementId = _this.attribute.name + '-' + jsUrl.name;
+                    var scriptElement = document.querySelector("script#" + elementId);
+                    if (!scriptElement) {
+                        scriptElement = Attv.createHTMLElement('<script>');
+                        document.body.append(scriptElement);
+                    }
+                    scriptElement.id = elementId;
+                    scriptElement.src = jsUrl.url;
+                    scriptElement.integrity = (_a = jsUrl.options) === null || _a === void 0 ? void 0 : _a.integrity;
+                    scriptElement.crossOrigin = (_b = jsUrl.options) === null || _b === void 0 ? void 0 : _b.crossorigin;
+                });
             }
         };
         return AttributeConfiguration;
@@ -634,7 +679,7 @@ String.prototype.equalsIgnoreCase = function (other) {
         for (var _i = 0; _i < arguments.length; _i++) {
             data[_i] = arguments[_i];
         }
-        if (!Attv.configuration.isLoggingEnabled) {
+        if (!Attv.configuration.isLoggingEnabled && data[0] !== 'fatal') {
             return;
         }
         var level = data[0];
@@ -646,6 +691,10 @@ String.prototype.equalsIgnoreCase = function (other) {
         }
         else if (level === 'error') {
             console.error.apply(console, data);
+        }
+        else if (level === 'fatal') {
+            console.error.apply(console, data);
+            throw new (Error.bind.apply(Error, __spreadArrays([void 0], data)))();
         }
         else if (level === 'debug') {
             console.debug.apply(console, data);
@@ -673,11 +722,12 @@ String.prototype.equalsIgnoreCase = function (other) {
     };
     function loadElements(root) {
         if (Attv.isUndefined(root)) {
-            root = document.querySelector('body');
+            root = document.querySelector('html');
         }
         // auto load all attvs that are marked auto load
         Attv.attributes.filter(function (attribute) { return attribute.isAutoLoad; }).forEach(function (attribute, index) {
-            root.querySelectorAll("" + attribute).forEach(function (element, index) {
+            var elements = root.querySelectorAll("" + attribute);
+            elements.forEach(function (element, index) {
                 try {
                     // #1. If it's already loaded return
                     if (attribute.isElementLoaded(element))

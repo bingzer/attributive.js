@@ -1,0 +1,1 @@
+* Additional plugin for jquery

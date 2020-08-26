@@ -8,7 +8,7 @@ namespace Attv {
         static readonly UniqueId = 'DataUrl';
 
         constructor (name: string) {
-            super(DataUrl.UniqueId, name, false);
+            super(DataUrl.UniqueId, name);
 
             this.dependency.requires.push(DataMethod.UniqueId, DataData.UniqueId, DataCache.UniqueId);
         }
@@ -77,7 +77,7 @@ namespace Attv {
         static readonly DefaultMethod = 'get';
 
         constructor (name: string) {
-            super(DataMethod.UniqueId, name, false);
+            super(DataMethod.UniqueId, name);
         }
 
         getMethod(element: HTMLElement): Ajax.AjaxMethod {
@@ -114,7 +114,7 @@ namespace Attv {
         static readonly UniqueId = 'DataCache';
 
         constructor (name: string) {
-            super(DataCache.UniqueId, name, false);
+            super(DataCache.UniqueId, name);
         }
 
         useCache(element: HTMLElement): boolean {
@@ -132,7 +132,7 @@ namespace Attv {
         static readonly UniqueId = 'DataCallback';
 
         constructor (name: string) {
-            super(DataCallback.UniqueId, name, false);
+            super(DataCallback.UniqueId, name);
         }
 
         callback(element: HTMLElement): any {
@@ -148,7 +148,7 @@ namespace Attv {
         static readonly UniqueId = 'DataLoading';
 
         constructor (name: string) {
-            super(DataLoading.UniqueId, name, false);
+            super(DataLoading.UniqueId, name);
         }
     }
 
@@ -159,7 +159,7 @@ namespace Attv {
         static readonly UniqueId = 'DataContent';
 
         constructor (name: string) {
-            super(DataContent.UniqueId, name, false);
+            super(DataContent.UniqueId, name);
         }
 
         getContent(element: HTMLElement): any {
@@ -176,7 +176,7 @@ namespace Attv {
         static readonly UniqueId = 'DataTarget';
 
         constructor (name: string) {
-            super(DataTarget.UniqueId, name, false);
+            super(DataTarget.UniqueId, name);
         }
 
         getTargetElement(element: HTMLElement): HTMLElement {
@@ -193,7 +193,7 @@ namespace Attv {
         static readonly UniqueId = 'DataTimeout';
 
         constructor (name: string) {
-            super(DataTimeout.UniqueId, name, false);
+            super(DataTimeout.UniqueId, name);
         }
 
         timeout(element: HTMLElement, fn: () => void) {
@@ -214,7 +214,7 @@ namespace Attv {
         static readonly UniqueId = 'DataInterval';
 
         constructor (name: string) {
-            super(DataInterval.UniqueId, name, false);
+            super(DataInterval.UniqueId, name);
         }
 
         interval(element: HTMLElement, fn: () => void) {
@@ -264,7 +264,7 @@ namespace Attv {
         static readonly UniqueId = 'DataData';
 
         constructor (name: string) {
-            super(DataData.UniqueId, name, false);
+            super(DataData.UniqueId, name);
         }
         
         getData(element: HTMLElement): any {
@@ -286,7 +286,7 @@ namespace Attv {
         static readonly UniqueId = 'DataOptions';
 
         constructor (name: string) {
-            super(DataOptions.UniqueId, name, false);
+            super(DataOptions.UniqueId, name);
         }
         
         /**
@@ -314,7 +314,7 @@ namespace Attv {
         static readonly UniqueId = 'DataTitle';
 
         constructor (name: string) {
-            super(DataTitle.UniqueId, name, false);
+            super(DataTitle.UniqueId, name);
         }
         
         getTitle(element: HTMLElement): string {
@@ -330,7 +330,7 @@ namespace Attv {
         static readonly UniqueId = 'DataBind';
 
         constructor (name: string) {
-            super(DataBind.UniqueId, name, false);
+            super(DataBind.UniqueId, name);
         }
 
         bind(element: HTMLElement, any: any) {
@@ -345,7 +345,7 @@ namespace Attv {
         static readonly UniqueId = 'DataActive';
 
         constructor (name: string) {
-            super(DataActive.UniqueId, name, false);
+            super(DataActive.UniqueId, name);
         }
         
         isActive(element: HTMLElement) {
@@ -395,7 +395,7 @@ namespace Attv {
         static readonly UniqueId = 'DataRenderer';
 
         constructor (name: string) {
-            super(DataRenderer.UniqueId, name, false);
+            super(DataRenderer.UniqueId, name);
         }
 
         render(content: string, model: any, element?: HTMLElement, attributeValue?: DataRenderer.DefaultAttributeValue): string {       

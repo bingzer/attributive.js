@@ -21,21 +21,32 @@ var Attv;
         function DataTemplate(name) {
             var _this = _super.call(this, DataTemplate.UniqueId, name, true) || this;
             _this.name = name;
+            _this.isStrict = true;
             return _this;
         }
-        DataTemplate.prototype.renderTemplate = function (sourceElementOrSelector, modelOrContent) {
-            var sourceElement = sourceElementOrSelector;
-            if (Attv.isString(sourceElementOrSelector)) {
-                sourceElement = document.querySelector(sourceElementOrSelector);
+        DataTemplate.prototype.renderTemplate = function (elementOrSelector, modelOrContent) {
+            var sourceElement = elementOrSelector;
+            if (Attv.isString(elementOrSelector)) {
+                sourceElement = document.querySelector(elementOrSelector);
             }
-            var attributeValue = this.getValue(sourceElement);
+            // find the 'default'
+            // getValue() doesn't like when sourceElement is null
+            var attributeValue = this.attributeValues.filter(function (val) { return val.getRawValue(sourceElement) === Attv.configuration.defaultTag; })[0];
+            if (sourceElement) {
+                attributeValue = this.getValue(sourceElement);
+            }
             return attributeValue.render(sourceElement, modelOrContent);
         };
         DataTemplate.UniqueId = 'DataTemplate';
         return DataTemplate;
     }(Attv.Attribute));
     Attv.DataTemplate = DataTemplate;
-    // --- AttributeValues
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////// AttributeValues /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
+    var DataTemplate;
     (function (DataTemplate) {
         /**
          * [data-template]='default'
@@ -46,17 +57,17 @@ var Attv;
                 if (validators === void 0) { validators = []; }
                 var _this = _super.call(this, attributeValue, attribute, validators) || this;
                 _this.resolver.uses.push(Attv.DataRenderer.UniqueId);
-                _this.resolver.internals.push(DataTemplateHtml.UniqueId);
+                _this.resolver.internals.push(Attv.DataTemplateHtml.UniqueId);
                 return _this;
             }
             DefaultAttributeValue.prototype.loadElement = function (element) {
                 var templateHtml = element.html();
-                this.resolver.addAttribute(DataTemplateHtml.UniqueId, element, templateHtml);
+                this.resolver.addAttribute(Attv.DataTemplateHtml.UniqueId, element, templateHtml);
                 element.html('');
                 return true;
             };
             DefaultAttributeValue.prototype.getTemplate = function (element) {
-                var html = this.resolver.resolve(DataTemplateHtml.UniqueId).getValue(element).getRawValue(element);
+                var html = this.resolver.resolve(Attv.DataTemplateHtml.UniqueId).getValue(element).getRawValue(element);
                 return Attv.createHTMLElement(html);
             };
             DefaultAttributeValue.prototype.render = function (element, modelOrContent) {
@@ -91,6 +102,11 @@ var Attv;
         }(DefaultAttributeValue));
         DataTemplate.ScriptAttributeValue = ScriptAttributeValue;
     })(DataTemplate = Attv.DataTemplate || (Attv.DataTemplate = {}));
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////// DataTemplateHtml //////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
     /**
      * [data-template-html]="*"
      */
@@ -105,6 +121,11 @@ var Attv;
         return DataTemplateHtml;
     }(Attv.Attribute));
     Attv.DataTemplateHtml = DataTemplateHtml;
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// DataTemplateSource /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
     /**
      * [data-template-source]="*"
      */
@@ -117,7 +138,7 @@ var Attv;
         }
         DataTemplateSource.prototype.renderTemplate = function (element, model) {
             var templateElement = this.getSourceElement(element);
-            var dataTemplate = this.getValue(element).resolver.resolve(DataTemplate.UniqueId);
+            var dataTemplate = this.getValue(element).resolver.resolve(Attv.DataTemplate.UniqueId);
             return dataTemplate.renderTemplate(templateElement, model);
         };
         DataTemplateSource.prototype.getSourceElement = function (element) {

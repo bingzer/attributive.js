@@ -36,8 +36,7 @@
 		<div>
 			<h3><code>[data-partial]</code></h3>
 
-			<div data-partial="auto" data-url="partial.html"
-			data-data="({name: 'value'})">uses [data-partial]</div>
+			<div data-partial="auto" data-url="partial.html" data-data="({name: 'value'})">uses [data-partial]</div>
 
 	<!-- 
 			<div data-partial="auto" data-url="datetime.html" data-refresh="1000"
@@ -138,7 +137,7 @@
 			<div>
 				<h3><code>[data-tab]</code></h3>
 
-				<ul data-tab="defauddlt">
+				<ul data-tab="default">
 					<li data-tab-nav="home" data-active="true">Home</li>
 					<li data-tab-nav="work">Work</li>
 					<li data-tab-nav="profile">Profile</li>
@@ -170,6 +169,9 @@
 		<script type="text/javascript" src="data-dialog.js"></script>
 		<script type="text/javascript" src="data-tab.js"></script>
 
+		<script type="text/javascript" src="bootstrap/bootstrap4/data-bootstrap.js"></script>
+
+
 		<script type="text/javascript" >
 			// // example How to rename attribute
 			// // in this example, we rename data-url to data-urlx
@@ -187,6 +189,10 @@
 			// 	dataDialog.configuration.style = 'dialog.attv-dialog { border: 1px solid blue }';
 			// 	dataDialog.configuration.commit();
 			// });
+
+			// Attv.loader.pre.unshift(() => {
+			// 	Attv.configuration.isLoggingEnabled = false;
+			// })
 		</script>
 	</body>
 </html>

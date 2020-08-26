@@ -346,6 +346,8 @@ namespace Attv {
         public readonly dependency: AttributeDependency = new AttributeDependency();
         public configuration: AttributeConfiguration;
 
+        protected isStrict: boolean = false;
+
         /**
          * 
          * @param uniqueId unique id
@@ -356,7 +358,7 @@ namespace Attv {
         constructor (
             public uniqueId: string,
             public name: string, 
-            public isAutoLoad: boolean = true) {
+            public isAutoLoad: boolean = false) {
             this.loadedName = this.name + "-loaded";
         }
         
@@ -391,6 +393,12 @@ namespace Attv {
         getValue<TAttributeValue extends AttributeValue>(element: HTMLElement): TAttributeValue {
             let value = element?.attr(this.name);
             let attributeValue = this.attributeValues.filter(val => val.getRawValue(element) === value)[0] as TAttributeValue;
+
+            // Print/throw an error
+            // when no 'attributeValue' found and there's 'element' to evaluate and isStrict is marked true
+            if (!attributeValue && this.isStrict) {
+                Attv.log('fatal', `${this}='${value || ''}' is not valid`, element);
+            }
             
             // #1. if attribute is undefined
             // find the one with the default tag
@@ -637,7 +645,7 @@ namespace Attv {
         }
 
         get logLevels(): string[] {
-            return ['log', 'warning', 'error', 'debug'];
+            return ['log', 'warning', 'error', 'debug', 'fatal'];
         }
     }
     
@@ -645,7 +653,9 @@ namespace Attv {
      * Attribute configuration
      */
     export class AttributeConfiguration {
-        style: string;
+        style?: string;
+        styleUrls?: {name: string, url: string, options?: any}[];
+        jsUrls?: {name: string, url: string, options?: any}[];
 
         constructor (private attribute: Attribute) {
             // do nothing
@@ -663,6 +673,41 @@ namespace Attv {
                 }
         
                 styleElement.innerHTML = this.style;
+            }
+
+            if (this.styleUrls) {
+                this.styleUrls.forEach(styleUrl => {
+                    let elementId = this.attribute.name + '-' + styleUrl.name;
+                    let linkElement = document.querySelector(`link#${elementId}`) as HTMLLinkElement;
+
+                    if (!linkElement) {
+                        linkElement = Attv.createHTMLElement('<link>') as HTMLLinkElement;
+                        document.head.append(linkElement);
+                    }
+
+                    linkElement.id = elementId;
+                    linkElement.rel = "stylesheet";
+                    linkElement.href = styleUrl.url;
+                    linkElement.integrity = styleUrl.options?.integrity;
+                    linkElement.crossOrigin = styleUrl.options?.crossorigin;
+                });
+            }
+
+            if (this.jsUrls) {
+                this.jsUrls.forEach(jsUrl => {
+                    let elementId = this.attribute.name + '-' + jsUrl.name;
+                    let scriptElement = document.querySelector(`script#${elementId}`) as HTMLScriptElement;
+
+                    if (!scriptElement) {
+                        scriptElement = Attv.createHTMLElement('<script>') as HTMLScriptElement;
+                        document.body.append(scriptElement);
+                    }
+
+                    scriptElement.id = elementId;
+                    scriptElement.src = jsUrl.url;
+                    scriptElement.integrity = jsUrl.options?.integrity;
+                    scriptElement.crossOrigin = jsUrl.options?.crossorigin;
+                });
             }
         }
     }
@@ -750,7 +795,7 @@ namespace Attv {
     }
 
     export function log(...data: any[]) {
-        if (!Attv.configuration.isLoggingEnabled) {
+        if (!Attv.configuration.isLoggingEnabled && data[0] !== 'fatal') {
             return;
         }
 
@@ -763,6 +808,9 @@ namespace Attv {
             console.warn(...data);
         } else if (level === 'error') {
             console.error(...data);
+        } else if (level === 'fatal') {
+            console.error(...data);
+            throw new Error(...data);
         } else if (level === 'debug') {
             console.debug(...data);
         } else {
@@ -810,12 +858,13 @@ namespace Attv {
 
     export function loadElements(root?: HTMLElement): void {
         if (isUndefined(root)) {
-            root = document.querySelector('body');
+            root = document.querySelector('html');
         }
 
         // auto load all attvs that are marked auto load
         attributes.filter(attribute => attribute.isAutoLoad).forEach((attribute, index) => {
-            root.querySelectorAll(`${attribute}`).forEach((element: HTMLElement, index) => {
+            let elements = root.querySelectorAll(`${attribute}`);
+            elements.forEach((element: HTMLElement, index) => {
                 try {
                     // #1. If it's already loaded return
                     if (attribute.isElementLoaded(element))

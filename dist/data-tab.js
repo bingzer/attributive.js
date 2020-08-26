@@ -21,6 +21,7 @@ var Attv;
         function DataTab(name) {
             var _this = _super.call(this, DataTab.UniqueId, name, true) || this;
             _this.name = name;
+            _this.isStrict = true;
             _this.dependency.uses.push(Attv.DataTabContent.UniqueId, Attv.DataTabNav.UniqueId);
             _this.configuration = new DataTab.AttributeConfiguration(_this);
             return _this;
@@ -130,7 +131,7 @@ var Attv;
     var DataTabNav = /** @class */ (function (_super) {
         __extends(DataTabNav, _super);
         function DataTabNav(name) {
-            var _this = _super.call(this, DataTabNav.UniqueId, name, true) || this;
+            var _this = _super.call(this, DataTabNav.UniqueId, name) || this;
             _this.name = name;
             return _this;
         }
@@ -149,7 +150,7 @@ var Attv;
     var DataTabContent = /** @class */ (function (_super) {
         __extends(DataTabContent, _super);
         function DataTabContent(name) {
-            var _this = _super.call(this, DataTabContent.UniqueId, name, true) || this;
+            var _this = _super.call(this, DataTabContent.UniqueId, name) || this;
             _this.name = name;
             return _this;
         }

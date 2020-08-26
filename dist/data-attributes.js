@@ -19,7 +19,7 @@ var Attv;
     var DataUrl = /** @class */ (function (_super) {
         __extends(DataUrl, _super);
         function DataUrl(name) {
-            var _this = _super.call(this, DataUrl.UniqueId, name, false) || this;
+            var _this = _super.call(this, DataUrl.UniqueId, name) || this;
             _this.dependency.requires.push(DataMethod.UniqueId, DataData.UniqueId, DataCache.UniqueId);
             return _this;
         }
@@ -81,7 +81,7 @@ var Attv;
     var DataMethod = /** @class */ (function (_super) {
         __extends(DataMethod, _super);
         function DataMethod(name) {
-            return _super.call(this, DataMethod.UniqueId, name, false) || this;
+            return _super.call(this, DataMethod.UniqueId, name) || this;
         }
         DataMethod.prototype.getMethod = function (element) {
             return this.getValue(element).getRawValue(element);
@@ -119,7 +119,7 @@ var Attv;
     var DataCache = /** @class */ (function (_super) {
         __extends(DataCache, _super);
         function DataCache(name) {
-            return _super.call(this, DataCache.UniqueId, name, false) || this;
+            return _super.call(this, DataCache.UniqueId, name) || this;
         }
         DataCache.prototype.useCache = function (element) {
             var value = this.getValue(element).getRawValue(element);
@@ -137,7 +137,7 @@ var Attv;
     var DataCallback = /** @class */ (function (_super) {
         __extends(DataCallback, _super);
         function DataCallback(name) {
-            return _super.call(this, DataCallback.UniqueId, name, false) || this;
+            return _super.call(this, DataCallback.UniqueId, name) || this;
         }
         DataCallback.prototype.callback = function (element) {
             var jsFunction = this.getValue(element).getRawValue(element);
@@ -153,7 +153,7 @@ var Attv;
     var DataLoading = /** @class */ (function (_super) {
         __extends(DataLoading, _super);
         function DataLoading(name) {
-            return _super.call(this, DataLoading.UniqueId, name, false) || this;
+            return _super.call(this, DataLoading.UniqueId, name) || this;
         }
         DataLoading.UniqueId = 'DataLoading';
         return DataLoading;
@@ -165,7 +165,7 @@ var Attv;
     var DataContent = /** @class */ (function (_super) {
         __extends(DataContent, _super);
         function DataContent(name) {
-            return _super.call(this, DataContent.UniqueId, name, false) || this;
+            return _super.call(this, DataContent.UniqueId, name) || this;
         }
         DataContent.prototype.getContent = function (element) {
             var rawValue = this.getValue(element).getRawValue(element);
@@ -181,7 +181,7 @@ var Attv;
     var DataTarget = /** @class */ (function (_super) {
         __extends(DataTarget, _super);
         function DataTarget(name) {
-            return _super.call(this, DataTarget.UniqueId, name, false) || this;
+            return _super.call(this, DataTarget.UniqueId, name) || this;
         }
         DataTarget.prototype.getTargetElement = function (element) {
             var selector = this.getValue(element).getRawValue(element);
@@ -197,7 +197,7 @@ var Attv;
     var DataTimeout = /** @class */ (function (_super) {
         __extends(DataTimeout, _super);
         function DataTimeout(name) {
-            return _super.call(this, DataTimeout.UniqueId, name, false) || this;
+            return _super.call(this, DataTimeout.UniqueId, name) || this;
         }
         DataTimeout.prototype.timeout = function (element, fn) {
             var ms = parseInt(this.getValue(element).getRawValue(element));
@@ -218,7 +218,7 @@ var Attv;
     var DataInterval = /** @class */ (function (_super) {
         __extends(DataInterval, _super);
         function DataInterval(name) {
-            return _super.call(this, DataInterval.UniqueId, name, false) || this;
+            return _super.call(this, DataInterval.UniqueId, name) || this;
         }
         DataInterval.prototype.interval = function (element, fn) {
             var ms = parseInt(this.getValue(element).getRawValue(element));
@@ -270,7 +270,7 @@ var Attv;
     var DataData = /** @class */ (function (_super) {
         __extends(DataData, _super);
         function DataData(name) {
-            return _super.call(this, DataData.UniqueId, name, false) || this;
+            return _super.call(this, DataData.UniqueId, name) || this;
         }
         DataData.prototype.getData = function (element) {
             var rawValue = this.getValue(element).getRawValue(element);
@@ -290,7 +290,7 @@ var Attv;
     var DataOptions = /** @class */ (function (_super) {
         __extends(DataOptions, _super);
         function DataOptions(name) {
-            return _super.call(this, DataOptions.UniqueId, name, false) || this;
+            return _super.call(this, DataOptions.UniqueId, name) || this;
         }
         /**
          * Returns the option object (json)
@@ -315,7 +315,7 @@ var Attv;
     var DataTitle = /** @class */ (function (_super) {
         __extends(DataTitle, _super);
         function DataTitle(name) {
-            return _super.call(this, DataTitle.UniqueId, name, false) || this;
+            return _super.call(this, DataTitle.UniqueId, name) || this;
         }
         DataTitle.prototype.getTitle = function (element) {
             var title = this.getValue(element).getRawValue(element);
@@ -331,7 +331,7 @@ var Attv;
     var DataBind = /** @class */ (function (_super) {
         __extends(DataBind, _super);
         function DataBind(name) {
-            return _super.call(this, DataBind.UniqueId, name, false) || this;
+            return _super.call(this, DataBind.UniqueId, name) || this;
         }
         DataBind.prototype.bind = function (element, any) {
             element.html((any === null || any === void 0 ? void 0 : any.toString()) || '');
@@ -346,7 +346,7 @@ var Attv;
     var DataActive = /** @class */ (function (_super) {
         __extends(DataActive, _super);
         function DataActive(name) {
-            return _super.call(this, DataActive.UniqueId, name, false) || this;
+            return _super.call(this, DataActive.UniqueId, name) || this;
         }
         DataActive.prototype.isActive = function (element) {
             var rawValue = this.getValue(element).getRawValue(element);
@@ -387,7 +387,7 @@ Attv.loader.pre.push(function () {
     var DataRenderer = /** @class */ (function (_super) {
         __extends(DataRenderer, _super);
         function DataRenderer(name) {
-            return _super.call(this, DataRenderer.UniqueId, name, false) || this;
+            return _super.call(this, DataRenderer.UniqueId, name) || this;
         }
         DataRenderer.prototype.render = function (content, model, element, attributeValue) {
             if (!attributeValue) {
