@@ -87,8 +87,6 @@ namespace Attv {
     
 }
 
-
-
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-wall', 
         (attributeName: string) => new Attv.DataWall(attributeName),

@@ -343,6 +343,14 @@ namespace Attv {
         }
 
         /**
+         * Checks to see if this attribute exists in this element
+         * @param element the element
+         */
+        exists(element: HTMLElement): boolean {
+            return !!element?.attr(this.name);
+        }
+
+        /**
          * Returns the current attribute value
          * @param element the element
          */
@@ -412,24 +420,6 @@ namespace Attv {
          */
         loadElement(element: HTMLElement): boolean {
             return true;
-        }
-
-        /**
-         * Equivalent to calling element.attr('data'). However, we use dependencies om this method
-         * @param element element
-         * @param uniqueId all unique ids
-         */
-        getData<TAny>(element: HTMLElement): TAny {
-            let attributes = this.resolver.allDependencies().map(id => this.resolver.resolve(id));
-
-            let obj = { };
-            attributes.forEach((att) => {
-                let name = att.name;
-                let datasetName = name?.startsWith('data-') && name.replace(/^data\-/, '').dashToCamelCase();
-                obj[datasetName] = att.getValue(element)?.getRawValue(element)
-            });
-
-            return obj as TAny;
         }
 
         /**
@@ -701,7 +691,6 @@ namespace Attv {
 }
 
 
-
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Attv Functions ///////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -731,9 +720,6 @@ namespace Attv {
         pre: [],
         post: []
     };
-
-    let attributeFactory: AttributeFactory[] = [];
-
 
     export function loadElements(root?: HTMLElement): void {
         if (isUndefined(root)) {
@@ -782,13 +768,28 @@ namespace Attv {
     export function getAttribute(id: string): Attribute {
         return attributes.filter(att => att.uniqueId == id)[0];
     }
-    
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// Attv Registrations ///////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv {
+    let attributeRegistrar: AttributeRegistration[] = [];
+    let valueRegistrar: AttributeValueRegistration[] = [];
+
     export function registerAttribute(attributeName: string, 
         fn: (attributeName: string) => Attribute,
         valuesFn?: (attribute: Attribute, list: AttributeValue[]) => void): void {
-        let factory = new AttributeFactory(attributeName, fn, valuesFn);
+        let registry = new AttributeRegistration(attributeName, fn, valuesFn);
 
-        attributeFactory.push(factory);
+        attributeRegistrar.push(registry);
+    }
+
+    export function registerAttributeValue(id: string, valuesFn?: (attribute: Attribute, list: AttributeValue[]) => void): void {
+        let registry = new AttributeValueRegistration(id, valuesFn);
+
+        valueRegistrar.push(registry);
     }
     
     /**
@@ -796,36 +797,48 @@ namespace Attv {
      * @param attributeName attribute name
      */
     export function unregisterAttribute(attributeName: string): void {
-        let attributes = attributeFactory.filter(factory => factory.attributeName !== attributeName);
-        attributeFactory.splice(0, attributeFactory.length);
-        attributeFactory.push(...attributes);
+        let attributes = attributeRegistrar.filter(factory => factory.attributeName !== attributeName);
+        attributeRegistrar.splice(0, attributeRegistrar.length);
+        attributeRegistrar.push(...attributes);
     }
 
-    // -- helper class 
-
-    class AttributeFactory {
+    class AttributeRegistration {
         constructor (public attributeName: string, 
             private fn: (attributeName: string) => Attribute,
             private valuesFn?: (attribute: Attribute, list: AttributeValue[]) => void) {
             // do nothing
         }
 
-        create(): Attribute {
+        register(): Attribute {
             let attribute = this.fn(this.attributeName);
             
             Attv.log('debug', `${attribute}`, attribute);
 
+            let attributeValues = [];
+
             if (this.valuesFn) {
-                let attributeValues = [];
-
                 this.valuesFn(attribute, attributeValues);
+            }
 
-                Attv.log('debug', `${attributeValues}`, attributeValues);
+            // from valueRegistrar
+            valueRegistrar.filter(r => r.attributeUniqueId === attribute.uniqueId).forEach(r => {
+                r.register(attribute, attributeValues);
+            });
     
-                attribute.registerAttributeValues(attributeValues);
+            attribute.registerAttributeValues(attributeValues);
+
+            if (attributeValues.length > 0) {
+                Attv.log('debug', `${attributeValues}`, attributeValues);
             }
 
             return attribute;
+        }
+    }
+
+    class AttributeValueRegistration {
+        constructor (public attributeUniqueId: string, 
+            public register: (attribute: Attribute, list: AttributeValue[]) => void) {
+            // do nothing
         }
     }
 
@@ -840,17 +853,23 @@ namespace Attv {
     }
 
     function register() {
-        for (var i = 0; i < attributeFactory.length; i++) {
-            let attribute = attributeFactory[i].create();
+        for (var i = 0; i < attributeRegistrar.length; i++) {
+            let attribute = attributeRegistrar[i].register();
 
             attributes.push(attribute);
         }
+    }
+
+    function cleanup() {
+        attributeRegistrar = [];
+        valueRegistrar = [];
     }
 
     Attv.loader.init.push(initialize);
     Attv.loader.pre.push(preRegister);
     Attv.loader.post.push(register);
     Attv.loader.post.push(loadElements);
+    Attv.loader.post.push(cleanup);
 }
 
 Attv.onDocumentReady(() => {

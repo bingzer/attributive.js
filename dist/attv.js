@@ -277,6 +277,13 @@ String.prototype.equalsIgnoreCase = function (other) {
             (_d = this.attributeValues).push.apply(_d, attributeValues);
         };
         /**
+         * Checks to see if this attribute exists in this element
+         * @param element the element
+         */
+        Attribute.prototype.exists = function (element) {
+            return !!(element === null || element === void 0 ? void 0 : element.attr(this.name));
+        };
+        /**
          * Returns the current attribute value
          * @param element the element
          */
@@ -341,23 +348,6 @@ String.prototype.equalsIgnoreCase = function (other) {
          */
         AttributeValue.prototype.loadElement = function (element) {
             return true;
-        };
-        /**
-         * Equivalent to calling element.attr('data'). However, we use dependencies om this method
-         * @param element element
-         * @param uniqueId all unique ids
-         */
-        AttributeValue.prototype.getData = function (element) {
-            var _this = this;
-            var attributes = this.resolver.allDependencies().map(function (id) { return _this.resolver.resolve(id); });
-            var obj = {};
-            attributes.forEach(function (att) {
-                var _a;
-                var name = att.name;
-                var datasetName = (name === null || name === void 0 ? void 0 : name.startsWith('data-')) && name.replace(/^data\-/, '').dashToCamelCase();
-                obj[datasetName] = (_a = att.getValue(element)) === null || _a === void 0 ? void 0 : _a.getRawValue(element);
-            });
-            return obj;
         };
         /**
          * To string
@@ -614,7 +604,6 @@ String.prototype.equalsIgnoreCase = function (other) {
         pre: [],
         post: []
     };
-    var attributeFactory = [];
     function loadElements(root) {
         if (Attv.isUndefined(root)) {
             root = document.querySelector('body');
@@ -657,41 +646,66 @@ String.prototype.equalsIgnoreCase = function (other) {
         return Attv.attributes.filter(function (att) { return att.uniqueId == id; })[0];
     }
     Attv.getAttribute = getAttribute;
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// Attv Registrations ///////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
+    var attributeRegistrar = [];
+    var valueRegistrar = [];
     function registerAttribute(attributeName, fn, valuesFn) {
-        var factory = new AttributeFactory(attributeName, fn, valuesFn);
-        attributeFactory.push(factory);
+        var registry = new AttributeRegistration(attributeName, fn, valuesFn);
+        attributeRegistrar.push(registry);
     }
     Attv.registerAttribute = registerAttribute;
+    function registerAttributeValue(id, valuesFn) {
+        var registry = new AttributeValueRegistration(id, valuesFn);
+        valueRegistrar.push(registry);
+    }
+    Attv.registerAttributeValue = registerAttributeValue;
     /**
      * This only work during loader.pre
      * @param attributeName attribute name
      */
     function unregisterAttribute(attributeName) {
-        var attributes = attributeFactory.filter(function (factory) { return factory.attributeName !== attributeName; });
-        attributeFactory.splice(0, attributeFactory.length);
-        attributeFactory.push.apply(attributeFactory, attributes);
+        var attributes = attributeRegistrar.filter(function (factory) { return factory.attributeName !== attributeName; });
+        attributeRegistrar.splice(0, attributeRegistrar.length);
+        attributeRegistrar.push.apply(attributeRegistrar, attributes);
     }
     Attv.unregisterAttribute = unregisterAttribute;
-    // -- helper class 
-    var AttributeFactory = /** @class */ (function () {
-        function AttributeFactory(attributeName, fn, valuesFn) {
+    var AttributeRegistration = /** @class */ (function () {
+        function AttributeRegistration(attributeName, fn, valuesFn) {
             this.attributeName = attributeName;
             this.fn = fn;
             this.valuesFn = valuesFn;
             // do nothing
         }
-        AttributeFactory.prototype.create = function () {
+        AttributeRegistration.prototype.register = function () {
             var attribute = this.fn(this.attributeName);
             Attv.log('debug', "" + attribute, attribute);
+            var attributeValues = [];
             if (this.valuesFn) {
-                var attributeValues = [];
                 this.valuesFn(attribute, attributeValues);
+            }
+            // from valueRegistrar
+            valueRegistrar.filter(function (r) { return r.attributeUniqueId === attribute.uniqueId; }).forEach(function (r) {
+                r.register(attribute, attributeValues);
+            });
+            attribute.registerAttributeValues(attributeValues);
+            if (attributeValues.length > 0) {
                 Attv.log('debug', "" + attributeValues, attributeValues);
-                attribute.registerAttributeValues(attributeValues);
             }
             return attribute;
         };
-        return AttributeFactory;
+        return AttributeRegistration;
+    }());
+    var AttributeValueRegistration = /** @class */ (function () {
+        function AttributeValueRegistration(attributeUniqueId, register) {
+            this.attributeUniqueId = attributeUniqueId;
+            this.register = register;
+            // do nothing
+        }
+        return AttributeValueRegistration;
     }());
     function initialize() {
         if (!Attv.configuration) {
@@ -702,15 +716,20 @@ String.prototype.equalsIgnoreCase = function (other) {
         Attv.log('Attv v.' + Attv.version);
     }
     function register() {
-        for (var i = 0; i < attributeFactory.length; i++) {
-            var attribute = attributeFactory[i].create();
+        for (var i = 0; i < attributeRegistrar.length; i++) {
+            var attribute = attributeRegistrar[i].register();
             Attv.attributes.push(attribute);
         }
+    }
+    function cleanup() {
+        attributeRegistrar = [];
+        valueRegistrar = [];
     }
     Attv.loader.init.push(initialize);
     Attv.loader.pre.push(preRegister);
     Attv.loader.post.push(register);
-    Attv.loader.post.push(loadElements);
+    Attv.loader.post.push(Attv.loadElements);
+    Attv.loader.post.push(cleanup);
 })(Attv || (Attv = {}));
 Attv.onDocumentReady(function () {
     for (var i = 0; i < Attv.loader.init.length; i++) {

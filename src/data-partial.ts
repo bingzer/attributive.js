@@ -42,11 +42,13 @@ namespace Attv {
                 this.resolver.uses.push(DataTemplateSource.UniqueId, DataTimeout.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId, DataInterval.UniqueId);
             }
 
-            render(element: HTMLElement, content?: string) {
+            render(element: HTMLElement, content?: string, options?: Ajax.AjaxOptions) {
                 // get content
                 if (!content) {
                     // data-url
-                    let options = { } as Ajax.AjaxOptions;
+                    if (!options) {
+                        options = { } as Ajax.AjaxOptions;
+                    }
 
                     // [data-url]
                     options.url = this.resolver.resolve<DataUrl>(DataUrl.UniqueId).getUrl(element);
@@ -55,7 +57,7 @@ namespace Attv {
                     options._internalCallback = (ajaxOptions: Attv.Ajax.AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
                         content = xhr.response;
                         
-                        this.doRender(element, content);
+                        this.doRender(element, content, options);
 
                         // [data-callback]
                         let dataCallback = this.resolver.resolve<DataCallback>(DataCallback.UniqueId);
@@ -65,11 +67,11 @@ namespace Attv {
                     this.sendAjax(element, options);
                 }
                 else {
-                    this.doRender(element, content);
+                    this.doRender(element, content, options);
                 }
             }
 
-            private doRender(element: HTMLElement, content: string) {
+            protected doRender(element: HTMLElement, content: string, options?: Ajax.AjaxOptions) {
                 // [data-template-source]                
                 let html = this.resolver.resolve<DataTemplateSource>(DataTemplateSource.UniqueId).renderTemplate(element, content);
 

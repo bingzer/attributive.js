@@ -7,7 +7,7 @@ namespace Attv {
         constructor (name: string) {
             super(DataDialog.UniqueId, name, true);
 
-            this.dependency.uses.push(DataContent.UniqueId, DataUrl.UniqueId, DataModal.UniqueId, DataTitle.UniqueId, DataOptions.UniqueId);
+            this.dependency.uses.push(DataContent.UniqueId, DataUrl.UniqueId, DataModal.UniqueId, DataTitle.UniqueId, DataOptions.UniqueId, DataPartial.UniqueId);
             this.dependency.internals.push(DataCallback.UniqueId);
         }
 
@@ -54,6 +54,14 @@ namespace Attv {
                     options.isModal = options.isModal || this.resolver.resolve<DataModal>(DataModal.UniqueId).isModal(htmlElement);
                     options.title = options.title || this.resolver.resolve<DataTitle>(DataTitle.UniqueId).getTitle(htmlElement);
                     options.content = options.content || this.resolver.resolve<DataContent>(DataContent.UniqueId).getContent(htmlElement);
+                    if (!options.content) {
+                        let dataPartial = this.resolver.resolve<DataPartial>(DataPartial.UniqueId);
+                        if (dataPartial.exists(htmlElement)) {
+                            options.callback = (contentElement: HTMLElement) => {
+                                dataPartial.getValue<DataPartialDialogAttributeValue>(htmlElement).render(htmlElement, undefined, { targetElement: contentElement } as any);
+                            }
+                        }
+                    }
                 } else {
                     options = optionsOrElements as DataDialog.DialogOptions;
                 }
@@ -76,12 +84,18 @@ namespace Attv {
                     dialogElement.querySelector(options.titleSelector).html(options.title);
                 }
 
-                dialogElement.querySelector(options.contentSelector).html(options.content || '');
+                if (options.content) {
+                    dialogElement.querySelector(options.contentSelector).html(options.content);
+                }
 
                 if (options.isModal) {
                     dialogElement.showModal();
                 } else {
                     dialogElement.show();
+                }
+
+                if (options.callback) {
+                    options.callback(dialogElement.querySelector(options.contentSelector));
                 }
 
                 return dialogElement;
@@ -115,6 +129,30 @@ namespace Attv {
             closeOnEscape?: boolean;
             closeOnOutsideClick?: boolean;
             size: string;
+
+            callback: (contentElement: HTMLElement) => void;
+        }
+
+        /**
+         * [data-partial]="dialog"
+         */
+        export class DataPartialDialogAttributeValue extends Attv.DataPartial.DefaultAttributeValue {
+            
+            constructor (attribute: Attv.Attribute) {
+                super('dialog', attribute)
+            }
+
+            protected doRender(element: HTMLElement, content?: string, options?: Ajax.AjaxOptions) {
+                // [data-template-source]                
+                let html = this.resolver.resolve<DataTemplateSource>(DataTemplateSource.UniqueId).renderTemplate(element, content);
+
+                // [data-target]
+                let targetElement = this.resolver.resolve<DataTarget>(DataTarget.UniqueId).getTargetElement(element) || (options as any)?.targetElement as HTMLElement;
+
+                targetElement.html(html);
+
+                Attv.loadElements(targetElement);
+            }
         }
     }
 
@@ -144,4 +182,10 @@ Attv.loader.pre.push(() => {
             list.push(new Attv.DataDialog.DefaultAttributeValue('click', attribute));
         });
     Attv.registerAttribute('data-modal', (name: string) => new Attv.DataModal(name));
+
+    Attv.registerAttributeValue(Attv.DataPartial.UniqueId,
+        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
+            list.push(new Attv.DataDialog.DataPartialDialogAttributeValue(attribute));
+        }
+    );
 });

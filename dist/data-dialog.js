@@ -18,7 +18,7 @@ var Attv;
         function DataDialog(name) {
             var _this = _super.call(this, DataDialog.UniqueId, name, true) || this;
             _this.configuration = new DataDialog.DialogConfiguration();
-            _this.dependency.uses.push(Attv.DataContent.UniqueId, Attv.DataUrl.UniqueId, DataModal.UniqueId, Attv.DataTitle.UniqueId, Attv.DataOptions.UniqueId);
+            _this.dependency.uses.push(Attv.DataContent.UniqueId, Attv.DataUrl.UniqueId, DataModal.UniqueId, Attv.DataTitle.UniqueId, Attv.DataOptions.UniqueId, Attv.DataPartial.UniqueId);
             _this.dependency.internals.push(Attv.DataCallback.UniqueId);
             return _this;
         }
@@ -54,11 +54,19 @@ var Attv;
                 var dataDialog = this.attribute;
                 var options;
                 if (optionsOrElements instanceof HTMLElement) {
-                    var htmlElement = optionsOrElements;
-                    options = this.resolver.resolve(Attv.DataOptions.UniqueId).getOptions(htmlElement);
-                    options.isModal = options.isModal || this.resolver.resolve(DataModal.UniqueId).isModal(htmlElement);
-                    options.title = options.title || this.resolver.resolve(Attv.DataTitle.UniqueId).getTitle(htmlElement);
-                    options.content = options.content || this.resolver.resolve(Attv.DataContent.UniqueId).getContent(htmlElement);
+                    var htmlElement_1 = optionsOrElements;
+                    options = this.resolver.resolve(Attv.DataOptions.UniqueId).getOptions(htmlElement_1);
+                    options.isModal = options.isModal || this.resolver.resolve(DataModal.UniqueId).isModal(htmlElement_1);
+                    options.title = options.title || this.resolver.resolve(Attv.DataTitle.UniqueId).getTitle(htmlElement_1);
+                    options.content = options.content || this.resolver.resolve(Attv.DataContent.UniqueId).getContent(htmlElement_1);
+                    if (!options.content) {
+                        var dataPartial_1 = this.resolver.resolve(Attv.DataPartial.UniqueId);
+                        if (dataPartial_1.exists(htmlElement_1)) {
+                            options.callback = function (contentElement) {
+                                dataPartial_1.getValue(htmlElement_1).render(htmlElement_1, undefined, { targetElement: contentElement });
+                            };
+                        }
+                    }
                 }
                 else {
                     options = optionsOrElements;
@@ -76,12 +84,17 @@ var Attv;
                 if (options.title) {
                     dialogElement.querySelector(options.titleSelector).html(options.title);
                 }
-                dialogElement.querySelector(options.contentSelector).html(options.content || '');
+                if (options.content) {
+                    dialogElement.querySelector(options.contentSelector).html(options.content);
+                }
                 if (options.isModal) {
                     dialogElement.showModal();
                 }
                 else {
                     dialogElement.show();
+                }
+                if (options.callback) {
+                    options.callback(dialogElement.querySelector(options.contentSelector));
                 }
                 return dialogElement;
             };
@@ -98,6 +111,26 @@ var Attv;
             return DialogConfiguration;
         }());
         DataDialog.DialogConfiguration = DialogConfiguration;
+        /**
+         * [data-partial]="dialog"
+         */
+        var DataPartialDialogAttributeValue = /** @class */ (function (_super) {
+            __extends(DataPartialDialogAttributeValue, _super);
+            function DataPartialDialogAttributeValue(attribute) {
+                return _super.call(this, 'dialog', attribute) || this;
+            }
+            DataPartialDialogAttributeValue.prototype.doRender = function (element, content, options) {
+                var _a;
+                // [data-template-source]                
+                var html = this.resolver.resolve(Attv.DataTemplateSource.UniqueId).renderTemplate(element, content);
+                // [data-target]
+                var targetElement = this.resolver.resolve(Attv.DataTarget.UniqueId).getTargetElement(element) || ((_a = options) === null || _a === void 0 ? void 0 : _a.targetElement);
+                targetElement.html(html);
+                Attv.loadElements(targetElement);
+            };
+            return DataPartialDialogAttributeValue;
+        }(Attv.DataPartial.DefaultAttributeValue));
+        DataDialog.DataPartialDialogAttributeValue = DataPartialDialogAttributeValue;
     })(DataDialog = Attv.DataDialog || (Attv.DataDialog = {}));
     /**
      * [data-modal]="true|false"
@@ -122,5 +155,8 @@ Attv.loader.pre.push(function () {
         list.push(new Attv.DataDialog.DefaultAttributeValue('click', attribute));
     });
     Attv.registerAttribute('data-modal', function (name) { return new Attv.DataModal(name); });
+    Attv.registerAttributeValue(Attv.DataPartial.UniqueId, function (attribute, list) {
+        list.push(new Attv.DataDialog.DataPartialDialogAttributeValue(attribute));
+    });
 });
 //# sourceMappingURL=data-dialog.js.map

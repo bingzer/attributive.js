@@ -48,18 +48,20 @@ var Attv;
                 _this.resolver.uses.push(Attv.DataTemplateSource.UniqueId, Attv.DataTimeout.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId, Attv.DataInterval.UniqueId);
                 return _this;
             }
-            DefaultAttributeValue.prototype.render = function (element, content) {
+            DefaultAttributeValue.prototype.render = function (element, content, options) {
                 var _this = this;
                 // get content
                 if (!content) {
                     // data-url
-                    var options = {};
+                    if (!options) {
+                        options = {};
+                    }
                     // [data-url]
                     options.url = this.resolver.resolve(Attv.DataUrl.UniqueId).getUrl(element);
                     options.method = this.resolver.resolve(Attv.DataMethod.UniqueId).getMethod(element);
                     options._internalCallback = function (ajaxOptions, wasSuccessful, xhr) {
                         content = xhr.response;
-                        _this.doRender(element, content);
+                        _this.doRender(element, content, options);
                         // [data-callback]
                         var dataCallback = _this.resolver.resolve(Attv.DataCallback.UniqueId);
                         dataCallback.callback(element);
@@ -67,10 +69,10 @@ var Attv;
                     this.sendAjax(element, options);
                 }
                 else {
-                    this.doRender(element, content);
+                    this.doRender(element, content, options);
                 }
             };
-            DefaultAttributeValue.prototype.doRender = function (element, content) {
+            DefaultAttributeValue.prototype.doRender = function (element, content, options) {
                 // [data-template-source]                
                 var html = this.resolver.resolve(Attv.DataTemplateSource.UniqueId).renderTemplate(element, content);
                 // [data-target]
