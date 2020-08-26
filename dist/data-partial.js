@@ -36,7 +36,12 @@ var Attv;
         return DataPartial;
     }(Attv.Attribute));
     Attv.DataPartial = DataPartial;
-    // --- AttributeValues
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////// AttributeValues /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
+    var DataPartial;
     (function (DataPartial) {
         /**
          * [data-partial]="lazy"
@@ -159,6 +164,9 @@ var Attv;
         DataPartial.FormAttributeValue = FormAttributeValue;
     })(DataPartial = Attv.DataPartial || (Attv.DataPartial = {}));
 })(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// Loader ////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-partial', function (attributeName) { return new Attv.DataPartial(attributeName); }, function (attribute, list) {
         list.push(new Attv.DataPartial.AutoAttributeValue(attribute));

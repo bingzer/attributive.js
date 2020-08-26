@@ -44,6 +44,39 @@ interface HTMLElement  {
      * value can be an object
      */
     attr: (name?: string | Attv.Attribute, value?: any) => HTMLElement | any;
+
+    /**
+     * Show
+     */
+    show: () => any;
+
+    /**
+     * HIde
+     */
+    hide: () => any;
+}
+
+HTMLElement.prototype.show = function () {
+    let element = this as HTMLElement;
+    
+    let dataStyle = Attv.parseJsonOrElse(element.attr('data-style')) || {};
+    if (dataStyle.display) {
+        element.style.display = dataStyle?.display;
+    } else {
+        element.style.display = 'block';
+    }
+}
+
+HTMLElement.prototype.hide = function () {
+    let element = this as HTMLElement;
+    
+    let dataStyle = Attv.parseJsonOrElse(element.attr('data-style')) || {};
+    if (element.style.display !== 'none') {
+        dataStyle.display = element.style.display;
+        element.attr('data-style', dataStyle);
+    }
+    
+    element.style.display = 'none'
 }
 
 HTMLElement.prototype.attr = function (name: string, value?: any): HTMLElement | any {
@@ -358,7 +391,7 @@ namespace Attv {
         getValue<TAttributeValue extends AttributeValue>(element: HTMLElement): TAttributeValue {
             let value = element?.attr(this.name);
             let attributeValue = this.attributeValues.filter(val => val.getRawValue(element) === value)[0] as TAttributeValue;
-
+            
             // #1. if attribute is undefined
             // find the one with the default tag
             if (!attributeValue) {
@@ -385,7 +418,16 @@ namespace Attv {
          */
         isElementLoaded(element: HTMLElement): boolean {
             let isLoaded = element.attr(this.loadedName);
-            return isLoaded === 'true';
+            return isLoaded === 'true' || !!isLoaded;
+        }
+
+        /**
+         * Mark element as loaded or not loaded
+         * @param element the element to mark
+         * @param isLoaded is loaded?
+         */
+        markElementLoaded(element: HTMLElement, isLoaded: boolean) {
+            element.attr(this.loadedName, isLoaded);
         }
 
         /**
@@ -801,7 +843,9 @@ namespace Attv {
 
                     // #4. Load the stuff!
                     let isLoaded = attributeValue.loadElement(element);
-                    element.attr(attribute.loadedName, isLoaded);
+                    if (isLoaded) {
+                        attribute.markElementLoaded(element, isLoaded);
+                    }
                 }
                 catch (error) {
                     Attv.log('error', `Unexpected error occurred when loading ${attribute}`, error, element);

@@ -20,7 +20,7 @@ var Attv;
         __extends(DataDialog, _super);
         function DataDialog(name) {
             var _this = _super.call(this, DataDialog.UniqueId, name, true) || this;
-            _this.dependency.uses.push(Attv.DataContent.UniqueId, Attv.DataUrl.UniqueId, DataModal.UniqueId, Attv.DataTitle.UniqueId, Attv.DataOptions.UniqueId, Attv.DataPartial.UniqueId);
+            _this.dependency.uses.push(Attv.DataContent.UniqueId, Attv.DataUrl.UniqueId, Attv.DataModal.UniqueId, Attv.DataTitle.UniqueId, Attv.DataOptions.UniqueId, Attv.DataPartial.UniqueId);
             _this.dependency.internals.push(Attv.DataCallback.UniqueId);
             _this.configuration = new DataDialog.AttributeConfiguration(_this);
             return _this;
@@ -32,7 +32,33 @@ var Attv;
         return DataDialog;
     }(Attv.Attribute));
     Attv.DataDialog = DataDialog;
-    // --- AttributeValues
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////// AttributeConfiguration ////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
+    var DataDialog;
+    (function (DataDialog) {
+        var AttributeConfiguration = /** @class */ (function (_super) {
+            __extends(AttributeConfiguration, _super);
+            function AttributeConfiguration() {
+                var _this = _super !== null && _super.apply(this, arguments) || this;
+                _this.style = "\ndialog.attv-dialog {\n    border: 1px solid gray;\n}\n";
+                _this.templateHtml = "\n<dialog class=\"attv-dialog\">\n<div class=\"attv-dialog-header\">\n<div class=\"attv-dialog-header-content\">\n<h3 class=\"attv-dialog-header-title\"></h3>\n</div>\n</div>\n<div class=\"attv-dialog-body\">\n<div class=\"attv-dialog-body-content\"></div>\n</div>\n<div class=\"attv-dialog-footer\">\n<div class=\"attv-dialog-footer-content\"></div>\n</div>\n</dialog>";
+                _this.titleSelector = "h3.attv-dialog-header-title";
+                _this.contentSelector = '.attv-dialog-body-content';
+                return _this;
+            }
+            return AttributeConfiguration;
+        }(Attv.AttributeConfiguration));
+        DataDialog.AttributeConfiguration = AttributeConfiguration;
+    })(DataDialog = Attv.DataDialog || (Attv.DataDialog = {}));
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////// AttributeValues /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
+    var DataDialog;
     (function (DataDialog) {
         /**
          * [data-dialog]="default|click"
@@ -59,7 +85,7 @@ var Attv;
                 if (optionsOrElements instanceof HTMLElement) {
                     var htmlElement_1 = optionsOrElements;
                     options = this.resolver.resolve(Attv.DataOptions.UniqueId).getOptions(htmlElement_1);
-                    options.isModal = options.isModal || this.resolver.resolve(DataModal.UniqueId).isModal(htmlElement_1);
+                    options.isModal = options.isModal || this.resolver.resolve(Attv.DataModal.UniqueId).isModal(htmlElement_1);
                     options.title = options.title || this.resolver.resolve(Attv.DataTitle.UniqueId).getTitle(htmlElement_1);
                     options.content = options.content || this.resolver.resolve(Attv.DataContent.UniqueId).getContent(htmlElement_1);
                     if (!options.content) {
@@ -105,51 +131,6 @@ var Attv;
             return DefaultAttributeValue;
         }(Attv.AttributeValue));
         DataDialog.DefaultAttributeValue = DefaultAttributeValue;
-    })(DataDialog = Attv.DataDialog || (Attv.DataDialog = {}));
-    /**
-     * [data-modal]="true|false"
-     */
-    var DataModal = /** @class */ (function (_super) {
-        __extends(DataModal, _super);
-        function DataModal(name) {
-            return _super.call(this, DataModal.UniqueId, name, false) || this;
-        }
-        DataModal.prototype.isModal = function (element) {
-            var rawValue = this.getValue(element).getRawValue(element);
-            return rawValue === 'true';
-        };
-        DataModal.UniqueId = "DataModal";
-        return DataModal;
-    }(Attv.Attribute));
-    Attv.DataModal = DataModal;
-})(Attv || (Attv = {}));
-////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// AttributeConfiguration ////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-(function (Attv) {
-    var DataDialog;
-    (function (DataDialog) {
-        var AttributeConfiguration = /** @class */ (function (_super) {
-            __extends(AttributeConfiguration, _super);
-            function AttributeConfiguration() {
-                var _this = _super !== null && _super.apply(this, arguments) || this;
-                _this.style = "\ndialog.attv-dialog {\n    border: 1px solid gray;\n}\n";
-                _this.templateHtml = "\n<dialog class=\"attv-dialog\">\n<div class=\"attv-dialog-header\">\n<div class=\"attv-dialog-header-content\">\n<h3 class=\"attv-dialog-header-title\"></h3>\n</div>\n</div>\n<div class=\"attv-dialog-body\">\n<div class=\"attv-dialog-body-content\"></div>\n</div>\n<div class=\"attv-dialog-footer\">\n<div class=\"attv-dialog-footer-content\"></div>\n</div>\n</dialog>";
-                _this.titleSelector = "h3.attv-dialog-header-title";
-                _this.contentSelector = '.attv-dialog-body-content';
-                return _this;
-            }
-            return AttributeConfiguration;
-        }(Attv.AttributeConfiguration));
-        DataDialog.AttributeConfiguration = AttributeConfiguration;
-    })(DataDialog = Attv.DataDialog || (Attv.DataDialog = {}));
-})(Attv || (Attv = {}));
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////// Attributevalues /////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-(function (Attv) {
-    var DataDialog;
-    (function (DataDialog) {
         /**
          * [data-partial]="dialog"
          */
@@ -171,6 +152,27 @@ var Attv;
         }(Attv.DataPartial.DefaultAttributeValue));
         DataDialog.DataPartialDialogAttributeValue = DataPartialDialogAttributeValue;
     })(DataDialog = Attv.DataDialog || (Attv.DataDialog = {}));
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// DataModal ////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
+    /**
+     * [data-modal]="true|false"
+     */
+    var DataModal = /** @class */ (function (_super) {
+        __extends(DataModal, _super);
+        function DataModal(name) {
+            return _super.call(this, DataModal.UniqueId, name, false) || this;
+        }
+        DataModal.prototype.isModal = function (element) {
+            var rawValue = this.getValue(element).getRawValue(element);
+            return rawValue === 'true';
+        };
+        DataModal.UniqueId = "DataModal";
+        return DataModal;
+    }(Attv.Attribute));
+    Attv.DataModal = DataModal;
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// Loader ////////////////////////////////////////

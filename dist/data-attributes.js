@@ -340,6 +340,22 @@ var Attv;
         return DataBind;
     }(Attv.Attribute));
     Attv.DataBind = DataBind;
+    /**
+     * [data-active]='*'
+     */
+    var DataActive = /** @class */ (function (_super) {
+        __extends(DataActive, _super);
+        function DataActive(name) {
+            return _super.call(this, DataActive.UniqueId, name, false) || this;
+        }
+        DataActive.prototype.isActive = function (element) {
+            var rawValue = this.getValue(element).getRawValue(element);
+            return rawValue === 'true';
+        };
+        DataActive.UniqueId = 'DataActive';
+        return DataActive;
+    }(Attv.Attribute));
+    Attv.DataActive = DataActive;
 })(Attv || (Attv = {}));
 Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-url', function (name) { return new Attv.DataUrl(name); }, function (attribute, list) {
@@ -359,6 +375,7 @@ Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-cache', function (name) { return new Attv.DataCache(name); });
     Attv.registerAttribute('data-title', function (name) { return new Attv.DataTitle(name); });
     Attv.registerAttribute('data-bind', function (name) { return new Attv.DataBind(name); });
+    Attv.registerAttribute('data-active', function (name) { return new Attv.DataActive(name); });
 });
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// DataRenderer ////////////////////////////////////

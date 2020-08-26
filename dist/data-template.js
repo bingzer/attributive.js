@@ -13,6 +13,9 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var Attv;
 (function (Attv) {
+    /**
+     * [data-template]
+     */
     var DataTemplate = /** @class */ (function (_super) {
         __extends(DataTemplate, _super);
         function DataTemplate(name) {
@@ -126,6 +129,9 @@ var Attv;
     }(Attv.Attribute));
     Attv.DataTemplateSource = DataTemplateSource;
 })(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// Loader ////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-template-html', function (attributeName) { return new Attv.DataTemplateHtml(attributeName); });
     Attv.registerAttribute('data-template-source', function (attributeName) { return new Attv.DataTemplateSource(attributeName); }, function (attribute, list) {

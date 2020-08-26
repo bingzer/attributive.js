@@ -338,6 +338,23 @@ namespace Attv {
         }
     }
 
+    /**
+     * [data-active]='*'
+     */
+    export class DataActive extends Attv.Attribute {
+        static readonly UniqueId = 'DataActive';
+
+        constructor (name: string) {
+            super(DataActive.UniqueId, name, false);
+        }
+        
+        isActive(element: HTMLElement) {
+            let rawValue = this.getValue(element).getRawValue(element);
+
+            return rawValue === 'true';
+        }
+    }
+
 }
 
 Attv.loader.pre.push(() => {
@@ -362,6 +379,7 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-cache', (name: string) => new Attv.DataCache(name));
     Attv.registerAttribute('data-title', (name: string) => new Attv.DataTitle(name));
     Attv.registerAttribute('data-bind', (name: string) => new Attv.DataBind(name));
+    Attv.registerAttribute('data-active', (name: string) => new Attv.DataActive(name));
 });
 
 ////////////////////////////////////////////////////////////////////////////////////

@@ -15,114 +15,10 @@ namespace Attv {
         }
 
         show(element: HTMLElement): HTMLDialogElement {
-            return this.getValue<DataDialog.DefaultAttributeValue>(element).show(element);
+            return this.getValue<Attv.DataDialog.DefaultAttributeValue>(element).show(element);
         }
     }
 
-    // --- AttributeValues
-
-    export namespace DataDialog {
-
-        /**
-         * [data-dialog]="default|click"
-         */
-        export class DefaultAttributeValue extends AttributeValue {
-
-            constructor (attributeValue: string, 
-                attribute: Attv.Attribute, 
-                validators: Validators.AttributeValidator[] = [
-                    new Validators.RequiredAnyElementsValidator(['a', 'button'])
-                ]) {
-                super(attributeValue, attribute, validators);
-            }
-            
-            loadElement(element: HTMLElement): boolean {
-                // remove onclick
-                if (element.attr('onclick')) {
-                    this.resolver.addAttribute(DataCallback.UniqueId, element, element.attr('onclick'));
-                }
-
-                element.onclick = (ev: Event) => this.show(element);
-
-                return true;
-            }
-
-            show(optionsOrElements: DataDialog.DialogOptions | HTMLElement): HTMLDialogElement {
-                let options: DataDialog.DialogOptions;
-
-                if (optionsOrElements instanceof HTMLElement) {
-                    let htmlElement = optionsOrElements as HTMLElement;
-
-                    options = this.resolver.resolve<DataOptions>(DataOptions.UniqueId).getOptions<DialogOptions>(htmlElement);
-                    options.isModal = options.isModal || this.resolver.resolve<DataModal>(DataModal.UniqueId).isModal(htmlElement);
-                    options.title = options.title || this.resolver.resolve<DataTitle>(DataTitle.UniqueId).getTitle(htmlElement);
-                    options.content = options.content || this.resolver.resolve<DataContent>(DataContent.UniqueId).getContent(htmlElement);
-                    if (!options.content) {
-                        let dataPartial = this.resolver.resolve<DataPartial>(DataPartial.UniqueId);
-                        if (dataPartial.exists(htmlElement)) {
-                            options.callback = (contentElement: HTMLElement) => {
-                                dataPartial.getValue<DataPartialDialogAttributeValue>(htmlElement).render(htmlElement, undefined, { targetElement: contentElement } as any);
-                            }
-                        }
-                    }
-                } else {
-                    options = optionsOrElements as DataDialog.DialogOptions;
-                }
-
-                let configuration = this.attribute.configuration as DataDialog.AttributeConfiguration;
-                options.templateHtml = configuration.templateHtml;
-                options.style = configuration.style;
-                options.titleSelector = configuration.titleSelector;
-                options.contentSelector = configuration.contentSelector;
-
-                return this.doShow(options);
-            }
-
-            private doShow(options: DataDialog.DialogOptions): HTMLDialogElement {
-                let dialogElement = Attv.createHTMLElement(options.templateHtml).querySelector('dialog') as HTMLDialogElement;
-
-                // add to the body
-                document.body.append(dialogElement);
-
-                if (options.title) {
-                    dialogElement.querySelector(options.titleSelector).html(options.title);
-                }
-
-                if (options.content) {
-                    dialogElement.querySelector(options.contentSelector).html(options.content);
-                }
-
-                if (options.isModal) {
-                    dialogElement.showModal();
-                } else {
-                    dialogElement.show();
-                }
-
-                if (options.callback) {
-                    options.callback(dialogElement.querySelector(options.contentSelector));
-                }
-
-                return dialogElement;
-            }
-        }
-    }
-
-    /**
-     * [data-modal]="true|false"
-     */
-    export class DataModal extends Attv.Attribute {
-        static readonly UniqueId = "DataModal";
-
-        constructor (name: string) {
-            super(DataModal.UniqueId, name, false);
-        }
-
-        isModal(element: HTMLElement): boolean {
-            let rawValue = this.getValue(element).getRawValue(element);
-
-            return rawValue === 'true';
-        }
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -168,10 +64,92 @@ dialog.attv-dialog {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////// Attributevalues /////////////////////////////////////
+////////////////////////////// AttributeValues /////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
 namespace Attv.DataDialog {
+    /**
+     * [data-dialog]="default|click"
+     */
+    export class DefaultAttributeValue extends Attv.AttributeValue {
+
+        constructor (attributeValue: string, 
+            attribute: Attv.Attribute, 
+            validators: Attv.Validators.AttributeValidator[] = [
+                new Validators.RequiredAnyElementsValidator(['a', 'button'])
+            ]) {
+            super(attributeValue, attribute, validators);
+        }
+        
+        loadElement(element: HTMLElement): boolean {
+            // remove onclick
+            if (element.attr('onclick')) {
+                this.resolver.addAttribute(DataCallback.UniqueId, element, element.attr('onclick'));
+            }
+
+            element.onclick = (ev: Event) => this.show(element);
+
+            return true;
+        }
+
+        show(optionsOrElements: DataDialog.DialogOptions | HTMLElement): HTMLDialogElement {
+            let options: DataDialog.DialogOptions;
+
+            if (optionsOrElements instanceof HTMLElement) {
+                let htmlElement = optionsOrElements as HTMLElement;
+
+                options = this.resolver.resolve<DataOptions>(DataOptions.UniqueId).getOptions<DialogOptions>(htmlElement);
+                options.isModal = options.isModal || this.resolver.resolve<DataModal>(DataModal.UniqueId).isModal(htmlElement);
+                options.title = options.title || this.resolver.resolve<DataTitle>(DataTitle.UniqueId).getTitle(htmlElement);
+                options.content = options.content || this.resolver.resolve<DataContent>(DataContent.UniqueId).getContent(htmlElement);
+                if (!options.content) {
+                    let dataPartial = this.resolver.resolve<DataPartial>(DataPartial.UniqueId);
+                    if (dataPartial.exists(htmlElement)) {
+                        options.callback = (contentElement: HTMLElement) => {
+                            dataPartial.getValue<DataPartialDialogAttributeValue>(htmlElement).render(htmlElement, undefined, { targetElement: contentElement } as any);
+                        }
+                    }
+                }
+            } else {
+                options = optionsOrElements as DataDialog.DialogOptions;
+            }
+
+            let configuration = this.attribute.configuration as DataDialog.AttributeConfiguration;
+            options.templateHtml = configuration.templateHtml;
+            options.style = configuration.style;
+            options.titleSelector = configuration.titleSelector;
+            options.contentSelector = configuration.contentSelector;
+
+            return this.doShow(options);
+        }
+
+        private doShow(options: DataDialog.DialogOptions): HTMLDialogElement {
+            let dialogElement = Attv.createHTMLElement(options.templateHtml).querySelector('dialog') as HTMLDialogElement;
+
+            // add to the body
+            document.body.append(dialogElement);
+
+            if (options.title) {
+                dialogElement.querySelector(options.titleSelector).html(options.title);
+            }
+
+            if (options.content) {
+                dialogElement.querySelector(options.contentSelector).html(options.content);
+            }
+
+            if (options.isModal) {
+                dialogElement.showModal();
+            } else {
+                dialogElement.show();
+            }
+
+            if (options.callback) {
+                options.callback(dialogElement.querySelector(options.contentSelector));
+            }
+
+            return dialogElement;
+        }
+    }
 
     /**
      * [data-partial]="dialog"
@@ -196,6 +174,29 @@ namespace Attv.DataDialog {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// DataModal ////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv {
+
+    /**
+     * [data-modal]="true|false"
+     */
+    export class DataModal extends Attv.Attribute {
+        static readonly UniqueId = "DataModal";
+
+        constructor (name: string) {
+            super(DataModal.UniqueId, name, false);
+        }
+
+        isModal(element: HTMLElement): boolean {
+            let rawValue = this.getValue(element).getRawValue(element);
+
+            return rawValue === 'true';
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// Loader ////////////////////////////////////////

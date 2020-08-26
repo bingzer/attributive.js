@@ -35,6 +35,25 @@ Element.prototype.html = function (html) {
         }
     }
 };
+HTMLElement.prototype.show = function () {
+    var element = this;
+    var dataStyle = Attv.parseJsonOrElse(element.attr('data-style')) || {};
+    if (dataStyle.display) {
+        element.style.display = dataStyle === null || dataStyle === void 0 ? void 0 : dataStyle.display;
+    }
+    else {
+        element.style.display = 'block';
+    }
+};
+HTMLElement.prototype.hide = function () {
+    var element = this;
+    var dataStyle = Attv.parseJsonOrElse(element.attr('data-style')) || {};
+    if (element.style.display !== 'none') {
+        dataStyle.display = element.style.display;
+        element.attr('data-style', dataStyle);
+    }
+    element.style.display = 'none';
+};
 HTMLElement.prototype.attr = function (name, value) {
     var _a, _b;
     name = (_b = (_a = name === null || name === void 0 ? void 0 : name.toString()) === null || _a === void 0 ? void 0 : _a.replace('[', '')) === null || _b === void 0 ? void 0 : _b.replace(']', '');
@@ -312,7 +331,15 @@ String.prototype.equalsIgnoreCase = function (other) {
          */
         Attribute.prototype.isElementLoaded = function (element) {
             var isLoaded = element.attr(this.loadedName);
-            return isLoaded === 'true';
+            return isLoaded === 'true' || !!isLoaded;
+        };
+        /**
+         * Mark element as loaded or not loaded
+         * @param element the element to mark
+         * @param isLoaded is loaded?
+         */
+        Attribute.prototype.markElementLoaded = function (element, isLoaded) {
+            element.attr(this.loadedName, isLoaded);
         };
         /**
          * String representation
@@ -673,7 +700,9 @@ String.prototype.equalsIgnoreCase = function (other) {
                     }
                     // #4. Load the stuff!
                     var isLoaded = attributeValue.loadElement(element);
-                    element.attr(attribute.loadedName, isLoaded);
+                    if (isLoaded) {
+                        attribute.markElementLoaded(element, isLoaded);
+                    }
                 }
                 catch (error) {
                     Attv.log('error', "Unexpected error occurred when loading " + attribute, error, element);

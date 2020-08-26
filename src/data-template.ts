@@ -1,6 +1,8 @@
 namespace Attv {
 
-
+    /**
+     * [data-template]
+     */
     export class DataTemplate extends Attv.Attribute {
         static readonly UniqueId = 'DataTemplate';
 
@@ -120,6 +122,10 @@ namespace Attv {
         }
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// Loader ////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-template-html',  (attributeName: string) => new Attv.DataTemplateHtml(attributeName));
