@@ -141,7 +141,7 @@ namespace Attv {
                     if (locationRoute) {
                         for (let i = 0; i < navSibilings.length; i++) {
                             let route = dataRoute.appendHash(dataRoute.getRoute(tab), this.getRaw(navSibilings[i]));
-                            if (locationRoute.startsWith(route)) {
+                            if (dataRoute.matches(route)) {
                                 // mark everybody not active
                                 navSibilings.forEach((e: HTMLElement) => dataActive.setActive(e, false) );
                                 dataActive.setActive(navSibilings[i], true);
@@ -257,7 +257,7 @@ namespace Attv {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// AttributeConfiguration ////////////////////////////////
+//////////////////////////////////// Settings //////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
 namespace Attv.DataTab {

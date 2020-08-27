@@ -287,6 +287,10 @@ namespace Attv {
         public readonly loadedName: string;
         public readonly dependency: Attribute.Dependency = new Attribute.Dependency();
 
+        /**
+         * When set to true. All attribute values needs to be registered. 
+         * NO wildcard.
+         */
         protected isStrict: boolean = false;
 
         /**
