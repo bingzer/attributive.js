@@ -142,17 +142,6 @@ namespace Attv {
     }
 
     /**
-     * [data-loading]='*'
-     */
-    export class DataLoading extends Attv.Attribute {
-        static readonly UniqueId = 'DataLoading';
-
-        constructor (name: string) {
-            super(DataLoading.UniqueId, name);
-        }
-    }
-
-    /**
      * [data-content]='*'
      */
     export class DataContent extends Attv.Attribute {
@@ -296,6 +285,12 @@ namespace Attv {
         getOptions<TOptions>(element: HTMLElement): TOptions {
             let rawValue = this.getValue(element).getRawValue(element);
 
+            // does it look like json?
+            if (rawValue?.startsWith('{') && rawValue?.endsWith('}')) {
+                rawValue = `(${rawValue})`;
+            }
+
+            // json ex: ({ name: 'value' }). so we just 
             if (Attv.isEvaluatable(rawValue)) {
                 //do eval
                 rawValue = Attv.eval(rawValue);
@@ -369,7 +364,6 @@ Attv.loader.pre.push(() => {
             list.push(new Attv.DataMethod.DefaultAttributeValue(attribute));
         });
     Attv.registerAttribute('data-callback', (name: string) => new Attv.DataCallback(name));
-    Attv.registerAttribute('data-loading', (name: string) => new Attv.DataLoading(name));
     Attv.registerAttribute('data-target',  (name: string) => new Attv.DataTarget(name));
     Attv.registerAttribute('data-content', (name: string) => new Attv.DataContent(name));
     Attv.registerAttribute('data-timeout', (name: string) => new Attv.DataTimeout(name));
@@ -380,6 +374,100 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-title', (name: string) => new Attv.DataTitle(name));
     Attv.registerAttribute('data-bind', (name: string) => new Attv.DataBind(name));
     Attv.registerAttribute('data-active', (name: string) => new Attv.DataActive(name));
+});
+
+////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////// DataLoading ////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv {
+    /**
+     * [data-loading]='*'
+     */
+    export class DataLoading extends Attv.Attribute {
+        static readonly UniqueId = 'DataLoading';
+
+        constructor (name: string) {
+            super(DataLoading.UniqueId, name, true);
+
+            this.isStrict = true;
+        }
+    }
+
+    export namespace DataLoading {
+
+        /**
+         * [data-loading]='default'
+         */
+        export class DefaultAttributeValue extends Attv.AttributeValue  {
+            
+            constructor (attributeValue: string, 
+                attribute: Attv.Attribute, 
+                configFn?: AttributeConfigurationFactory) {
+                super(attributeValue, attribute, configFn);
+
+                this.resolver.uses.push(DataOptions.UniqueId);
+            }
+    
+            loadElement(element: HTMLElement): boolean {
+                let configuration = this.configuration as SpinnerConfiguration;
+                let dataOptions = this.resolver.resolve<DataOptions>(DataOptions.UniqueId);
+
+                if (dataOptions.exists(element)) {
+                    let spinnerOptions = dataOptions.getOptions<SpinnerOptions>(element);
+                    element.style.borderColor = spinnerOptions.outerColor || configuration.defaultOuterColor;
+                    element.style.borderTopColor = spinnerOptions.innerColor || configuration.defaultInnerColor;
+                    element.style.height = spinnerOptions.width || configuration.defaultHeight;
+                    element.style.width = spinnerOptions.height || configuration.defaultWidth;
+                }
+
+                return true;
+            }
+        }
+
+        export interface SpinnerOptions {
+            outerColor: string;
+            innerColor: string;
+            width: string;
+            height: string;
+        }
+
+        export class SpinnerConfiguration extends Attv.AttributeConfiguration {
+// https://codepen.io/mandelid/pen/vwKoe
+            defaultOuterColor = "#c0c0c0";
+            defaultInnerColor = "#000000";
+            defaultWidth = "25px";
+            defaultHeight = "25px";
+            style = `
+[data-loading='spinner'],
+[data-loading='default'] {
+    display: inline-block;
+    width: ${this.defaultWidth};
+    height: ${this.defaultHeight};
+    border: 3px solid ${this.defaultOuterColor};
+    border-radius: 50%;
+    border-top-color: ${this.defaultInnerColor};
+    animation: spin 1s ease-in-out infinite;
+    -webkit-animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+to { -webkit-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+to { -webkit-transform: rotate(360deg); }
+}
+`;
+        }
+    }
+}
+
+Attv.loader.pre.push(() => {
+    Attv.registerAttribute('data-loading', 
+        (name: string) => new Attv.DataLoading(name),
+        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
+            list.push(new Attv.DataLoading.DefaultAttributeValue(Attv.configuration.defaultTag, attribute, (name, value) => new Attv.DataLoading.SpinnerConfiguration(name, value)));
+        });
 });
 
 ////////////////////////////////////////////////////////////////////////////////////
