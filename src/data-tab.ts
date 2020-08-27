@@ -29,17 +29,24 @@ namespace Attv.DataTab {
         
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
-            settingsFn: Attv.Attribute.SettingsFactory,
+            settingsFn?: Attv.Attribute.SettingsFactory,
             validators: Validators.AttributeValidator[] = []) {
             super(attributeValue, attribute, settingsFn, validators);
         }
         
         loadElement(element: HTMLElement): boolean {
-            let dataTabNav = this.resolver.resolve<DataTabNav>(DataTabNav.UniqueId);
+            if (!this.attribute.isElementLoaded(element)) {
+                let dataTabNav = this.resolver.resolve<DataTabNav>(DataTabNav.UniqueId);
+    
+                element.querySelectorAll(dataTabNav.toString()).forEach((navElement: HTMLElement) => {
+                    dataTabNav.getValue(navElement).loadElement(navElement);
+                });
 
-            element.querySelectorAll(dataTabNav.toString()).forEach((navElement: HTMLElement) => {
-                dataTabNav.getValue(navElement).loadElement(navElement);
-            });
+                // load settings
+                this.settings?.commit();
+
+                this.attribute.markElementLoaded(element, true);
+            }
 
             return true;
         }
@@ -241,10 +248,11 @@ namespace Attv.DataTab {
     list-style: none;
 }
 
-[data-tab] [data-tab-nav][data-enabled] {
+[data-tab] [data-tab-nav][data-enabled="false"] {
     cursor: default;
+    opacity: 0.5;
 }
-[data-tab] [data-tab-nav][data-enabled]:hover {
+[data-tab] [data-tab-nav][data-enabled="false"]:hover {
     background-color: inherit;
 }
 

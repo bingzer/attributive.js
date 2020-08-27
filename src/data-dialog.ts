@@ -27,30 +27,6 @@ namespace Attv {
 ////////////////////////////////////////////////////////////////////////////////////
 
 namespace Attv.DataDialog {
-        
-    export class DefaultSettings extends Attv.Attribute.Settings {
-        style = `
-dialog.attv-dialog {
-    border: 1px solid gray;
-}
-`;
-        templateHtml = `
-<dialog class="attv-dialog">
-<div class="attv-dialog-header">
-<div class="attv-dialog-header-content">
-<h3 class="attv-dialog-header-title"></h3>
-</div>
-</div>
-<div class="attv-dialog-body">
-<div class="attv-dialog-body-content"></div>
-</div>
-<div class="attv-dialog-footer">
-<div class="attv-dialog-footer-content"></div>
-</div>
-</dialog>`;
-        titleSelector = "h3.attv-dialog-header-title";
-        contentSelector = '.attv-dialog-body-content';
-    }
 
     export interface DialogOptions extends DefaultSettings {
         isModal: boolean;
@@ -61,6 +37,37 @@ dialog.attv-dialog {
         size: string;
 
         callback: (contentElement: HTMLElement) => void;
+    }
+        
+    export class DefaultSettings extends Attv.Attribute.Settings {
+        style = `
+dialog.attv-dialog {
+    border: 1px solid gray;
+    min-width: 250px;
+}
+dialog.attv-dialog h3.attv-dialog-header-title {
+    margin-top: 8px;
+}
+dialog.attv-dialog .attv-dialog-body {
+    margin-bottom: 8px;
+}
+`;
+        templateHtml = `
+<dialog class="attv-dialog">
+    <div class="attv-dialog-header">
+        <div class="attv-dialog-header-content">
+            <h3 class="attv-dialog-header-title"></h3>
+        </div>
+    </div>
+    <div class="attv-dialog-body">
+        <div class="attv-dialog-body-content"></div>
+    </div>
+    <div class="attv-dialog-footer">
+        <div class="attv-dialog-footer-content"></div>
+    </div>
+</dialog>`;
+        titleSelector = "h3.attv-dialog-header-title";
+        contentSelector = '.attv-dialog-body-content';
     }
 }
 
@@ -116,13 +123,7 @@ namespace Attv.DataDialog {
                 options = optionsOrElements as DataDialog.DialogOptions;
             }
 
-            if (this.settings) {
-                let settings = this.settings as DataDialog.DefaultSettings;
-                options.templateHtml = settings.templateHtml;
-                options.style = settings.style;
-                options.titleSelector = settings.titleSelector;
-                options.contentSelector = settings.contentSelector;
-            }
+            this.applySettings(options);
 
             return this.doShow(options);
         }
@@ -152,6 +153,17 @@ namespace Attv.DataDialog {
             }
 
             return dialogElement;
+        }
+
+        private applySettings(options: DataDialog.DialogOptions) {
+            if (this.settings) {
+                let settings = this.settings as DataDialog.DefaultSettings;
+                options.templateHtml = settings.templateHtml;
+                options.style = settings.style;
+                options.titleSelector = settings.titleSelector;
+                options.contentSelector = settings.contentSelector;
+            }
+            this.settings?.commit();
         }
     }
 

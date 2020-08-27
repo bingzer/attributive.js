@@ -282,7 +282,7 @@ namespace Attv {
          * Returns the option object (json)
          * @param element the element
          */
-        getOptions<TOptions>(element: HTMLElement): TOptions {
+        getOptions<TOptions>(element: HTMLElement, orDefault?: TOptions): TOptions {
             let rawValue = this.getValue(element).getRaw(element);
 
             // does it look like json?
@@ -296,7 +296,7 @@ namespace Attv {
                 rawValue = Attv.eval(rawValue);
             }
 
-            let options = parseJsonOrElse(rawValue) || {} as TOptions;
+            let options = parseJsonOrElse(rawValue) || (orDefault || {} as TOptions);
 
             return options;
         }
@@ -455,6 +455,7 @@ namespace Attv {
         }
 
         export class SpinnerSettings extends Attv.Attribute.Settings {
+            isAutoLoad = true;
 // https://codepen.io/mandelid/pen/vwKoe
             defaultOuterColor = "#c0c0c0";
             defaultInnerColor = "#000000";

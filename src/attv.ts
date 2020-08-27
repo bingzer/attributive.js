@@ -402,7 +402,7 @@ namespace Attv.Attribute {
         public readonly resolver: Resolver = new Resolver(this);
         public settings: Settings;
         
-        constructor (private value: string, 
+        constructor (protected value: string, 
             public attribute: Attribute, 
             settingsFn?: SettingsFactory,
             public validators: Validators.AttributeValidator[] = []) {
@@ -505,6 +505,11 @@ namespace Attv.Attribute {
      */
     export class Settings {
         /**
+         * If it's true - it will be loaded during setup
+         */
+        isAutoLoad: boolean = false;
+
+        /**
          * Inline style
          */
         style?: string;
@@ -523,10 +528,14 @@ namespace Attv.Attribute {
             // do nothing
         }
     
-        commit() {
+        commit(override?: boolean) {
+            let apply = true;
+
             if (this.style) {
                 let elementId = this.attributeValue.attribute.name + '-' + this.configName;
                 let styleElement = document.querySelector(`style#${elementId}`) as HTMLStyleElement;
+                apply = override || !styleElement;
+
                 if (!styleElement) {
                     styleElement = Attv.createHTMLElement('<style>') as HTMLStyleElement;
                     styleElement.id = elementId;
@@ -534,13 +543,16 @@ namespace Attv.Attribute {
                     document.head.append(styleElement);
                 }
         
-                styleElement.innerHTML = this.style;
+                if (apply) {
+                    styleElement.innerHTML = this.style;
+                }
             }
 
             if (this.styleUrls) {
                 this.styleUrls.forEach(styleUrl => {
                     let elementId = this.attributeValue.attribute.name + '-' + this.configName + '-' + styleUrl.name;
                     let linkElement = document.querySelector(`link#${elementId}`) as HTMLLinkElement;
+                    apply = override || !linkElement;
 
                     if (!linkElement) {
                         linkElement = Attv.createHTMLElement('<link>') as HTMLLinkElement;
@@ -559,6 +571,7 @@ namespace Attv.Attribute {
                 this.jsUrls.forEach(jsUrl => {
                     let elementId = this.attributeValue.attribute.name + '-' + this.configName + '-' + jsUrl.name;
                     let scriptElement = document.querySelector(`script#${elementId}`) as HTMLScriptElement;
+                    apply = override || !scriptElement;
 
                     if (!scriptElement) {
                         scriptElement = Attv.createHTMLElement('<script>') as HTMLScriptElement;
@@ -1000,8 +1013,8 @@ namespace Attv {
                 Attv.log('debug', `${attributeValues.map(v => v.toString(true))}`, attributeValues);
             }
 
-            // commit configuration if any
-            attributeValues?.forEach(attValue => attValue?.settings?.commit());
+            // commit configuration if applicable
+            attributeValues?.filter(attValue => attValue?.settings?.isAutoLoad).forEach(attValue => attValue?.settings?.commit());
 
             return attribute;
         }
