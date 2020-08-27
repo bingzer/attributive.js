@@ -32,6 +32,8 @@ namespace Attv.DataTab {
             settingsFn?: Attv.Attribute.SettingsFactory,
             validators: Validators.AttributeValidator[] = []) {
             super(attributeValue, attribute, settingsFn, validators);
+
+            this.resolver.uses.push(DataRoute.UniqueId, DataOptions.UniqueId);
         }
         
         loadElement(element: HTMLElement): boolean {
@@ -43,12 +45,21 @@ namespace Attv.DataTab {
                 });
 
                 // load settings
-                this.settings?.commit();
+                this.applySettings(element);
 
                 this.attribute.markElementLoaded(element, true);
             }
 
             return true;
+        }
+
+        private applySettings(element: HTMLElement) {
+            let dataOptions = this.resolver.resolve<DataOptions>(DataOptions.UniqueId);
+            if (dataOptions.exists(element)) {
+                this.settings
+            }
+
+            this.settings?.commit();
         }
     }
 
@@ -95,6 +106,7 @@ namespace Attv {
             super(DataTabNav.UniqueId, name);
 
             this.dependency.uses.push(DataEnabled.UniqueId, DataActive.UniqueId);
+            this.dependency.internals.push(DataRoute.UniqueId);
         }
 
     }
@@ -115,15 +127,46 @@ namespace Attv {
             
             loadElement(element: HTMLElement): boolean {
                 if (!this.attribute.isElementLoaded(element)) {
+                    let tab = element.parentElement;
+                    let nav = element;
+                    let navSibilings = [...tab.querySelectorAll(this.toString()) as any] as HTMLElement[]; // force as array
+
                     let dataActive = this.resolver.resolve<DataActive>(DataActive.UniqueId);
                     let dataEnabled = this.resolver.resolve<DataEnabled>(DataEnabled.UniqueId);
+                    let dataRoute = this.resolver.resolve<DataRoute>(DataRoute.UniqueId);
 
-                    if (dataEnabled.isEnabled(element)) {
-                        element.onclick = (evt: Event) => this.displayContent(element.parentElement, element)
+                    // #1. from the route first
+                    // [data-route]
+                    let locationRoute = dataRoute.getLocationRoute();
+                    if (locationRoute) {
+                        for (let i = 0; i < navSibilings.length; i++) {
+                            let route = dataRoute.appendHash(dataRoute.getRoute(tab), this.getRaw(navSibilings[i]));
+                            if (locationRoute.startsWith(route)) {
+                                // mark everybody not active
+                                navSibilings.forEach((e: HTMLElement) => dataActive.setActive(e, false) );
+                                dataActive.setActive(navSibilings[i], true);
+                                break;
+                            }
+                        }
                     }
-    
+
+                    // [data-enabled]
+                    if (dataEnabled.isEnabled(element)) {
+                        element.onclick = (evt: Event) => {
+                            // mark everybody not active
+                            navSibilings.forEach((e: HTMLElement) => dataActive.setActive(e, false));
+                            dataActive.setActive(nav, true);
+                            this.displayContent(tab, nav, navSibilings);
+
+                            // update route on click
+                            let thisRoute = dataRoute.appendHash(dataRoute.getRoute(tab), this.getRaw(nav));
+                            dataRoute.setRoute(thisRoute);
+                        }
+                    }
+
+                    // [data-active]
                     if (dataActive.isActive(element)) {
-                        this.displayContent(element.parentElement, element);
+                        this.displayContent(tab, nav, navSibilings);
                     }
 
                     this.attribute.markElementLoaded(element, true);
@@ -132,24 +175,17 @@ namespace Attv {
                 return true;
             }
 
-            private displayContent(tabElement: HTMLElement, navElement: HTMLElement): boolean {
-                let dataActive = this.resolver.resolve<DataActive>(DataActive.UniqueId);
+            private displayContent(tab: HTMLElement, nav: HTMLElement, siblings: HTMLElement[]): boolean {
                 let dataTabContent = this.resolver.resolve<DataTabContent>(DataTabContent.UniqueId);
-    
-                // -- [data-tab-nav]
-                navElement.parentElement.querySelectorAll(this.toString()).forEach((e: HTMLElement) => e.attr(dataActive, false));
-    
-                let contentName = this.getRaw(navElement);
-                let contentElement = tabElement.parentElement.querySelector(`[${dataTabContent.name}="${contentName}"]`) as HTMLElement;
+
+                let contentName = this.getRaw(nav);
+                let contentElement = tab.parentElement.querySelector(`[${dataTabContent.name}="${contentName}"]`) as HTMLElement;
                 if (contentElement) {
                     let parentElement = contentElement.parentElement;
                     // hide all children
                     parentElement.querySelectorAll(dataTabContent.toString()).forEach((e: HTMLElement) => e.hide());
 
                     dataTabContent.getValue(contentElement).loadElement(contentElement);
-    
-                    // mark the tabnav as active
-                    navElement.attr(dataActive, true);
                 }
     
                 return false;
@@ -225,6 +261,10 @@ namespace Attv {
 ////////////////////////////////////////////////////////////////////////////////////
 
 namespace Attv.DataTab {
+
+    export interface DefaultOptions {
+        router: boolean;
+    }
         
     export class DefaultSettings extends Attv.Attribute.Settings {
         style = `

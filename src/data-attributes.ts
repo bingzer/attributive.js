@@ -369,6 +369,49 @@ namespace Attv {
 
             return rawValue === 'true';
         }
+
+        setActive(element: HTMLElement, isActive: boolean) {
+            element.attr(this, isActive);
+        }
+    }
+
+    /**
+     * [data-route]='*'
+     * Just like for SPA
+     */
+    export class DataRoute extends Attv.Attribute {
+        static readonly UniqueId = 'DataRoute';
+
+        constructor (name: string) {
+            super(DataRoute.UniqueId, name);
+        }
+
+        getRoute(element: HTMLElement) {
+            let rawValue = this.getValue(element).getRaw(element);
+
+            return rawValue;
+        }
+
+        getLocationRoute(): string {
+            return this.cleanHash(window.location.hash);
+        }
+
+        appendHash(...hash: string[]) {
+            let result = hash?.map(h => this.cleanHash(h))?.join('/');
+            return this.cleanHash(result);
+        }
+
+        setRoute(hash: string) {
+            if (isUndefined(hash)) {
+                return;
+            }
+
+            window.location.hash = this.cleanHash(hash);
+        }
+
+        private cleanHash(hash: string): string {
+            return hash?.replace('#', '')?.replace(/\/\//, '/');
+        }
     }
 
 }
@@ -396,6 +439,7 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-bind', (name: string) => new Attv.DataBind(name));
     Attv.registerAttribute('data-active', (name: string) => new Attv.DataActive(name));
     Attv.registerAttribute('data-enabled', (name: string) => new Attv.DataEnabled(name));
+    Attv.registerAttribute('data-route', (name: string) => new Attv.DataRoute(name));
 });
 
 ////////////////////////////////////////////////////////////////////////////////////
