@@ -15,7 +15,7 @@ namespace Attv {
 
         getUrl(element: HTMLElement): string {
             let attributeValue = this.getValue(element);
-            let url = attributeValue.getRawValue(element);
+            let url = attributeValue.getRaw(element);
 
             // [data-method]
             let dataMethod = attributeValue.resolver.resolve<DataMethod>(DataMethod.UniqueId);
@@ -50,8 +50,8 @@ namespace Attv {
                 super(undefined, attribute);
             }
 
-            getRawValue(element: HTMLElement): string {
-                let rawValue = super.getRawValue(element);
+            getRaw(element: HTMLElement): string {
+                let rawValue = super.getRaw(element);
 
                 // <form action='/'></form>
                 if (!rawValue && element?.tagName?.equalsIgnoreCase('form')) {
@@ -81,7 +81,7 @@ namespace Attv {
         }
 
         getMethod(element: HTMLElement): Ajax.AjaxMethod {
-            return this.getValue(element).getRawValue(element) as Ajax.AjaxMethod;
+            return this.getValue(element).getRaw(element) as Ajax.AjaxMethod;
         }
     }
     export namespace DataMethod {
@@ -90,8 +90,8 @@ namespace Attv {
                 super(undefined, attribute)
             }
 
-            getRawValue(element: HTMLElement): string {
-                let rawValue = super.getRawValue(element);
+            getRaw(element: HTMLElement): string {
+                let rawValue = super.getRaw(element);
 
                 if (!rawValue && element?.tagName?.equalsIgnoreCase('form')) {
                     // get from method attribute
@@ -118,7 +118,7 @@ namespace Attv {
         }
 
         useCache(element: HTMLElement): boolean {
-            let value = this.getValue(element).getRawValue(element);
+            let value = this.getValue(element).getRaw(element);
             if (isUndefined(value) || value === null)
                 return true;
             return value === 'true';
@@ -136,7 +136,7 @@ namespace Attv {
         }
 
         callback(element: HTMLElement): any {
-            let jsFunction = this.getValue(element).getRawValue(element);
+            let jsFunction = this.getValue(element).getRaw(element);
             return Attv.eval(jsFunction);
         }
     }
@@ -152,7 +152,7 @@ namespace Attv {
         }
 
         getContent(element: HTMLElement): any {
-            let rawValue = this.getValue(element).getRawValue(element);
+            let rawValue = this.getValue(element).getRaw(element);
 
             return rawValue;
         }
@@ -169,7 +169,7 @@ namespace Attv {
         }
 
         getTargetElement(element: HTMLElement): HTMLElement {
-            let selector = this.getValue(element).getRawValue(element);
+            let selector = this.getValue(element).getRaw(element);
 
             return document.querySelector(selector) as HTMLElement;
         }
@@ -186,7 +186,7 @@ namespace Attv {
         }
 
         timeout(element: HTMLElement, fn: () => void) {
-            let ms = parseInt(this.getValue(element).getRawValue(element));
+            let ms = parseInt(this.getValue(element).getRaw(element));
 
             if (ms) {
                 window.setTimeout(fn, ms);
@@ -207,7 +207,7 @@ namespace Attv {
         }
 
         interval(element: HTMLElement, fn: () => void) {
-            let ms = parseInt(this.getValue(element).getRawValue(element));
+            let ms = parseInt(this.getValue(element).getRaw(element));
 
             if (ms) {
                 let timer = new DataInterval.IntervalTimer(ms, fn);
@@ -257,7 +257,7 @@ namespace Attv {
         }
         
         getData(element: HTMLElement): any {
-            let rawValue = this.getValue(element).getRawValue(element);
+            let rawValue = this.getValue(element).getRaw(element);
 
             if (Attv.isEvaluatable(rawValue)) {
                 //do eval
@@ -283,7 +283,7 @@ namespace Attv {
          * @param element the element
          */
         getOptions<TOptions>(element: HTMLElement): TOptions {
-            let rawValue = this.getValue(element).getRawValue(element);
+            let rawValue = this.getValue(element).getRaw(element);
 
             // does it look like json?
             if (rawValue?.startsWith('{') && rawValue?.endsWith('}')) {
@@ -313,7 +313,7 @@ namespace Attv {
         }
         
         getTitle(element: HTMLElement): string {
-            let title = this.getValue(element).getRawValue(element);
+            let title = this.getValue(element).getRaw(element);
             return title;
         }
     }
@@ -348,7 +348,7 @@ namespace Attv {
          * @param element the element
          */
         isEnabled(element: HTMLElement) {
-            let rawValue = this.getValue(element).getRawValue(element);
+            let rawValue = this.getValue(element).getRaw(element);
 
             return !rawValue?.equalsIgnoreCase('false');
         }
@@ -365,7 +365,7 @@ namespace Attv {
         }
         
         isActive(element: HTMLElement) {
-            let rawValue = this.getValue(element).getRawValue(element);
+            let rawValue = this.getValue(element).getRaw(element);
 
             return rawValue === 'true';
         }

@@ -57,10 +57,10 @@ namespace Attv {
 
             protected continue(element: HTMLElement): boolean {
                 let dataUrl = this.resolver.resolve<DataUrl>(DataUrl.UniqueId);
-                let url = dataUrl.getValue(element).getRawValue(element);
+                let url = dataUrl.getValue(element).getRaw(element);
                 
                 let dataCallback = this.resolver.resolve<DataCallback>(DataCallback.UniqueId);
-                if (dataCallback.getValue(element).getRawValue(element)) {
+                if (dataCallback.getValue(element).getRaw(element)) {
                     dataCallback.callback(element);
                 } else if (element?.tagName?.equalsIgnoreCase('a')) {
                     let target = element.attr('target');

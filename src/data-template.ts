@@ -20,7 +20,7 @@ namespace Attv {
 
             // find the 'default'
             // getValue() doesn't like when sourceElement is null
-            let attributeValue = this.values.filter(val => val.getRawValue(sourceElement) === Attv.configuration.defaultTag)[0] as DataTemplate.DefaultAttributeValue;
+            let attributeValue = this.values.filter(val => val.getRaw(sourceElement) === Attv.configuration.defaultTag)[0] as DataTemplate.DefaultAttributeValue;
             if (sourceElement) {
                 attributeValue = this.getValue<DataTemplate.DefaultAttributeValue>(sourceElement);
             }
@@ -63,7 +63,7 @@ namespace Attv.DataTemplate {
         }
         
         getTemplate(element: HTMLElement): HTMLElement {
-            let html = this.resolver.resolve(DataTemplateHtml.UniqueId).getValue(element).getRawValue(element);
+            let html = this.resolver.resolve(DataTemplateHtml.UniqueId).getValue(element).getRaw(element);
 
             return Attv.createHTMLElement(html);
         }
@@ -142,7 +142,7 @@ namespace Attv {
         }
 
         protected getSourceElement(element: HTMLElement): HTMLElement {
-            let sourceElementSelector = this.getValue(element).getRawValue(element);
+            let sourceElementSelector = this.getValue(element).getRaw(element);
 
             return document.querySelector(sourceElementSelector) as HTMLElement;
         }

@@ -41,7 +41,7 @@ namespace Attv.Bootstrap4 {
 
         loadElement(element: HTMLElement): boolean {
             if (!this.settings && !this.attribute.isElementLoaded(element)) {
-                this.settings = new BootstrapSettings(this.value, this);
+                this.settings = new BootstrapSettings('default', this);
                 this.settings.commit();
             }
 

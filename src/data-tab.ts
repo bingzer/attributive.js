@@ -132,7 +132,7 @@ namespace Attv {
                 // -- [data-tab-nav]
                 navElement.parentElement.querySelectorAll(this.toString()).forEach((e: HTMLElement) => e.attr(dataActive, false));
     
-                let contentName = this.getRawValue(navElement);
+                let contentName = this.getRaw(navElement);
                 let contentElement = tabElement.parentElement.querySelector(`[${dataTabContent.name}="${contentName}"]`) as HTMLElement;
                 if (contentElement) {
                     let parentElement = contentElement.parentElement;

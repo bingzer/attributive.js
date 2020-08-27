@@ -333,7 +333,7 @@ namespace Attv {
          */
         getValue<TValue extends Attribute.Value>(element: HTMLElement): TValue {
             let value = element?.attr(this.name);
-            let attributeValue = this.values.filter(val => val.getRawValue(element) === value)[0] as TValue;
+            let attributeValue = this.values.filter(val => val.getRaw(element) === value)[0] as TValue;
 
             // Print/throw an error
             // when no 'attributeValue' found and there's 'element' to evaluate and isStrict is marked true
@@ -344,7 +344,7 @@ namespace Attv {
             // #1. if attribute is undefined
             // find the one with the default tag
             if (!attributeValue) {
-                attributeValue = this.values.filter(val => val.getRawValue(element) === Attv.configuration.defaultTag)[0] as TValue;
+                attributeValue = this.values.filter(val => val.getRaw(element) === Attv.configuration.defaultTag)[0] as TValue;
             }
 
             // #2. find the first attribute
@@ -402,7 +402,7 @@ namespace Attv.Attribute {
         public readonly resolver: Resolver = new Resolver(this);
         public settings: Settings;
         
-        constructor (protected value: string, 
+        constructor (private value: string, 
             public attribute: Attribute, 
             settingsFn?: SettingsFactory,
             public validators: Validators.AttributeValidator[] = []) {
@@ -414,7 +414,7 @@ namespace Attv.Attribute {
         /**
          * Returns raw string
          */
-        getRawValue(element: HTMLElement): string {
+        getRaw(element: HTMLElement): string {
             return this.value?.toString() || element?.attr(this.attribute.name);
         }
     
@@ -624,7 +624,7 @@ namespace Attv.Validators {
             for (let i = 0; i < attributes.length; i++) {
                 let attribute = attributes[i];
                 let attributeValue = attribute.getValue(element);
-                if (!attributeValue?.getRawValue(element)) {
+                if (!attributeValue?.getRaw(element)) {
                     Attv.log('error', `${value} is requiring ${attribute} to be present in DOM`, element)
                 }
 

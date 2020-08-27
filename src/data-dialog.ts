@@ -195,7 +195,7 @@ namespace Attv {
         }
 
         isModal(element: HTMLElement): boolean {
-            let rawValue = this.getValue(element).getRawValue(element);
+            let rawValue = this.getValue(element).getRaw(element);
 
             return rawValue === 'true';
         }
