@@ -2,12 +2,28 @@
     <h3><code>[data-table]</code></h3>
     
     <div>
-        <h4 data-table="dd">
+        <h4>
             This is an example of using <code>[data-table]</code>
         </h4>
 
-        <table data-table="default">
-            
+        <table data-table="default" 
+            data-template="table"
+            data-partial="table"
+            data-renderer="json2Table"
+            data-template-source="this"
+            data-url="/docs/samples/sample.json">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Company</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-bind="$root">
+                    <td data-bind="name"></td>
+                    <td data-bind="company"></td>
+                </tr>
+            </tbody>
         </table>
     </div>
 </div>

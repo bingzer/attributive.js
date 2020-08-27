@@ -80,15 +80,30 @@ namespace Attv.DataPartial {
         }
 
         protected doRender(element: HTMLElement, content: string, options?: Ajax.AjaxOptions): void {
-            // [data-template-source]                
-            let html = this.resolver.resolve<DataTemplateSource>(DataTemplateSource.UniqueId).renderTemplate(element, content);
-
-            // [data-target]
-            let targetElement = this.resolver.resolve<DataTarget>(DataTarget.UniqueId).getTargetElement(element) || element;
+            let html = this.getTemplate(element, content);
+            let targetElement = this.getTargetElement(element);
 
             targetElement.html(html);
 
             Attv.loadElements(targetElement);
+        }
+
+        protected getTemplate(element: HTMLElement, content: string): string {
+            // [data-template-source]           
+            let dataTemplateSource = this.resolver.resolve<DataTemplateSource>(DataTemplateSource.UniqueId);
+
+            let html = dataTemplateSource.renderTemplate(element, content);
+
+            return html;
+        }
+
+        protected getTargetElement(element: HTMLElement): HTMLElement {
+            // [data-target]           
+            let dataTarget = this.resolver.resolve<DataTarget>(DataTarget.UniqueId);
+
+            let targetElement = dataTarget.getTargetElement(element) || element;
+
+            return targetElement;
         }
         
         private sendAjax(element: HTMLElement, options: Attv.Ajax.AjaxOptions) {

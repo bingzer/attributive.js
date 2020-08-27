@@ -576,9 +576,9 @@ namespace Attv {
             super(DataRenderer.UniqueId, name);
         }
 
-        render(content: string, model: any, element?: HTMLElement, attributeValue?: DataRenderer.DefaultAttributeValue): string {       
+        render(content: string, model: any, element?: HTMLElement, attributeValue?: DataRenderer.DefaultValue): string {       
             if (!attributeValue) {
-                attributeValue = this.getValue<DataRenderer.DefaultAttributeValue>(element);
+                attributeValue = this.getValue<DataRenderer.DefaultValue>(element);
             }
 
             return attributeValue.render(content, model);
@@ -590,7 +590,7 @@ namespace Attv {
         /**
          * [data-renderer]='default'
          */
-        export class DefaultAttributeValue extends Attv.Attribute.Value  {
+        export class DefaultValue extends Attv.Attribute.Value  {
             
             constructor (attributeValue: string, attribute: Attv.Attribute) {
                 super(attributeValue, attribute);
@@ -609,12 +609,12 @@ namespace Attv {
         /**
          * [data-renderer]='json2html'
          */
-        export class Json2HtmlAttributeValue extends DefaultAttributeValue {
+        export class Json2HtmlValue extends DefaultValue {
     
             private dataBind: DataBind;
             
-            constructor (attribute: Attv.Attribute) {
-                super('json2html', attribute);
+            constructor (attributeValue: string = 'json2html', attribute: Attv.Attribute) {
+                super(attributeValue, attribute);
 
                 this.resolver.requires.push(DataBind.UniqueId);
                 this.dataBind = this.resolver.resolve<DataBind>(DataBind.UniqueId);
@@ -700,7 +700,7 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-renderer', 
         (name: string) => new Attv.DataRenderer(name),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataRenderer.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
-            list.push(new Attv.DataRenderer.Json2HtmlAttributeValue(attribute));
+            list.push(new Attv.DataRenderer.DefaultValue(Attv.configuration.defaultTag, attribute));
+            list.push(new Attv.DataRenderer.Json2HtmlValue('json2Html', attribute));
         });
 });

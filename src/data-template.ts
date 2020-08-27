@@ -20,9 +20,9 @@ namespace Attv {
 
             // find the 'default'
             // getValue() doesn't like when sourceElement is null
-            let attributeValue = this.values.filter(val => val.getRaw(sourceElement) === Attv.configuration.defaultTag)[0] as DataTemplate.DefaultAttributeValue;
+            let attributeValue = this.values.filter(val => val.getRaw(sourceElement) === Attv.configuration.defaultTag)[0] as DataTemplate.DefaultValue;
             if (sourceElement) {
-                attributeValue = this.getValue<DataTemplate.DefaultAttributeValue>(sourceElement);
+                attributeValue = this.getValue<DataTemplate.DefaultValue>(sourceElement);
             }
 
             return attributeValue.render(sourceElement, modelOrContent);
@@ -40,7 +40,7 @@ namespace Attv.DataTemplate {
     /**
      * [data-template]='default'
      */
-    export class DefaultAttributeValue extends Attv.Attribute.Value {
+    export class DefaultValue extends Attv.Attribute.Value {
         
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
@@ -62,14 +62,14 @@ namespace Attv.DataTemplate {
             return true;
         }
         
-        getTemplate(element: HTMLElement): HTMLElement {
+        getTemplate(element: HTMLElement): string {
             let html = this.resolver.resolve(DataTemplateHtml.UniqueId).getValue(element).getRaw(element);
 
-            return Attv.createHTMLElement(html);
+            return html;
         }
 
         render(element: HTMLElement, modelOrContent: string): string {
-            let content = this.getTemplate(element)?.html() || modelOrContent;
+            let content = this.getTemplate(element) || modelOrContent;
             let dataRenderer = this.resolver.resolve<DataRenderer>(DataRenderer.UniqueId);
 
             return dataRenderer.render(content, modelOrContent, element);
@@ -79,7 +79,7 @@ namespace Attv.DataTemplate {
     /**
      * [data-template]='script'
      */
-    export class ScriptAttributeValue extends DefaultAttributeValue {
+    export class ScriptValue extends DefaultValue {
         
         constructor (attribute: Attv.Attribute) {
             super('script', attribute, undefined, [ 
@@ -93,9 +93,8 @@ namespace Attv.DataTemplate {
             return true;
         }
         
-        getTemplate(element: HTMLElement): HTMLElement {
-            let html = element.html();
-            return Attv.createHTMLElement(html);
+        getTemplate(element: HTMLElement): string {
+            return element.html();
         }
         
     }
@@ -141,10 +140,13 @@ namespace Attv {
             return dataTemplate.renderTemplate(templateElement, model);
         }
 
-        protected getSourceElement(element: HTMLElement): HTMLElement {
-            let sourceElementSelector = this.getValue(element).getRaw(element);
+        getSourceElement(element: HTMLElement): HTMLElement {
+            let selector = this.getValue(element).getRaw(element);
+            if (selector === 'this') {
+                return element;
+            }
 
-            return document.querySelector(sourceElementSelector) as HTMLElement;
+            return document.querySelector(selector) as HTMLElement;
         }
     }
 }
@@ -166,7 +168,7 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-template', 
         (attributeName: string) => new Attv.DataTemplate(attributeName),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTemplate.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
-            list.push(new Attv.DataTemplate.ScriptAttributeValue(attribute));
+            list.push(new Attv.DataTemplate.DefaultValue(Attv.configuration.defaultTag, attribute));
+            list.push(new Attv.DataTemplate.ScriptValue(attribute));
         });
 });
