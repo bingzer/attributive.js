@@ -25,24 +25,24 @@ namespace Attv.Bootstrap4 {
     /**
      * [data-bootstrap]="bootstrap4"
      */
-    export class DefaultAttributeValue extends Attv.AttributeValue {
+    export class DefaultAttributeValue extends Attv.Attribute.Value {
         
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
-            configFn?: AttributeConfigurationFactory,
+            settingsFn?: Attv.Attribute.SettingsFactory,
             validators: Validators.AttributeValidator[] = [
                 new Validators.RequiredElementValidator(['body'])
             ]) {
-            super(attributeValue, attribute, configFn, validators);
+            super(attributeValue, attribute, settingsFn, validators);
 
             this.resolver.uses.push(DataRenderer.UniqueId);
             this.resolver.internals.push(DataTemplateHtml.UniqueId);
         }
 
         loadElement(element: HTMLElement): boolean {
-            if (!this.configuration && !this.attribute.isElementLoaded(element)) {
-                this.configuration = new BootstrapConfiguration(this.value, this);
-                this.configuration.commit();
+            if (!this.settings && !this.attribute.isElementLoaded(element)) {
+                this.settings = new BootstrapSettings(this.value, this);
+                this.settings.commit();
             }
 
             return true;
@@ -56,7 +56,7 @@ namespace Attv.Bootstrap4 {
 
 namespace Attv.Bootstrap4 {
         
-    export class BootstrapConfiguration extends Attv.AttributeConfiguration {
+    export class BootstrapSettings extends Attv.Attribute.Settings {
         styleUrls = [
             {
                 name: 'bootstrap-css',
@@ -104,7 +104,7 @@ namespace Attv.Bootstrap4 {
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-bootstrap', 
         (attributeName: string) => new Attv.Bootstrap4.DataBootstrap(attributeName),
-        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
             list.push(new Attv.Bootstrap4.DefaultAttributeValue('bootstrap4', attribute));
         });
 });

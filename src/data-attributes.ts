@@ -45,7 +45,7 @@ namespace Attv {
 
     export namespace DataUrl {
 
-        export class DefaultAttributeValue extends AttributeValue {
+        export class DefaultValue extends Attribute.Value {
             constructor (attribute: Attribute) {
                 super(undefined, attribute);
             }
@@ -85,7 +85,7 @@ namespace Attv {
         }
     }
     export namespace DataMethod {
-        export class DefaultAttributeValue extends AttributeValue {
+        export class DefaultValue extends Attribute.Value {
             constructor (attribute: Attribute) {
                 super(undefined, attribute)
             }
@@ -376,13 +376,13 @@ namespace Attv {
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-url', 
         (name: string) => new Attv.DataUrl(name),
-        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
-            list.push(new Attv.DataUrl.DefaultAttributeValue(attribute));
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
+            list.push(new Attv.DataUrl.DefaultValue(attribute));
         });
     Attv.registerAttribute('data-method', 
         (name: string) => new Attv.DataMethod(name),
-        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
-            list.push(new Attv.DataMethod.DefaultAttributeValue(attribute));
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
+            list.push(new Attv.DataMethod.DefaultValue(attribute));
         });
     Attv.registerAttribute('data-callback', (name: string) => new Attv.DataCallback(name));
     Attv.registerAttribute('data-target',  (name: string) => new Attv.DataTarget(name));
@@ -421,18 +421,18 @@ namespace Attv {
         /**
          * [data-loading]='default'
          */
-        export class DefaultAttributeValue extends Attv.AttributeValue  {
+        export class DefaultAttributeValue extends Attv.Attribute.Value  {
             
             constructor (attributeValue: string, 
                 attribute: Attv.Attribute, 
-                configFn?: AttributeConfigurationFactory) {
-                super(attributeValue, attribute, configFn);
+                settingsFn?: Attv.Attribute.SettingsFactory) {
+                super(attributeValue, attribute, settingsFn);
 
                 this.resolver.uses.push(DataOptions.UniqueId);
             }
     
             loadElement(element: HTMLElement): boolean {
-                let configuration = this.configuration as SpinnerConfiguration;
+                let configuration = this.settings as SpinnerSettings;
                 let dataOptions = this.resolver.resolve<DataOptions>(DataOptions.UniqueId);
 
                 if (dataOptions.exists(element)) {
@@ -454,7 +454,7 @@ namespace Attv {
             height: string;
         }
 
-        export class SpinnerConfiguration extends Attv.AttributeConfiguration {
+        export class SpinnerSettings extends Attv.Attribute.Settings {
 // https://codepen.io/mandelid/pen/vwKoe
             defaultOuterColor = "#c0c0c0";
             defaultInnerColor = "#000000";
@@ -487,8 +487,8 @@ to { -webkit-transform: rotate(360deg); }
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-loading', 
         (name: string) => new Attv.DataLoading(name),
-        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
-            list.push(new Attv.DataLoading.DefaultAttributeValue(Attv.configuration.defaultTag, attribute, (name, value) => new Attv.DataLoading.SpinnerConfiguration(name, value)));
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
+            list.push(new Attv.DataLoading.DefaultAttributeValue(Attv.configuration.defaultTag, attribute, (name, value) => new Attv.DataLoading.SpinnerSettings(name, value)));
         });
 });
 
@@ -522,7 +522,7 @@ namespace Attv {
         /**
          * [data-renderer]='default'
          */
-        export class DefaultAttributeValue extends Attv.AttributeValue  {
+        export class DefaultAttributeValue extends Attv.Attribute.Value  {
             
             constructor (attributeValue: string, attribute: Attv.Attribute) {
                 super(attributeValue, attribute);
@@ -631,7 +631,7 @@ namespace Attv {
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-renderer', 
         (name: string) => new Attv.DataRenderer(name),
-        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
             list.push(new Attv.DataRenderer.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
             list.push(new Attv.DataRenderer.Json2HtmlAttributeValue(attribute));
         });

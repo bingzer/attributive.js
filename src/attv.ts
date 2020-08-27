@@ -276,76 +276,16 @@ namespace Attv.Ajax {
 ////////////////////////////////////////////////////////////////////////////////////
 
 namespace Attv {
-
-    export class AttributeDependency {
-
-        /**
-         * List of attribute Ids that we require
-         */
-        readonly requires: string[] = [];
-
-        /**
-         * List of attribute Id that we use
-         */
-        readonly uses: string[] = [];
-
-        /**
-         * List of attribute Id that we internvally use
-         */
-        readonly internals: string[] = [];
-
-        /**
-         * List of all dependencies
-         */
-        allDependencies(): string[] {
-            return this.requires.concat(this.uses).concat(this.internals);
-        }
-    }
-
-    export class AttributeResolver extends AttributeDependency {
-        
-        constructor (private attributeValue: AttributeValue) {
-            super();
-        }
-
-        /**
-         * Returns the data attribute
-         * @param attributeId id
-         */
-        resolve<TAttribute extends Attribute>(attributeId: string) {
-            let attribute = Attv.getAttribute(attributeId) as TAttribute;
-
-            if (!this.allDependencies().some(dep => dep === attributeId)) {
-                Attv.log('warning', `${attribute || attributeId} should be declared as the dependant in ${this.attributeValue.attribute}. This is for documentation purposes`);
-            }
-
-            if (!attribute) {
-                throw new Error(`${attribute || attributeId} can not be found. Did you register ${attribute || attributeId}?`);
-            }
-
-            return attribute;
-        }
-
-        /**
-         * Adds a dependency data attribute to the 'element'
-         * @param element the element
-         * @param value the value
-         */
-        addAttribute(uniqueId: string, element: HTMLElement, any: string) {
-            let attribute = this.resolve(uniqueId);
-            element.attr(attribute.name, any);
-        }
-    }
     
     /**
     * Base class for data-attributes
     */
     export class Attribute {
-        public readonly attributeValues: AttributeValue[] = [];
+        public readonly values: Attribute.Value[] = [];
 
         public readonly description: string;
         public readonly loadedName: string;
-        public readonly dependency: AttributeDependency = new AttributeDependency();
+        public readonly dependency: Attribute.Dependency = new Attribute.Dependency();
 
         protected isStrict: boolean = false;
 
@@ -367,7 +307,7 @@ namespace Attv {
          * Register attribute values
          * @param attributeValues attribute values
          */
-        registerAttributeValues(attributeValues: AttributeValue[]) {
+        registerAttributeValues(attributeValues: Attribute.Value[]) {
             // add dependency
             for (let i = 0; i < attributeValues.length; i++) {
                 // add dependency
@@ -376,7 +316,7 @@ namespace Attv {
                 attributeValues[i].resolver.internals.push(...this.dependency.internals);
             }
 
-            this.attributeValues.push(...attributeValues);
+            this.values.push(...attributeValues);
         }
 
         /**
@@ -391,9 +331,9 @@ namespace Attv {
          * Returns the current attribute value
          * @param element the element
          */
-        getValue<TAttributeValue extends AttributeValue>(element: HTMLElement): TAttributeValue {
+        getValue<TValue extends Attribute.Value>(element: HTMLElement): TValue {
             let value = element?.attr(this.name);
-            let attributeValue = this.attributeValues.filter(val => val.getRawValue(element) === value)[0] as TAttributeValue;
+            let attributeValue = this.values.filter(val => val.getRawValue(element) === value)[0] as TValue;
 
             // Print/throw an error
             // when no 'attributeValue' found and there's 'element' to evaluate and isStrict is marked true
@@ -404,18 +344,18 @@ namespace Attv {
             // #1. if attribute is undefined
             // find the one with the default tag
             if (!attributeValue) {
-                attributeValue = this.attributeValues.filter(val => val.getRawValue(element) === Attv.configuration.defaultTag)[0] as TAttributeValue;
+                attributeValue = this.values.filter(val => val.getRawValue(element) === Attv.configuration.defaultTag)[0] as TValue;
             }
 
             // #2. find the first attribute
             if (!attributeValue) {
-                attributeValue = this.attributeValues[0] as TAttributeValue;
+                attributeValue = this.values[0] as TValue;
             }
 
             // #3. generic attribute
             if (!attributeValue) {
                 let rawAttributeValue = element?.attr(this.name) as string;
-                attributeValue = new AttributeValue(rawAttributeValue, this) as TAttributeValue;
+                attributeValue = new Attribute.Value(rawAttributeValue, this) as TValue;
             }
 
             return attributeValue;
@@ -447,19 +387,27 @@ namespace Attv {
         }
     }
 
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////// Attv.Attributes /////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv.Attribute {
+
     /**
      * Base class for attribute-value
      */
-    export class AttributeValue {
-        public readonly resolver: AttributeResolver = new AttributeResolver(this);
-        public configuration: AttributeConfiguration;
+    export class Value {
+        public readonly resolver: Resolver = new Resolver(this);
+        public settings: Settings;
         
         constructor (protected value: string, 
             public attribute: Attribute, 
-            configFn?: AttributeConfigurationFactory,
+            settingsFn?: SettingsFactory,
             public validators: Validators.AttributeValidator[] = []) {
-            if (configFn) {
-                this.configuration = configFn(value, this);
+            if (settingsFn) {
+                this.settings = settingsFn(value, this);
             }
         }
 
@@ -490,180 +438,72 @@ namespace Attv {
         }
     }
 
-}
+    export class Dependency {
 
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// Validators //////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
+        /**
+         * List of attribute Ids that we require
+         */
+        readonly requires: string[] = [];
 
-namespace Attv.Validators {
+        /**
+         * List of attribute Id that we use
+         */
+        readonly uses: string[] = [];
 
-    export interface AttributeValidator {
-        validate(value: AttributeValue, element: Element): boolean;
+        /**
+         * List of attribute Id that we internvally use
+         */
+        readonly internals: string[] = [];
+
+        /**
+         * List of all dependencies
+         */
+        allDependencies(): string[] {
+            return this.requires.concat(this.uses).concat(this.internals);
+        }
     }
 
-    export class RequiredRawAttributeValidator implements AttributeValidator {
-
-        constructor (private requiredRawAttributes: string[]) {
-            // do nothing
+    export class Resolver extends Dependency {
+        
+        constructor (private attributeValue: Attribute.Value) {
+            super();
         }
-    
-        validate(value: AttributeValue, element: HTMLElement): boolean {
-            let isValidated = true;
 
-            // check for other require attributes
-            for (let i = 0; i < this.requiredRawAttributes.length; i++) {
-                let requiredAttributeName = this.requiredRawAttributes[i];
-                let requiredAttribute = element.attr(requiredAttributeName);
-                if (!requiredAttribute) {
-                    Attv.log('error', `${value} is requiring [${requiredAttributeName}] to be present in DOM`, element)
-                }
+        /**
+         * Returns the data attribute
+         * @param attributeId id
+         */
+        resolve<TAttribute extends Attribute>(attributeId: string) {
+            let attribute = Attv.getAttribute(attributeId) as TAttribute;
 
-                isValidated = isValidated && !!requiredAttribute;
+            if (!this.allDependencies().some(dep => dep === attributeId)) {
+                Attv.log('warning', `${attribute || attributeId} should be declared as the dependant in ${this.attributeValue.attribute}. This is for documentation purposes`);
             }
 
-            return isValidated;
-        }
-    }
-
-    export class RequiredAttributeValidator implements AttributeValidator {
-
-        constructor (private requiredAttributeIds: string[]) {
-            // do nothing
-        }
-    
-        validate(value: AttributeValue, element: HTMLElement): boolean {
-            let isValidated = true;
-
-            let attributes = this.requiredAttributeIds.map(attId => Attv.getAttribute(attId));
-
-            // check for other require attributes
-            for (let i = 0; i < attributes.length; i++) {
-                let attribute = attributes[i];
-                let attributeValue = attribute.getValue(element);
-                if (!attributeValue?.getRawValue(element)) {
-                    Attv.log('error', `${value} is requiring ${attribute} to be present in DOM`, element)
-                }
-
-                isValidated = isValidated && !!attribute;
+            if (!attribute) {
+                throw new Error(`${attribute || attributeId} can not be found. Did you register ${attribute || attributeId}?`);
             }
 
-            return isValidated;
+            return attribute;
+        }
+
+        /**
+         * Adds a dependency data attribute to the 'element'
+         * @param element the element
+         * @param value the value
+         */
+        addAttribute(uniqueId: string, element: HTMLElement, any: string) {
+            let attribute = this.resolve(uniqueId);
+            element.attr(attribute.name, any);
         }
     }
 
-    export class RequiredAttributeValidatorWithValue implements AttributeValidator {
-
-        constructor (private requiredAttributes: { name: string, value: string}[]) {
-            // do nothing
-        }
-    
-        validate(value: AttributeValue, element: HTMLElement): boolean {
-            let isValidated = true;
-
-            // check for other require attributes
-            for (let i = 0; i < this.requiredAttributes.length; i++) {
-                let attribute = this.requiredAttributes[i];
-                let requiredAttribute = element.attr(attribute.name);
-                if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
-                    Attv.log('error', `${value} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
-                }
-
-                isValidated = isValidated && !!requiredAttribute;
-            }
-
-            return isValidated;
-        }
-    }
-
-    export class RequiredElementValidator implements AttributeValidator {
-
-        constructor (private elementTagNames: string[]) {
-            // do nothing
-        }
-
-        validate(value: AttributeValue, element: Element): boolean {
-            let isValidated = true;
-
-            // check for element that this attribute belongs to
-            for (let i = 0; i < this.elementTagNames.length; i++) {
-                let elementName = this.elementTagNames[i];
-                isValidated = isValidated && element.tagName.equalsIgnoreCase(elementName);
-            }
-
-            if (!isValidated) {
-                Attv.log('error', `${value} can only be attached to elements [${this.elementTagNames}]`, element)
-            }
-
-            return isValidated;
-        }
-    }
-    
-    export class RequiredAnyElementsValidator implements AttributeValidator {
-
-        constructor (private elementTagNames: string[]) {
-            // do nothing
-        }
-
-        validate(value: AttributeValue, element: Element): boolean {
-            let isValidated = false;
-
-            // check for element that this attribute belongs to
-            for (let i = 0; i < this.elementTagNames.length; i++) {
-                let elementName = this.elementTagNames[i];
-                if (element.tagName.equalsIgnoreCase(elementName)) {
-                    isValidated = true;
-                    break;
-                }
-            }
-
-            if (!isValidated) {
-                Attv.log('error', `${value} can only be attached to elements [${this.elementTagNames}]`, element)
-            }
-
-            return isValidated;
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// Configuration ///////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-
-namespace Attv {
-
-    export interface Configuration {
-
-        isDebug: boolean;
-
-        isLoggingEnabled: boolean;
-
-        readonly defaultTag: string;
-
-        readonly logLevels: string[];
-    }
-
-    export class DefaultConfiguration implements Configuration {
-
-        isDebug: boolean = true;
-
-        isLoggingEnabled: boolean = true;
-
-        get defaultTag(): string  {
-            return "default";
-        }
-
-        get logLevels(): string[] {
-            return ['log', 'warning', 'error', 'debug', 'fatal'];
-        }
-    }
-
-    export type AttributeConfigurationFactory = (configName: string, attributeValue: AttributeValue) => AttributeConfiguration;
+    export type SettingsFactory = (name: string, attributeValue: Value) => Settings;
     
     /**
      * Attribute configuration
      */
-    export class AttributeConfiguration {
+    export class Settings {
         /**
          * Inline style
          */
@@ -679,7 +519,7 @@ namespace Attv {
          */
         jsUrls?: {name: string, url: string, options?: any}[];
 
-        constructor (private configName: string, private attributeValue: AttributeValue) {
+        constructor (private configName: string, private attributeValue: Value) {
             // do nothing
         }
     
@@ -731,6 +571,173 @@ namespace Attv {
                     scriptElement.crossOrigin = jsUrl.options?.crossorigin;
                 });
             }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////// Validators //////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv.Validators {
+
+    export interface AttributeValidator {
+        validate(value: Attribute.Value, element: Element): boolean;
+    }
+
+    export class RequiredRawAttributeValidator implements AttributeValidator {
+
+        constructor (private requiredRawAttributes: string[]) {
+            // do nothing
+        }
+    
+        validate(value: Attribute.Value, element: HTMLElement): boolean {
+            let isValidated = true;
+
+            // check for other require attributes
+            for (let i = 0; i < this.requiredRawAttributes.length; i++) {
+                let requiredAttributeName = this.requiredRawAttributes[i];
+                let requiredAttribute = element.attr(requiredAttributeName);
+                if (!requiredAttribute) {
+                    Attv.log('error', `${value} is requiring [${requiredAttributeName}] to be present in DOM`, element)
+                }
+
+                isValidated = isValidated && !!requiredAttribute;
+            }
+
+            return isValidated;
+        }
+    }
+
+    export class RequiredAttributeValidator implements AttributeValidator {
+
+        constructor (private requiredAttributeIds: string[]) {
+            // do nothing
+        }
+    
+        validate(value: Attribute.Value, element: HTMLElement): boolean {
+            let isValidated = true;
+
+            let attributes = this.requiredAttributeIds.map(attId => Attv.getAttribute(attId));
+
+            // check for other require attributes
+            for (let i = 0; i < attributes.length; i++) {
+                let attribute = attributes[i];
+                let attributeValue = attribute.getValue(element);
+                if (!attributeValue?.getRawValue(element)) {
+                    Attv.log('error', `${value} is requiring ${attribute} to be present in DOM`, element)
+                }
+
+                isValidated = isValidated && !!attribute;
+            }
+
+            return isValidated;
+        }
+    }
+
+    export class RequiredAttributeValidatorWithValue implements AttributeValidator {
+
+        constructor (private requiredAttributes: { name: string, value: string}[]) {
+            // do nothing
+        }
+    
+        validate(value: Attribute.Value, element: HTMLElement): boolean {
+            let isValidated = true;
+
+            // check for other require attributes
+            for (let i = 0; i < this.requiredAttributes.length; i++) {
+                let attribute = this.requiredAttributes[i];
+                let requiredAttribute = element.attr(attribute.name);
+                if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
+                    Attv.log('error', `${value} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
+                }
+
+                isValidated = isValidated && !!requiredAttribute;
+            }
+
+            return isValidated;
+        }
+    }
+
+    export class RequiredElementValidator implements AttributeValidator {
+
+        constructor (private elementTagNames: string[]) {
+            // do nothing
+        }
+
+        validate(value: Attribute.Value, element: Element): boolean {
+            let isValidated = true;
+
+            // check for element that this attribute belongs to
+            for (let i = 0; i < this.elementTagNames.length; i++) {
+                let elementName = this.elementTagNames[i];
+                isValidated = isValidated && element.tagName.equalsIgnoreCase(elementName);
+            }
+
+            if (!isValidated) {
+                Attv.log('error', `${value} can only be attached to elements [${this.elementTagNames}]`, element)
+            }
+
+            return isValidated;
+        }
+    }
+    
+    export class RequiredAnyElementsValidator implements AttributeValidator {
+
+        constructor (private elementTagNames: string[]) {
+            // do nothing
+        }
+
+        validate(value: Attribute.Value, element: Element): boolean {
+            let isValidated = false;
+
+            // check for element that this attribute belongs to
+            for (let i = 0; i < this.elementTagNames.length; i++) {
+                let elementName = this.elementTagNames[i];
+                if (element.tagName.equalsIgnoreCase(elementName)) {
+                    isValidated = true;
+                    break;
+                }
+            }
+
+            if (!isValidated) {
+                Attv.log('error', `${value} can only be attached to elements [${this.elementTagNames}]`, element)
+            }
+
+            return isValidated;
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////// Configuration ///////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv {
+
+    export interface Configuration {
+
+        isDebug: boolean;
+
+        isLoggingEnabled: boolean;
+
+        readonly defaultTag: string;
+
+        readonly logLevels: string[];
+    }
+
+    export class DefaultConfiguration implements Configuration {
+
+        isDebug: boolean = true;
+
+        isLoggingEnabled: boolean = true;
+
+        get defaultTag(): string  {
+            return "default";
+        }
+
+        get logLevels(): string[] {
+            return ['log', 'warning', 'error', 'debug', 'fatal'];
         }
     }
 }
@@ -938,18 +945,18 @@ namespace Attv {
 
 namespace Attv {
     let attributeRegistrar: AttributeRegistration[] = [];
-    let valueRegistrar: AttributeValueRegistration[] = [];
+    let valueRegistrar: ValueRegistration[] = [];
 
     export function registerAttribute(attributeName: string, 
         fn: (attributeName: string) => Attribute,
-        valuesFn?: (attribute: Attribute, list: AttributeValue[]) => void): void {
+        valuesFn?: (attribute: Attribute, list: Attribute.Value[]) => void): void {
         let registry = new AttributeRegistration(attributeName, fn, valuesFn);
 
         attributeRegistrar.push(registry);
     }
 
-    export function registerAttributeValue(id: string, valuesFn?: (attribute: Attribute, list: AttributeValue[]) => void): void {
-        let registry = new AttributeValueRegistration(id, valuesFn);
+    export function registerAttributeValue(id: string, valuesFn?: (attribute: Attribute, list: Attribute.Value[]) => void): void {
+        let registry = new ValueRegistration(id, valuesFn);
 
         valueRegistrar.push(registry);
     }
@@ -967,7 +974,7 @@ namespace Attv {
     class AttributeRegistration {
         constructor (public attributeName: string, 
             private fn: (attributeName: string) => Attribute,
-            private valuesFn?: (attribute: Attribute, list: AttributeValue[]) => void) {
+            private valuesFn?: (attribute: Attribute, list: Attribute.Value[]) => void) {
             // do nothing
         }
 
@@ -976,7 +983,7 @@ namespace Attv {
             
             Attv.log('debug', `${attribute}`, attribute);
 
-            let attributeValues: AttributeValue[] = [];
+            let attributeValues: Attribute.Value[] = [];
 
             if (this.valuesFn) {
                 this.valuesFn(attribute, attributeValues);
@@ -994,15 +1001,15 @@ namespace Attv {
             }
 
             // commit configuration if any
-            attributeValues?.forEach(attValue => attValue?.configuration?.commit());
+            attributeValues?.forEach(attValue => attValue?.settings?.commit());
 
             return attribute;
         }
     }
 
-    class AttributeValueRegistration {
+    class ValueRegistration {
         constructor (public attributeUniqueId: string, 
-            public register: (attribute: Attribute, list: AttributeValue[]) => void) {
+            public register: (attribute: Attribute, list: Attribute.Value[]) => void) {
             // do nothing
         }
     }

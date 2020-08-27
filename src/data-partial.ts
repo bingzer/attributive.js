@@ -20,7 +20,7 @@ namespace Attv {
 
             let htmlElement = element as HTMLElement;
 
-            let attributeValue = this.getValue<DataPartial.DefaultAttributeValue>(htmlElement);
+            let attributeValue = this.getValue<DataPartial.DefaultValue>(htmlElement);
 
             attributeValue.render(htmlElement, content);
         }
@@ -37,15 +37,15 @@ namespace Attv.DataPartial {
     /**
      * [data-partial]="lazy"
      */
-    export class DefaultAttributeValue extends Attv.AttributeValue {
+    export class DefaultValue extends Attv.Attribute.Value {
         
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
-            configFn?: AttributeConfigurationFactory,
+            settingsFn?: Attv.Attribute.SettingsFactory,
             validators: Validators.AttributeValidator[] = [
                 new Validators.RequiredAttributeValidator([DataUrl.UniqueId])
             ]) {
-            super(attributeValue, attribute, configFn, validators);
+            super(attributeValue, attribute, settingsFn, validators);
 
             this.resolver.uses.push(DataTemplateSource.UniqueId, DataTimeout.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId, DataInterval.UniqueId);
         }
@@ -107,7 +107,7 @@ namespace Attv.DataPartial {
     /**
      * [data-partial]="auto"
      */
-    export class AutoAttributeValue extends DefaultAttributeValue {
+    export class AutoValue extends DefaultValue {
         
         constructor (attribute: Attv.Attribute) {
             super('auto', attribute)
@@ -124,7 +124,7 @@ namespace Attv.DataPartial {
     /**
      * [data-partial]="click"
      */
-    export class ClickAttributeValue extends DefaultAttributeValue {
+    export class ClickValue extends DefaultValue {
         
         constructor (attribute: Attv.Attribute) {
             super('click', attribute, undefined, [
@@ -146,7 +146,7 @@ namespace Attv.DataPartial {
     /**
      * [data-partial]="click"
      */
-    export class FormAttributeValue extends DefaultAttributeValue {
+    export class FormValue extends DefaultValue {
         
         constructor (attribute: Attv.Attribute) {
             super('form', attribute, undefined, [
@@ -175,11 +175,11 @@ namespace Attv.DataPartial {
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-partial', 
         (attributeName: string) => new Attv.DataPartial(attributeName),
-        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
-            list.push(new Attv.DataPartial.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
-            list.push(new Attv.DataPartial.DefaultAttributeValue('lazy', attribute));
-            list.push(new Attv.DataPartial.AutoAttributeValue(attribute));
-            list.push(new Attv.DataPartial.ClickAttributeValue(attribute));
-            list.push(new Attv.DataPartial.FormAttributeValue(attribute));
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
+            list.push(new Attv.DataPartial.DefaultValue(Attv.configuration.defaultTag, attribute));
+            list.push(new Attv.DataPartial.DefaultValue('lazy', attribute));
+            list.push(new Attv.DataPartial.AutoValue(attribute));
+            list.push(new Attv.DataPartial.ClickValue(attribute));
+            list.push(new Attv.DataPartial.FormValue(attribute));
         });
 });

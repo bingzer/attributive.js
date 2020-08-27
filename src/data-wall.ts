@@ -24,15 +24,15 @@ namespace Attv {
         /**
          * [data-wall]="alert"
          */
-        export class DefaultAttributeValue extends AttributeValue {
+        export class DefaultValue extends Attribute.Value {
 
             constructor (attributeValue: string, 
                 attribute: Attv.Attribute, 
-                configFn?: AttributeConfigurationFactory,
+                settingsFn?: Attv.Attribute.SettingsFactory,
                 validators: Validators.AttributeValidator[] = [
                     new Validators.RequiredAnyElementsValidator(['a', 'button'])
                 ]) {
-                super(attributeValue, attribute, configFn, validators);
+                super(attributeValue, attribute, settingsFn, validators);
             }
             
             loadElement(element: HTMLElement): boolean {
@@ -74,7 +74,7 @@ namespace Attv {
         /**
          * [data-wall]="confirm"
          */
-        export class ConfirmAttributeValue extends DefaultAttributeValue {
+        export class ConfirmValue extends DefaultValue {
             constructor (attributeValue: string,
                 attribute: Attv.Attribute, 
                 validators: Validators.AttributeValidator[] = []) {
@@ -99,10 +99,10 @@ namespace Attv {
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-wall', 
         (attributeName: string) => new Attv.DataWall(attributeName),
-        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
-            list.push(new Attv.DataWall.DefaultAttributeValue('alert', attribute));
-            list.push(new Attv.DataWall.DefaultAttributeValue('native-alert', attribute));
-            list.push(new Attv.DataWall.ConfirmAttributeValue('confirm', attribute));
-            list.push(new Attv.DataWall.ConfirmAttributeValue('native-confirm', attribute));
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
+            list.push(new Attv.DataWall.DefaultValue('alert', attribute));
+            list.push(new Attv.DataWall.ConfirmValue('confirm', attribute));
+            list.push(new Attv.DataWall.DefaultValue('native-alert', attribute));
+            list.push(new Attv.DataWall.ConfirmValue('native-confirm', attribute));
         });
 });

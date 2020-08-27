@@ -20,7 +20,7 @@ namespace Attv {
 
             // find the 'default'
             // getValue() doesn't like when sourceElement is null
-            let attributeValue = this.attributeValues.filter(val => val.getRawValue(sourceElement) === Attv.configuration.defaultTag)[0] as DataTemplate.DefaultAttributeValue;
+            let attributeValue = this.values.filter(val => val.getRawValue(sourceElement) === Attv.configuration.defaultTag)[0] as DataTemplate.DefaultAttributeValue;
             if (sourceElement) {
                 attributeValue = this.getValue<DataTemplate.DefaultAttributeValue>(sourceElement);
             }
@@ -40,13 +40,13 @@ namespace Attv.DataTemplate {
     /**
      * [data-template]='default'
      */
-    export class DefaultAttributeValue extends Attv.AttributeValue {
+    export class DefaultAttributeValue extends Attv.Attribute.Value {
         
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
-            configFn?: AttributeConfigurationFactory,
+            settingsFn?: Attv.Attribute.SettingsFactory,
             validators: Validators.AttributeValidator[] = []) {
-            super(attributeValue, attribute, configFn, validators);
+            super(attributeValue, attribute, settingsFn, validators);
 
             this.resolver.uses.push(DataRenderer.UniqueId);
             this.resolver.internals.push(DataTemplateHtml.UniqueId);
@@ -157,15 +157,15 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-template-html',  (attributeName: string) => new Attv.DataTemplateHtml(attributeName));
     Attv.registerAttribute('data-template-source', 
         (attributeName: string) => new Attv.DataTemplateSource(attributeName),
-        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
-            let attributeValue = new Attv.AttributeValue(undefined, attribute);
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
+            let attributeValue = new Attv.Attribute.Value(undefined, attribute);
             attributeValue.resolver.uses.push(Attv.DataTemplate.UniqueId);
 
             list.push(attributeValue);
         });
     Attv.registerAttribute('data-template', 
         (attributeName: string) => new Attv.DataTemplate(attributeName),
-        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
             list.push(new Attv.DataTemplate.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
             list.push(new Attv.DataTemplate.ScriptAttributeValue(attribute));
         });
