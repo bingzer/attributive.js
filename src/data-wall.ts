@@ -28,10 +28,11 @@ namespace Attv {
 
             constructor (attributeValue: string, 
                 attribute: Attv.Attribute, 
+                configFn?: AttributeConfigurationFactory,
                 validators: Validators.AttributeValidator[] = [
                     new Validators.RequiredAnyElementsValidator(['a', 'button'])
                 ]) {
-                super(attributeValue, attribute, validators);
+                super(attributeValue, attribute, configFn, validators);
             }
             
             loadElement(element: HTMLElement): boolean {
@@ -77,7 +78,7 @@ namespace Attv {
             constructor (attributeValue: string,
                 attribute: Attv.Attribute, 
                 validators: Validators.AttributeValidator[] = []) {
-                super(attributeValue, attribute, validators);
+                super(attributeValue, attribute, undefined, validators);
             }
 
             protected onclick(element: HTMLElement, ev: Event): boolean {

@@ -13,7 +13,6 @@ namespace Attv {
 
             this.dependency.uses.push(DataContent.UniqueId, DataUrl.UniqueId, DataModal.UniqueId, DataTitle.UniqueId, DataOptions.UniqueId, DataPartial.UniqueId);
             this.dependency.internals.push(DataCallback.UniqueId);
-            this.configuration = new DataDialog.AttributeConfiguration(this);
         }
 
         show(element: HTMLElement): HTMLDialogElement {
@@ -77,10 +76,11 @@ namespace Attv.DataDialog {
 
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
+            configFn?: AttributeConfigurationFactory,
             validators: Attv.Validators.AttributeValidator[] = [
                 new Validators.RequiredAnyElementsValidator(['a', 'button'])
             ]) {
-            super(attributeValue, attribute, validators);
+            super(attributeValue, attribute, configFn, validators);
         }
         
         loadElement(element: HTMLElement): boolean {
@@ -116,11 +116,13 @@ namespace Attv.DataDialog {
                 options = optionsOrElements as DataDialog.DialogOptions;
             }
 
-            let configuration = this.attribute.configuration as DataDialog.AttributeConfiguration;
-            options.templateHtml = configuration.templateHtml;
-            options.style = configuration.style;
-            options.titleSelector = configuration.titleSelector;
-            options.contentSelector = configuration.contentSelector;
+            if (this.configuration) {
+                let configuration = this.configuration as DataDialog.AttributeConfiguration;
+                options.templateHtml = configuration.templateHtml;
+                options.style = configuration.style;
+                options.titleSelector = configuration.titleSelector;
+                options.contentSelector = configuration.contentSelector;
+            }
 
             return this.doShow(options);
         }
@@ -208,8 +210,8 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-dialog', 
         (attributeName: string) => new Attv.DataDialog(attributeName),
         (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
-            list.push(new Attv.DataDialog.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
-            list.push(new Attv.DataDialog.DefaultAttributeValue('click', attribute));
+            list.push(new Attv.DataDialog.DefaultAttributeValue(Attv.configuration.defaultTag, attribute, (name, value)  => new Attv.DataDialog.AttributeConfiguration(name, value)));
+            list.push(new Attv.DataDialog.DefaultAttributeValue('click', attribute, (_, value)  => new Attv.DataDialog.AttributeConfiguration('default', value)));
         });
     Attv.registerAttribute('data-modal', (name: string) => new Attv.DataModal(name));
 

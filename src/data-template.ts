@@ -42,8 +42,11 @@ namespace Attv.DataTemplate {
      */
     export class DefaultAttributeValue extends Attv.AttributeValue {
         
-        constructor (attributeValue: string, attribute: Attv.Attribute, validators: Validators.AttributeValidator[] = []) {
-            super(attributeValue, attribute, validators);
+        constructor (attributeValue: string, 
+            attribute: Attv.Attribute, 
+            configFn?: AttributeConfigurationFactory,
+            validators: Validators.AttributeValidator[] = []) {
+            super(attributeValue, attribute, configFn, validators);
 
             this.resolver.uses.push(DataRenderer.UniqueId);
             this.resolver.internals.push(DataTemplateHtml.UniqueId);
@@ -79,7 +82,7 @@ namespace Attv.DataTemplate {
     export class ScriptAttributeValue extends DefaultAttributeValue {
         
         constructor (attribute: Attv.Attribute) {
-            super('script', attribute, [ 
+            super('script', attribute, undefined, [ 
                 new Validators.RequiredElementValidator(['script']),
                 new Validators.RequiredAttributeValidatorWithValue([{ name: 'type', value: 'text/html'}])
             ])

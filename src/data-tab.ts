@@ -12,7 +12,6 @@ namespace Attv {
             this.isStrict = true;
 
             this.dependency.uses.push(DataTabContent.UniqueId, DataTabNav.UniqueId);
-            this.configuration = new DataTab.AttributeConfiguration(this);
         }
     }
 }
@@ -30,8 +29,9 @@ namespace Attv.DataTab {
         
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
+            configFn: AttributeConfigurationFactory,
             validators: Validators.AttributeValidator[] = []) {
-            super(attributeValue, attribute, validators);
+            super(attributeValue, attribute, configFn, validators);
 
             this.resolver.uses.push(DataContent.UniqueId, DataPartial.UniqueId, DataActive.UniqueId);
         }
@@ -219,7 +219,7 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-tab', 
         (attributeName: string) => new Attv.DataTab(attributeName),
         (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
-            list.push(new Attv.DataTab.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
+            list.push(new Attv.DataTab.DefaultAttributeValue(Attv.configuration.defaultTag, attribute, (name, value) => new Attv.DataTab.AttributeConfiguration(name, value)));
         });
     Attv.registerAttribute('data-tab-nav', (attributeName: string) => new Attv.DataTabNav(attributeName));
     Attv.registerAttribute('data-tab-content', (attributeName: string) => new Attv.DataTabContent(attributeName));

@@ -41,10 +41,11 @@ namespace Attv.DataPartial {
         
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
+            configFn?: AttributeConfigurationFactory,
             validators: Validators.AttributeValidator[] = [
                 new Validators.RequiredAttributeValidator([DataUrl.UniqueId])
             ]) {
-            super(attributeValue, attribute, validators);
+            super(attributeValue, attribute, configFn, validators);
 
             this.resolver.uses.push(DataTemplateSource.UniqueId, DataTimeout.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId, DataInterval.UniqueId);
         }
@@ -126,7 +127,7 @@ namespace Attv.DataPartial {
     export class ClickAttributeValue extends DefaultAttributeValue {
         
         constructor (attribute: Attv.Attribute) {
-            super('click', attribute, [
+            super('click', attribute, undefined, [
                 new Validators.RequiredAttributeValidator([DataUrl.UniqueId]),
                 new Validators.RequiredAnyElementsValidator(['button', 'a'])
             ])
@@ -148,7 +149,7 @@ namespace Attv.DataPartial {
     export class FormAttributeValue extends DefaultAttributeValue {
         
         constructor (attribute: Attv.Attribute) {
-            super('form', attribute, [
+            super('form', attribute, undefined, [
                 new Validators.RequiredAttributeValidator([DataUrl.UniqueId]),
                 new Validators.RequiredElementValidator(['form'])
             ])
@@ -175,10 +176,10 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-partial', 
         (attributeName: string) => new Attv.DataPartial(attributeName),
         (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
+            list.push(new Attv.DataPartial.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
+            list.push(new Attv.DataPartial.DefaultAttributeValue('lazy', attribute));
             list.push(new Attv.DataPartial.AutoAttributeValue(attribute));
             list.push(new Attv.DataPartial.ClickAttributeValue(attribute));
             list.push(new Attv.DataPartial.FormAttributeValue(attribute));
-            list.push(new Attv.DataPartial.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
-            list.push(new Attv.DataPartial.DefaultAttributeValue('lazy', attribute));
         });
 });

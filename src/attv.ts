@@ -346,7 +346,6 @@ namespace Attv {
         public readonly description: string;
         public readonly loadedName: string;
         public readonly dependency: AttributeDependency = new AttributeDependency();
-        public configuration: AttributeConfiguration;
 
         protected isStrict: boolean = false;
 
@@ -453,11 +452,15 @@ namespace Attv {
      */
     export class AttributeValue {
         public readonly resolver: AttributeResolver = new AttributeResolver(this);
+        public configuration: AttributeConfiguration;
         
-        constructor (private value: string, 
+        constructor (protected value: string, 
             public attribute: Attribute, 
+            configFn?: AttributeConfigurationFactory,
             public validators: Validators.AttributeValidator[] = []) {
-            // do nothing
+            if (configFn) {
+                this.configuration = configFn(value, this);
+            }
         }
 
         /**
@@ -650,22 +653,35 @@ namespace Attv {
             return ['log', 'warning', 'error', 'debug', 'fatal'];
         }
     }
+
+    export type AttributeConfigurationFactory = (configName: string, attributeValue: AttributeValue) => AttributeConfiguration;
     
     /**
      * Attribute configuration
      */
     export class AttributeConfiguration {
+        /**
+         * Inline style
+         */
         style?: string;
+
+        /**
+         * Style urls
+         */
         styleUrls?: {name: string, url: string, options?: any}[];
+
+        /**
+         * Javascript urls
+         */
         jsUrls?: {name: string, url: string, options?: any}[];
 
-        constructor (private attribute: Attribute) {
+        constructor (private configName: string, private attributeValue: AttributeValue) {
             // do nothing
         }
     
         commit() {
             if (this.style) {
-                let elementId = this.attribute.name;
+                let elementId = this.attributeValue.attribute.name + '-' + this.configName;
                 let styleElement = document.querySelector(`style#${elementId}`) as HTMLStyleElement;
                 if (!styleElement) {
                     styleElement = Attv.createHTMLElement('<style>') as HTMLStyleElement;
@@ -679,7 +695,7 @@ namespace Attv {
 
             if (this.styleUrls) {
                 this.styleUrls.forEach(styleUrl => {
-                    let elementId = this.attribute.name + '-' + styleUrl.name;
+                    let elementId = this.attributeValue.attribute.name + '-' + this.configName + '-' + styleUrl.name;
                     let linkElement = document.querySelector(`link#${elementId}`) as HTMLLinkElement;
 
                     if (!linkElement) {
@@ -697,7 +713,7 @@ namespace Attv {
 
             if (this.jsUrls) {
                 this.jsUrls.forEach(jsUrl => {
-                    let elementId = this.attribute.name + '-' + jsUrl.name;
+                    let elementId = this.attributeValue.attribute.name + '-' + this.configName + '-' + jsUrl.name;
                     let scriptElement = document.querySelector(`script#${elementId}`) as HTMLScriptElement;
 
                     if (!scriptElement) {
@@ -956,7 +972,7 @@ namespace Attv {
             
             Attv.log('debug', `${attribute}`, attribute);
 
-            let attributeValues = [];
+            let attributeValues: AttributeValue[] = [];
 
             if (this.valuesFn) {
                 this.valuesFn(attribute, attributeValues);
@@ -974,7 +990,7 @@ namespace Attv {
             }
 
             // commit configuration if any
-            attribute.configuration?.commit();
+            attributeValues?.forEach(attValue => attValue?.configuration?.commit());
 
             return attribute;
         }

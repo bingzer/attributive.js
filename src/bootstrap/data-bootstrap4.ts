@@ -4,7 +4,7 @@ namespace Attv.Bootstrap4 {
      * [data-bootstrap]
      */
     export class DataBootstrap extends Attv.Attribute {
-        static readonly UniqueId = "DataBootstrap";
+        static readonly UniqueId = "DataBootstrap4";
 
         constructor (public name: string) {
             super(DataBootstrap.UniqueId, name, true);
@@ -29,19 +29,20 @@ namespace Attv.Bootstrap4 {
         
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
+            configFn?: AttributeConfigurationFactory,
             validators: Validators.AttributeValidator[] = [
                 new Validators.RequiredElementValidator(['body'])
             ]) {
-            super(attributeValue, attribute, validators);
+            super(attributeValue, attribute, configFn, validators);
 
             this.resolver.uses.push(DataRenderer.UniqueId);
             this.resolver.internals.push(DataTemplateHtml.UniqueId);
         }
 
         loadElement(element: HTMLElement): boolean {
-            if (!this.attribute.configuration && !this.attribute.isElementLoaded(element)) {
-                this.attribute.configuration = new BootstrapConfiguration(this.attribute);
-                this.attribute.configuration.commit();
+            if (!this.configuration && !this.attribute.isElementLoaded(element)) {
+                this.configuration = new BootstrapConfiguration(this.value, this);
+                this.configuration.commit();
             }
 
             return true;
