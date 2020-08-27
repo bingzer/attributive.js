@@ -334,6 +334,27 @@ namespace Attv {
     }
 
     /**
+     * [data-enabled]='true|false'
+     */
+    export class DataEnabled extends Attv.Attribute {
+        static readonly UniqueId = 'DataEnabled';
+
+        constructor (name: string) {
+            super(DataEnabled.UniqueId, name);
+        }
+
+        /**
+         * Assume everything is enabled except when specifically set to 'false'
+         * @param element the element
+         */
+        isEnabled(element: HTMLElement) {
+            let rawValue = this.getValue(element).getRawValue(element);
+
+            return !rawValue?.equalsIgnoreCase('false');
+        }
+    }
+
+    /**
      * [data-active]='*'
      */
     export class DataActive extends Attv.Attribute {
@@ -374,6 +395,7 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-title', (name: string) => new Attv.DataTitle(name));
     Attv.registerAttribute('data-bind', (name: string) => new Attv.DataBind(name));
     Attv.registerAttribute('data-active', (name: string) => new Attv.DataActive(name));
+    Attv.registerAttribute('data-enabled', (name: string) => new Attv.DataEnabled(name));
 });
 
 ////////////////////////////////////////////////////////////////////////////////////

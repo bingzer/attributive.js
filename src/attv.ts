@@ -481,8 +481,12 @@ namespace Attv {
         /**
          * To string
          */
-        toString(): string {
-            return `[${this.attribute.name}]='${this.value || '*'}'`;
+        toString(prettyPrint?: boolean): string {
+            if (prettyPrint) {
+                return `[${this.attribute.name}]='${this.value || '*'}'`;
+            } else {
+                return `[${this.attribute.name}]${this.value ? `=${this.value}`: ''}`;
+            }
         }
     }
 
@@ -986,7 +990,7 @@ namespace Attv {
             attribute.registerAttributeValues(attributeValues);
 
             if (attributeValues.length > 0) {
-                Attv.log('debug', `${attributeValues}`, attributeValues);
+                Attv.log('debug', `${attributeValues.map(v => v.toString(true))}`, attributeValues);
             }
 
             // commit configuration if any

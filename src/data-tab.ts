@@ -32,68 +32,16 @@ namespace Attv.DataTab {
             configFn: AttributeConfigurationFactory,
             validators: Validators.AttributeValidator[] = []) {
             super(attributeValue, attribute, configFn, validators);
-
-            this.resolver.uses.push(DataContent.UniqueId, DataPartial.UniqueId, DataActive.UniqueId);
         }
         
         loadElement(element: HTMLElement): boolean {
             let dataTabNav = this.resolver.resolve<DataTabNav>(DataTabNav.UniqueId);
 
             element.querySelectorAll(dataTabNav.toString()).forEach((navElement: HTMLElement) => {
-                let dataActive = this.resolver.resolve<DataActive>(DataActive.UniqueId);
-
-                navElement.onclick = (evt: Event) => this.displayContent(element.parentElement, navElement)
-
-                if (dataActive.isActive(navElement)) {
-                    this.displayContent(element.parentElement, navElement);
-                }
+                dataTabNav.getValue(navElement).loadElement(navElement);
             });
 
             return true;
-        }
-
-        private displayContent(tabElement: HTMLElement, navElement: HTMLElement): boolean {
-            let dataActive = this.resolver.resolve<DataActive>(DataActive.UniqueId);
-            let dataTabNav = this.resolver.resolve<DataTabNav>(DataTabNav.UniqueId);
-            let dataTabContent = this.resolver.resolve<DataTabContent>(DataTabContent.UniqueId);
-
-            // -- [data-tab-nav]
-            navElement.parentElement.querySelectorAll(dataTabNav.toString()).forEach((e: HTMLElement) => e.attr(dataActive, false));
-
-            let contentName = dataTabNav.getValue(navElement).getRawValue(navElement);
-            let contentElement = tabElement.querySelector(`[${dataTabContent.name}="${contentName}"]`) as HTMLElement;
-            if (contentElement) {
-                let parentElement = contentElement.parentElement;
-                // hide all children
-                parentElement.querySelectorAll(dataTabContent.toString()).forEach((e: HTMLElement) => e.hide());
-
-                this.displayContentElement(contentElement);
-
-                // mark the tabnav as active
-                navElement.attr(dataActive, true);
-            }
-
-            return false;
-        }
-
-        private displayContentElement(contentElement: HTMLElement) {
-            contentElement.show();
-
-            // [data-content]
-            let dataContent = this.resolver.resolve<DataContent>(DataContent.UniqueId);
-            if (dataContent.exists(contentElement)) {
-                contentElement.html(dataContent.getContent(contentElement));
-                return;
-            }
-
-            // [data-partial]
-            let dataPartial = this.resolver.resolve<DataPartial>(DataPartial.UniqueId);
-            if (dataPartial.exists(contentElement)) {
-                dataPartial.renderPartial(contentElement);
-                return;
-            }
-
-            Attv.loadElements(contentElement);
         }
     }
 
@@ -138,8 +86,68 @@ namespace Attv {
 
         constructor (public name: string) {
             super(DataTabNav.UniqueId, name);
+
+            this.dependency.uses.push(DataEnabled.UniqueId, DataActive.UniqueId);
         }
 
+    }
+
+    export namespace DataTabNav {
+        /**
+         * [data-tab-nav]="*"
+         */
+        export class DefaultAttributeValue extends AttributeValue {
+            
+            constructor (attribute: Attv.Attribute, 
+                configFn?: AttributeConfigurationFactory,
+                validators: Validators.AttributeValidator[] = []) {
+                super(undefined, attribute, configFn, validators);
+
+                this.resolver.uses.push(DataEnabled.UniqueId, DataActive.UniqueId, DataTabContent.UniqueId);
+            }
+            
+            loadElement(element: HTMLElement): boolean {
+                if (!this.attribute.isElementLoaded(element)) {
+                    let dataActive = this.resolver.resolve<DataActive>(DataActive.UniqueId);
+                    let dataEnabled = this.resolver.resolve<DataEnabled>(DataEnabled.UniqueId);
+
+                    if (dataEnabled.isEnabled(element)) {
+                        element.onclick = (evt: Event) => this.displayContent(element.parentElement, element)
+                    }
+    
+                    if (dataActive.isActive(element)) {
+                        this.displayContent(element.parentElement, element);
+                    }
+
+                    this.attribute.markElementLoaded(element, true);
+                }
+
+                return true;
+            }
+
+            private displayContent(tabElement: HTMLElement, navElement: HTMLElement): boolean {
+                let dataActive = this.resolver.resolve<DataActive>(DataActive.UniqueId);
+                let dataTabContent = this.resolver.resolve<DataTabContent>(DataTabContent.UniqueId);
+    
+                // -- [data-tab-nav]
+                navElement.parentElement.querySelectorAll(this.toString()).forEach((e: HTMLElement) => e.attr(dataActive, false));
+    
+                let contentName = this.getRawValue(navElement);
+                let contentElement = tabElement.parentElement.querySelector(`[${dataTabContent.name}="${contentName}"]`) as HTMLElement;
+                if (contentElement) {
+                    let parentElement = contentElement.parentElement;
+                    // hide all children
+                    parentElement.querySelectorAll(dataTabContent.toString()).forEach((e: HTMLElement) => e.hide());
+
+                    dataTabContent.getValue(contentElement).loadElement(contentElement);
+    
+                    // mark the tabnav as active
+                    navElement.attr(dataActive, true);
+                }
+    
+                return false;
+            }
+        }
     }
 }
 
@@ -159,6 +167,49 @@ namespace Attv {
             super(DataTabContent.UniqueId, name);
         }
 
+    }
+
+    export namespace DataTabContent {
+        
+        /**
+         * [data-tab-nav]="*"
+         */
+        export class DefaultAttributeValue extends AttributeValue {
+            
+            constructor (attribute: Attv.Attribute, 
+                configFn?: AttributeConfigurationFactory,
+                validators: Validators.AttributeValidator[] = []) {
+                super(undefined, attribute, configFn, validators);
+                
+                this.resolver.uses.push(DataContent.UniqueId, DataPartial.UniqueId, DataActive.UniqueId);
+            }
+            
+            loadElement(element: HTMLElement): boolean {
+                if (!this.attribute.isElementLoaded(element)) {
+                    element.show();
+        
+                    // [data-content]
+                    let dataContent = this.resolver.resolve<DataContent>(DataContent.UniqueId);
+                    if (dataContent.exists(element)) {
+                        element.html(dataContent.getContent(element));
+                        return;
+                    }
+        
+                    // [data-partial]
+                    let dataPartial = this.resolver.resolve<DataPartial>(DataPartial.UniqueId);
+                    if (dataPartial.exists(element)) {
+                        dataPartial.renderPartial(element);
+                        return;
+                    }
+        
+                    Attv.loadElements(element);
+
+                    this.attribute.markElementLoaded(element, true);
+                }
+
+                return true;
+            }
+        }
     }
 }
 
@@ -188,6 +239,13 @@ namespace Attv.DataTab {
     transition: 0.3s;
     font-size: 17px;
     list-style: none;
+}
+
+[data-tab] [data-tab-nav][data-enabled] {
+    cursor: default;
+}
+[data-tab] [data-tab-nav][data-enabled]:hover {
+    background-color: inherit;
 }
 
 /* Change background color of buttons on hover */
@@ -221,8 +279,16 @@ Attv.loader.pre.push(() => {
         (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
             list.push(new Attv.DataTab.DefaultAttributeValue(Attv.configuration.defaultTag, attribute, (name, value) => new Attv.DataTab.AttributeConfiguration(name, value)));
         });
-    Attv.registerAttribute('data-tab-nav', (attributeName: string) => new Attv.DataTabNav(attributeName));
-    Attv.registerAttribute('data-tab-content', (attributeName: string) => new Attv.DataTabContent(attributeName));
+    Attv.registerAttribute('data-tab-nav', 
+        (attributeName: string) => new Attv.DataTabNav(attributeName),
+        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
+            list.push(new Attv.DataTabNav.DefaultAttributeValue(attribute));
+        });
+    Attv.registerAttribute('data-tab-content', 
+        (attributeName: string) => new Attv.DataTabContent(attributeName),
+        (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
+            list.push(new Attv.DataTabContent.DefaultAttributeValue(attribute));
+        });
 
     Attv.registerAttributeValue(Attv.DataPartial.UniqueId,
         (attribute: Attv.Attribute, list: Attv.AttributeValue[]) => {
