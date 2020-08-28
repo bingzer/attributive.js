@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bingzer/attributive.js.svg?branch=master)](https://travis-ci.org/bingzer/attributive.js)
+
 # attributive.js
 Unobtrusive Vanilla javascript
 
