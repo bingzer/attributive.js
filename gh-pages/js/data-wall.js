@@ -105,4 +105,3 @@ Attv.loader.pre.push(function () {
         list.push(new Attv.DataWall.ConfirmValue('native-confirm', attribute));
     });
 });
-//# sourceMappingURL=data-wall.js.map

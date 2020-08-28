@@ -286,4 +286,3 @@ Attv.loader.pre.push(function () {
         list.push(new Attv.DataTab.DataTabDialogAttributeValue(attribute));
     });
 });
-//# sourceMappingURL=data-tab.js.map

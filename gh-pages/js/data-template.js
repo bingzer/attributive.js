@@ -166,4 +166,3 @@ Attv.loader.pre.push(function () {
         list.push(new Attv.DataTemplate.ScriptValue(attribute));
     });
 });
-//# sourceMappingURL=data-template.js.map

@@ -194,4 +194,3 @@ Attv.loader.pre.push(function () {
         list.push(new Attv.DataDialog.DataPartialDialogValue(attribute));
     });
 });
-//# sourceMappingURL=data-dialog.js.map

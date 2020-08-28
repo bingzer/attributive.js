@@ -1,14 +1,23 @@
 var gulp = require('gulp');
 var del = require("del");
-
-function ghPagesJs() {
-    return gulp.src('dist/*.js').pipe(gulp.dest('gh-pages/js'));
-}
+var typescript = require('gulp-typescript');
+var tsProject = typescript.createProject('tsconfig.json');
 
 function ghPagesJsClean() {
     return del('gh-pages/js');
 }
 
-const build = gulp.series(ghPagesJsClean, ghPagesJs);
+function tsc() {
+    var tsResult = gulp.src(['src/**/*.ts'])
+        .pipe(tsProject());
+    return tsResult.js.pipe(gulp.dest('gh-pages/js/'));
+}
+
+function watch() {
+    return gulp.watch('src/**/*.ts', gulp.series(tsc));
+}
+
+const build = gulp.series(ghPagesJsClean, tsc);
 
 exports.default = build;
+exports.watch = watch;

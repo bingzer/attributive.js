@@ -12,4 +12,3 @@ var Attv;
         Documentation.showHelp = showHelp;
     })(Documentation = Attv.Documentation || (Attv.Documentation = {}));
 })(Attv || (Attv = {}));
-//# sourceMappingURL=data-docs.js.map

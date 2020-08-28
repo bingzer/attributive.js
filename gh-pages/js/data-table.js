@@ -193,4 +193,3 @@ Attv.loader.pre.push(function () {
         list.push(new Attv.DataTable.DataRendererJson2TableValue(attribute));
     });
 });
-//# sourceMappingURL=data-table.js.map
