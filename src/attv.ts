@@ -149,8 +149,6 @@ HTMLElement.prototype.attr = function (name: string, value?: any): HTMLElement |
 
 interface String {
     contains: (text: string) => boolean;
-    startsWith: (text: string) => boolean;
-    endsWith: (text: string) => boolean;
     equalsIgnoreCase: (other: string) => boolean;
     camelCaseToDash: () => string;
     dashToCamelCase: () => string;
