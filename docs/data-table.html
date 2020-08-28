@@ -16,12 +16,17 @@
                 <tr>
                     <th>Name</th>
                     <th>Company</th>
+                    <th>Contact</th>
                 </tr>
             </thead>
             <tbody>
                 <tr data-bind="$root">
                     <td data-bind="name"></td>
                     <td data-bind="company"></td>
+                    <td>
+                        Email: <span data-bind="contact.email"></span>
+                        Phone: <span data-bind="contact.phone"></span>
+                    </td>
                 </tr>
             </tbody>
         </table>

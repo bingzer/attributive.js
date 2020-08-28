@@ -1,0 +1,13 @@
+{
+    "name": "attributive.js",
+    "version": "0.0.1",
+    "dependencies": {
+      "typescript": "5.6.0",
+      "tsc": "5.6.0"
+    },
+    "scripts": {
+      "install": "tsc"
+    },
+    "devDependencies": {
+    }
+  }
