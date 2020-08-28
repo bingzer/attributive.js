@@ -17,15 +17,21 @@
                     <th>Name</th>
                     <th>Company</th>
                     <th>Contact</th>
+                    <th>Tags</th>
                 </tr>
             </thead>
             <tbody>
                 <tr data-bind="$root">
                     <td data-bind="name"></td>
                     <td data-bind="company"></td>
-                    <td>
+                    <td> 
                         Email: <span data-bind="contact.email"></span>
                         Phone: <span data-bind="contact.phone"></span>
+                    </td>
+                    <td>
+                        <span data-bind="tags">
+                            <span data-bind="$"></span>
+                        </span>
                     </td>
                 </tr>
             </tbody>
