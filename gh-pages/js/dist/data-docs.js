@@ -1,0 +1,1 @@
+var Attv;!function(o){(o.Documentation||(o.Documentation={})).showHelp=function(n){var t=o.attributes.filter(function(t){return t.uniqueId==n||t.name===n})[0];console.log(t)}}(Attv=Attv||{});
