@@ -62,6 +62,9 @@ namespace Attv.DataTable {
 ////////////////////////////////////////////////////////////////////////////////////
 
 namespace Attv.DataTable {
+    /**
+     * [data-partial]="table"
+     */
     export class DataPartialTableValue extends Attv.DataPartial.DefaultValue {
         
         constructor (attribute: Attv.Attribute, 
@@ -104,6 +107,9 @@ namespace Attv.DataTable {
 ////////////////////////////////////////////////////////////////////////////////////
 
 namespace Attv.DataTable {
+    /**
+     * [data-template]="table"
+     */
     export class DataTemplateTableValue extends Attv.DataTemplate.DefaultValue {
         
         constructor (attribute: Attv.Attribute, 
@@ -129,35 +135,6 @@ namespace Attv.DataTable {
             return true;
         }
 
-    }
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////// DataRenderer //////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-
-namespace Attv.DataTable {
-    export class DataRendererJson2TableValue extends Attv.DataRenderer.Json2HtmlValue {
-        
-        constructor (attribute: Attv.Attribute) {
-            super('json2Table', attribute);
-        }
-            
-        render(templatedContent: string, model?: any): string {
-            model = Attv.parseJsonOrElse(model);
-
-            let tbody = Attv.createHTMLElement('tbody');
-            tbody.innerHTML = templatedContent;
-            
-            let rootElement = Attv.createHTMLElement('tbody');
-
-            this.bind(rootElement, tbody, model);
-
-            let rootHtml = rootElement.html();
-
-            return rootHtml;
-        }
     }
 }
 
@@ -199,10 +176,5 @@ Attv.loader.pre.push(() => {
     Attv.registerAttributeValue(Attv.DataPartial.UniqueId,
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
             list.push(new Attv.DataTable.DataPartialTableValue(attribute));
-        });
-
-    Attv.registerAttributeValue(Attv.DataRenderer.UniqueId,
-        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTable.DataRendererJson2TableValue(attribute));
         });
 });

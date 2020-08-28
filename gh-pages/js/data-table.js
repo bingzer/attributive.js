@@ -73,6 +73,9 @@ var Attv;
 (function (Attv) {
     var DataTable;
     (function (DataTable) {
+        /**
+         * [data-partial]="table"
+         */
         var DataPartialTableValue = /** @class */ (function (_super) {
             __extends(DataPartialTableValue, _super);
             function DataPartialTableValue(attribute, settingsFn, validators) {
@@ -110,6 +113,9 @@ var Attv;
 (function (Attv) {
     var DataTable;
     (function (DataTable) {
+        /**
+         * [data-template]="table"
+         */
         var DataTemplateTableValue = /** @class */ (function (_super) {
             __extends(DataTemplateTableValue, _super);
             function DataTemplateTableValue(attribute, settingsFn, validators) {
@@ -131,31 +137,6 @@ var Attv;
             return DataTemplateTableValue;
         }(Attv.DataTemplate.DefaultValue));
         DataTable.DataTemplateTableValue = DataTemplateTableValue;
-    })(DataTable = Attv.DataTable || (Attv.DataTable = {}));
-})(Attv || (Attv = {}));
-////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////// DataRenderer //////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-(function (Attv) {
-    var DataTable;
-    (function (DataTable) {
-        var DataRendererJson2TableValue = /** @class */ (function (_super) {
-            __extends(DataRendererJson2TableValue, _super);
-            function DataRendererJson2TableValue(attribute) {
-                return _super.call(this, 'json2Table', attribute) || this;
-            }
-            DataRendererJson2TableValue.prototype.render = function (templatedContent, model) {
-                model = Attv.parseJsonOrElse(model);
-                var tbody = Attv.createHTMLElement('tbody');
-                tbody.innerHTML = templatedContent;
-                var rootElement = Attv.createHTMLElement('tbody');
-                this.bind(rootElement, tbody, model);
-                var rootHtml = rootElement.html();
-                return rootHtml;
-            };
-            return DataRendererJson2TableValue;
-        }(Attv.DataRenderer.Json2HtmlValue));
-        DataTable.DataRendererJson2TableValue = DataRendererJson2TableValue;
     })(DataTable = Attv.DataTable || (Attv.DataTable = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
@@ -188,9 +169,6 @@ Attv.loader.pre.push(function () {
     });
     Attv.registerAttributeValue(Attv.DataPartial.UniqueId, function (attribute, list) {
         list.push(new Attv.DataTable.DataPartialTableValue(attribute));
-    });
-    Attv.registerAttributeValue(Attv.DataRenderer.UniqueId, function (attribute, list) {
-        list.push(new Attv.DataTable.DataRendererJson2TableValue(attribute));
     });
 });
 

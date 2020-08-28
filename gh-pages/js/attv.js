@@ -630,6 +630,71 @@ String.prototype.equalsIgnoreCase = function (other) {
     Attv.DefaultConfiguration = DefaultConfiguration;
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// Attv.DomParser ////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
+    var Dom;
+    (function (Dom) {
+        Dom.htmlTags = [
+            { tag: 'tr', parentTag: 'tbody' },
+            { tag: 'th', parentTag: 'thead' },
+            { tag: 'td', parentTag: 'tr' },
+        ];
+        function getParentTag(elementOrTag) {
+            var _a, _b;
+            var tagName = ((_a = elementOrTag) === null || _a === void 0 ? void 0 : _a.tagName) || elementOrTag;
+            var parentTag = (_b = Attv.Dom.htmlTags.filter(function (tag) { return tag.tag.equalsIgnoreCase(tagName); })[0]) === null || _b === void 0 ? void 0 : _b.parentTag;
+            if (!parentTag) {
+                parentTag = 'div';
+            }
+            return parentTag;
+        }
+        Dom.getParentTag = getParentTag;
+        function createHTMLElement(tagName, innerHtml) {
+            var parentTag = getParentTag(tagName);
+            var htmlElement = document.createElement(parentTag);
+            htmlElement.innerHTML = innerHtml;
+            return htmlElement;
+        }
+        Dom.createHTMLElement = createHTMLElement;
+        function parseDom(any) {
+            if (Attv.isString(any)) {
+                var text = any;
+                var htmlElement = void 0;
+                var tag = text.toString();
+                if (tag.startsWith('<') && tag.endsWith('>')) {
+                    var tempTag = tag.substring(1, tag.length - 1);
+                    try {
+                        htmlElement = window.document.createElement(tempTag);
+                    }
+                    catch (e) {
+                        // ignore
+                    }
+                }
+                if (!htmlElement) {
+                    try {
+                        if (!Attv.Dom.domParser) {
+                            Attv.Dom.domParser = new DOMParser();
+                        }
+                        var domDocument = Attv.Dom.domParser.parseFromString(text, 'text/xml');
+                        tag = domDocument.firstElementChild.tagName;
+                        if (domDocument.querySelector('parsererror')) {
+                            tag = 'div';
+                        }
+                    }
+                    catch (e) {
+                        // ignore
+                    }
+                    htmlElement = Attv.Dom.createHTMLElement(tag, text);
+                }
+                any = htmlElement;
+            }
+            return any;
+        }
+        Dom.parseDom = parseDom;
+    })(Dom = Attv.Dom || (Attv.Dom = {}));
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Helper functions ////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 (function (Attv) {
@@ -672,22 +737,7 @@ String.prototype.equalsIgnoreCase = function (other) {
     }
     Attv.navigate = navigate;
     function createHTMLElement(any) {
-        if (isString(any)) {
-            var tag = any.toString();
-            if (tag.startsWith('<') && tag.endsWith('>')) {
-                tag = tag.substring(1, tag.length - 1);
-            }
-            var htmlElement = void 0;
-            try {
-                htmlElement = document.createElement(tag);
-            }
-            catch (e) {
-                htmlElement = document.createElement('div');
-                htmlElement.innerHTML = tag;
-            }
-            any = htmlElement;
-        }
-        return any;
+        return Attv.Dom.parseDom(any);
     }
     Attv.createHTMLElement = createHTMLElement;
     function parseJsonOrElse(any) {

@@ -758,6 +758,78 @@ namespace Attv {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// Attv.DomParser ////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv.Dom {
+
+    export var domParser: DOMParser;
+    export const htmlTags: { tag: string, parentTag: string }[] = [
+        { tag: 'tr', parentTag: 'tbody' },
+        { tag: 'th', parentTag: 'thead' },
+        { tag: 'td', parentTag: 'tr' },
+    ];
+
+    export function getParentTag(elementOrTag: HTMLElement | string) {
+        let tagName: string = (elementOrTag as HTMLElement)?.tagName || elementOrTag as string;
+        let parentTag = Attv.Dom.htmlTags.filter(tag => tag.tag.equalsIgnoreCase(tagName))[0]?.parentTag;
+        if (!parentTag) {
+            parentTag = 'div';
+        }
+
+        return parentTag;
+    }
+
+    export function createHTMLElement(tagName: string, innerHtml: string): HTMLElement {
+        let parentTag = getParentTag(tagName);
+        
+        let htmlElement = document.createElement(parentTag);
+        htmlElement.innerHTML = innerHtml;
+
+        return htmlElement;
+    }
+
+    export function parseDom(any: string | HTMLElement): HTMLElement {
+        if (isString(any)) {
+            let text = any as string;
+            let htmlElement: HTMLElement;
+            let tag: string = text.toString();
+
+            if (tag.startsWith('<') && tag.endsWith('>')) {
+                let tempTag = tag.substring(1, tag.length - 1);
+                try {
+                    htmlElement = window.document.createElement(tempTag);
+                } catch (e) {
+                    // ignore
+                }
+            }
+
+            if (!htmlElement) {
+                try {
+                    if (!Attv.Dom.domParser) {
+                        Attv.Dom.domParser = new DOMParser();
+                    }
+    
+                    let domDocument = Attv.Dom.domParser.parseFromString(text, 'text/xml');
+                    tag = domDocument.firstElementChild.tagName;
+                    if (domDocument.querySelector('parsererror')) {
+                        tag = 'div';
+                    }
+                } catch (e) {
+                    // ignore
+                }
+
+                htmlElement = Attv.Dom.createHTMLElement(tag, text);
+            }
+
+            any = htmlElement;
+        }
+
+        return any as HTMLElement;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Helper functions ////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -801,25 +873,7 @@ namespace Attv {
     }
 
     export function createHTMLElement(any: string | HTMLElement): HTMLElement {
-        if (isString(any)) {
-            let tag: string = any.toString();
-            if (tag.startsWith('<') && tag.endsWith('>')) {
-                tag = tag.substring(1, tag.length - 1);
-            }
-
-            let htmlElement: HTMLElement;
-
-            try {
-                htmlElement = document.createElement(tag as string);
-            } catch (e) {
-                htmlElement = document.createElement('div');
-                htmlElement.innerHTML = tag as string;
-            }
-
-            any = htmlElement;
-        }
-
-        return any as HTMLElement;
+        return Attv.Dom.parseDom(any);
     }
 
     export function parseJsonOrElse(any: any) {
