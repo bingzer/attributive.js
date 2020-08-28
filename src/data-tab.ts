@@ -159,8 +159,10 @@ namespace Attv {
                             this.displayContent(tab, nav, navSibilings);
 
                             // update route on click
-                            let thisRoute = dataRoute.appendHash(dataRoute.getRoute(tab), this.getRaw(nav));
-                            dataRoute.setRoute(thisRoute);
+                            if (dataRoute.exists(tab)) {
+                                let thisRoute = dataRoute.appendHash(dataRoute.getRoute(tab), this.getRaw(nav));
+                                dataRoute.setRoute(thisRoute);
+                            }
                         }
                     }
 

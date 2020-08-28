@@ -337,7 +337,7 @@ namespace Attv {
          */
         getValue<TValue extends Attribute.Value>(element: HTMLElement): TValue {
             let value = element?.attr(this.name);
-            let attributeValue = this.values.filter(val => val.getRaw(element) === value)[0] as TValue;
+            let attributeValue = this.values.filter(val => val.getRaw(element)?.equalsIgnoreCase(value))[0] as TValue;
 
             // Print/throw an error
             // when no 'attributeValue' found and there's 'element' to evaluate and isStrict is marked true
@@ -348,7 +348,7 @@ namespace Attv {
             // #1. if attribute is undefined
             // find the one with the default tag
             if (!attributeValue) {
-                attributeValue = this.values.filter(val => val.getRaw(element) === Attv.configuration.defaultTag)[0] as TValue;
+                attributeValue = this.values.filter(val => val.getRaw(element)?.equalsIgnoreCase(Attv.configuration.defaultTag))[0] as TValue;
             }
 
             // #2. find the first attribute
