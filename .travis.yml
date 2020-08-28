@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - "6.1"
+  - node
 before_script:
   - npm i -g typescript typings
   - typings install
