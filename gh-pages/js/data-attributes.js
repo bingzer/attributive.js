@@ -641,3 +641,5 @@ Attv.loader.pre.push(function () {
         list.push(new Attv.DataRenderer.Json2HtmlValue('json2Html', attribute));
     });
 });
+
+//# sourceMappingURL=data-attributes.js.map

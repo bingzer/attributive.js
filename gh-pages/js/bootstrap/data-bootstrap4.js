@@ -125,3 +125,5 @@ Attv.loader.pre.push(function () {
         list.push(new Attv.Bootstrap4.DefaultAttributeValue('bootstrap4', attribute));
     });
 });
+
+//# sourceMappingURL=data-bootstrap4.js.map

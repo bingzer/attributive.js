@@ -187,3 +187,5 @@ Attv.loader.pre.push(function () {
         list.push(new Attv.DataPartial.FormValue(attribute));
     });
 });
+
+//# sourceMappingURL=data-partial.js.map

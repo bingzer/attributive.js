@@ -32,3 +32,5 @@ var Attv;
         JQuery.DataJQuery = DataJQuery;
     })(JQuery = Attv.JQuery || (Attv.JQuery = {}));
 })(Attv || (Attv = {}));
+
+//# sourceMappingURL=data-jquery.js.map
