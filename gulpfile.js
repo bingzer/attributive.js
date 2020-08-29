@@ -8,7 +8,7 @@ var typescript = require('gulp-typescript');
 var tsProject = typescript.createProject('tsconfig.json');
 
 function ghPagesJsClean() {
-    return del('gh-pages/js');
+    return del('docs/js');
 }
 
 function tsc() {
@@ -16,7 +16,7 @@ function tsc() {
         .pipe(sourcemaps.init())
         .pipe(tsProject())
         .pipe(sourcemaps.write('.', { sourceRoot: './', includeContent: false }))
-        .pipe(gulp.dest('gh-pages/js/'));
+        .pipe(gulp.dest('docs/js/'));
 }
 
 function watch() {
@@ -25,29 +25,29 @@ function watch() {
 
 function uglifyAttributiveJs() {
     return pipeline(
-        gulp.src('gh-pages/js/*.js'),
+        gulp.src('docs/js/*.js'),
         uglify(),
-        gulp.dest('gh-pages/js/dist')
+        gulp.dest('docs/js/dist')
     );
 }
 
 function concatAttributiveJs() {
     return pipeline(
         gulp.src([
-            'gh-pages/js/dist/attv.js',
-            'gh-pages/js/dist/data-attributes.js',
-            'gh-pages/js/dist/data-wall.js',
-            'gh-pages/js/dist/data-docs.js',
-            'gh-pages/js/dist/data-template.js',
-            'gh-pages/js/dist/data-partial.js',
-            'gh-pages/js/dist/data-tab.js',
-            'gh-pages/js/dist/data-table.js',
-            'gh-pages/js/dist/data-dialog.js'
+            'docs/js/dist/attv.js',
+            'docs/js/dist/data-attributes.js',
+            'docs/js/dist/data-wall.js',
+            'docs/js/dist/data-docs.js',
+            'docs/js/dist/data-template.js',
+            'docs/js/dist/data-partial.js',
+            'docs/js/dist/data-tab.js',
+            'docs/js/dist/data-table.js',
+            'docs/js/dist/data-dialog.js'
         ]),
         sourcemaps.init(),
         concat('attributive.min.js'),
         sourcemaps.write('.'),
-        gulp.dest('gh-pages/js/dist/')
+        gulp.dest('docs/js/dist/')
     )
         
 }

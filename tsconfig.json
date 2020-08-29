@@ -2,6 +2,6 @@
     "compilerOptions": {
       "target": "es5",
       "sourceMap": true,
-      "outDir": "gh-pages/js/"
+      "outDir": "docs/js"
     }
   }
