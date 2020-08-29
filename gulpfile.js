@@ -7,7 +7,7 @@ var sourcemaps = require('gulp-sourcemaps');
 var typescript = require('gulp-typescript');
 var tsProject = typescript.createProject('tsconfig.json');
 
-function ghPagesJsClean() {
+function docsJsClean() {
     return del('docs/js');
 }
 
@@ -52,7 +52,7 @@ function concatAttributiveJs() {
         
 }
 
-const build = gulp.series(ghPagesJsClean, tsc, uglifyAttributiveJs, concatAttributiveJs);
+const build = gulp.series(docsJsClean, tsc, uglifyAttributiveJs, concatAttributiveJs);
 
 exports.default = build;
 exports.watch = watch;
