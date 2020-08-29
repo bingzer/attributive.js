@@ -409,6 +409,14 @@ namespace Attv {
             window.location.hash = this.cleanHash(hash);
         }
 
+        getHash(hash: string): string {
+            if (!hash?.startsWith('#')) {
+                hash = '#' + hash;
+            } 
+
+            return hash;
+        }
+
         /**
          * Checks if location route matches/starts-with hash
          * @param hash the hash

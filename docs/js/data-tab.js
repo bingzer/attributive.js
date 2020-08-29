@@ -29,7 +29,7 @@ var Attv;
             var _this = _super.call(this, DataTab.UniqueId, name, true) || this;
             _this.name = name;
             _this.isStrict = true;
-            _this.dependency.uses.push(Attv.DataTabContent.UniqueId, Attv.DataTabNav.UniqueId);
+            _this.dependency.uses.push(Attv.DataTabContent.UniqueId, Attv.DataTabItem.UniqueId);
             return _this;
         }
         DataTab.UniqueId = 'DataTab';
@@ -56,9 +56,9 @@ var Attv;
             }
             DefaultValue.prototype.loadElement = function (element) {
                 if (!this.attribute.isElementLoaded(element)) {
-                    var dataTabNav_1 = this.resolver.resolve(Attv.DataTabNav.UniqueId);
-                    element.querySelectorAll(dataTabNav_1.toString()).forEach(function (navElement) {
-                        dataTabNav_1.getValue(navElement).loadElement(navElement);
+                    var dataTabItem_1 = this.resolver.resolve(Attv.DataTabItem.UniqueId);
+                    element.querySelectorAll(dataTabItem_1.toString()).forEach(function (itemElement) {
+                        dataTabItem_1.getValue(itemElement).loadElement(itemElement);
                     });
                     // load settings
                     this.applySettings(element);
@@ -107,24 +107,24 @@ var Attv;
 ////////////////////////////////////////////////////////////////////////////////////
 (function (Attv) {
     /**
-     * [data-tab-nav]
+     * [data-tab-item]
      */
-    var DataTabNav = /** @class */ (function (_super) {
-        __extends(DataTabNav, _super);
-        function DataTabNav(name) {
-            var _this = _super.call(this, DataTabNav.UniqueId, name) || this;
+    var DataTabItem = /** @class */ (function (_super) {
+        __extends(DataTabItem, _super);
+        function DataTabItem(name) {
+            var _this = _super.call(this, DataTabItem.UniqueId, name) || this;
             _this.name = name;
             _this.dependency.uses.push(Attv.DataEnabled.UniqueId, Attv.DataActive.UniqueId);
             _this.dependency.internals.push(Attv.DataRoute.UniqueId);
             return _this;
         }
-        DataTabNav.UniqueId = 'DataTabNav';
-        return DataTabNav;
+        DataTabItem.UniqueId = 'DataTabItem';
+        return DataTabItem;
     }(Attv.Attribute));
-    Attv.DataTabNav = DataTabNav;
-    (function (DataTabNav) {
+    Attv.DataTabItem = DataTabItem;
+    (function (DataTabItem) {
         /**
-         * [data-tab-nav]="*"
+         * [data-tab-item]="*"
          */
         var DefaultAttributeValue = /** @class */ (function (_super) {
             __extends(DefaultAttributeValue, _super);
@@ -132,56 +132,89 @@ var Attv;
                 if (validators === void 0) { validators = []; }
                 var _this = _super.call(this, undefined, attribute, settingsFn, validators) || this;
                 _this.resolver.uses.push(Attv.DataEnabled.UniqueId, Attv.DataActive.UniqueId, Attv.DataTabContent.UniqueId);
+                _this.resolver.internals.push(Attv.DataTab.UniqueId);
                 return _this;
             }
             DefaultAttributeValue.prototype.loadElement = function (element) {
                 var _this = this;
                 if (!this.attribute.isElementLoaded(element)) {
-                    var tab_1 = element.parentElement;
-                    var nav_1 = element;
-                    var navSibilings_1 = __spreadArrays(tab_1.querySelectorAll(this.toString())); // force as array
+                    var dataTab = this.resolver.resolve(Attv.DataTab.UniqueId);
                     var dataActive_1 = this.resolver.resolve(Attv.DataActive.UniqueId);
                     var dataEnabled = this.resolver.resolve(Attv.DataEnabled.UniqueId);
                     var dataRoute_1 = this.resolver.resolve(Attv.DataRoute.UniqueId);
+                    var tab_1 = element.closest(dataTab.toString());
+                    var item_1 = element;
+                    var itemSiblings_1 = __spreadArrays(tab_1.querySelectorAll(this.toString())); // force as array
+                    var onclick_1 = function (evt) {
+                        // mark everybody not active
+                        _this.setItemActive(dataActive_1, item_1, true, itemSiblings_1);
+                        _this.displayContent(tab_1, item_1, itemSiblings_1);
+                        // update route on click
+                        if (dataRoute_1.exists(tab_1)) {
+                            var thisRoute = dataRoute_1.appendHash(dataRoute_1.getRoute(tab_1), _this.getRaw(item_1));
+                            dataRoute_1.setRoute(thisRoute);
+                        }
+                        return false;
+                    };
                     // #1. from the route first
                     // [data-route]
                     var locationRoute = dataRoute_1.getLocationRoute();
                     if (locationRoute) {
-                        for (var i = 0; i < navSibilings_1.length; i++) {
-                            var route = dataRoute_1.appendHash(dataRoute_1.getRoute(tab_1), this.getRaw(navSibilings_1[i]));
+                        for (var i = 0; i < itemSiblings_1.length; i++) {
+                            var route = dataRoute_1.appendHash(dataRoute_1.getRoute(tab_1), this.getRaw(itemSiblings_1[i]));
                             if (dataRoute_1.matches(route)) {
                                 // mark everybody not active
-                                navSibilings_1.forEach(function (e) { return dataActive_1.setActive(e, false); });
-                                dataActive_1.setActive(navSibilings_1[i], true);
+                                this.setItemActive(dataActive_1, itemSiblings_1[i], true, itemSiblings_1);
                                 break;
                             }
                         }
                     }
+                    // element is an <a>
+                    if (dataRoute_1.exists(tab_1) && element.tagName.equalsIgnoreCase('a')) {
+                        var thisRoute = dataRoute_1.appendHash(dataRoute_1.getRoute(tab_1), this.getRaw(item_1));
+                        element.attr('href', dataRoute_1.getHash(thisRoute));
+                    }
                     // [data-enabled]
                     if (dataEnabled.isEnabled(element)) {
-                        element.onclick = function (evt) {
-                            // mark everybody not active
-                            navSibilings_1.forEach(function (e) { return dataActive_1.setActive(e, false); });
-                            dataActive_1.setActive(nav_1, true);
-                            _this.displayContent(tab_1, nav_1, navSibilings_1);
-                            // update route on click
-                            if (dataRoute_1.exists(tab_1)) {
-                                var thisRoute = dataRoute_1.appendHash(dataRoute_1.getRoute(tab_1), _this.getRaw(nav_1));
-                                dataRoute_1.setRoute(thisRoute);
-                            }
-                        };
+                        element.onclick = onclick_1;
+                        // if parent element is an <li>
+                        if (element.parentElement.tagName.equalsIgnoreCase('li')) {
+                            element.parentElement.onclick = onclick_1;
+                        }
+                    }
+                    else {
+                        if (element.tagName.equalsIgnoreCase('a')) {
+                            element.removeAttribute('href');
+                        }
+                        if (element.parentElement.tagName.equalsIgnoreCase('li')) {
+                            element.parentElement.attr(dataEnabled, false);
+                        }
                     }
                     // [data-active]
                     if (dataActive_1.isActive(element)) {
-                        this.displayContent(tab_1, nav_1, navSibilings_1);
+                        this.displayContent(tab_1, item_1, itemSiblings_1);
                     }
                     this.attribute.markElementLoaded(element, true);
                 }
                 return true;
             };
-            DefaultAttributeValue.prototype.displayContent = function (tab, nav, siblings) {
+            DefaultAttributeValue.prototype.setItemActive = function (dataActive, item, isActive, siblings) {
+                var _this = this;
+                var _a, _b;
+                // mark everybody else not active
+                if (!!siblings) {
+                    siblings.forEach(function (e) {
+                        _this.setItemActive(dataActive, e, false);
+                    });
+                }
+                dataActive.setActive(item, isActive);
+                if ((_b = (_a = item.parentElement) === null || _a === void 0 ? void 0 : _a.tagName) === null || _b === void 0 ? void 0 : _b.equalsIgnoreCase('li')) {
+                    dataActive.setActive(item.parentElement, isActive);
+                }
+            };
+            DefaultAttributeValue.prototype.displayContent = function (tab, item, siblings) {
                 var dataTabContent = this.resolver.resolve(Attv.DataTabContent.UniqueId);
-                var contentName = this.getRaw(nav);
+                var contentName = this.getRaw(item);
                 var contentElement = tab.parentElement.querySelector("[" + dataTabContent.name + "=\"" + contentName + "\"]");
                 if (contentElement) {
                     var parentElement = contentElement.parentElement;
@@ -193,8 +226,8 @@ var Attv;
             };
             return DefaultAttributeValue;
         }(Attv.Attribute.Value));
-        DataTabNav.DefaultAttributeValue = DefaultAttributeValue;
-    })(DataTabNav = Attv.DataTabNav || (Attv.DataTabNav = {}));
+        DataTabItem.DefaultAttributeValue = DefaultAttributeValue;
+    })(DataTabItem = Attv.DataTabItem || (Attv.DataTabItem = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// DataTabContent //////////////////////////////////
@@ -216,7 +249,7 @@ var Attv;
     Attv.DataTabContent = DataTabContent;
     (function (DataTabContent) {
         /**
-         * [data-tab-nav]="*"
+         * [data-tab-item]="*"
          */
         var DefaultAttributeValue = /** @class */ (function (_super) {
             __extends(DefaultAttributeValue, _super);
@@ -261,7 +294,7 @@ var Attv;
             __extends(DefaultSettings, _super);
             function DefaultSettings() {
                 var _this = _super !== null && _super.apply(this, arguments) || this;
-                _this.style = "\n/* Style the tab */\n[data-tab] {\n    overflow: hidden;\n    border: 1px solid #ccc;\n    background-color: #f1f1f1;\n}\n\n/* Style the buttons inside the tab */\n[data-tab] [data-tab-nav] {\n    background-color: inherit;\n    float: left;\n    border: none;\n    outline: none;\n    cursor: pointer;\n    padding: 14px 16px;\n    transition: 0.3s;\n    font-size: 17px;\n    list-style: none;\n}\n\n[data-tab] [data-tab-nav][data-enabled=\"false\"] {\n    cursor: default;\n    opacity: 0.5;\n}\n[data-tab] [data-tab-nav][data-enabled=\"false\"]:hover {\n    background-color: inherit;\n}\n\n/* Change background color of buttons on hover */\n[data-tab] [data-tab-nav]:hover {\n    background-color: #ddd;\n}\n\n/* Create an active/current tablink class */\n[data-tab] [data-tab-nav][data-active=true] {\n    background-color: #ccc;\n}\n\n/* Style the tab content */\n[data-tab-content]{\n    display: none;\n    padding: 6px 12px;\n    border: 1px solid #ccc;\n    border-top: none;\n}\n";
+                _this.style = "\n/* Style the tab */\n[data-tab] {\n    overflow: hidden;\n    border: 1px solid #ccc;\n    background-color: #f1f1f1;\n}\n\n/* Style the buttons inside the tab */\n[data-tab] li {\n    background-color: inherit;\n    float: left;\n    border: none;\n    outline: none;\n    padding: 14px 16px;\n    transition: 0.3s;\n    font-size: 17px;\n    list-style: none;\n}\n[data-tab] li {\n    background-color: inherit;\n    float: left;\n    border: none;\n    outline: none;\n    padding: 14px 16px;\n    transition: 0.3s;\n    font-size: 17px;\n    list-style: none;\n}\n\n/* Change background color of buttons on hover */\n[data-tab] li:not([data-enabled=\"false\"]):hover {\n    cursor: pointer;\n}\n\n/* Create an active/current tablink class */\n[data-tab] li[data-active=true] {\n    background-color: #ccc;\n}\n\n/* Style the tab content */\n[data-tab-content]{\n    display: none;\n    padding: 6px 12px;\n    border: 1px solid #ccc;\n    border-top: none;\n}\n\n[data-tab] [data-tab-item][data-enabled=\"false\"] {\n    cursor: default;\n    opacity: 0.5;\n}\n[data-tab] li[data-enabled=\"false\"]:hover,\n[data-tab] [data-tab-item][data-enabled=\"false\"]:hover {\n    background-color: inherit;\n}\n";
                 return _this;
             }
             return DefaultSettings;
@@ -276,8 +309,8 @@ Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-tab', function (attributeName) { return new Attv.DataTab(attributeName); }, function (attribute, list) {
         list.push(new Attv.DataTab.DefaultValue(Attv.configuration.defaultTag, attribute, function (name, value) { return new Attv.DataTab.DefaultSettings(name, value); }));
     });
-    Attv.registerAttribute('data-tab-nav', function (attributeName) { return new Attv.DataTabNav(attributeName); }, function (attribute, list) {
-        list.push(new Attv.DataTabNav.DefaultAttributeValue(attribute));
+    Attv.registerAttribute('data-tab-item', function (attributeName) { return new Attv.DataTabItem(attributeName); }, function (attribute, list) {
+        list.push(new Attv.DataTabItem.DefaultAttributeValue(attribute));
     });
     Attv.registerAttribute('data-tab-content', function (attributeName) { return new Attv.DataTabContent(attributeName); }, function (attribute, list) {
         list.push(new Attv.DataTabContent.DefaultAttributeValue(attribute));

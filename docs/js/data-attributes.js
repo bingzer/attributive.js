@@ -404,6 +404,12 @@ var Attv;
             }
             window.location.hash = this.cleanHash(hash);
         };
+        DataRoute.prototype.getHash = function (hash) {
+            if (!(hash === null || hash === void 0 ? void 0 : hash.startsWith('#'))) {
+                hash = '#' + hash;
+            }
+            return hash;
+        };
         /**
          * Checks if location route matches/starts-with hash
          * @param hash the hash

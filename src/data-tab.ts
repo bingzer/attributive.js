@@ -11,7 +11,7 @@ namespace Attv {
 
             this.isStrict = true;
 
-            this.dependency.uses.push(DataTabContent.UniqueId, DataTabNav.UniqueId);
+            this.dependency.uses.push(DataTabContent.UniqueId, DataTabItem.UniqueId);
         }
     }
 }
@@ -38,10 +38,10 @@ namespace Attv.DataTab {
         
         loadElement(element: HTMLElement): boolean {
             if (!this.attribute.isElementLoaded(element)) {
-                let dataTabNav = this.resolver.resolve<DataTabNav>(DataTabNav.UniqueId);
+                let dataTabItem = this.resolver.resolve<DataTabItem>(DataTabItem.UniqueId);
     
-                element.querySelectorAll(dataTabNav.toString()).forEach((navElement: HTMLElement) => {
-                    dataTabNav.getValue(navElement).loadElement(navElement);
+                element.querySelectorAll(dataTabItem.toString()).forEach((itemElement: HTMLElement) => {
+                    dataTabItem.getValue(itemElement).loadElement(itemElement);
                 });
 
                 // load settings
@@ -97,13 +97,13 @@ namespace Attv.DataTab {
 namespace Attv {
 
     /**
-     * [data-tab-nav]
+     * [data-tab-item]
      */
-    export class DataTabNav extends Attv.Attribute {
-        static readonly UniqueId = 'DataTabNav';
+    export class DataTabItem extends Attv.Attribute {
+        static readonly UniqueId = 'DataTabItem';
 
         constructor (public name: string) {
-            super(DataTabNav.UniqueId, name);
+            super(DataTabItem.UniqueId, name);
 
             this.dependency.uses.push(DataEnabled.UniqueId, DataActive.UniqueId);
             this.dependency.internals.push(DataRoute.UniqueId);
@@ -111,9 +111,9 @@ namespace Attv {
 
     }
 
-    export namespace DataTabNav {
+    export namespace DataTabItem {
         /**
-         * [data-tab-nav]="*"
+         * [data-tab-item]="*"
          */
         export class DefaultAttributeValue extends Attribute.Value {
             
@@ -123,52 +123,72 @@ namespace Attv {
                 super(undefined, attribute, settingsFn, validators);
 
                 this.resolver.uses.push(DataEnabled.UniqueId, DataActive.UniqueId, DataTabContent.UniqueId);
+                this.resolver.internals.push(DataTab.UniqueId);
             }
             
             loadElement(element: HTMLElement): boolean {
                 if (!this.attribute.isElementLoaded(element)) {
-                    let tab = element.parentElement;
-                    let nav = element;
-                    let navSibilings = [...tab.querySelectorAll(this.toString()) as any] as HTMLElement[]; // force as array
-
+                    let dataTab = this.resolver.resolve<DataTab>(DataTab.UniqueId);
                     let dataActive = this.resolver.resolve<DataActive>(DataActive.UniqueId);
                     let dataEnabled = this.resolver.resolve<DataEnabled>(DataEnabled.UniqueId);
                     let dataRoute = this.resolver.resolve<DataRoute>(DataRoute.UniqueId);
+
+                    let tab = element.closest(dataTab.toString()) as HTMLElement;
+                    let item = element;
+                    let itemSiblings = [...tab.querySelectorAll(this.toString()) as any] as HTMLElement[]; // force as array
+                    let onclick = (evt: Event) => {
+                        // mark everybody not active
+                        this.setItemActive(dataActive, item, true, itemSiblings);
+                        this.displayContent(tab, item, itemSiblings);
+
+                        // update route on click
+                        if (dataRoute.exists(tab)) {
+                            let thisRoute = dataRoute.appendHash(dataRoute.getRoute(tab), this.getRaw(item));
+                            dataRoute.setRoute(thisRoute);
+                        }
+
+                        return false;
+                    }
 
                     // #1. from the route first
                     // [data-route]
                     let locationRoute = dataRoute.getLocationRoute();
                     if (locationRoute) {
-                        for (let i = 0; i < navSibilings.length; i++) {
-                            let route = dataRoute.appendHash(dataRoute.getRoute(tab), this.getRaw(navSibilings[i]));
+                        for (let i = 0; i < itemSiblings.length; i++) {
+                            let route = dataRoute.appendHash(dataRoute.getRoute(tab), this.getRaw(itemSiblings[i]));
                             if (dataRoute.matches(route)) {
                                 // mark everybody not active
-                                navSibilings.forEach((e: HTMLElement) => dataActive.setActive(e, false) );
-                                dataActive.setActive(navSibilings[i], true);
+                                this.setItemActive(dataActive, itemSiblings[i], true, itemSiblings);
                                 break;
                             }
                         }
                     }
 
+                    // element is an <a>
+                    if (dataRoute.exists(tab) && element.tagName.equalsIgnoreCase('a')) {
+                        let thisRoute = dataRoute.appendHash(dataRoute.getRoute(tab), this.getRaw(item));
+                        element.attr('href', dataRoute.getHash(thisRoute));
+                    }
+
                     // [data-enabled]
                     if (dataEnabled.isEnabled(element)) {
-                        element.onclick = (evt: Event) => {
-                            // mark everybody not active
-                            navSibilings.forEach((e: HTMLElement) => dataActive.setActive(e, false));
-                            dataActive.setActive(nav, true);
-                            this.displayContent(tab, nav, navSibilings);
-
-                            // update route on click
-                            if (dataRoute.exists(tab)) {
-                                let thisRoute = dataRoute.appendHash(dataRoute.getRoute(tab), this.getRaw(nav));
-                                dataRoute.setRoute(thisRoute);
-                            }
+                        element.onclick = onclick
+                        // if parent element is an <li>
+                        if (element.parentElement.tagName.equalsIgnoreCase('li')) {
+                            element.parentElement.onclick = onclick;
+                        }
+                    } else {
+                        if (element.tagName.equalsIgnoreCase('a')) {
+                            element.removeAttribute('href');
+                        }
+                        if (element.parentElement.tagName.equalsIgnoreCase('li')) {
+                            element.parentElement.attr(dataEnabled, false);
                         }
                     }
 
                     // [data-active]
                     if (dataActive.isActive(element)) {
-                        this.displayContent(tab, nav, navSibilings);
+                        this.displayContent(tab, item, itemSiblings);
                     }
 
                     this.attribute.markElementLoaded(element, true);
@@ -177,10 +197,24 @@ namespace Attv {
                 return true;
             }
 
-            private displayContent(tab: HTMLElement, nav: HTMLElement, siblings: HTMLElement[]): boolean {
+            private setItemActive(dataActive: DataActive, item: HTMLElement, isActive: boolean, siblings?: HTMLElement[], ) {
+                // mark everybody else not active
+                if (!!siblings) {
+                    siblings.forEach((e: HTMLElement) => {
+                        this.setItemActive(dataActive, e, false);
+                    });
+                }
+
+                dataActive.setActive(item, isActive);
+                if (item.parentElement?.tagName?.equalsIgnoreCase('li')) {
+                    dataActive.setActive(item.parentElement, isActive);
+                }
+            }
+
+            private displayContent(tab: HTMLElement, item: HTMLElement, siblings: HTMLElement[]): boolean {
                 let dataTabContent = this.resolver.resolve<DataTabContent>(DataTabContent.UniqueId);
 
-                let contentName = this.getRaw(nav);
+                let contentName = this.getRaw(item);
                 let contentElement = tab.parentElement.querySelector(`[${dataTabContent.name}="${contentName}"]`) as HTMLElement;
                 if (contentElement) {
                     let parentElement = contentElement.parentElement;
@@ -217,7 +251,7 @@ namespace Attv {
     export namespace DataTabContent {
         
         /**
-         * [data-tab-nav]="*"
+         * [data-tab-item]="*"
          */
         export class DefaultAttributeValue extends Attribute.Value {
             
@@ -278,33 +312,34 @@ namespace Attv.DataTab {
 }
 
 /* Style the buttons inside the tab */
-[data-tab] [data-tab-nav] {
+[data-tab] li {
     background-color: inherit;
     float: left;
     border: none;
     outline: none;
-    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+    list-style: none;
+}
+[data-tab] li {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
     padding: 14px 16px;
     transition: 0.3s;
     font-size: 17px;
     list-style: none;
 }
 
-[data-tab] [data-tab-nav][data-enabled="false"] {
-    cursor: default;
-    opacity: 0.5;
-}
-[data-tab] [data-tab-nav][data-enabled="false"]:hover {
-    background-color: inherit;
-}
-
 /* Change background color of buttons on hover */
-[data-tab] [data-tab-nav]:hover {
-    background-color: #ddd;
+[data-tab] li:not([data-enabled="false"]):hover {
+    cursor: pointer;
 }
 
 /* Create an active/current tablink class */
-[data-tab] [data-tab-nav][data-active=true] {
+[data-tab] li[data-active=true] {
     background-color: #ccc;
 }
 
@@ -314,6 +349,15 @@ namespace Attv.DataTab {
     padding: 6px 12px;
     border: 1px solid #ccc;
     border-top: none;
+}
+
+[data-tab] [data-tab-item][data-enabled="false"] {
+    cursor: default;
+    opacity: 0.5;
+}
+[data-tab] li[data-enabled="false"]:hover,
+[data-tab] [data-tab-item][data-enabled="false"]:hover {
+    background-color: inherit;
 }
 `;
     }
@@ -329,10 +373,10 @@ Attv.loader.pre.push(() => {
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
             list.push(new Attv.DataTab.DefaultValue(Attv.configuration.defaultTag, attribute, (name, value) => new Attv.DataTab.DefaultSettings(name, value)));
         });
-    Attv.registerAttribute('data-tab-nav', 
-        (attributeName: string) => new Attv.DataTabNav(attributeName),
+    Attv.registerAttribute('data-tab-item', 
+        (attributeName: string) => new Attv.DataTabItem(attributeName),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTabNav.DefaultAttributeValue(attribute));
+            list.push(new Attv.DataTabItem.DefaultAttributeValue(attribute));
         });
     Attv.registerAttribute('data-tab-content', 
         (attributeName: string) => new Attv.DataTabContent(attributeName),

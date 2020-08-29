@@ -6,9 +6,15 @@
             This is the tab with route enabled <code>[data-route]</code>
         </h4>
         <ul data-tab="default" data-route="/data-tab">
-            <li data-tab-nav="intro" data-active="true">Existing content</li>
-            <li data-tab-nav="data-content">Using [data-content]</li>
-            <li data-tab-nav="data-url">Using [data-url]</li>
+            <li>
+                <a href="#" data-tab-item="intro" data-active="true">Existing content</a>
+            </li>
+            <li>
+                <a href="#" data-tab-item="data-content">Using [data-content]</a>
+            </li>
+            <li>
+                <a href="#" data-tab-item="data-url">Using [data-url]</a>
+            </li>
         </ul>
         <div>
             <div data-tab-content="intro">
@@ -28,9 +34,15 @@
             This is the tab without route enabled <code>[data-route]</code>
         </h4>
         <ul data-tab="default" data-options="{ tabNavActiveBackgroundColor: 'green', tabNavHoverBackgroundColor: 'orange'}">
-            <li data-tab-nav="intro" data-active="true">Existing content</li>
-            <li data-tab-nav="data-content">Using [data-content]</li>
-            <li data-tab-nav="data-url" data-enabled="false">Using [data-url]</li>
+            <li>
+                <a href="#" data-tab-item="intro" data-active="true">Existing content</a>
+            </li>
+            <li>
+                <a href="#" data-tab-item="data-content">Existing content</a>
+            </li>
+            <li>
+                <a href="#" data-tab-item="data-url" data-enabled="false">Existing content</a>
+            </li>
         </ul>
         <div>
             <div data-tab-content="intro">
