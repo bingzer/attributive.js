@@ -11,3 +11,6 @@ Unobtrusive Vanilla javascript
 
 # What is it?
 A library that uses DOM attributes to ...
+
+# Demo
+[https://bingzer.github.io/attributive.js/](https://bingzer.github.io/attributive.js/)
