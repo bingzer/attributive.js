@@ -29,7 +29,7 @@ namespace Attv {
             constructor (attributeValue: string, 
                 attribute: Attv.Attribute, 
                 validators: Validators.AttributeValidator[] = [
-                    new Validators.RequiredAnyElementsValidator(['a', 'button'])
+                    new Validators.RequiredElement(['a', 'button'])
                 ]) {
                 super(attributeValue, attribute, validators);
             }

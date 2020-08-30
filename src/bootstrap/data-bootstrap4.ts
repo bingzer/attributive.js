@@ -30,7 +30,7 @@ namespace Attv.Bootstrap4 {
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
             validators: Validators.AttributeValidator[] = [
-                new Validators.RequiredElementValidator(['body'])
+                new Validators.RequiredElement(['body'])
             ]) {
             super(attributeValue, attribute, validators);
 

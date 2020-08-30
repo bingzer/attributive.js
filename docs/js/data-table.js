@@ -42,7 +42,7 @@ var Attv;
             __extends(DefaultValue, _super);
             function DefaultValue(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = [
-                    new Attv.Validators.RequiredElementValidator(['table'])
+                    new Attv.Validators.RequiredElement(['table'])
                 ]; }
                 var _this = _super.call(this, attributeValue, attribute, validators) || this;
                 _this.resolver.uses.push(Attv.DataTemplate.UniqueId, Attv.DataPartial.UniqueId);
@@ -80,7 +80,7 @@ var Attv;
             __extends(DataPartialTableValue, _super);
             function DataPartialTableValue(attribute, validators) {
                 if (validators === void 0) { validators = [
-                    new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId])
+                    new Attv.Validators.RequiredAttribute([Attv.DataUrl.UniqueId])
                 ]; }
                 var _this = _super.call(this, 'table', attribute, validators) || this;
                 _this.resolver.uses.push(Attv.DataTemplateSource.UniqueId, Attv.DataTimeout.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId, Attv.DataInterval.UniqueId);
@@ -120,7 +120,7 @@ var Attv;
             __extends(DataTemplateTableValue, _super);
             function DataTemplateTableValue(attribute, validators) {
                 if (validators === void 0) { validators = [
-                    new Attv.Validators.RequiredElementValidator(['table'])
+                    new Attv.Validators.RequiredElement(['table'])
                 ]; }
                 return _super.call(this, 'table', attribute, validators) || this;
             }

@@ -51,7 +51,7 @@ var Attv;
             __extends(DefaultValue, _super);
             function DefaultValue(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = [
-                    new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId])
+                    new Attv.Validators.RequiredAttribute([Attv.DataUrl.UniqueId])
                 ]; }
                 var _this = _super.call(this, attributeValue, attribute, validators) || this;
                 _this.resolver.uses.push(Attv.DataTemplateSource.UniqueId, Attv.DataTimeout.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId, Attv.DataInterval.UniqueId);
@@ -135,8 +135,8 @@ var Attv;
             __extends(ClickValue, _super);
             function ClickValue(attribute) {
                 return _super.call(this, 'click', attribute, [
-                    new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId]),
-                    new Attv.Validators.RequiredAnyElementsValidator(['button', 'a'])
+                    new Attv.Validators.RequiredAttribute([Attv.DataUrl.UniqueId]),
+                    new Attv.Validators.RequiredElement(['button', 'a'])
                 ]) || this;
             }
             ClickValue.prototype.loadElement = function (element) {
@@ -157,8 +157,8 @@ var Attv;
             __extends(FormValue, _super);
             function FormValue(attribute) {
                 return _super.call(this, 'form', attribute, [
-                    new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId]),
-                    new Attv.Validators.RequiredElementValidator(['form'])
+                    new Attv.Validators.RequiredAttribute([Attv.DataUrl.UniqueId]),
+                    new Attv.Validators.RequiredElement(['form'])
                 ]) || this;
             }
             FormValue.prototype.loadElement = function (element) {

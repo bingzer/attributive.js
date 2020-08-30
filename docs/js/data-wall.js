@@ -39,7 +39,7 @@ var Attv;
             __extends(DefaultValue, _super);
             function DefaultValue(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = [
-                    new Attv.Validators.RequiredAnyElementsValidator(['a', 'button'])
+                    new Attv.Validators.RequiredElement(['a', 'button'])
                 ]; }
                 return _super.call(this, attributeValue, attribute, validators) || this;
             }

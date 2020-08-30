@@ -29,7 +29,7 @@ namespace Attv.DataTable {
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
             validators: Validators.AttributeValidator[] = [
-                new Validators.RequiredElementValidator(['table'])
+                new Validators.RequiredElement(['table'])
             ]) {
             super(attributeValue, attribute, validators);
 
@@ -68,7 +68,7 @@ namespace Attv.DataTable {
         
         constructor (attribute: Attv.Attribute, 
             validators: Validators.AttributeValidator[] = [
-                new Validators.RequiredAttributeValidator([DataUrl.UniqueId])
+                new Validators.RequiredAttribute([DataUrl.UniqueId])
             ]) {
             super('table', attribute, validators);
 
@@ -112,7 +112,7 @@ namespace Attv.DataTable {
         
         constructor (attribute: Attv.Attribute, 
             validators: Validators.AttributeValidator[] = [
-                new Validators.RequiredElementValidator(['table'])
+                new Validators.RequiredElement(['table'])
             ]) {
             super('table', attribute, validators);
         }

@@ -85,8 +85,8 @@ var Attv;
             __extends(ScriptValue, _super);
             function ScriptValue(attribute) {
                 return _super.call(this, 'script', attribute, [
-                    new Attv.Validators.RequiredElementValidator(['script']),
-                    new Attv.Validators.RequiredAttributeValidatorWithValue([{ name: 'type', value: 'text/html' }])
+                    new Attv.Validators.RequiredElement(['script']),
+                    new Attv.Validators.RequiredAttributeWithValue([{ name: 'type', value: 'text/html' }])
                 ]) || this;
             }
             ScriptValue.prototype.loadElement = function (element) {

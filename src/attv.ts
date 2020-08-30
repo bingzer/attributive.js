@@ -531,6 +531,14 @@ namespace Attv.Attribute {
      * Attribute configuration
      */
     export interface Settings {
+
+        /**
+         * The attribute value
+         * that this settings belongs to.
+         * This is required.
+         */
+        attributeValue: Attv.Attribute.Value;
+
         /**
          * True to override existing style
          */
@@ -550,12 +558,6 @@ namespace Attv.Attribute {
          * Javascript urls
          */
         jsUrls?: {name: string, url: string, options?: any}[];
-
-        /**
-         * The attribute value
-         * that this settings belongs to
-         */
-        attributeValue: Attv.Attribute.Value;
     }
 
     export namespace Settings {
@@ -685,31 +687,7 @@ namespace Attv.Validators {
         validate(value: Attribute.Value, element: Element): boolean;
     }
 
-    export class RequiredRawAttributeValidator implements AttributeValidator {
-
-        constructor (private requiredRawAttributes: string[]) {
-            // do nothing
-        }
-    
-        validate(value: Attribute.Value, element: HTMLElement): boolean {
-            let isValidated = true;
-
-            // check for other require attributes
-            for (let i = 0; i < this.requiredRawAttributes.length; i++) {
-                let requiredAttributeName = this.requiredRawAttributes[i];
-                let requiredAttribute = element.attr(requiredAttributeName);
-                if (!requiredAttribute) {
-                    Attv.log('error', `${value} is requiring [${requiredAttributeName}] to be present in DOM`, element)
-                }
-
-                isValidated = isValidated && !!requiredAttribute;
-            }
-
-            return isValidated;
-        }
-    }
-
-    export class RequiredAttributeValidator implements AttributeValidator {
+    export class RequiredAttribute implements AttributeValidator {
 
         constructor (private requiredAttributeIds: string[]) {
             // do nothing
@@ -735,7 +713,10 @@ namespace Attv.Validators {
         }
     }
 
-    export class RequiredAttributeValidatorWithValue implements AttributeValidator {
+    /**
+     * DOM is required to have an attribute of [name]=[value]
+     */
+    export class RequiredAttributeWithValue implements AttributeValidator {
 
         constructor (private requiredAttributes: { name: string, value: string}[]) {
             // do nothing
@@ -759,30 +740,10 @@ namespace Attv.Validators {
         }
     }
 
-    export class RequiredElementValidator implements AttributeValidator {
-
-        constructor (private elementTagNames: string[]) {
-            // do nothing
-        }
-
-        validate(value: Attribute.Value, element: Element): boolean {
-            let isValidated = true;
-
-            // check for element that this attribute belongs to
-            for (let i = 0; i < this.elementTagNames.length; i++) {
-                let elementName = this.elementTagNames[i];
-                isValidated = isValidated && element.tagName.equalsIgnoreCase(elementName);
-            }
-
-            if (!isValidated) {
-                Attv.log('error', `${value} can only be attached to elements [${this.elementTagNames}]`, element)
-            }
-
-            return isValidated;
-        }
-    }
-    
-    export class RequiredAnyElementsValidator implements AttributeValidator {
+    /**
+     * Requirement Any element
+     */
+    export class RequiredElement implements AttributeValidator {
 
         constructor (private elementTagNames: string[]) {
             // do nothing

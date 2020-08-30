@@ -42,7 +42,7 @@ namespace Attv.DataPartial {
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
             validators: Validators.AttributeValidator[] = [
-                new Validators.RequiredAttributeValidator([DataUrl.UniqueId])
+                new Validators.RequiredAttribute([DataUrl.UniqueId])
             ]) {
             super(attributeValue, attribute, validators);
 
@@ -142,8 +142,8 @@ namespace Attv.DataPartial {
         
         constructor (attribute: Attv.Attribute) {
             super('click', attribute, [
-                new Validators.RequiredAttributeValidator([DataUrl.UniqueId]),
-                new Validators.RequiredAnyElementsValidator(['button', 'a'])
+                new Validators.RequiredAttribute([DataUrl.UniqueId]),
+                new Validators.RequiredElement(['button', 'a'])
             ])
         }
 
@@ -164,8 +164,8 @@ namespace Attv.DataPartial {
         
         constructor (attribute: Attv.Attribute) {
             super('form', attribute, [
-                new Validators.RequiredAttributeValidator([DataUrl.UniqueId]),
-                new Validators.RequiredElementValidator(['form'])
+                new Validators.RequiredAttribute([DataUrl.UniqueId]),
+                new Validators.RequiredElement(['form'])
             ])
         }
 

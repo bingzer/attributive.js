@@ -45,7 +45,7 @@ var Attv;
             __extends(DefaultAttributeValue, _super);
             function DefaultAttributeValue(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = [
-                    new Attv.Validators.RequiredElementValidator(['body'])
+                    new Attv.Validators.RequiredElement(['body'])
                 ]; }
                 var _this = _super.call(this, attributeValue, attribute, validators) || this;
                 _this.resolver.uses.push(Attv.DataRenderer.UniqueId);

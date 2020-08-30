@@ -82,8 +82,8 @@ namespace Attv.DataTemplate {
         
         constructor (attribute: Attv.Attribute) {
             super('script', attribute, [ 
-                new Validators.RequiredElementValidator(['script']),
-                new Validators.RequiredAttributeValidatorWithValue([{ name: 'type', value: 'text/html'}])
+                new Validators.RequiredElement(['script']),
+                new Validators.RequiredAttributeWithValue([{ name: 'type', value: 'text/html'}])
             ])
         }
 

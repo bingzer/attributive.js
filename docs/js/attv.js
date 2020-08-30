@@ -551,33 +551,12 @@ String.prototype.equalsIgnoreCase = function (other) {
 (function (Attv) {
     var Validators;
     (function (Validators) {
-        var RequiredRawAttributeValidator = /** @class */ (function () {
-            function RequiredRawAttributeValidator(requiredRawAttributes) {
-                this.requiredRawAttributes = requiredRawAttributes;
-                // do nothing
-            }
-            RequiredRawAttributeValidator.prototype.validate = function (value, element) {
-                var isValidated = true;
-                // check for other require attributes
-                for (var i = 0; i < this.requiredRawAttributes.length; i++) {
-                    var requiredAttributeName = this.requiredRawAttributes[i];
-                    var requiredAttribute = element.attr(requiredAttributeName);
-                    if (!requiredAttribute) {
-                        Attv.log('error', value + " is requiring [" + requiredAttributeName + "] to be present in DOM", element);
-                    }
-                    isValidated = isValidated && !!requiredAttribute;
-                }
-                return isValidated;
-            };
-            return RequiredRawAttributeValidator;
-        }());
-        Validators.RequiredRawAttributeValidator = RequiredRawAttributeValidator;
-        var RequiredAttributeValidator = /** @class */ (function () {
-            function RequiredAttributeValidator(requiredAttributeIds) {
+        var RequiredAttribute = /** @class */ (function () {
+            function RequiredAttribute(requiredAttributeIds) {
                 this.requiredAttributeIds = requiredAttributeIds;
                 // do nothing
             }
-            RequiredAttributeValidator.prototype.validate = function (value, element) {
+            RequiredAttribute.prototype.validate = function (value, element) {
                 var isValidated = true;
                 var attributes = this.requiredAttributeIds.map(function (attId) { return Attv.getAttribute(attId); });
                 // check for other require attributes
@@ -591,15 +570,18 @@ String.prototype.equalsIgnoreCase = function (other) {
                 }
                 return isValidated;
             };
-            return RequiredAttributeValidator;
+            return RequiredAttribute;
         }());
-        Validators.RequiredAttributeValidator = RequiredAttributeValidator;
-        var RequiredAttributeValidatorWithValue = /** @class */ (function () {
-            function RequiredAttributeValidatorWithValue(requiredAttributes) {
+        Validators.RequiredAttribute = RequiredAttribute;
+        /**
+         * DOM is required to have an attribute of [name]=[value]
+         */
+        var RequiredAttributeWithValue = /** @class */ (function () {
+            function RequiredAttributeWithValue(requiredAttributes) {
                 this.requiredAttributes = requiredAttributes;
                 // do nothing
             }
-            RequiredAttributeValidatorWithValue.prototype.validate = function (value, element) {
+            RequiredAttributeWithValue.prototype.validate = function (value, element) {
                 var isValidated = true;
                 // check for other require attributes
                 for (var i = 0; i < this.requiredAttributes.length; i++) {
@@ -612,35 +594,18 @@ String.prototype.equalsIgnoreCase = function (other) {
                 }
                 return isValidated;
             };
-            return RequiredAttributeValidatorWithValue;
+            return RequiredAttributeWithValue;
         }());
-        Validators.RequiredAttributeValidatorWithValue = RequiredAttributeValidatorWithValue;
-        var RequiredElementValidator = /** @class */ (function () {
-            function RequiredElementValidator(elementTagNames) {
+        Validators.RequiredAttributeWithValue = RequiredAttributeWithValue;
+        /**
+         * Requirement Any element
+         */
+        var RequiredElement = /** @class */ (function () {
+            function RequiredElement(elementTagNames) {
                 this.elementTagNames = elementTagNames;
                 // do nothing
             }
-            RequiredElementValidator.prototype.validate = function (value, element) {
-                var isValidated = true;
-                // check for element that this attribute belongs to
-                for (var i = 0; i < this.elementTagNames.length; i++) {
-                    var elementName = this.elementTagNames[i];
-                    isValidated = isValidated && element.tagName.equalsIgnoreCase(elementName);
-                }
-                if (!isValidated) {
-                    Attv.log('error', value + " can only be attached to elements [" + this.elementTagNames + "]", element);
-                }
-                return isValidated;
-            };
-            return RequiredElementValidator;
-        }());
-        Validators.RequiredElementValidator = RequiredElementValidator;
-        var RequiredAnyElementsValidator = /** @class */ (function () {
-            function RequiredAnyElementsValidator(elementTagNames) {
-                this.elementTagNames = elementTagNames;
-                // do nothing
-            }
-            RequiredAnyElementsValidator.prototype.validate = function (value, element) {
+            RequiredElement.prototype.validate = function (value, element) {
                 var isValidated = false;
                 // check for element that this attribute belongs to
                 for (var i = 0; i < this.elementTagNames.length; i++) {
@@ -655,9 +620,9 @@ String.prototype.equalsIgnoreCase = function (other) {
                 }
                 return isValidated;
             };
-            return RequiredAnyElementsValidator;
+            return RequiredElement;
         }());
-        Validators.RequiredAnyElementsValidator = RequiredAnyElementsValidator;
+        Validators.RequiredElement = RequiredElement;
     })(Validators = Attv.Validators || (Attv.Validators = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
