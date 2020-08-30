@@ -43,21 +43,20 @@ var Attv;
          */
         var DefaultAttributeValue = /** @class */ (function (_super) {
             __extends(DefaultAttributeValue, _super);
-            function DefaultAttributeValue(attributeValue, attribute, settingsFn, validators) {
+            function DefaultAttributeValue(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = [
                     new Attv.Validators.RequiredElementValidator(['body'])
                 ]; }
-                var _this = _super.call(this, attributeValue, attribute, settingsFn, validators) || this;
+                var _this = _super.call(this, attributeValue, attribute, validators) || this;
                 _this.resolver.uses.push(Attv.DataRenderer.UniqueId);
                 _this.resolver.internals.push(Attv.DataTemplateHtml.UniqueId);
                 return _this;
             }
             DefaultAttributeValue.prototype.loadElement = function (element) {
-                if (!this.settings && !this.attribute.isElementLoaded(element)) {
-                    this.settings = new Bootstrap4.BootstrapSettings('default', this);
-                    this.settings.commit();
-                }
-                return true;
+                return this.loadSettings(element, function (settings) {
+                    settings.styleUrls = settings.styleUrls || Bootstrap4.BootstrapSettings.StyleUrls;
+                    settings.jsUrls = settings.jsUrls || Bootstrap4.BootstrapSettings.JsUrls;
+                });
             };
             return DefaultAttributeValue;
         }(Attv.Attribute.Value));
@@ -70,51 +69,45 @@ var Attv;
 (function (Attv) {
     var Bootstrap4;
     (function (Bootstrap4) {
-        var BootstrapSettings = /** @class */ (function (_super) {
-            __extends(BootstrapSettings, _super);
-            function BootstrapSettings() {
-                var _this = _super !== null && _super.apply(this, arguments) || this;
-                _this.styleUrls = [
-                    {
-                        name: 'bootstrap-css',
-                        url: 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
-                        options: {
-                            integrity: 'sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T',
-                            crossorigin: 'anonymous'
-                        }
+        var BootstrapSettings;
+        (function (BootstrapSettings) {
+            BootstrapSettings.StyleUrls = [
+                {
+                    name: 'bootstrap-css',
+                    url: 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
+                    options: {
+                        integrity: 'sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T',
+                        crossorigin: 'anonymous'
                     }
-                ];
-                _this.jsUrls = [
-                    {
-                        name: 'jquery',
-                        url: 'https://code.jquery.com/jquery-3.3.1.slim.min.js',
-                        options: {
-                            integrity: 'sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo',
-                            crossorigin: 'anonymous'
-                        }
-                    },
-                    {
-                        name: 'popper',
-                        url: 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js',
-                        options: {
-                            integrity: 'sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1',
-                            crossorigin: 'anonymous'
-                        }
-                    },
-                    {
-                        name: 'bootstrap',
-                        url: 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js',
-                        options: {
-                            integrity: 'sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM',
-                            crossorigin: 'anonymous'
-                        }
-                    },
-                ];
-                return _this;
-            }
-            return BootstrapSettings;
-        }(Attv.Attribute.Settings));
-        Bootstrap4.BootstrapSettings = BootstrapSettings;
+                }
+            ];
+            BootstrapSettings.JsUrls = [
+                {
+                    name: 'jquery',
+                    url: 'https://code.jquery.com/jquery-3.3.1.slim.min.js',
+                    options: {
+                        integrity: 'sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo',
+                        crossorigin: 'anonymous'
+                    }
+                },
+                {
+                    name: 'popper',
+                    url: 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js',
+                    options: {
+                        integrity: 'sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1',
+                        crossorigin: 'anonymous'
+                    }
+                },
+                {
+                    name: 'bootstrap',
+                    url: 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js',
+                    options: {
+                        integrity: 'sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM',
+                        crossorigin: 'anonymous'
+                    }
+                },
+            ];
+        })(BootstrapSettings = Bootstrap4.BootstrapSettings || (Bootstrap4.BootstrapSettings = {}));
     })(Bootstrap4 = Attv.Bootstrap4 || (Attv.Bootstrap4 = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////

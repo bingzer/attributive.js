@@ -41,11 +41,10 @@ namespace Attv.DataPartial {
         
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
-            settingsFn?: Attv.Attribute.SettingsFactory,
             validators: Validators.AttributeValidator[] = [
                 new Validators.RequiredAttributeValidator([DataUrl.UniqueId])
             ]) {
-            super(attributeValue, attribute, settingsFn, validators);
+            super(attributeValue, attribute, validators);
 
             this.resolver.uses.push(DataTemplateSource.UniqueId, DataTimeout.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId, DataInterval.UniqueId);
         }
@@ -142,7 +141,7 @@ namespace Attv.DataPartial {
     export class ClickValue extends DefaultValue {
         
         constructor (attribute: Attv.Attribute) {
-            super('click', attribute, undefined, [
+            super('click', attribute, [
                 new Validators.RequiredAttributeValidator([DataUrl.UniqueId]),
                 new Validators.RequiredAnyElementsValidator(['button', 'a'])
             ])
@@ -164,7 +163,7 @@ namespace Attv.DataPartial {
     export class FormValue extends DefaultValue {
         
         constructor (attribute: Attv.Attribute) {
-            super('form', attribute, undefined, [
+            super('form', attribute, [
                 new Validators.RequiredAttributeValidator([DataUrl.UniqueId]),
                 new Validators.RequiredElementValidator(['form'])
             ])

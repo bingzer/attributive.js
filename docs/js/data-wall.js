@@ -37,11 +37,11 @@ var Attv;
          */
         var DefaultValue = /** @class */ (function (_super) {
             __extends(DefaultValue, _super);
-            function DefaultValue(attributeValue, attribute, settingsFn, validators) {
+            function DefaultValue(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = [
                     new Attv.Validators.RequiredAnyElementsValidator(['a', 'button'])
                 ]; }
-                return _super.call(this, attributeValue, attribute, settingsFn, validators) || this;
+                return _super.call(this, attributeValue, attribute, validators) || this;
             }
             DefaultValue.prototype.loadElement = function (element) {
                 var _this = this;
@@ -82,7 +82,7 @@ var Attv;
             __extends(ConfirmValue, _super);
             function ConfirmValue(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = []; }
-                return _super.call(this, attributeValue, attribute, undefined, validators) || this;
+                return _super.call(this, attributeValue, attribute, validators) || this;
             }
             ConfirmValue.prototype.onclick = function (element, ev) {
                 var dataContent = this.resolver.resolve(Attv.DataContent.UniqueId);

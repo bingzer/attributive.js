@@ -28,11 +28,10 @@ namespace Attv.DataTable {
         
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
-            settingsFn?: Attv.Attribute.SettingsFactory,
             validators: Validators.AttributeValidator[] = [
                 new Validators.RequiredElementValidator(['table'])
             ]) {
-            super(attributeValue, attribute, settingsFn, validators);
+            super(attributeValue, attribute, validators);
 
             this.resolver.uses.push(DataTemplate.UniqueId, DataPartial.UniqueId);
         }
@@ -68,11 +67,10 @@ namespace Attv.DataTable {
     export class DataPartialTableValue extends Attv.DataPartial.DefaultValue {
         
         constructor (attribute: Attv.Attribute, 
-            settingsFn?: Attv.Attribute.SettingsFactory,
             validators: Validators.AttributeValidator[] = [
                 new Validators.RequiredAttributeValidator([DataUrl.UniqueId])
             ]) {
-            super('table', attribute, settingsFn, validators);
+            super('table', attribute, validators);
 
             this.resolver.uses.push(DataTemplateSource.UniqueId, DataTimeout.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId, DataInterval.UniqueId);
         }
@@ -113,11 +111,10 @@ namespace Attv.DataTable {
     export class DataTemplateTableValue extends Attv.DataTemplate.DefaultValue {
         
         constructor (attribute: Attv.Attribute, 
-            settingsFn?: Attv.Attribute.SettingsFactory,
             validators: Validators.AttributeValidator[] = [
                 new Validators.RequiredElementValidator(['table'])
             ]) {
-            super('table', attribute, settingsFn, validators);
+            super('table', attribute, validators);
         }
 
         loadElement(element: HTMLElement): boolean {
@@ -144,15 +141,17 @@ namespace Attv.DataTable {
 ////////////////////////////////////////////////////////////////////////////////////
 
 namespace Attv.DataTable {
-
-    export interface DefaultOptions {
-    }
         
-    export class DefaultSettings extends Attv.Attribute.Settings {
-        style = `
+    export interface TableSettings extends Attv.Attribute.Settings {
+    }
+
+    export namespace TableSettings {
+        export function getStyle(settings: TableSettings): string {
+            return `
 /* Style the table */
 [data-table]
 `;
+        }
     }
 }
 
@@ -165,7 +164,7 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-table', 
         (attributeName: string) => new Attv.DataTable(attributeName),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTable.DefaultValue(Attv.configuration.defaultTag, attribute, (name, value) => new Attv.DataTable.DefaultSettings(name, value)));
+            list.push(new Attv.DataTable.DefaultValue(Attv.configuration.defaultTag, attribute));
         });
 
     Attv.registerAttributeValue(Attv.DataTemplate.UniqueId,

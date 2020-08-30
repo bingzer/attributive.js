@@ -53,9 +53,9 @@ var Attv;
          */
         var DefaultValue = /** @class */ (function (_super) {
             __extends(DefaultValue, _super);
-            function DefaultValue(attributeValue, attribute, settingsFn, validators) {
+            function DefaultValue(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = []; }
-                var _this = _super.call(this, attributeValue, attribute, settingsFn, validators) || this;
+                var _this = _super.call(this, attributeValue, attribute, validators) || this;
                 _this.resolver.uses.push(Attv.DataRenderer.UniqueId);
                 _this.resolver.internals.push(Attv.DataTemplateHtml.UniqueId);
                 return _this;
@@ -84,7 +84,7 @@ var Attv;
         var ScriptValue = /** @class */ (function (_super) {
             __extends(ScriptValue, _super);
             function ScriptValue(attribute) {
-                return _super.call(this, 'script', attribute, undefined, [
+                return _super.call(this, 'script', attribute, [
                     new Attv.Validators.RequiredElementValidator(['script']),
                     new Attv.Validators.RequiredAttributeValidatorWithValue([{ name: 'type', value: 'text/html' }])
                 ]) || this;

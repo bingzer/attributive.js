@@ -40,11 +40,11 @@ var Attv;
          */
         var DefaultValue = /** @class */ (function (_super) {
             __extends(DefaultValue, _super);
-            function DefaultValue(attributeValue, attribute, settingsFn, validators) {
+            function DefaultValue(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = [
                     new Attv.Validators.RequiredElementValidator(['table'])
                 ]; }
-                var _this = _super.call(this, attributeValue, attribute, settingsFn, validators) || this;
+                var _this = _super.call(this, attributeValue, attribute, validators) || this;
                 _this.resolver.uses.push(Attv.DataTemplate.UniqueId, Attv.DataPartial.UniqueId);
                 return _this;
             }
@@ -78,11 +78,11 @@ var Attv;
          */
         var DataPartialTableValue = /** @class */ (function (_super) {
             __extends(DataPartialTableValue, _super);
-            function DataPartialTableValue(attribute, settingsFn, validators) {
+            function DataPartialTableValue(attribute, validators) {
                 if (validators === void 0) { validators = [
                     new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId])
                 ]; }
-                var _this = _super.call(this, 'table', attribute, settingsFn, validators) || this;
+                var _this = _super.call(this, 'table', attribute, validators) || this;
                 _this.resolver.uses.push(Attv.DataTemplateSource.UniqueId, Attv.DataTimeout.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId, Attv.DataInterval.UniqueId);
                 return _this;
             }
@@ -118,11 +118,11 @@ var Attv;
          */
         var DataTemplateTableValue = /** @class */ (function (_super) {
             __extends(DataTemplateTableValue, _super);
-            function DataTemplateTableValue(attribute, settingsFn, validators) {
+            function DataTemplateTableValue(attribute, validators) {
                 if (validators === void 0) { validators = [
                     new Attv.Validators.RequiredElementValidator(['table'])
                 ]; }
-                return _super.call(this, 'table', attribute, settingsFn, validators) || this;
+                return _super.call(this, 'table', attribute, validators) || this;
             }
             DataTemplateTableValue.prototype.loadElement = function (element) {
                 if (!this.attribute.isElementLoaded(element)) {
@@ -145,16 +145,13 @@ var Attv;
 (function (Attv) {
     var DataTable;
     (function (DataTable) {
-        var DefaultSettings = /** @class */ (function (_super) {
-            __extends(DefaultSettings, _super);
-            function DefaultSettings() {
-                var _this = _super !== null && _super.apply(this, arguments) || this;
-                _this.style = "\n/* Style the table */\n[data-table]\n";
-                return _this;
+        var TableSettings;
+        (function (TableSettings) {
+            function getStyle(settings) {
+                return "\n/* Style the table */\n[data-table]\n";
             }
-            return DefaultSettings;
-        }(Attv.Attribute.Settings));
-        DataTable.DefaultSettings = DefaultSettings;
+            TableSettings.getStyle = getStyle;
+        })(TableSettings = DataTable.TableSettings || (DataTable.TableSettings = {}));
     })(DataTable = Attv.DataTable || (Attv.DataTable = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
@@ -162,7 +159,7 @@ var Attv;
 ////////////////////////////////////////////////////////////////////////////////////
 Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-table', function (attributeName) { return new Attv.DataTable(attributeName); }, function (attribute, list) {
-        list.push(new Attv.DataTable.DefaultValue(Attv.configuration.defaultTag, attribute, function (name, value) { return new Attv.DataTable.DefaultSettings(name, value); }));
+        list.push(new Attv.DataTable.DefaultValue(Attv.configuration.defaultTag, attribute));
     });
     Attv.registerAttributeValue(Attv.DataTemplate.UniqueId, function (attribute, list) {
         list.push(new Attv.DataTable.DataTemplateTableValue(attribute));

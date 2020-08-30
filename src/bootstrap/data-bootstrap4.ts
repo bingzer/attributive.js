@@ -29,23 +29,20 @@ namespace Attv.Bootstrap4 {
         
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
-            settingsFn?: Attv.Attribute.SettingsFactory,
             validators: Validators.AttributeValidator[] = [
                 new Validators.RequiredElementValidator(['body'])
             ]) {
-            super(attributeValue, attribute, settingsFn, validators);
+            super(attributeValue, attribute, validators);
 
             this.resolver.uses.push(DataRenderer.UniqueId);
             this.resolver.internals.push(DataTemplateHtml.UniqueId);
         }
 
         loadElement(element: HTMLElement): boolean {
-            if (!this.settings && !this.attribute.isElementLoaded(element)) {
-                this.settings = new BootstrapSettings('default', this);
-                this.settings.commit();
-            }
-
-            return true;
+            return this.loadSettings<BootstrapSettings>(element, settings => {
+                settings.styleUrls = settings.styleUrls || BootstrapSettings.StyleUrls;
+                settings.jsUrls = settings.jsUrls || BootstrapSettings.JsUrls;
+            });
         }
     }
 }
@@ -56,8 +53,11 @@ namespace Attv.Bootstrap4 {
 
 namespace Attv.Bootstrap4 {
         
-    export class BootstrapSettings extends Attv.Attribute.Settings {
-        styleUrls = [
+    export interface BootstrapSettings extends Attv.Attribute.Settings {
+    }
+
+    export namespace BootstrapSettings {
+        export const StyleUrls = [
             {
                 name: 'bootstrap-css',
                 url: 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
@@ -68,7 +68,7 @@ namespace Attv.Bootstrap4 {
             }
         ];
         
-        jsUrls = [
+        export const JsUrls = [
             { 
                 name: 'jquery',
                 url: 'https://code.jquery.com/jquery-3.3.1.slim.min.js',                

@@ -48,31 +48,20 @@ var Attv;
          */
         var DefaultValue = /** @class */ (function (_super) {
             __extends(DefaultValue, _super);
-            function DefaultValue(attributeValue, attribute, settingsFn, validators) {
+            function DefaultValue(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = []; }
-                var _this = _super.call(this, attributeValue, attribute, settingsFn, validators) || this;
-                _this.resolver.uses.push(Attv.DataRoute.UniqueId, Attv.DataOptions.UniqueId);
-                return _this;
+                return _super.call(this, attributeValue, attribute, validators) || this;
             }
             DefaultValue.prototype.loadElement = function (element) {
-                if (!this.attribute.isElementLoaded(element)) {
-                    var dataTabItem_1 = this.resolver.resolve(Attv.DataTabItem.UniqueId);
-                    element.querySelectorAll(dataTabItem_1.toString()).forEach(function (itemElement) {
-                        dataTabItem_1.getValue(itemElement).loadElement(itemElement);
+                var _this = this;
+                return this.loadSettings(element, function (settings) {
+                    var dataTabItem = _this.resolver.resolve(Attv.DataTabItem.UniqueId);
+                    element.querySelectorAll(dataTabItem.toString()).forEach(function (itemElement) {
+                        dataTabItem.getValue(itemElement).loadElement(itemElement);
                     });
-                    // load settings
-                    this.applySettings(element);
-                    this.attribute.markElementLoaded(element, true);
-                }
-                return true;
-            };
-            DefaultValue.prototype.applySettings = function (element) {
-                var _a;
-                var dataOptions = this.resolver.resolve(Attv.DataOptions.UniqueId);
-                if (dataOptions.exists(element)) {
-                    this.settings;
-                }
-                (_a = this.settings) === null || _a === void 0 ? void 0 : _a.commit();
+                    settings.style = Attv.DataTab.DefaultSettings.getStyle(settings);
+                    _this.attribute.markElementLoaded(element, true);
+                });
             };
             return DefaultValue;
         }(Attv.Attribute.Value));
@@ -128,9 +117,9 @@ var Attv;
          */
         var DefaultAttributeValue = /** @class */ (function (_super) {
             __extends(DefaultAttributeValue, _super);
-            function DefaultAttributeValue(attribute, settingsFn, validators) {
+            function DefaultAttributeValue(attribute, validators) {
                 if (validators === void 0) { validators = []; }
-                var _this = _super.call(this, undefined, attribute, settingsFn, validators) || this;
+                var _this = _super.call(this, undefined, attribute, validators) || this;
                 _this.resolver.uses.push(Attv.DataEnabled.UniqueId, Attv.DataActive.UniqueId, Attv.DataTabContent.UniqueId);
                 _this.resolver.internals.push(Attv.DataTab.UniqueId);
                 return _this;
@@ -253,9 +242,9 @@ var Attv;
          */
         var DefaultAttributeValue = /** @class */ (function (_super) {
             __extends(DefaultAttributeValue, _super);
-            function DefaultAttributeValue(attribute, settingsFn, validators) {
+            function DefaultAttributeValue(attribute, validators) {
                 if (validators === void 0) { validators = []; }
-                var _this = _super.call(this, undefined, attribute, settingsFn, validators) || this;
+                var _this = _super.call(this, undefined, attribute, validators) || this;
                 _this.resolver.uses.push(Attv.DataContent.UniqueId, Attv.DataPartial.UniqueId, Attv.DataActive.UniqueId);
                 return _this;
             }
@@ -290,16 +279,13 @@ var Attv;
 (function (Attv) {
     var DataTab;
     (function (DataTab) {
-        var DefaultSettings = /** @class */ (function (_super) {
-            __extends(DefaultSettings, _super);
-            function DefaultSettings() {
-                var _this = _super !== null && _super.apply(this, arguments) || this;
-                _this.style = "\n/* Style the tab */\n[data-tab] {\n    overflow: hidden;\n    border: 1px solid #ccc;\n    background-color: #f1f1f1;\n}\n\n/* Style the buttons inside the tab */\n[data-tab] li {\n    background-color: inherit;\n    float: left;\n    border: none;\n    outline: none;\n    padding: 14px 16px;\n    transition: 0.3s;\n    font-size: 17px;\n    list-style: none;\n}\n[data-tab] li {\n    background-color: inherit;\n    float: left;\n    border: none;\n    outline: none;\n    padding: 14px 16px;\n    transition: 0.3s;\n    font-size: 17px;\n    list-style: none;\n}\n\n/* Change background color of buttons on hover */\n[data-tab] li:not([data-enabled=\"false\"]):hover {\n    cursor: pointer;\n}\n\n/* Create an active/current tablink class */\n[data-tab] li[data-active=true] {\n    background-color: #ccc;\n}\n\n/* Style the tab content */\n[data-tab-content]{\n    display: none;\n    padding: 6px 12px;\n    border: 1px solid #ccc;\n    border-top: none;\n}\n\n[data-tab] [data-tab-item][data-enabled=\"false\"] {\n    cursor: default;\n    opacity: 0.5;\n}\n[data-tab] li[data-enabled=\"false\"]:hover,\n[data-tab] [data-tab-item][data-enabled=\"false\"]:hover {\n    background-color: inherit;\n}\n";
-                return _this;
+        var DefaultSettings;
+        (function (DefaultSettings) {
+            function getStyle(settings) {
+                return "\n/* Style the tab */\n" + settings.attributeValue.attribute + " {\n    overflow: hidden;\n    border: 1px solid #ccc;\n    background-color: #f1f1f1;\n}\n\n/* Style the buttons inside the tab */\n" + settings.attributeValue.attribute + " li {\n    background-color: inherit;\n    float: left;\n    border: none;\n    outline: none;\n    padding: 14px 16px;\n    transition: 0.3s;\n    font-size: 17px;\n    list-style: none;\n}\n" + settings.attributeValue.attribute + " li {\n    background-color: inherit;\n    float: left;\n    border: none;\n    outline: none;\n    padding: 14px 16px;\n    transition: 0.3s;\n    font-size: 17px;\n    list-style: none;\n}\n\n/* Change background color of buttons on hover */\n" + settings.attributeValue.attribute + " li:not([data-enabled=\"false\"]):hover {\n    cursor: pointer;\n}\n\n/* Create an active/current tablink class */\n" + settings.attributeValue.attribute + " li[data-active=true] {\n    background-color: #ccc;\n}\n\n/* Style the tab content */\n" + settings.attributeValue.attribute + " [data-tab-content]{\n    display: none;\n    padding: 6px 12px;\n    border: 1px solid #ccc;\n    border-top: none;\n}\n\n" + settings.attributeValue.attribute + " [data-tab-item][data-enabled=\"false\"] {\n    cursor: default;\n    opacity: 0.5;\n}\n" + settings.attributeValue.attribute + " li[data-enabled=\"false\"]:hover,\n" + settings.attributeValue.attribute + " [data-tab-item][data-enabled=\"false\"]:hover {\n    background-color: inherit;\n}\n";
             }
-            return DefaultSettings;
-        }(Attv.Attribute.Settings));
-        DataTab.DefaultSettings = DefaultSettings;
+            DefaultSettings.getStyle = getStyle;
+        })(DefaultSettings = DataTab.DefaultSettings || (DataTab.DefaultSettings = {}));
     })(DataTab = Attv.DataTab || (Attv.DataTab = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
@@ -307,7 +293,7 @@ var Attv;
 ////////////////////////////////////////////////////////////////////////////////////
 Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-tab', function (attributeName) { return new Attv.DataTab(attributeName); }, function (attribute, list) {
-        list.push(new Attv.DataTab.DefaultValue(Attv.configuration.defaultTag, attribute, function (name, value) { return new Attv.DataTab.DefaultSettings(name, value); }));
+        list.push(new Attv.DataTab.DefaultValue(Attv.configuration.defaultTag, attribute));
     });
     Attv.registerAttribute('data-tab-item', function (attributeName) { return new Attv.DataTabItem(attributeName); }, function (attribute, list) {
         list.push(new Attv.DataTabItem.DefaultAttributeValue(attribute));

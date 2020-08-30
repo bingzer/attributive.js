@@ -282,8 +282,9 @@ namespace Attv {
         public readonly values: Attribute.Value[] = [];
 
         public readonly description: string;
-        public readonly loadedName: string;
         public readonly dependency: Attribute.Dependency = new Attribute.Dependency();
+        public readonly loadedName: string;
+        public readonly settingsName: string;
 
         /**
          * When set to true. All attribute values needs to be registered. 
@@ -303,6 +304,8 @@ namespace Attv {
             public name: string, 
             public isAutoLoad: boolean = false) {
             this.loadedName = this.name + "-loaded";
+            this.settingsName = this.name + "-settings";
+            this.dependency.internals.push(DataSettings.UniqueId);
         }
         
         /**
@@ -406,12 +409,8 @@ namespace Attv.Attribute {
         public settings: Settings;
         
         constructor (protected value: string, 
-            public attribute: Attribute, 
-            settingsFn?: SettingsFactory,
+            public attribute: Attribute,
             public validators: Validators.AttributeValidator[] = []) {
-            if (settingsFn) {
-                this.settings = settingsFn(value, this);
-            }
         }
 
         /**
@@ -422,10 +421,30 @@ namespace Attv.Attribute {
         }
     
         /**
-         * Find all element and construct
-         * @param root the root
+         * Load element
+         * @param element the Element
          */
         loadElement(element: HTMLElement): boolean {
+            return true;
+        }
+
+        /**
+         * 
+         * @param element the element
+         * @param orDefault (optional) default settings
+         */
+        loadSettings<TSettings extends Settings>(element: HTMLElement, callback?: (settings: TSettings) => void): boolean {
+            let dataSettings = this.resolver.resolve<DataSettings>(DataSettings.UniqueId);
+            
+            this.settings = dataSettings.getSettingsForValue<TSettings>(this, element);
+            if (this.settings) {
+                if (callback) {
+                    callback(this.settings as TSettings);
+                }
+    
+                Attv.Attribute.Settings.commit(this.settings);
+            }
+
             return true;
         }
 
@@ -500,20 +519,25 @@ namespace Attv.Attribute {
             element.attr(attribute.name, any);
         }
     }
+}
 
-    export type SettingsFactory = (name: string, attributeValue: Value) => Settings;
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////// Attv.Attribute.Settings /////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv.Attribute {
     
     /**
      * Attribute configuration
      */
-    export class Settings {
+    export interface Settings {
         /**
-         * If it's true - it will be loaded during setup
+         * True to override existing style
          */
-        isAutoLoad: boolean = false;
+        override?: boolean;
 
         /**
-         * Inline style
+         * Inside the <style></style>
          */
         style?: string;
 
@@ -527,18 +551,22 @@ namespace Attv.Attribute {
          */
         jsUrls?: {name: string, url: string, options?: any}[];
 
-        constructor (private configName: string, private attributeValue: Value) {
-            // do nothing
-        }
-    
-        commit(override?: boolean) {
+        /**
+         * The attribute value
+         * that this settings belongs to
+         */
+        attributeValue: Attv.Attribute.Value;
+    }
+
+    export namespace Settings {
+        export function commit(settings: Settings) {
             let apply = true;
-
-            if (this.style) {
-                let elementId = this.attributeValue.attribute.name + '-' + this.configName;
+    
+            if (settings.style) {
+                let elementId = 'style-' + settings.attributeValue.attribute.settingsName;
                 let styleElement = document.querySelector(`style#${elementId}`) as HTMLStyleElement;
-                apply = override || !styleElement;
-
+                apply = settings.override || !styleElement;
+    
                 if (!styleElement) {
                     styleElement = Attv.createHTMLElement('<style>') as HTMLStyleElement;
                     styleElement.id = elementId;
@@ -547,46 +575,102 @@ namespace Attv.Attribute {
                 }
         
                 if (apply) {
-                    styleElement.innerHTML = this.style;
+                    styleElement.innerHTML = settings.style;
                 }
             }
-
-            if (this.styleUrls) {
-                this.styleUrls.forEach(styleUrl => {
-                    let elementId = this.attributeValue.attribute.name + '-' + this.configName + '-' + styleUrl.name;
+    
+            if (settings.styleUrls) {
+                settings.styleUrls.forEach(styleUrl => {
+                    let elementId = 'link-' + settings.attributeValue.attribute.settingsName;
                     let linkElement = document.querySelector(`link#${elementId}`) as HTMLLinkElement;
-                    apply = override || !linkElement;
-
+                    apply = settings.override || !linkElement;
+    
                     if (!linkElement) {
                         linkElement = Attv.createHTMLElement('<link>') as HTMLLinkElement;
                         document.head.append(linkElement);
                     }
-
-                    linkElement.id = elementId;
-                    linkElement.rel = "stylesheet";
-                    linkElement.href = styleUrl.url;
-                    linkElement.integrity = styleUrl.options?.integrity;
-                    linkElement.crossOrigin = styleUrl.options?.crossorigin;
+    
+                    if (apply) {
+                        linkElement.id = elementId;
+                        linkElement.rel = "stylesheet";
+                        linkElement.href = styleUrl.url;
+                        linkElement.integrity = styleUrl.options?.integrity;
+                        linkElement.crossOrigin = styleUrl.options?.crossorigin;
+                    }
                 });
             }
-
-            if (this.jsUrls) {
-                this.jsUrls.forEach(jsUrl => {
-                    let elementId = this.attributeValue.attribute.name + '-' + this.configName + '-' + jsUrl.name;
+    
+            if (settings.jsUrls) {
+                settings.jsUrls.forEach(jsUrl => {
+                    let elementId = 'script-' + settings.attributeValue.attribute.settingsName;
                     let scriptElement = document.querySelector(`script#${elementId}`) as HTMLScriptElement;
-                    apply = override || !scriptElement;
-
+                    apply = settings.override || !scriptElement;
+    
                     if (!scriptElement) {
                         scriptElement = Attv.createHTMLElement('<script>') as HTMLScriptElement;
                         document.body.append(scriptElement);
                     }
-
-                    scriptElement.id = elementId;
-                    scriptElement.src = jsUrl.url;
-                    scriptElement.integrity = jsUrl.options?.integrity;
-                    scriptElement.crossOrigin = jsUrl.options?.crossorigin;
+    
+                    if (apply) {
+                        scriptElement.id = elementId;
+                        scriptElement.src = jsUrl.url;
+                        scriptElement.integrity = jsUrl.options?.integrity;
+                        scriptElement.crossOrigin = jsUrl.options?.crossorigin;
+                    }
                 });
             }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+///////////////////////// 1st class attributes /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv {
+
+    /**
+     * [data-settings]='*|json'
+     */
+    export class DataSettings extends Attv.Attribute {
+        static readonly UniqueId = 'DataSettings';
+    
+        constructor (name: string) {
+            super(DataSettings.UniqueId, name);
+        }
+        
+        /**
+         * Returns the option object (json)
+         * @param element the element
+         */
+        getSettings<TSettings>(element: HTMLElement): TSettings {
+            let rawValue = this.getValue(element).getRaw(element);
+            let settings = DataSettings.parseSettings<TSettings>(rawValue);
+    
+            return settings;
+        }
+
+        getSettingsForValue<TSettings extends Attribute.Settings>(value: Attv.Attribute.Value, element: HTMLElement): TSettings {
+            let rawValue = element.attr(value.attribute.settingsName);
+            let settings = DataSettings.parseSettings<TSettings>(rawValue);
+            settings.attributeValue = settings.attributeValue || value;
+    
+            return settings;
+        }
+
+        static parseSettings<TSettings>(rawValue: string): TSettings  {    
+            // does it look like json?
+            if (rawValue?.startsWith('{') && rawValue?.endsWith('}')) {
+                rawValue = `(${rawValue})`;
+            }
+    
+            // json ex: ({ name: 'value' }). so we just 
+            if (Attv.isEvaluatable(rawValue)) {
+                //do eval
+                rawValue = Attv.eval(rawValue);
+            }
+    
+            return parseJsonOrElse(rawValue) || { } as TSettings;
         }
     }
 }
@@ -1069,9 +1153,6 @@ namespace Attv {
             if (attributeValues.length > 0) {
                 Attv.log('debug', `${attributeValues.map(v => v.toString(true))}`, attributeValues);
             }
-
-            // commit configuration if applicable
-            attributeValues?.filter(attValue => attValue?.settings?.isAutoLoad).forEach(attValue => attValue?.settings?.commit());
 
             return attribute;
         }

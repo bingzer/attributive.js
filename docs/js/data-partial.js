@@ -49,11 +49,11 @@ var Attv;
          */
         var DefaultValue = /** @class */ (function (_super) {
             __extends(DefaultValue, _super);
-            function DefaultValue(attributeValue, attribute, settingsFn, validators) {
+            function DefaultValue(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = [
                     new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId])
                 ]; }
-                var _this = _super.call(this, attributeValue, attribute, settingsFn, validators) || this;
+                var _this = _super.call(this, attributeValue, attribute, validators) || this;
                 _this.resolver.uses.push(Attv.DataTemplateSource.UniqueId, Attv.DataTimeout.UniqueId, Attv.DataMethod.UniqueId, Attv.DataCallback.UniqueId, Attv.DataTarget.UniqueId, Attv.DataInterval.UniqueId);
                 return _this;
             }
@@ -134,7 +134,7 @@ var Attv;
         var ClickValue = /** @class */ (function (_super) {
             __extends(ClickValue, _super);
             function ClickValue(attribute) {
-                return _super.call(this, 'click', attribute, undefined, [
+                return _super.call(this, 'click', attribute, [
                     new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId]),
                     new Attv.Validators.RequiredAnyElementsValidator(['button', 'a'])
                 ]) || this;
@@ -156,7 +156,7 @@ var Attv;
         var FormValue = /** @class */ (function (_super) {
             __extends(FormValue, _super);
             function FormValue(attribute) {
-                return _super.call(this, 'form', attribute, undefined, [
+                return _super.call(this, 'form', attribute, [
                     new Attv.Validators.RequiredAttributeValidator([Attv.DataUrl.UniqueId]),
                     new Attv.Validators.RequiredElementValidator(['form'])
                 ]) || this;

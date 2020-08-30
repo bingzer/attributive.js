@@ -237,6 +237,8 @@ String.prototype.equalsIgnoreCase = function (other) {
              */
             this.isStrict = false;
             this.loadedName = this.name + "-loaded";
+            this.settingsName = this.name + "-settings";
+            this.dependency.internals.push(Attv.DataSettings.UniqueId);
         }
         /**
          * Register attribute values
@@ -324,15 +326,12 @@ String.prototype.equalsIgnoreCase = function (other) {
          * Base class for attribute-value
          */
         var Value = /** @class */ (function () {
-            function Value(value, attribute, settingsFn, validators) {
+            function Value(value, attribute, validators) {
                 if (validators === void 0) { validators = []; }
                 this.value = value;
                 this.attribute = attribute;
                 this.validators = validators;
                 this.resolver = new Resolver(this);
-                if (settingsFn) {
-                    this.settings = settingsFn(value, this);
-                }
             }
             /**
              * Returns raw string
@@ -342,10 +341,26 @@ String.prototype.equalsIgnoreCase = function (other) {
                 return ((_a = this.value) === null || _a === void 0 ? void 0 : _a.toString()) || (element === null || element === void 0 ? void 0 : element.attr(this.attribute.name));
             };
             /**
-             * Find all element and construct
-             * @param root the root
+             * Load element
+             * @param element the Element
              */
             Value.prototype.loadElement = function (element) {
+                return true;
+            };
+            /**
+             *
+             * @param element the element
+             * @param orDefault (optional) default settings
+             */
+            Value.prototype.loadSettings = function (element, callback) {
+                var dataSettings = this.resolver.resolve(Attv.DataSettings.UniqueId);
+                this.settings = dataSettings.getSettingsForValue(this, element);
+                if (this.settings) {
+                    if (callback) {
+                        callback(this.settings);
+                    }
+                    Attv.Attribute.Settings.commit(this.settings);
+                }
                 return true;
             };
             /**
@@ -419,73 +434,116 @@ String.prototype.equalsIgnoreCase = function (other) {
             return Resolver;
         }(Dependency));
         Attribute.Resolver = Resolver;
-        /**
-         * Attribute configuration
-         */
-        var Settings = /** @class */ (function () {
-            function Settings(configName, attributeValue) {
-                this.configName = configName;
-                this.attributeValue = attributeValue;
-                /**
-                 * If it's true - it will be loaded during setup
-                 */
-                this.isAutoLoad = false;
-                // do nothing
-            }
-            Settings.prototype.commit = function (override) {
-                var _this = this;
+    })(Attribute = Attv.Attribute || (Attv.Attribute = {}));
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////// Attv.Attribute.Settings /////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
+    var Attribute;
+    (function (Attribute) {
+        var Settings;
+        (function (Settings) {
+            function commit(settings) {
                 var apply = true;
-                if (this.style) {
-                    var elementId = this.attributeValue.attribute.name + '-' + this.configName;
+                if (settings.style) {
+                    var elementId = 'style-' + settings.attributeValue.attribute.settingsName;
                     var styleElement = document.querySelector("style#" + elementId);
-                    apply = override || !styleElement;
+                    apply = settings.override || !styleElement;
                     if (!styleElement) {
                         styleElement = Attv.createHTMLElement('<style>');
                         styleElement.id = elementId;
                         document.head.append(styleElement);
                     }
                     if (apply) {
-                        styleElement.innerHTML = this.style;
+                        styleElement.innerHTML = settings.style;
                     }
                 }
-                if (this.styleUrls) {
-                    this.styleUrls.forEach(function (styleUrl) {
+                if (settings.styleUrls) {
+                    settings.styleUrls.forEach(function (styleUrl) {
                         var _a, _b;
-                        var elementId = _this.attributeValue.attribute.name + '-' + _this.configName + '-' + styleUrl.name;
+                        var elementId = 'link-' + settings.attributeValue.attribute.settingsName;
                         var linkElement = document.querySelector("link#" + elementId);
-                        apply = override || !linkElement;
+                        apply = settings.override || !linkElement;
                         if (!linkElement) {
                             linkElement = Attv.createHTMLElement('<link>');
                             document.head.append(linkElement);
                         }
-                        linkElement.id = elementId;
-                        linkElement.rel = "stylesheet";
-                        linkElement.href = styleUrl.url;
-                        linkElement.integrity = (_a = styleUrl.options) === null || _a === void 0 ? void 0 : _a.integrity;
-                        linkElement.crossOrigin = (_b = styleUrl.options) === null || _b === void 0 ? void 0 : _b.crossorigin;
+                        if (apply) {
+                            linkElement.id = elementId;
+                            linkElement.rel = "stylesheet";
+                            linkElement.href = styleUrl.url;
+                            linkElement.integrity = (_a = styleUrl.options) === null || _a === void 0 ? void 0 : _a.integrity;
+                            linkElement.crossOrigin = (_b = styleUrl.options) === null || _b === void 0 ? void 0 : _b.crossorigin;
+                        }
                     });
                 }
-                if (this.jsUrls) {
-                    this.jsUrls.forEach(function (jsUrl) {
+                if (settings.jsUrls) {
+                    settings.jsUrls.forEach(function (jsUrl) {
                         var _a, _b;
-                        var elementId = _this.attributeValue.attribute.name + '-' + _this.configName + '-' + jsUrl.name;
+                        var elementId = 'script-' + settings.attributeValue.attribute.settingsName;
                         var scriptElement = document.querySelector("script#" + elementId);
-                        apply = override || !scriptElement;
+                        apply = settings.override || !scriptElement;
                         if (!scriptElement) {
                             scriptElement = Attv.createHTMLElement('<script>');
                             document.body.append(scriptElement);
                         }
-                        scriptElement.id = elementId;
-                        scriptElement.src = jsUrl.url;
-                        scriptElement.integrity = (_a = jsUrl.options) === null || _a === void 0 ? void 0 : _a.integrity;
-                        scriptElement.crossOrigin = (_b = jsUrl.options) === null || _b === void 0 ? void 0 : _b.crossorigin;
+                        if (apply) {
+                            scriptElement.id = elementId;
+                            scriptElement.src = jsUrl.url;
+                            scriptElement.integrity = (_a = jsUrl.options) === null || _a === void 0 ? void 0 : _a.integrity;
+                            scriptElement.crossOrigin = (_b = jsUrl.options) === null || _b === void 0 ? void 0 : _b.crossorigin;
+                        }
                     });
                 }
-            };
-            return Settings;
-        }());
-        Attribute.Settings = Settings;
+            }
+            Settings.commit = commit;
+        })(Settings = Attribute.Settings || (Attribute.Settings = {}));
     })(Attribute = Attv.Attribute || (Attv.Attribute = {}));
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+///////////////////////// 1st class attributes /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
+    /**
+     * [data-settings]='*|json'
+     */
+    var DataSettings = /** @class */ (function (_super) {
+        __extends(DataSettings, _super);
+        function DataSettings(name) {
+            return _super.call(this, DataSettings.UniqueId, name) || this;
+        }
+        /**
+         * Returns the option object (json)
+         * @param element the element
+         */
+        DataSettings.prototype.getSettings = function (element) {
+            var rawValue = this.getValue(element).getRaw(element);
+            var settings = DataSettings.parseSettings(rawValue);
+            return settings;
+        };
+        DataSettings.prototype.getSettingsForValue = function (value, element) {
+            var rawValue = element.attr(value.attribute.settingsName);
+            var settings = DataSettings.parseSettings(rawValue);
+            settings.attributeValue = settings.attributeValue || value;
+            return settings;
+        };
+        DataSettings.parseSettings = function (rawValue) {
+            // does it look like json?
+            if ((rawValue === null || rawValue === void 0 ? void 0 : rawValue.startsWith('{')) && (rawValue === null || rawValue === void 0 ? void 0 : rawValue.endsWith('}'))) {
+                rawValue = "(" + rawValue + ")";
+            }
+            // json ex: ({ name: 'value' }). so we just 
+            if (Attv.isEvaluatable(rawValue)) {
+                //do eval
+                rawValue = Attv.eval(rawValue);
+            }
+            return Attv.parseJsonOrElse(rawValue) || {};
+        };
+        DataSettings.UniqueId = 'DataSettings';
+        return DataSettings;
+    }(Attv.Attribute));
+    Attv.DataSettings = DataSettings;
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Validators //////////////////////////////////////
@@ -898,8 +956,6 @@ String.prototype.equalsIgnoreCase = function (other) {
             if (attributeValues.length > 0) {
                 Attv.log('debug', "" + attributeValues.map(function (v) { return v.toString(true); }), attributeValues);
             }
-            // commit configuration if applicable
-            attributeValues === null || attributeValues === void 0 ? void 0 : attributeValues.filter(function (attValue) { var _a; return (_a = attValue === null || attValue === void 0 ? void 0 : attValue.settings) === null || _a === void 0 ? void 0 : _a.isAutoLoad; }).forEach(function (attValue) { var _a; return (_a = attValue === null || attValue === void 0 ? void 0 : attValue.settings) === null || _a === void 0 ? void 0 : _a.commit(); });
             return attribute;
         };
         return AttributeRegistration;

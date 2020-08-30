@@ -269,40 +269,6 @@ namespace Attv {
     }
 
     /**
-     * [data-options]='*'
-     */
-    export class DataOptions extends Attv.Attribute {
-        static readonly UniqueId = 'DataOptions';
-
-        constructor (name: string) {
-            super(DataOptions.UniqueId, name);
-        }
-        
-        /**
-         * Returns the option object (json)
-         * @param element the element
-         */
-        getOptions<TOptions>(element: HTMLElement, orDefault?: TOptions): TOptions {
-            let rawValue = this.getValue(element).getRaw(element);
-
-            // does it look like json?
-            if (rawValue?.startsWith('{') && rawValue?.endsWith('}')) {
-                rawValue = `(${rawValue})`;
-            }
-
-            // json ex: ({ name: 'value' }). so we just 
-            if (Attv.isEvaluatable(rawValue)) {
-                //do eval
-                rawValue = Attv.eval(rawValue);
-            }
-
-            let options = parseJsonOrElse(rawValue) || (orDefault || {} as TOptions);
-
-            return options;
-        }
-    }
-
-    /**
      * [data-title]='*'
      */
     export class DataTitle extends Attv.Attribute {
@@ -464,7 +430,7 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-timeout', (name: string) => new Attv.DataTimeout(name));
     Attv.registerAttribute('data-interval', (name: string) => new Attv.DataInterval(name));
     Attv.registerAttribute('data-data', (name: string) => new Attv.DataData(name));
-    Attv.registerAttribute('data-options', (name: string) => new Attv.DataOptions(name));
+    Attv.registerAttribute('data-settings', (name: string) => new Attv.DataSettings(name));
     Attv.registerAttribute('data-cache', (name: string) => new Attv.DataCache(name));
     Attv.registerAttribute('data-title', (name: string) => new Attv.DataTitle(name));
     Attv.registerAttribute('data-bind', (name: string) => new Attv.DataBind(name));
@@ -499,63 +465,66 @@ namespace Attv {
         export class DefaultAttributeValue extends Attv.Attribute.Value  {
             
             constructor (attributeValue: string, 
-                attribute: Attv.Attribute, 
-                settingsFn?: Attv.Attribute.SettingsFactory) {
-                super(attributeValue, attribute, settingsFn);
-
-                this.resolver.uses.push(DataOptions.UniqueId);
+                attribute: Attv.Attribute) {
+                super(attributeValue, attribute);
             }
     
             loadElement(element: HTMLElement): boolean {
-                let configuration = this.settings as SpinnerSettings;
-                let dataOptions = this.resolver.resolve<DataOptions>(DataOptions.UniqueId);
+                return this.loadSettings<SpinnerSettings>(
+                    element,
+                    settings => {
+                        settings.outerColor = settings.outerColor || Attv.DataLoading.SpinnerSettings.DefaultOuterColor;
+                        settings.innerColor = settings.innerColor || Attv.DataLoading.SpinnerSettings.DefaultInnerColor;
+                        settings.width = settings.width || Attv.DataLoading.SpinnerSettings.DefaultWidth;
+                        settings.height = settings.height || Attv.DataLoading.SpinnerSettings.DefaultHeight;
+                        settings.style = SpinnerSettings.getStyle(settings);
 
-                if (dataOptions.exists(element)) {
-                    let spinnerOptions = dataOptions.getOptions<SpinnerOptions>(element);
-                    element.style.borderColor = spinnerOptions.outerColor || configuration.defaultOuterColor;
-                    element.style.borderTopColor = spinnerOptions.innerColor || configuration.defaultInnerColor;
-                    element.style.height = spinnerOptions.width || configuration.defaultHeight;
-                    element.style.width = spinnerOptions.height || configuration.defaultWidth;
-                }
-
-                return true;
+                        // apply to the element
+                        element.style.borderColor = settings.outerColor;
+                        element.style.borderTopColor = settings.innerColor;
+                        element.style.height = settings.width;
+                        element.style.width = settings.height;
+                    }
+                );
             }
         }
 
-        export interface SpinnerOptions {
+        export interface SpinnerSettings extends Attv.Attribute.Settings {
             outerColor: string;
             innerColor: string;
             width: string;
             height: string;
         }
 
-        export class SpinnerSettings extends Attv.Attribute.Settings {
-            isAutoLoad = true;
-// https://codepen.io/mandelid/pen/vwKoe
-            defaultOuterColor = "#c0c0c0";
-            defaultInnerColor = "#000000";
-            defaultWidth = "25px";
-            defaultHeight = "25px";
-            style = `
+        export namespace SpinnerSettings {
+            // https://codepen.io/mandelid/pen/vwKoe
+            export const DefaultOuterColor = "#c0c0c0"
+            export const DefaultInnerColor = "#000000";
+            export const DefaultWidth = "25px";
+            export const DefaultHeight = "25px";
+            // https://codepen.io/mandelid/pen/vwKoe
+            export function getStyle(settings: Attv.DataLoading.SpinnerSettings) {
+                return `
 [data-loading='spinner'],
 [data-loading='default'] {
     display: inline-block;
-    width: ${this.defaultWidth};
-    height: ${this.defaultHeight};
-    border: 3px solid ${this.defaultOuterColor};
+    width: ${settings.width};
+    height: ${settings.height};
+    border: 3px solid ${settings.outerColor};
     border-radius: 50%;
-    border-top-color: ${this.defaultInnerColor};
+    border-top-color: ${settings.innerColor};
     animation: spin 1s ease-in-out infinite;
     -webkit-animation: spin 1s ease-in-out infinite;
 }
 
 @keyframes spin {
-to { -webkit-transform: rotate(360deg); }
+    to { -webkit-transform: rotate(360deg); }
 }
 @-webkit-keyframes spin {
-to { -webkit-transform: rotate(360deg); }
+    to { -webkit-transform: rotate(360deg); }
 }
 `;
+            }
         }
     }
 }
@@ -564,7 +533,7 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-loading', 
         (name: string) => new Attv.DataLoading(name),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataLoading.DefaultAttributeValue(Attv.configuration.defaultTag, attribute, (name, value) => new Attv.DataLoading.SpinnerSettings(name, value)));
+            list.push(new Attv.DataLoading.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
         });
 });
 

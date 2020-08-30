@@ -29,37 +29,23 @@ namespace Attv.DataTab {
         
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
-            settingsFn?: Attv.Attribute.SettingsFactory,
             validators: Validators.AttributeValidator[] = []) {
-            super(attributeValue, attribute, settingsFn, validators);
-
-            this.resolver.uses.push(DataRoute.UniqueId, DataOptions.UniqueId);
+            super(attributeValue, attribute, validators);
         }
         
         loadElement(element: HTMLElement): boolean {
-            if (!this.attribute.isElementLoaded(element)) {
-                let dataTabItem = this.resolver.resolve<DataTabItem>(DataTabItem.UniqueId);
+            return this.loadSettings(element, 
+                (settings) => {
+                    let dataTabItem = this.resolver.resolve<DataTabItem>(DataTabItem.UniqueId);
+        
+                    element.querySelectorAll(dataTabItem.toString()).forEach((itemElement: HTMLElement) => {
+                        dataTabItem.getValue(itemElement).loadElement(itemElement);
+                    });
+
+                    settings.style = Attv.DataTab.DefaultSettings.getStyle(settings);
     
-                element.querySelectorAll(dataTabItem.toString()).forEach((itemElement: HTMLElement) => {
-                    dataTabItem.getValue(itemElement).loadElement(itemElement);
+                    this.attribute.markElementLoaded(element, true);
                 });
-
-                // load settings
-                this.applySettings(element);
-
-                this.attribute.markElementLoaded(element, true);
-            }
-
-            return true;
-        }
-
-        private applySettings(element: HTMLElement) {
-            let dataOptions = this.resolver.resolve<DataOptions>(DataOptions.UniqueId);
-            if (dataOptions.exists(element)) {
-                this.settings
-            }
-
-            this.settings?.commit();
         }
     }
 
@@ -118,9 +104,8 @@ namespace Attv {
         export class DefaultAttributeValue extends Attribute.Value {
             
             constructor (attribute: Attv.Attribute, 
-                settingsFn?: Attv.Attribute.SettingsFactory,
                 validators: Validators.AttributeValidator[] = []) {
-                super(undefined, attribute, settingsFn, validators);
+                super(undefined, attribute, validators);
 
                 this.resolver.uses.push(DataEnabled.UniqueId, DataActive.UniqueId, DataTabContent.UniqueId);
                 this.resolver.internals.push(DataTab.UniqueId);
@@ -256,9 +241,8 @@ namespace Attv {
         export class DefaultAttributeValue extends Attribute.Value {
             
             constructor (attribute: Attv.Attribute, 
-                settingsFn?: Attv.Attribute.SettingsFactory,
                 validators: Validators.AttributeValidator[] = []) {
-                super(undefined, attribute, settingsFn, validators);
+                super(undefined, attribute, validators);
                 
                 this.resolver.uses.push(DataContent.UniqueId, DataPartial.UniqueId, DataActive.UniqueId);
             }
@@ -297,22 +281,21 @@ namespace Attv {
 ////////////////////////////////////////////////////////////////////////////////////
 
 namespace Attv.DataTab {
-
-    export interface DefaultOptions {
-        router: boolean;
+    export interface DefaultSettings extends Attv.Attribute.Settings {
     }
         
-    export class DefaultSettings extends Attv.Attribute.Settings {
-        style = `
+    export namespace DefaultSettings {
+        export function getStyle(settings: DefaultSettings): string {
+            return `
 /* Style the tab */
-[data-tab] {
+${settings.attributeValue.attribute} {
     overflow: hidden;
     border: 1px solid #ccc;
     background-color: #f1f1f1;
 }
 
 /* Style the buttons inside the tab */
-[data-tab] li {
+${settings.attributeValue.attribute} li {
     background-color: inherit;
     float: left;
     border: none;
@@ -322,7 +305,7 @@ namespace Attv.DataTab {
     font-size: 17px;
     list-style: none;
 }
-[data-tab] li {
+${settings.attributeValue.attribute} li {
     background-color: inherit;
     float: left;
     border: none;
@@ -334,32 +317,33 @@ namespace Attv.DataTab {
 }
 
 /* Change background color of buttons on hover */
-[data-tab] li:not([data-enabled="false"]):hover {
+${settings.attributeValue.attribute} li:not([data-enabled="false"]):hover {
     cursor: pointer;
 }
 
 /* Create an active/current tablink class */
-[data-tab] li[data-active=true] {
+${settings.attributeValue.attribute} li[data-active=true] {
     background-color: #ccc;
 }
 
 /* Style the tab content */
-[data-tab-content]{
+${settings.attributeValue.attribute} [data-tab-content]{
     display: none;
     padding: 6px 12px;
     border: 1px solid #ccc;
     border-top: none;
 }
 
-[data-tab] [data-tab-item][data-enabled="false"] {
+${settings.attributeValue.attribute} [data-tab-item][data-enabled="false"] {
     cursor: default;
     opacity: 0.5;
 }
-[data-tab] li[data-enabled="false"]:hover,
-[data-tab] [data-tab-item][data-enabled="false"]:hover {
+${settings.attributeValue.attribute} li[data-enabled="false"]:hover,
+${settings.attributeValue.attribute} [data-tab-item][data-enabled="false"]:hover {
     background-color: inherit;
 }
-`;
+`
+        }
     }
 }
 
@@ -371,7 +355,7 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-tab', 
         (attributeName: string) => new Attv.DataTab(attributeName),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTab.DefaultValue(Attv.configuration.defaultTag, attribute, (name, value) => new Attv.DataTab.DefaultSettings(name, value)));
+            list.push(new Attv.DataTab.DefaultValue(Attv.configuration.defaultTag, attribute));
         });
     Attv.registerAttribute('data-tab-item', 
         (attributeName: string) => new Attv.DataTabItem(attributeName),
