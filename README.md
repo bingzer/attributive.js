@@ -1,19 +1,18 @@
 [![Build Status](https://travis-ci.org/bingzer/attributive.js.svg?branch=master)](https://travis-ci.org/bingzer/attributive.js)
 
 # attributive.js
-An unobtrusive vanilla javascript library.
 
-* Not a framework
-* A library
+### What is it?
+**attributive.js** is a library that uses element attributes to modify DOM behavior.
+It is an unobtrusive vanilla javascript library.
+
+* Not a framework, a library
 * Plug N Play
 * Extensible
 * Self Documenting
+* Complements other js library
 
-# What is it?
-A library that uses attributes to modify
-DOM behavior.
-
-# Concept
+### Concept
 Let's say you have a 'partial.html' somewhere.
 And you want to display it in a `<div>`.
 Usually you would have to do (in jQuery sample or other similar Ajax code):
@@ -32,5 +31,5 @@ Using **attributive.js**, you can simply put `[data-partial]` to load the html:
 
 The purpose of **attributive.js** is to eliminate a boilerplate and repetitive javascript code by using html attributes.
 
-# Demo
+### Demo
 [https://bingzer.github.io/attributive.js/](https://bingzer.github.io/attributive.js/)
