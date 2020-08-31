@@ -27,9 +27,9 @@ function watch() {
 
 function uglifyAttributiveJs(name) {
     return pipeline(
-        gulp.src('docs/js/*.js'),
+        gulp.src('docs/js/**/*.js'),
         uglify(),
-        gulp.dest('docs/js/dist')
+        gulp.dest('docs/js/dist/')
     );
 }
 

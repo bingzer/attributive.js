@@ -11,7 +11,7 @@ namespace Attv {
 
             this.isStrict = true;
 
-            this.dependency.uses.push(DataContent.UniqueId, DataUrl.UniqueId);
+            this.dependency.uses.push(DataContent.UniqueId);
             this.dependency.internals.push(DataCallback.UniqueId);
         }
 
@@ -94,6 +94,10 @@ namespace Attv {
     }
     
 }
+
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// Loader ////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-wall', 

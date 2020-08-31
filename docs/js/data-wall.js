@@ -22,7 +22,7 @@ var Attv;
             var _this = _super.call(this, DataWall.UniqueId, name, true) || this;
             _this.name = name;
             _this.isStrict = true;
-            _this.dependency.uses.push(Attv.DataContent.UniqueId, Attv.DataUrl.UniqueId);
+            _this.dependency.uses.push(Attv.DataContent.UniqueId);
             _this.dependency.internals.push(Attv.DataCallback.UniqueId);
             return _this;
         }
@@ -97,6 +97,9 @@ var Attv;
         DataWall.ConfirmValue = ConfirmValue;
     })(DataWall = Attv.DataWall || (Attv.DataWall = {}));
 })(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// Loader ////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-wall', function (attributeName) { return new Attv.DataWall(attributeName); }, function (attribute, list) {
         list.push(new Attv.DataWall.DefaultValue('alert', attribute));
