@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/bingzer/attributive.js.svg?branch=master)](https://travis-ci.org/bingzer/attributive.js)
 
 # attributive.js
-Unobtrusive Vanilla javascript
+An unobtrusive vanilla javascript library.
 
 * Not a framework
 * A library
@@ -10,7 +10,8 @@ Unobtrusive Vanilla javascript
 * Self Documenting
 
 # What is it?
-A library that uses DOM attributes to modify their behavior.
+A library that uses attributes to modify
+DOM behavior.
 
 # Concept
 Let's say you have a 'partial.html' somewhere.
