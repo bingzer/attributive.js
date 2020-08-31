@@ -564,7 +564,7 @@ String.prototype.equalsIgnoreCase = function (other) {
                     var attribute = attributes[i];
                     var attributeValue = attribute.getValue(element);
                     if (!(attributeValue === null || attributeValue === void 0 ? void 0 : attributeValue.getRaw(element))) {
-                        Attv.log('error', value + " is requiring " + attribute + " to be present in DOM", element);
+                        Attv.log('error', value.toString(true) + " is requiring " + attribute + " to be present in DOM", element);
                     }
                     isValidated = isValidated && !!attribute;
                 }
@@ -588,7 +588,7 @@ String.prototype.equalsIgnoreCase = function (other) {
                     var attribute = this.requiredAttributes[i];
                     var requiredAttribute = element.attr(attribute.name);
                     if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
-                        Attv.log('error', value + " is requiring [" + attribute.name + "]='" + attribute.value + "' to be present in DOM", element);
+                        Attv.log('error', value.toString(true) + " is requiring [" + attribute.name + "]='" + attribute.value + "' to be present in DOM", element);
                     }
                     isValidated = isValidated && !!requiredAttribute;
                 }
@@ -616,7 +616,7 @@ String.prototype.equalsIgnoreCase = function (other) {
                     }
                 }
                 if (!isValidated) {
-                    Attv.log('error', value + " can only be attached to elements [" + this.elementTagNames + "]", element);
+                    Attv.log('error', value.toString(true) + " can only be attached to elements [" + this.elementTagNames + "]", element);
                 }
                 return isValidated;
             };
@@ -917,7 +917,8 @@ String.prototype.equalsIgnoreCase = function (other) {
             valueRegistrar.filter(function (r) { return r.attributeUniqueId === attribute.uniqueId; }).forEach(function (r) {
                 r.register(attribute, attributeValues);
             });
-            attribute.registerAttributeValues(attributeValues);
+            var values = attributeValues.reverse();
+            attribute.registerAttributeValues(values);
             if (attributeValues.length > 0) {
                 Attv.log('debug', "" + attributeValues.map(function (v) { return v.toString(true); }), attributeValues);
             }

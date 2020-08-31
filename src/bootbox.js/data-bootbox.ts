@@ -5,7 +5,7 @@ namespace Attv.Bootbox {
     /**
      * [data-wall]="alert"
      */
-    export class DefaultValue extends Attribute.Value {
+    export class DefaultValue extends Attv.DataWall.DefaultValue {
 
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
@@ -17,17 +17,6 @@ namespace Attv.Bootbox {
 
             this.resolver.uses.push(DataContent.UniqueId, DataTitle.UniqueId, DataCallback.UniqueId);
             this.resolver.internals.push(DataCallback.UniqueId);
-        }
-            
-        loadElement(element: HTMLElement): boolean {
-            // remove onclick
-            if (element.attr('onclick')) {
-                this.resolver.addAttribute(DataCallback.UniqueId, element, element.attr('onclick'));
-            }
-
-            element.onclick = (ev: Event) => this.onclick(element, ev);
-
-            return true;
         }
 
         protected onclick(element: HTMLElement, ev: Event): boolean {
@@ -72,8 +61,15 @@ namespace Attv.Bootbox {
         }
 
         protected mapSettings(element: HTMLElement, settings: BootboxSettings): BootboxSettings {
+            let dataCallback = this.resolver.resolve<DataCallback>(DataCallback.UniqueId);
             settings = super.mapSettings(element, settings);
+
             // more for confirm
+            settings.callback = (result: boolean) => {
+                if (dataCallback.exists(element)) {
+                    dataCallback.callback(element);
+                }
+            }
 
             return settings;
         }
@@ -111,7 +107,7 @@ namespace Attv.Bootbox {
 
             if (!window.bootbox) {
                 isValidated = false;
-                Attv.log('fatal', `${value} is requiring bootboxjs`, element)
+                Attv.log('fatal', `${value.toString(true)} is requiring bootboxjs`, element)
             }
 
             return isValidated;
@@ -125,8 +121,7 @@ namespace Attv.Bootbox {
 ////////////////////////////////////////////////////////////////////////////////////
 
 Attv.loader.pre.push(() => {
-    Attv.registerAttribute('data-wall', 
-        (attributeName: string) => new Attv.DataWall(attributeName),
+    Attv.registerAttributeValue(Attv.DataWall.UniqueId,
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
             list.push(new Attv.Bootbox.DefaultValue('alert', attribute));
             list.push(new Attv.Bootbox.ConfirmValue('confirm', attribute));

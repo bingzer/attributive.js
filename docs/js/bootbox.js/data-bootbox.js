@@ -30,15 +30,6 @@ var Attv;
                 _this.resolver.internals.push(Attv.DataCallback.UniqueId);
                 return _this;
             }
-            DefaultValue.prototype.loadElement = function (element) {
-                var _this = this;
-                // remove onclick
-                if (element.attr('onclick')) {
-                    this.resolver.addAttribute(Attv.DataCallback.UniqueId, element, element.attr('onclick'));
-                }
-                element.onclick = function (ev) { return _this.onclick(element, ev); };
-                return true;
-            };
             DefaultValue.prototype.onclick = function (element, ev) {
                 var _this = this;
                 this.loadSettings(element, function (settings) {
@@ -60,7 +51,7 @@ var Attv;
                 bootbox.alert(settings);
             };
             return DefaultValue;
-        }(Attv.Attribute.Value));
+        }(Attv.DataWall.DefaultValue));
         Bootbox.DefaultValue = DefaultValue;
         /**
          * [data-wall]="confirm"
@@ -75,8 +66,14 @@ var Attv;
                 return _super.call(this, attributeValue, attribute, validators) || this;
             }
             ConfirmValue.prototype.mapSettings = function (element, settings) {
+                var dataCallback = this.resolver.resolve(Attv.DataCallback.UniqueId);
                 settings = _super.prototype.mapSettings.call(this, element, settings);
                 // more for confirm
+                settings.callback = function (result) {
+                    if (dataCallback.exists(element)) {
+                        dataCallback.callback(element);
+                    }
+                };
                 return settings;
             };
             ConfirmValue.prototype.bootboxShow = function (settings) {
@@ -100,7 +97,7 @@ var Attv;
                 var isValidated = true;
                 if (!window.bootbox) {
                     isValidated = false;
-                    Attv.log('fatal', value + " is requiring bootboxjs", element);
+                    Attv.log('fatal', value.toString(true) + " is requiring bootboxjs", element);
                 }
                 return isValidated;
             };
@@ -113,7 +110,7 @@ var Attv;
 //////////////////////////////////// Loader ////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 Attv.loader.pre.push(function () {
-    Attv.registerAttribute('data-wall', function (attributeName) { return new Attv.DataWall(attributeName); }, function (attribute, list) {
+    Attv.registerAttributeValue(Attv.DataWall.UniqueId, function (attribute, list) {
         list.push(new Attv.Bootbox.DefaultValue('alert', attribute));
         list.push(new Attv.Bootbox.ConfirmValue('confirm', attribute));
     });

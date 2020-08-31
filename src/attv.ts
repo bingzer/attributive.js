@@ -703,7 +703,7 @@ namespace Attv.Validators {
                 let attribute = attributes[i];
                 let attributeValue = attribute.getValue(element);
                 if (!attributeValue?.getRaw(element)) {
-                    Attv.log('error', `${value} is requiring ${attribute} to be present in DOM`, element)
+                    Attv.log('error', `${value.toString(true)} is requiring ${attribute} to be present in DOM`, element)
                 }
 
                 isValidated = isValidated && !!attribute;
@@ -730,7 +730,7 @@ namespace Attv.Validators {
                 let attribute = this.requiredAttributes[i];
                 let requiredAttribute = element.attr(attribute.name);
                 if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
-                    Attv.log('error', `${value} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
+                    Attv.log('error', `${value.toString(true)} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
                 }
 
                 isValidated = isValidated && !!requiredAttribute;
@@ -762,7 +762,7 @@ namespace Attv.Validators {
             }
 
             if (!isValidated) {
-                Attv.log('error', `${value} can only be attached to elements [${this.elementTagNames}]`, element)
+                Attv.log('error', `${value.toString(true)} can only be attached to elements [${this.elementTagNames}]`, element)
             }
 
             return isValidated;
@@ -1109,7 +1109,8 @@ namespace Attv {
                 r.register(attribute, attributeValues);
             });
     
-            attribute.registerAttributeValues(attributeValues);
+            let values = attributeValues.reverse();
+            attribute.registerAttributeValues(values);
 
             if (attributeValues.length > 0) {
                 Attv.log('debug', `${attributeValues.map(v => v.toString(true))}`, attributeValues);
