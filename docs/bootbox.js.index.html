@@ -3,25 +3,25 @@
     <title>Test Usage</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
-<body>
+<body data-bootstrap="bootstrap4">
     <nav>
-        <ul class="nav">
+        <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link active" href="#bootbox.js">bootbox.js</a>
+                <a class="nav-link active" data-toggle="tab" href="#intro">bootbox.js</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#data-wall">[data-wall]</a>
+                <a class="nav-link" data-toggle="tab" href="#data-wall">[data-wall]</a>
             </li>
         </ul>
     </nav>
-    <div class="tab-content" id="nav-tabContent">
-        <div class="tab-pane fade show active" id="bootbox.js" role="tabpanel" aria-labelledby="nav-home-tab"
-            data-partial="auto"
+    <div class="tab-content">
+        <div class="tab-pane active" id="intro" role="tabpanel"
+            data-partial="tab"
             data-url="bootbox.js.intro.html">
             <div data-loading="default"></div>
         </div>
-        <div class="tab-pane" id="data-wall" role="tabpanel" aria-labelledby="nav-profile-tab"
-            data-partial="auto"
+        <div class="tab-pane" id="data-wall" role="tabpanel"
+            data-partial="tab"
             data-url="bootbox.js.data-wall.html">
             <div data-loading="default"></div>
         </div>
@@ -38,6 +38,7 @@
 	<script type="text/javascript" src="js/data-wall.js"></script>
 	<script type="text/javascript" src="js/data-partial.js"></script>
 	<script type="text/javascript" src="js/data-template.js"></script>
+    <script type="text/javascript" src="js/bootstrap/data-bootstrap4.js"></script>
     <script type="text/javascript" src="js/bootbox.js/data-bootbox.js"></script>
 </body>
 </html>
