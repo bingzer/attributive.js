@@ -120,11 +120,11 @@ namespace Attv.DataTable {
         loadElement(element: HTMLElement): boolean {
             if (!this.attribute.isElementLoaded(element)) {
                 let tbody = element.querySelector('tbody');
-                let templateHtml = tbody.html();
+                let templateHtml = tbody.attvHtml();
 
                 this.resolver.addAttribute(DataTemplateHtml.UniqueId, element, templateHtml);
 
-                tbody.html('');
+                tbody.attvHtml('');
 
                 this.attribute.markElementLoaded(element, true);
             }

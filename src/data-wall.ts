@@ -36,8 +36,8 @@ namespace Attv {
             
             loadElement(element: HTMLElement): boolean {
                 // remove onclick
-                if (element.attr('onclick')) {
-                    this.resolver.addAttribute(DataCallback.UniqueId, element, element.attr('onclick'));
+                if (element.attvAttr('onclick')) {
+                    this.resolver.addAttribute(DataCallback.UniqueId, element, element.attvAttr('onclick'));
                 }
 
                 element.onclick = (ev: Event) => this.onclick(element, ev);
@@ -62,7 +62,7 @@ namespace Attv {
                 if (dataCallback.getValue(element).getRaw(element)) {
                     dataCallback.callback(element);
                 } else if (element?.tagName?.equalsIgnoreCase('a')) {
-                    let target = element.attr('target');
+                    let target = element.attvAttr('target');
                     Attv.navigate(url || '', target);
                 }
 

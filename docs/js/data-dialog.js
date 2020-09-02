@@ -53,8 +53,8 @@ var Attv;
             DefaultValue.prototype.loadElement = function (element) {
                 var _this = this;
                 // remove onclick
-                if (element.attr('onclick')) {
-                    this.resolver.addAttribute(Attv.DataCallback.UniqueId, element, element.attr('onclick'));
+                if (element.attvAttr('onclick')) {
+                    this.resolver.addAttribute(Attv.DataCallback.UniqueId, element, element.attvAttr('onclick'));
                 }
                 element.onclick = function (ev) {
                     _this.show(element);
@@ -95,16 +95,16 @@ var Attv;
                 // add to the body
                 document.body.append(dialogElement);
                 if (settings.title) {
-                    dialogElement.querySelector(settings.titleSelector).html(settings.title);
+                    dialogElement.querySelector(settings.titleSelector).attvHtml(settings.title);
                 }
                 if (settings.content) {
-                    dialogElement.querySelector(settings.contentSelector).html(settings.content);
+                    dialogElement.querySelector(settings.contentSelector).attvHtml(settings.content);
                 }
                 if (settings.isModal) {
                     dialogElement.showModal();
                 }
                 else {
-                    dialogElement.show();
+                    dialogElement.attvShow();
                 }
                 if (settings.callback) {
                     settings.callback(dialogElement.querySelector(settings.contentSelector));
@@ -128,7 +128,7 @@ var Attv;
                 var html = this.resolver.resolve(Attv.DataTemplateSource.UniqueId).renderTemplate(element, content);
                 // [data-target]
                 var targetElement = this.resolver.resolve(Attv.DataTarget.UniqueId).getTargetElement(element) || ((_a = options) === null || _a === void 0 ? void 0 : _a.targetElement);
-                targetElement.html(html);
+                targetElement.attvHtml(html);
                 Attv.loadElements(targetElement);
             };
             return DataPartialDialogValue;

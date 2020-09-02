@@ -24,6 +24,7 @@ var Attv;
                 var _this = _super.call(this, DataBootstrap.UniqueId, name, true) || this;
                 _this.name = name;
                 _this.isStrict = true;
+                _this.priority = 0;
                 return _this;
             }
             DataBootstrap.UniqueId = "DataBootstrap4";
@@ -41,9 +42,9 @@ var Attv;
         /**
          * [data-bootstrap]="bootstrap4"
          */
-        var DefaultAttributeValue = /** @class */ (function (_super) {
-            __extends(DefaultAttributeValue, _super);
-            function DefaultAttributeValue(attributeValue, attribute, validators) {
+        var Bootstrap4Value = /** @class */ (function (_super) {
+            __extends(Bootstrap4Value, _super);
+            function Bootstrap4Value(attributeValue, attribute, validators) {
                 if (validators === void 0) { validators = [
                     new Attv.Validators.RequiredElement(['body'])
                 ]; }
@@ -52,19 +53,57 @@ var Attv;
                 _this.resolver.internals.push(Attv.DataTemplateHtml.UniqueId);
                 return _this;
             }
-            DefaultAttributeValue.prototype.loadElement = function (element) {
-                return this.loadSettings(element, function (settings) {
-                    settings.styleUrls = settings.styleUrls || Bootstrap4.BootstrapSettings.StyleUrls;
-                    settings.jsUrls = settings.jsUrls || Bootstrap4.BootstrapSettings.JsUrls;
-                });
+            Bootstrap4Value.prototype.loadElement = function (element) {
+                if (!this.attribute.isElementLoaded(element)) {
+                    return this.loadSettings(element, function (settings) {
+                        if (settings.injectJs)
+                            settings.jsUrls = settings.jsUrls || Bootstrap4.BootstrapSettings.JsUrls;
+                        if (settings.injectStyles)
+                            settings.styleUrls = settings.styleUrls || Bootstrap4.BootstrapSettings.StyleUrls;
+                    });
+                }
+                return true;
             };
-            return DefaultAttributeValue;
+            return Bootstrap4Value;
         }(Attv.Attribute.Value));
-        Bootstrap4.DefaultAttributeValue = DefaultAttributeValue;
+        Bootstrap4.Bootstrap4Value = Bootstrap4Value;
+        /**
+         * [data-partial]="tab"
+         */
+        var DataPartialTabValue = /** @class */ (function (_super) {
+            __extends(DataPartialTabValue, _super);
+            function DataPartialTabValue(attribute) {
+                return _super.call(this, "tab", attribute) || this;
+            }
+            DataPartialTabValue.prototype.loadElement = function (element) {
+                var _this = this;
+                if (!this.attribute.isElementLoaded(element)) {
+                    if (Attv.isUndefined(window['$'])) {
+                        return false;
+                    }
+                    var anchor = $("a[href='#" + element.id + "']");
+                    if (anchor) {
+                        anchor.on('shown.bs.tab', function (e) {
+                            var targetElement = $(e.target);
+                            if (element.id === targetElement.attr('href').replace('#', '')) {
+                                _this.render(element);
+                            }
+                        });
+                        if (anchor.is('.active')) {
+                            this.render(element);
+                        }
+                    }
+                    return this.attribute.markElementLoaded(element, true);
+                }
+                return true;
+            };
+            return DataPartialTabValue;
+        }(Attv.DataPartial.DefaultValue));
+        Bootstrap4.DataPartialTabValue = DataPartialTabValue;
     })(Bootstrap4 = Attv.Bootstrap4 || (Attv.Bootstrap4 = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// AttributeConfiguration ////////////////////////////////
+///////////////////////////////////// Settings /////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 (function (Attv) {
     var Bootstrap4;
@@ -115,7 +154,10 @@ var Attv;
 ////////////////////////////////////////////////////////////////////////////////////
 Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-bootstrap', function (attributeName) { return new Attv.Bootstrap4.DataBootstrap(attributeName); }, function (attribute, list) {
-        list.push(new Attv.Bootstrap4.DefaultAttributeValue('bootstrap4', attribute));
+        list.push(new Attv.Bootstrap4.Bootstrap4Value('bootstrap4', attribute));
+    });
+    Attv.registerAttributeValue(Attv.DataPartial.UniqueId, function (attribute, list) {
+        list.push(new Attv.Bootstrap4.DataPartialTabValue(attribute));
     });
 });
 

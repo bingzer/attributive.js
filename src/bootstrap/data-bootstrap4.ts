@@ -1,3 +1,5 @@
+declare const $: any;
+
 namespace Attv.Bootstrap4 {
 
     /**
@@ -10,6 +12,7 @@ namespace Attv.Bootstrap4 {
             super(DataBootstrap.UniqueId, name, true);
             
             this.isStrict = true;
+            this.priority = 0;
         }
 
     }
@@ -20,12 +23,11 @@ namespace Attv.Bootstrap4 {
 ////////////////////////////////////////////////////////////////////////////////////
 
 namespace Attv.Bootstrap4 {
-    
 
     /**
      * [data-bootstrap]="bootstrap4"
      */
-    export class DefaultAttributeValue extends Attv.Attribute.Value {
+    export class Bootstrap4Value extends Attv.Attribute.Value {
         
         constructor (attributeValue: string, 
             attribute: Attv.Attribute, 
@@ -39,21 +41,66 @@ namespace Attv.Bootstrap4 {
         }
 
         loadElement(element: HTMLElement): boolean {
-            return this.loadSettings<BootstrapSettings>(element, settings => {
-                settings.styleUrls = settings.styleUrls || BootstrapSettings.StyleUrls;
-                settings.jsUrls = settings.jsUrls || BootstrapSettings.JsUrls;
-            });
+            if (!this.attribute.isElementLoaded(element)) {
+                return this.loadSettings<BootstrapSettings>(element, settings => {
+                    if (settings.injectJs)
+                        settings.jsUrls = settings.jsUrls || BootstrapSettings.JsUrls;
+    
+                    if (settings.injectStyles)
+                        settings.styleUrls = settings.styleUrls || BootstrapSettings.StyleUrls;
+                });
+            }
+
+            return true;
+        }
+    }
+
+    /**
+     * [data-partial]="tab"
+     */
+    export class DataPartialTabValue extends Attv.DataPartial.DefaultValue {
+        
+        constructor (attribute: Attv.Attribute) {
+            super("tab", attribute);
+        }
+
+        loadElement(element: HTMLElement): boolean {
+            if (!this.attribute.isElementLoaded(element)) {
+                if (Attv.isUndefined(window['$'])) {
+                    return false;
+                }
+
+                let anchor = $(`a[href='#${element.id}']`);
+                if (anchor) {
+                    anchor.on('shown.bs.tab', (e: Event) => {
+                        let targetElement = $(e.target);
+                        if (element.id === targetElement.attr('href').replace('#', '')) {
+                            this.render(element);
+                        }
+                    });
+
+                    if (anchor.is('.active')) {
+                        this.render(element);
+                    }
+                }
+
+                return this.attribute.markElementLoaded(element, true);
+            }
+            
+            return true;
         }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// AttributeConfiguration ////////////////////////////////
+///////////////////////////////////// Settings /////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
 namespace Attv.Bootstrap4 {
         
     export interface BootstrapSettings extends Attv.Attribute.Settings {
+        injectStyles: boolean;
+        injectJs: boolean;
     }
 
     export namespace BootstrapSettings {
@@ -105,6 +152,11 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-bootstrap', 
         (attributeName: string) => new Attv.Bootstrap4.DataBootstrap(attributeName),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.Bootstrap4.DefaultAttributeValue('bootstrap4', attribute));
+            list.push(new Attv.Bootstrap4.Bootstrap4Value('bootstrap4', attribute));
+        });
+
+    Attv.registerAttributeValue(Attv.DataPartial.UniqueId,
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
+            list.push(new Attv.Bootstrap4.DataPartialTabValue(attribute));
         });
 });

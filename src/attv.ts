@@ -16,10 +16,10 @@ interface Element {
      * Gets/Sets html.
      * Will execute javascript inside also
      */
-    html: (html?: string) => string | any;
+    attvHtml: (html?: string) => string | any;
 }
 
-Element.prototype.html = function (html?: string): string | any {
+Element.prototype.attvHtml = function (html?: string): string | any {
     let element = this as HTMLElement;
 
     if (Attv.isUndefined(html)) {
@@ -45,23 +45,23 @@ interface HTMLElement  {
      * Attribute helper.
      * value can be an object
      */
-    attr: (name?: string | Attv.Attribute, value?: any) => HTMLElement | any;
+    attvAttr: (name?: string | Attv.Attribute, value?: any) => HTMLElement | any;
 
     /**
      * Show
      */
-    show: () => any;
+    attvShow: () => any;
 
     /**
      * HIde
      */
-    hide: () => any;
+    attvHide: () => any;
 }
 
-HTMLElement.prototype.show = function () {
+HTMLElement.prototype.attvShow = function () {
     let element = this as HTMLElement;
     
-    let dataStyle = Attv.parseJsonOrElse(element.attr('data-style')) || {};
+    let dataStyle = Attv.parseJsonOrElse(element.attvAttr('data-style')) || {};
     if (dataStyle.display) {
         element.style.display = dataStyle?.display;
     } else {
@@ -69,19 +69,19 @@ HTMLElement.prototype.show = function () {
     }
 }
 
-HTMLElement.prototype.hide = function () {
+HTMLElement.prototype.attvHide = function () {
     let element = this as HTMLElement;
     
-    let dataStyle = Attv.parseJsonOrElse(element.attr('data-style')) || {};
+    let dataStyle = Attv.parseJsonOrElse(element.attvAttr('data-style')) || {};
     if (element.style.display !== 'none') {
         dataStyle.display = element.style.display;
-        element.attr('data-style', dataStyle);
+        element.attvAttr('data-style', dataStyle);
     }
     
     element.style.display = 'none'
 }
 
-HTMLElement.prototype.attr = function (name: string, value?: any): HTMLElement | any {
+HTMLElement.prototype.attvAttr = function (name: string, value?: any): HTMLElement | any {
     name = name?.toString()?.replace('[', '')?.replace(']', '');
 
     let element = this as HTMLElement;
@@ -287,6 +287,11 @@ namespace Attv {
         public readonly settingsName: string;
 
         /**
+         * zero-index priority
+         */
+        public priority: number = 1;
+
+        /**
          * When set to true. All attribute values needs to be registered. 
          * NO wildcard.
          */
@@ -329,7 +334,7 @@ namespace Attv {
          * @param element the element
          */
         exists(element: HTMLElement): boolean {
-            return !!element?.attr(this.name);
+            return !!element?.attvAttr(this.name);
         }
 
         /**
@@ -337,7 +342,7 @@ namespace Attv {
          * @param element the element
          */
         getValue<TValue extends Attribute.Value>(element: HTMLElement): TValue {
-            let value = element?.attr(this.name);
+            let value = element?.attvAttr(this.name);
             let attributeValue = this.values.filter(val => val.getRaw(element)?.equalsIgnoreCase(value))[0] as TValue;
 
             // Print/throw an error
@@ -359,7 +364,7 @@ namespace Attv {
 
             // #3. generic attribute
             if (!attributeValue) {
-                let rawAttributeValue = element?.attr(this.name) as string;
+                let rawAttributeValue = element?.attvAttr(this.name) as string;
                 attributeValue = new Attribute.Value(rawAttributeValue, this) as TValue;
             }
 
@@ -371,7 +376,7 @@ namespace Attv {
          * @param element element to check
          */
         isElementLoaded(element: HTMLElement): boolean {
-            let isLoaded = element.attr(this.loadedName);
+            let isLoaded = element.attvAttr(this.loadedName);
             return isLoaded === 'true' || !!isLoaded;
         }
 
@@ -380,8 +385,10 @@ namespace Attv {
          * @param element the element to mark
          * @param isLoaded is loaded?
          */
-        markElementLoaded(element: HTMLElement, isLoaded: boolean) {
-            element.attr(this.loadedName, isLoaded);
+        markElementLoaded(element: HTMLElement, isLoaded: boolean): boolean {
+            element.attvAttr(this.loadedName, isLoaded);
+
+            return isLoaded;
         }
 
         /**
@@ -417,7 +424,7 @@ namespace Attv.Attribute {
          * Returns raw string
          */
         getRaw(element: HTMLElement): string {
-            return this.value?.toString() || element?.attr(this.attribute.name);
+            return this.value?.toString() || element?.attvAttr(this.attribute.name);
         }
     
         /**
@@ -516,7 +523,7 @@ namespace Attv.Attribute {
          */
         addAttribute(uniqueId: string, element: HTMLElement, any: string) {
             let attribute = this.resolve(uniqueId);
-            element.attr(attribute.name, any);
+            element.attvAttr(attribute.name, any);
         }
     }
 }
@@ -583,7 +590,7 @@ namespace Attv.Attribute {
     
             if (settings.styleUrls) {
                 settings.styleUrls.forEach(styleUrl => {
-                    let elementId = 'link-' + settings.attributeValue.attribute.settingsName;
+                    let elementId = `link-${styleUrl.name}-${settings.attributeValue.attribute.settingsName}`;
                     let linkElement = document.querySelector(`link#${elementId}`) as HTMLLinkElement;
                     apply = settings.override || !linkElement;
     
@@ -604,7 +611,7 @@ namespace Attv.Attribute {
     
             if (settings.jsUrls) {
                 settings.jsUrls.forEach(jsUrl => {
-                    let elementId = 'script-' + settings.attributeValue.attribute.settingsName;
+                    let elementId = `script-${jsUrl.name}-${settings.attributeValue.attribute.settingsName}`;
                     let scriptElement = document.querySelector(`script#${elementId}`) as HTMLScriptElement;
                     apply = settings.override || !scriptElement;
     
@@ -618,6 +625,7 @@ namespace Attv.Attribute {
                         scriptElement.src = jsUrl.url;
                         scriptElement.integrity = jsUrl.options?.integrity;
                         scriptElement.crossOrigin = jsUrl.options?.crossorigin;
+                        scriptElement.onload = () => Attv.loadElements();
                     }
                 });
             }
@@ -653,7 +661,7 @@ namespace Attv {
         }
 
         getSettingsForValue<TSettings extends Attribute.Settings>(value: Attv.Attribute.Value, element: HTMLElement): TSettings {
-            let rawValue = element.attr(value.attribute.settingsName);
+            let rawValue = element.attvAttr(value.attribute.settingsName);
             let settings = DataSettings.parseSettings<TSettings>(rawValue);
             settings.attributeValue = settings.attributeValue || value;
     
@@ -728,7 +736,7 @@ namespace Attv.Validators {
             // check for other require attributes
             for (let i = 0; i < this.requiredAttributes.length; i++) {
                 let attribute = this.requiredAttributes[i];
-                let requiredAttribute = element.attr(attribute.name);
+                let requiredAttribute = element.attvAttr(attribute.name);
                 if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
                     Attv.log('error', `${value.toString(true)} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
                 }
@@ -1008,7 +1016,7 @@ namespace Attv {
         Attv.log('debug', 'Loading element', root);
         
         // auto load all attvs that are marked auto load
-        attributes.filter(attribute => attribute.isAutoLoad).forEach((attribute, index) => {
+        attributes.filter(attribute => attribute.isAutoLoad).sort((a, b) => a.priority < b.priority ? -1 : 0).forEach((attribute, index) => {
             let elements = root.querySelectorAll(`${attribute}`);
             elements.forEach((element: HTMLElement, index) => {
                 try {
@@ -1020,7 +1028,7 @@ namespace Attv {
 
                     // #2. Check if the attribute value is supported
                     if (!attributeValue) {
-                        let attributeValue = element.attr(attribute.name);
+                        let attributeValue = element.attvAttr(attribute.name);
                         Attv.log('warning', `${attribute} does not support ${attribute}='${attributeValue}'`, element);
                         return;
                     }

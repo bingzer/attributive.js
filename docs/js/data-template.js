@@ -61,9 +61,9 @@ var Attv;
                 return _this;
             }
             DefaultValue.prototype.loadElement = function (element) {
-                var templateHtml = element.html();
+                var templateHtml = element.attvHtml();
                 this.resolver.addAttribute(Attv.DataTemplateHtml.UniqueId, element, templateHtml);
-                element.html('');
+                element.attvHtml('');
                 return true;
             };
             DefaultValue.prototype.getTemplate = function (element) {
@@ -94,7 +94,7 @@ var Attv;
                 return true;
             };
             ScriptValue.prototype.getTemplate = function (element) {
-                return element.html();
+                return element.attvHtml();
             };
             return ScriptValue;
         }(DefaultValue));

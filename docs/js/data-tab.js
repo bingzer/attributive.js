@@ -161,7 +161,7 @@ var Attv;
                     // element is an <a>
                     if (dataRoute_1.exists(tab_1) && element.tagName.equalsIgnoreCase('a')) {
                         var thisRoute = dataRoute_1.appendHash(dataRoute_1.getRoute(tab_1), this.getRaw(item_1));
-                        element.attr('href', dataRoute_1.getHash(thisRoute));
+                        element.attvAttr('href', dataRoute_1.getHash(thisRoute));
                     }
                     // [data-enabled]
                     if (dataEnabled.isEnabled(element)) {
@@ -176,7 +176,7 @@ var Attv;
                             element.removeAttribute('href');
                         }
                         if (element.parentElement.tagName.equalsIgnoreCase('li')) {
-                            element.parentElement.attr(dataEnabled, false);
+                            element.parentElement.attvAttr(dataEnabled, false);
                         }
                     }
                     // [data-active]
@@ -208,7 +208,7 @@ var Attv;
                 if (contentElement) {
                     var parentElement = contentElement.parentElement;
                     // hide all children
-                    parentElement.querySelectorAll(dataTabContent.toString()).forEach(function (e) { return e.hide(); });
+                    parentElement.querySelectorAll(dataTabContent.toString()).forEach(function (e) { return e.attvHide(); });
                     dataTabContent.getValue(contentElement).loadElement(contentElement);
                 }
                 return false;
@@ -250,11 +250,11 @@ var Attv;
             }
             DefaultAttributeValue.prototype.loadElement = function (element) {
                 if (!this.attribute.isElementLoaded(element)) {
-                    element.show();
+                    element.attvShow();
                     // [data-content]
                     var dataContent = this.resolver.resolve(Attv.DataContent.UniqueId);
                     if (dataContent.exists(element)) {
-                        element.html(dataContent.getContent(element));
+                        element.attvHtml(dataContent.getContent(element));
                         return;
                     }
                     // [data-partial]

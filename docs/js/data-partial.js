@@ -84,7 +84,7 @@ var Attv;
             DefaultValue.prototype.doRender = function (element, content, options) {
                 var html = this.getTemplate(element, content);
                 var targetElement = this.getTargetElement(element);
-                targetElement.html(html);
+                targetElement.attvHtml(html);
                 Attv.loadElements(targetElement);
             };
             DefaultValue.prototype.getTemplate = function (element, content) {

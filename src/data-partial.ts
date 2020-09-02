@@ -82,7 +82,7 @@ namespace Attv.DataPartial {
             let html = this.getTemplate(element, content);
             let targetElement = this.getTargetElement(element);
 
-            targetElement.html(html);
+            targetElement.attvHtml(html);
 
             Attv.loadElements(targetElement);
         }

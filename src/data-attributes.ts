@@ -56,12 +56,12 @@ namespace Attv {
                 // <form action='/'></form>
                 if (!rawValue && element?.tagName?.equalsIgnoreCase('form')) {
                     // get from action attribute
-                    rawValue = element.attr('action');
+                    rawValue = element.attvAttr('action');
                 }
 
                 // <a href='/'></form>
                 if (!rawValue && element?.tagName?.equalsIgnoreCase('a')) {
-                    rawValue = element.attr('href');
+                    rawValue = element.attvAttr('href');
                 }
 
                 return rawValue;
@@ -95,7 +95,7 @@ namespace Attv {
 
                 if (!rawValue && element?.tagName?.equalsIgnoreCase('form')) {
                     // get from method attribute
-                    rawValue = element.attr('method');
+                    rawValue = element.attvAttr('method');
                 }
 
                 if (!rawValue) {
@@ -295,7 +295,7 @@ namespace Attv {
         }
 
         bind(element: HTMLElement, any: any) {
-            element.html(any?.toString() || '');
+            element.attvHtml(any?.toString() || '');
         }
     }
 
@@ -337,7 +337,7 @@ namespace Attv {
         }
 
         setActive(element: HTMLElement, isActive: boolean) {
-            element.attr(this, isActive);
+            element.attvAttr(this, isActive);
         }
     }
 
@@ -609,7 +609,7 @@ namespace Attv {
     
                 this.bind(rootElement, templateElement, model);
     
-                return rootElement.html();
+                return rootElement.attvHtml();
             }
     
             protected bind(parent: HTMLElement, template: HTMLElement, model: any) {
@@ -617,7 +617,7 @@ namespace Attv {
                 for (let i = 0; i < allbinds.length; i++) {
                     let bindElement = allbinds[i] as HTMLElement;
                     
-                    let propName = bindElement.attr(this.dataBind);
+                    let propName = bindElement.attvAttr(this.dataBind);
                     let propValue = this.getPropertyValue(propName, model);
 
                     if (Array.isArray(propValue)) {

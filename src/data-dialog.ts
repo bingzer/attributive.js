@@ -42,8 +42,8 @@ namespace Attv.DataDialog {
 
         loadElement(element: HTMLElement): boolean {
             // remove onclick
-            if (element.attr('onclick')) {
-                this.resolver.addAttribute(DataCallback.UniqueId, element, element.attr('onclick'));
+            if (element.attvAttr('onclick')) {
+                this.resolver.addAttribute(DataCallback.UniqueId, element, element.attvAttr('onclick'));
             }
 
             element.onclick = (ev: Event) => {
@@ -90,17 +90,17 @@ namespace Attv.DataDialog {
             document.body.append(dialogElement);
 
             if (settings.title) {
-                dialogElement.querySelector(settings.titleSelector).html(settings.title);
+                dialogElement.querySelector(settings.titleSelector).attvHtml(settings.title);
             }
 
             if (settings.content) {
-                dialogElement.querySelector(settings.contentSelector).html(settings.content);
+                dialogElement.querySelector(settings.contentSelector).attvHtml(settings.content);
             }
 
             if (settings.isModal) {
                 dialogElement.showModal();
             } else {
-                dialogElement.show();
+                dialogElement.attvShow();
             }
 
             if (settings.callback) {
@@ -127,7 +127,7 @@ namespace Attv.DataDialog {
             // [data-target]
             let targetElement = this.resolver.resolve<DataTarget>(DataTarget.UniqueId).getTargetElement(element) || (options as any)?.targetElement as HTMLElement;
 
-            targetElement.html(html);
+            targetElement.attvHtml(html);
 
             Attv.loadElements(targetElement);
         }

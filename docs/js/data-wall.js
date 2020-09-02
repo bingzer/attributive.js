@@ -46,8 +46,8 @@ var Attv;
             DefaultValue.prototype.loadElement = function (element) {
                 var _this = this;
                 // remove onclick
-                if (element.attr('onclick')) {
-                    this.resolver.addAttribute(Attv.DataCallback.UniqueId, element, element.attr('onclick'));
+                if (element.attvAttr('onclick')) {
+                    this.resolver.addAttribute(Attv.DataCallback.UniqueId, element, element.attvAttr('onclick'));
                 }
                 element.onclick = function (ev) { return _this.onclick(element, ev); };
                 return true;
@@ -67,7 +67,7 @@ var Attv;
                     dataCallback.callback(element);
                 }
                 else if ((_a = element === null || element === void 0 ? void 0 : element.tagName) === null || _a === void 0 ? void 0 : _a.equalsIgnoreCase('a')) {
-                    var target = element.attr('target');
+                    var target = element.attvAttr('target');
                     Attv.navigate(url || '', target);
                 }
                 return false;

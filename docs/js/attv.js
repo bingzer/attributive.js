@@ -25,7 +25,7 @@ var Attv;
      */
     Attv.version = '0.0.1';
 })(Attv || (Attv = {}));
-Element.prototype.html = function (html) {
+Element.prototype.attvHtml = function (html) {
     var _a, _b;
     var element = this;
     if (Attv.isUndefined(html)) {
@@ -45,9 +45,9 @@ Element.prototype.html = function (html) {
         }
     }
 };
-HTMLElement.prototype.show = function () {
+HTMLElement.prototype.attvShow = function () {
     var element = this;
-    var dataStyle = Attv.parseJsonOrElse(element.attr('data-style')) || {};
+    var dataStyle = Attv.parseJsonOrElse(element.attvAttr('data-style')) || {};
     if (dataStyle.display) {
         element.style.display = dataStyle === null || dataStyle === void 0 ? void 0 : dataStyle.display;
     }
@@ -55,16 +55,16 @@ HTMLElement.prototype.show = function () {
         element.style.display = 'block';
     }
 };
-HTMLElement.prototype.hide = function () {
+HTMLElement.prototype.attvHide = function () {
     var element = this;
-    var dataStyle = Attv.parseJsonOrElse(element.attr('data-style')) || {};
+    var dataStyle = Attv.parseJsonOrElse(element.attvAttr('data-style')) || {};
     if (element.style.display !== 'none') {
         dataStyle.display = element.style.display;
-        element.attr('data-style', dataStyle);
+        element.attvAttr('data-style', dataStyle);
     }
     element.style.display = 'none';
 };
-HTMLElement.prototype.attr = function (name, value) {
+HTMLElement.prototype.attvAttr = function (name, value) {
     var _a, _b;
     name = (_b = (_a = name === null || name === void 0 ? void 0 : name.toString()) === null || _a === void 0 ? void 0 : _a.replace('[', '')) === null || _b === void 0 ? void 0 : _b.replace(']', '');
     var element = this;
@@ -232,6 +232,10 @@ String.prototype.equalsIgnoreCase = function (other) {
             this.values = [];
             this.dependency = new Attribute.Dependency();
             /**
+             * zero-index priority
+             */
+            this.priority = 1;
+            /**
              * When set to true. All attribute values needs to be registered.
              * NO wildcard.
              */
@@ -260,14 +264,14 @@ String.prototype.equalsIgnoreCase = function (other) {
          * @param element the element
          */
         Attribute.prototype.exists = function (element) {
-            return !!(element === null || element === void 0 ? void 0 : element.attr(this.name));
+            return !!(element === null || element === void 0 ? void 0 : element.attvAttr(this.name));
         };
         /**
          * Returns the current attribute value
          * @param element the element
          */
         Attribute.prototype.getValue = function (element) {
-            var value = element === null || element === void 0 ? void 0 : element.attr(this.name);
+            var value = element === null || element === void 0 ? void 0 : element.attvAttr(this.name);
             var attributeValue = this.values.filter(function (val) { var _a; return (_a = val.getRaw(element)) === null || _a === void 0 ? void 0 : _a.equalsIgnoreCase(value); })[0];
             // Print/throw an error
             // when no 'attributeValue' found and there's 'element' to evaluate and isStrict is marked true
@@ -285,7 +289,7 @@ String.prototype.equalsIgnoreCase = function (other) {
             }
             // #3. generic attribute
             if (!attributeValue) {
-                var rawAttributeValue = element === null || element === void 0 ? void 0 : element.attr(this.name);
+                var rawAttributeValue = element === null || element === void 0 ? void 0 : element.attvAttr(this.name);
                 attributeValue = new Attribute.Value(rawAttributeValue, this);
             }
             return attributeValue;
@@ -295,7 +299,7 @@ String.prototype.equalsIgnoreCase = function (other) {
          * @param element element to check
          */
         Attribute.prototype.isElementLoaded = function (element) {
-            var isLoaded = element.attr(this.loadedName);
+            var isLoaded = element.attvAttr(this.loadedName);
             return isLoaded === 'true' || !!isLoaded;
         };
         /**
@@ -304,7 +308,8 @@ String.prototype.equalsIgnoreCase = function (other) {
          * @param isLoaded is loaded?
          */
         Attribute.prototype.markElementLoaded = function (element, isLoaded) {
-            element.attr(this.loadedName, isLoaded);
+            element.attvAttr(this.loadedName, isLoaded);
+            return isLoaded;
         };
         /**
          * String representation
@@ -338,7 +343,7 @@ String.prototype.equalsIgnoreCase = function (other) {
              */
             Value.prototype.getRaw = function (element) {
                 var _a;
-                return ((_a = this.value) === null || _a === void 0 ? void 0 : _a.toString()) || (element === null || element === void 0 ? void 0 : element.attr(this.attribute.name));
+                return ((_a = this.value) === null || _a === void 0 ? void 0 : _a.toString()) || (element === null || element === void 0 ? void 0 : element.attvAttr(this.attribute.name));
             };
             /**
              * Load element
@@ -429,7 +434,7 @@ String.prototype.equalsIgnoreCase = function (other) {
              */
             Resolver.prototype.addAttribute = function (uniqueId, element, any) {
                 var attribute = this.resolve(uniqueId);
-                element.attr(attribute.name, any);
+                element.attvAttr(attribute.name, any);
             };
             return Resolver;
         }(Dependency));
@@ -462,7 +467,7 @@ String.prototype.equalsIgnoreCase = function (other) {
                 if (settings.styleUrls) {
                     settings.styleUrls.forEach(function (styleUrl) {
                         var _a, _b;
-                        var elementId = 'link-' + settings.attributeValue.attribute.settingsName;
+                        var elementId = "link-" + styleUrl.name + "-" + settings.attributeValue.attribute.settingsName;
                         var linkElement = document.querySelector("link#" + elementId);
                         apply = settings.override || !linkElement;
                         if (!linkElement) {
@@ -481,7 +486,7 @@ String.prototype.equalsIgnoreCase = function (other) {
                 if (settings.jsUrls) {
                     settings.jsUrls.forEach(function (jsUrl) {
                         var _a, _b;
-                        var elementId = 'script-' + settings.attributeValue.attribute.settingsName;
+                        var elementId = "script-" + jsUrl.name + "-" + settings.attributeValue.attribute.settingsName;
                         var scriptElement = document.querySelector("script#" + elementId);
                         apply = settings.override || !scriptElement;
                         if (!scriptElement) {
@@ -493,6 +498,7 @@ String.prototype.equalsIgnoreCase = function (other) {
                             scriptElement.src = jsUrl.url;
                             scriptElement.integrity = (_a = jsUrl.options) === null || _a === void 0 ? void 0 : _a.integrity;
                             scriptElement.crossOrigin = (_b = jsUrl.options) === null || _b === void 0 ? void 0 : _b.crossorigin;
+                            scriptElement.onload = function () { return Attv.loadElements(); };
                         }
                     });
                 }
@@ -523,7 +529,7 @@ String.prototype.equalsIgnoreCase = function (other) {
             return settings;
         };
         DataSettings.prototype.getSettingsForValue = function (value, element) {
-            var rawValue = element.attr(value.attribute.settingsName);
+            var rawValue = element.attvAttr(value.attribute.settingsName);
             var settings = DataSettings.parseSettings(rawValue);
             settings.attributeValue = settings.attributeValue || value;
             return settings;
@@ -586,7 +592,7 @@ String.prototype.equalsIgnoreCase = function (other) {
                 // check for other require attributes
                 for (var i = 0; i < this.requiredAttributes.length; i++) {
                     var attribute = this.requiredAttributes[i];
-                    var requiredAttribute = element.attr(attribute.name);
+                    var requiredAttribute = element.attvAttr(attribute.name);
                     if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
                         Attv.log('error', value.toString(true) + " is requiring [" + attribute.name + "]='" + attribute.value + "' to be present in DOM", element);
                     }
@@ -832,7 +838,7 @@ String.prototype.equalsIgnoreCase = function (other) {
         }
         Attv.log('debug', 'Loading element', root);
         // auto load all attvs that are marked auto load
-        Attv.attributes.filter(function (attribute) { return attribute.isAutoLoad; }).forEach(function (attribute, index) {
+        Attv.attributes.filter(function (attribute) { return attribute.isAutoLoad; }).sort(function (a, b) { return a.priority < b.priority ? -1 : 0; }).forEach(function (attribute, index) {
             var elements = root.querySelectorAll("" + attribute);
             elements.forEach(function (element, index) {
                 try {
@@ -842,7 +848,7 @@ String.prototype.equalsIgnoreCase = function (other) {
                     var attributeValue = attribute.getValue(element);
                     // #2. Check if the attribute value is supported
                     if (!attributeValue) {
-                        var attributeValue_1 = element.attr(attribute.name);
+                        var attributeValue_1 = element.attvAttr(attribute.name);
                         Attv.log('warning', attribute + " does not support " + attribute + "='" + attributeValue_1 + "'", element);
                         return;
                     }

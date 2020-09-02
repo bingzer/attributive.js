@@ -127,9 +127,9 @@ var Attv;
             DataTemplateTableValue.prototype.loadElement = function (element) {
                 if (!this.attribute.isElementLoaded(element)) {
                     var tbody = element.querySelector('tbody');
-                    var templateHtml = tbody.html();
+                    var templateHtml = tbody.attvHtml();
                     this.resolver.addAttribute(Attv.DataTemplateHtml.UniqueId, element, templateHtml);
-                    tbody.html('');
+                    tbody.attvHtml('');
                     this.attribute.markElementLoaded(element, true);
                 }
                 return true;

@@ -63,11 +63,11 @@ var Attv;
                 // <form action='/'></form>
                 if (!rawValue && ((_a = element === null || element === void 0 ? void 0 : element.tagName) === null || _a === void 0 ? void 0 : _a.equalsIgnoreCase('form'))) {
                     // get from action attribute
-                    rawValue = element.attr('action');
+                    rawValue = element.attvAttr('action');
                 }
                 // <a href='/'></form>
                 if (!rawValue && ((_b = element === null || element === void 0 ? void 0 : element.tagName) === null || _b === void 0 ? void 0 : _b.equalsIgnoreCase('a'))) {
-                    rawValue = element.attr('href');
+                    rawValue = element.attvAttr('href');
                 }
                 return rawValue;
             };
@@ -102,7 +102,7 @@ var Attv;
                 var rawValue = _super.prototype.getRaw.call(this, element);
                 if (!rawValue && ((_a = element === null || element === void 0 ? void 0 : element.tagName) === null || _a === void 0 ? void 0 : _a.equalsIgnoreCase('form'))) {
                     // get from method attribute
-                    rawValue = element.attr('method');
+                    rawValue = element.attvAttr('method');
                 }
                 if (!rawValue) {
                     rawValue = DataMethod.DefaultMethod;
@@ -297,7 +297,7 @@ var Attv;
             return _super.call(this, DataBind.UniqueId, name) || this;
         }
         DataBind.prototype.bind = function (element, any) {
-            element.html((any === null || any === void 0 ? void 0 : any.toString()) || '');
+            element.attvHtml((any === null || any === void 0 ? void 0 : any.toString()) || '');
         };
         DataBind.UniqueId = 'DataBind';
         return DataBind;
@@ -336,7 +336,7 @@ var Attv;
             return rawValue === 'true';
         };
         DataActive.prototype.setActive = function (element, isActive) {
-            element.attr(this, isActive);
+            element.attvAttr(this, isActive);
         };
         DataActive.UniqueId = 'DataActive';
         return DataActive;
@@ -555,13 +555,13 @@ Attv.loader.pre.push(function () {
                 var templateElement = Attv.createHTMLElement(templatedContent);
                 var rootElement = Attv.createHTMLElement('');
                 this.bind(rootElement, templateElement, model);
-                return rootElement.html();
+                return rootElement.attvHtml();
             };
             Json2HtmlValue.prototype.bind = function (parent, template, model) {
                 var allbinds = template.querySelectorAll(this.dataBind.toString());
                 for (var i = 0; i < allbinds.length; i++) {
                     var bindElement = allbinds[i];
-                    var propName = bindElement.attr(this.dataBind);
+                    var propName = bindElement.attvAttr(this.dataBind);
                     var propValue = this.getPropertyValue(propName, model);
                     if (Array.isArray(propValue)) {
                         var array = propValue;

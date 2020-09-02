@@ -52,11 +52,11 @@ namespace Attv.DataTemplate {
         }
 
         loadElement(element: HTMLElement): boolean {
-            let templateHtml = element.html();
+            let templateHtml = element.attvHtml();
 
             this.resolver.addAttribute(DataTemplateHtml.UniqueId, element, templateHtml);
 
-            element.html('');
+            element.attvHtml('');
             
             return true;
         }
@@ -93,7 +93,7 @@ namespace Attv.DataTemplate {
         }
         
         getTemplate(element: HTMLElement): string {
-            return element.html();
+            return element.attvHtml();
         }
         
     }

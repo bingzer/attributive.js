@@ -152,7 +152,7 @@ namespace Attv {
                     // element is an <a>
                     if (dataRoute.exists(tab) && element.tagName.equalsIgnoreCase('a')) {
                         let thisRoute = dataRoute.appendHash(dataRoute.getRoute(tab), this.getRaw(item));
-                        element.attr('href', dataRoute.getHash(thisRoute));
+                        element.attvAttr('href', dataRoute.getHash(thisRoute));
                     }
 
                     // [data-enabled]
@@ -167,7 +167,7 @@ namespace Attv {
                             element.removeAttribute('href');
                         }
                         if (element.parentElement.tagName.equalsIgnoreCase('li')) {
-                            element.parentElement.attr(dataEnabled, false);
+                            element.parentElement.attvAttr(dataEnabled, false);
                         }
                     }
 
@@ -204,7 +204,7 @@ namespace Attv {
                 if (contentElement) {
                     let parentElement = contentElement.parentElement;
                     // hide all children
-                    parentElement.querySelectorAll(dataTabContent.toString()).forEach((e: HTMLElement) => e.hide());
+                    parentElement.querySelectorAll(dataTabContent.toString()).forEach((e: HTMLElement) => e.attvHide());
 
                     dataTabContent.getValue(contentElement).loadElement(contentElement);
                 }
@@ -249,12 +249,12 @@ namespace Attv {
             
             loadElement(element: HTMLElement): boolean {
                 if (!this.attribute.isElementLoaded(element)) {
-                    element.show();
+                    element.attvShow();
         
                     // [data-content]
                     let dataContent = this.resolver.resolve<DataContent>(DataContent.UniqueId);
                     if (dataContent.exists(element)) {
-                        element.html(dataContent.getContent(element));
+                        element.attvHtml(dataContent.getContent(element));
                         return;
                     }
         
