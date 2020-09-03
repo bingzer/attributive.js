@@ -557,6 +557,9 @@ String.prototype.equalsIgnoreCase = function (other) {
 (function (Attv) {
     var Validators;
     (function (Validators) {
+        /**
+         * DOM is required to have an attribute specified by attribute ids
+         */
         var RequiredAttribute = /** @class */ (function () {
             function RequiredAttribute(requiredAttributeIds) {
                 this.requiredAttributeIds = requiredAttributeIds;

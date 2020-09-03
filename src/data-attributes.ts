@@ -139,6 +139,10 @@ namespace Attv {
             let jsFunction = this.getValue(element).getRaw(element);
             return Attv.eval(jsFunction);
         }
+
+        fn(element: HTMLElement, ...args: any[]): any {
+            return (args) => this.callback(element);
+        }
     }
 
     /**

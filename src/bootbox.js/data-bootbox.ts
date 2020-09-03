@@ -23,7 +23,7 @@ namespace Attv.Bootbox {
             this.loadSettings<BootboxSettings>(element, settings => {
                 settings = this.mapSettings(element, settings);
 
-                bootbox.alert(settings);
+                this.bootboxShow(settings);
             });
 
             return false;
@@ -32,13 +32,26 @@ namespace Attv.Bootbox {
         protected mapSettings(element: HTMLElement, settings: BootboxSettings): BootboxSettings {
             let dataContent = this.resolver.resolve<DataContent>(DataContent.UniqueId);
             let dataTitle = this.resolver.resolve<DataTitle>(DataTitle.UniqueId);
-            let dataCallback = this.resolver.resolve<DataCallback>(DataCallback.UniqueId);
             
             settings.message = settings.message || dataContent.getContent(element);
             settings.title = settings.title || dataTitle.getTitle(element);
-            settings.callback = settings.callback || dataCallback.callback(element);
+            settings.callback = settings.callback || this.bootboxCallback(element);
 
             return settings;
+        }
+
+        protected bootboxCallback(element: HTMLElement) {
+            let dataCallback = this.resolver.resolve<DataCallback>(DataCallback.UniqueId);
+
+            if (dataCallback.exists(element)) {
+                return (result: boolean) => {
+                    if (Attv.isUndefined(result) || result) {
+                        dataCallback.callback(element);
+                    }
+                }
+            }
+
+            return undefined;
         }
 
         protected bootboxShow(settings: BootboxSettings) {
@@ -60,18 +73,13 @@ namespace Attv.Bootbox {
             super(attributeValue, attribute, validators);
         }
 
-        protected mapSettings(element: HTMLElement, settings: BootboxSettings): BootboxSettings {
+        protected bootboxCallback(element: HTMLElement) {
             let dataCallback = this.resolver.resolve<DataCallback>(DataCallback.UniqueId);
-            settings = super.mapSettings(element, settings);
-
-            // more for confirm
-            settings.callback = (result: boolean) => {
-                if (dataCallback.exists(element)) {
+            return (result: boolean) => {
+                if (Attv.isUndefined(result) || result) {
                     dataCallback.callback(element);
                 }
             }
-
-            return settings;
         }
 
         protected bootboxShow(settings: BootboxSettings) {

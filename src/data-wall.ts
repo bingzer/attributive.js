@@ -38,6 +38,8 @@ namespace Attv {
                 // remove onclick
                 if (element.attvAttr('onclick')) {
                     this.resolver.addAttribute(DataCallback.UniqueId, element, element.attvAttr('onclick'));
+                    element.removeAttribute('onclick');
+                    element.onclick = null;
                 }
 
                 element.onclick = (ev: Event) => this.onclick(element, ev);

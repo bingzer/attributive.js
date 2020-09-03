@@ -695,6 +695,9 @@ namespace Attv.Validators {
         validate(value: Attribute.Value, element: Element): boolean;
     }
 
+    /**
+     * DOM is required to have an attribute specified by attribute ids
+     */
     export class RequiredAttribute implements AttributeValidator {
 
         constructor (private requiredAttributeIds: string[]) {

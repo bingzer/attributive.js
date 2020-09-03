@@ -48,6 +48,8 @@ var Attv;
                 // remove onclick
                 if (element.attvAttr('onclick')) {
                     this.resolver.addAttribute(Attv.DataCallback.UniqueId, element, element.attvAttr('onclick'));
+                    element.removeAttribute('onclick');
+                    element.onclick = null;
                 }
                 element.onclick = function (ev) { return _this.onclick(element, ev); };
                 return true;

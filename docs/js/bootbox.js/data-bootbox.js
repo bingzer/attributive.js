@@ -34,18 +34,28 @@ var Attv;
                 var _this = this;
                 this.loadSettings(element, function (settings) {
                     settings = _this.mapSettings(element, settings);
-                    bootbox.alert(settings);
+                    _this.bootboxShow(settings);
                 });
                 return false;
             };
             DefaultValue.prototype.mapSettings = function (element, settings) {
                 var dataContent = this.resolver.resolve(Attv.DataContent.UniqueId);
                 var dataTitle = this.resolver.resolve(Attv.DataTitle.UniqueId);
-                var dataCallback = this.resolver.resolve(Attv.DataCallback.UniqueId);
                 settings.message = settings.message || dataContent.getContent(element);
                 settings.title = settings.title || dataTitle.getTitle(element);
-                settings.callback = settings.callback || dataCallback.callback(element);
+                settings.callback = settings.callback || this.bootboxCallback(element);
                 return settings;
+            };
+            DefaultValue.prototype.bootboxCallback = function (element) {
+                var dataCallback = this.resolver.resolve(Attv.DataCallback.UniqueId);
+                if (dataCallback.exists(element)) {
+                    return function (result) {
+                        if (Attv.isUndefined(result) || result) {
+                            dataCallback.callback(element);
+                        }
+                    };
+                }
+                return undefined;
             };
             DefaultValue.prototype.bootboxShow = function (settings) {
                 bootbox.alert(settings);
@@ -65,16 +75,13 @@ var Attv;
                 ]; }
                 return _super.call(this, attributeValue, attribute, validators) || this;
             }
-            ConfirmValue.prototype.mapSettings = function (element, settings) {
+            ConfirmValue.prototype.bootboxCallback = function (element) {
                 var dataCallback = this.resolver.resolve(Attv.DataCallback.UniqueId);
-                settings = _super.prototype.mapSettings.call(this, element, settings);
-                // more for confirm
-                settings.callback = function (result) {
-                    if (dataCallback.exists(element)) {
+                return function (result) {
+                    if (Attv.isUndefined(result) || result) {
                         dataCallback.callback(element);
                     }
                 };
-                return settings;
             };
             ConfirmValue.prototype.bootboxShow = function (settings) {
                 bootbox.confirm(settings);
