@@ -204,10 +204,8 @@ namespace Attv.Ajax {
         url: string;
         method?: AjaxMethod;
         data?: any;
-        callback?: (wasSuccessful: boolean, xhr: XMLHttpRequest) => void;
+        callback?: (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest) => void;
         headers?: {name: string, value: string}[];
-
-        _internalCallback?: (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest) => void;
     }
         
     export function sendAjax(options: AjaxOptions) {
@@ -217,11 +215,15 @@ namespace Attv.Ajax {
             if (xhr.readyState == 4) {
                 let wasSuccessful = this.status >= 200 && this.status < 400;
 
-                options?._internalCallback(options, wasSuccessful, xhr);
+                if (options?.callback) {
+                    options?.callback(options, wasSuccessful, xhr);
+                }
             }
         };
         xhr.onerror = function (e: ProgressEvent<EventTarget>) {
-            options?._internalCallback(options, false, xhr);
+            if (options?.callback) {
+                options?.callback(options, false, xhr);
+            }
         }
 
         // header
@@ -677,17 +679,19 @@ namespace Attv {
         }
 
         static parseSettings<TSettings>(rawValue: string): TSettings  {    
-            // does it look like json?
-            if (rawValue?.startsWith('{') && rawValue?.endsWith('}')) {
-                rawValue = `(${rawValue})`;
+            if (Attv.isString(rawValue)) {
+                // does it look like json?
+                if (rawValue?.startsWith('{') && rawValue?.endsWith('}')) {
+                    rawValue = `(${rawValue})`;
+                }
+        
+                // json ex: ({ name: 'value' }). so we just 
+                if (Attv.isEvaluatable(rawValue)) {
+                    //do eval
+                    rawValue = Attv.eval(rawValue);
+                }
             }
-    
-            // json ex: ({ name: 'value' }). so we just 
-            if (Attv.isEvaluatable(rawValue)) {
-                //do eval
-                rawValue = Attv.eval(rawValue);
-            }
-    
+        
             return parseJsonOrElse(rawValue) || { } as TSettings;
         }
     }

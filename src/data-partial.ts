@@ -61,7 +61,7 @@ namespace Attv.DataPartial {
                 options.url = this.resolver.resolve<DataUrl>(DataUrl.UniqueId).getUrl(element);
                 options.method = this.resolver.resolve<DataMethod>(DataMethod.UniqueId).getMethod(element);
 
-                options._internalCallback = (ajaxOptions: Attv.Ajax.AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
+                options.callback = (ajaxOptions: Attv.Ajax.AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
                     content = xhr.response;
                     
                     this.doRender(element, content, options);

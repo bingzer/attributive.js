@@ -163,11 +163,15 @@ String.prototype.equalsIgnoreCase = function (other) {
                 var xhr = this;
                 if (xhr.readyState == 4) {
                     var wasSuccessful = this.status >= 200 && this.status < 400;
-                    options === null || options === void 0 ? void 0 : options._internalCallback(options, wasSuccessful, xhr);
+                    if (options === null || options === void 0 ? void 0 : options.callback) {
+                        options === null || options === void 0 ? void 0 : options.callback(options, wasSuccessful, xhr);
+                    }
                 }
             };
             xhr.onerror = function (e) {
-                options === null || options === void 0 ? void 0 : options._internalCallback(options, false, xhr);
+                if (options === null || options === void 0 ? void 0 : options.callback) {
+                    options === null || options === void 0 ? void 0 : options.callback(options, false, xhr);
+                }
             };
             // header
             (_a = options.headers) === null || _a === void 0 ? void 0 : _a.forEach(function (header) { return xhr.setRequestHeader(header.name, header.value); });
@@ -540,14 +544,16 @@ String.prototype.equalsIgnoreCase = function (other) {
             return settings;
         };
         DataSettings.parseSettings = function (rawValue) {
-            // does it look like json?
-            if ((rawValue === null || rawValue === void 0 ? void 0 : rawValue.startsWith('{')) && (rawValue === null || rawValue === void 0 ? void 0 : rawValue.endsWith('}'))) {
-                rawValue = "(" + rawValue + ")";
-            }
-            // json ex: ({ name: 'value' }). so we just 
-            if (Attv.isEvaluatable(rawValue)) {
-                //do eval
-                rawValue = Attv.eval(rawValue);
+            if (Attv.isString(rawValue)) {
+                // does it look like json?
+                if ((rawValue === null || rawValue === void 0 ? void 0 : rawValue.startsWith('{')) && (rawValue === null || rawValue === void 0 ? void 0 : rawValue.endsWith('}'))) {
+                    rawValue = "(" + rawValue + ")";
+                }
+                // json ex: ({ name: 'value' }). so we just 
+                if (Attv.isEvaluatable(rawValue)) {
+                    //do eval
+                    rawValue = Attv.eval(rawValue);
+                }
             }
             return Attv.parseJsonOrElse(rawValue) || {};
         };
