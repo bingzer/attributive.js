@@ -47,7 +47,7 @@ Element.prototype.attvHtml = function (html) {
 };
 HTMLElement.prototype.attvShow = function () {
     var element = this;
-    var dataStyle = Attv.parseJsonOrElse(element.attvAttr('data-style')) || {};
+    var dataStyle = Attv.parseJsonOrElse(element.attvAttr('data-style'), {});
     if (dataStyle.display) {
         element.style.display = dataStyle === null || dataStyle === void 0 ? void 0 : dataStyle.display;
     }
@@ -57,7 +57,7 @@ HTMLElement.prototype.attvShow = function () {
 };
 HTMLElement.prototype.attvHide = function () {
     var element = this;
-    var dataStyle = Attv.parseJsonOrElse(element.attvAttr('data-style')) || {};
+    var dataStyle = Attv.parseJsonOrElse(element.attvAttr('data-style'), {});
     if (element.style.display !== 'none') {
         dataStyle.display = element.style.display;
         element.attvAttr('data-style', dataStyle);
@@ -534,28 +534,14 @@ String.prototype.equalsIgnoreCase = function (other) {
          */
         DataSettings.prototype.getSettings = function (element) {
             var rawValue = this.getValue(element).getRaw(element);
-            var settings = DataSettings.parseSettings(rawValue);
+            var settings = Attv.parseJsonOrElse(rawValue, {});
             return settings;
         };
         DataSettings.prototype.getSettingsForValue = function (value, element) {
             var rawValue = element.attvAttr(value.attribute.settingsName);
-            var settings = DataSettings.parseSettings(rawValue);
+            var settings = Attv.parseJsonOrElse(rawValue, {});
             settings.attributeValue = settings.attributeValue || value;
             return settings;
-        };
-        DataSettings.parseSettings = function (rawValue) {
-            if (Attv.isString(rawValue)) {
-                // does it look like json?
-                if ((rawValue === null || rawValue === void 0 ? void 0 : rawValue.startsWith('{')) && (rawValue === null || rawValue === void 0 ? void 0 : rawValue.endsWith('}'))) {
-                    rawValue = "(" + rawValue + ")";
-                }
-                // json ex: ({ name: 'value' }). so we just 
-                if (Attv.isEvaluatable(rawValue)) {
-                    //do eval
-                    rawValue = Attv.eval(rawValue);
-                }
-            }
-            return Attv.parseJsonOrElse(rawValue) || {};
         };
         DataSettings.UniqueId = 'DataSettings';
         return DataSettings;
@@ -783,14 +769,27 @@ String.prototype.equalsIgnoreCase = function (other) {
         return Attv.Dom.parseDom(any);
     }
     Attv.createHTMLElement = createHTMLElement;
-    function parseJsonOrElse(any) {
+    function parseJsonOrElse(any, orDefault) {
+        if (Attv.isString(any)) {
+            var text = any;
+            // does it look like json?
+            if ((text === null || text === void 0 ? void 0 : text.startsWith('{')) && (text === null || text === void 0 ? void 0 : text.endsWith('}'))) {
+                text = "(" + text + ")";
+            }
+            // json ex: ({ name: 'value' }). so we just 
+            if (Attv.isEvaluatable(text)) {
+                //do eval
+                text = Attv.eval(text);
+            }
+            any = text;
+        }
         try {
             any = JSON.parse(any);
         }
         catch (_a) {
             // nothing
         }
-        return any;
+        return (any || orDefault);
     }
     Attv.parseJsonOrElse = parseJsonOrElse;
     function generateElementId(attributeId) {

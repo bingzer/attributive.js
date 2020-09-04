@@ -61,7 +61,7 @@ interface HTMLElement  {
 HTMLElement.prototype.attvShow = function () {
     let element = this as HTMLElement;
     
-    let dataStyle = Attv.parseJsonOrElse(element.attvAttr('data-style')) || {};
+    let dataStyle = Attv.parseJsonOrElse<any>(element.attvAttr('data-style'), {});
     if (dataStyle.display) {
         element.style.display = dataStyle?.display;
     } else {
@@ -72,7 +72,7 @@ HTMLElement.prototype.attvShow = function () {
 HTMLElement.prototype.attvHide = function () {
     let element = this as HTMLElement;
     
-    let dataStyle = Attv.parseJsonOrElse(element.attvAttr('data-style')) || {};
+    let dataStyle = Attv.parseJsonOrElse<any>(element.attvAttr('data-style'), {});
     if (element.style.display !== 'none') {
         dataStyle.display = element.style.display;
         element.attvAttr('data-style', dataStyle);
@@ -665,34 +665,17 @@ namespace Attv {
          */
         getSettings<TSettings>(element: HTMLElement): TSettings {
             let rawValue = this.getValue(element).getRaw(element);
-            let settings = DataSettings.parseSettings<TSettings>(rawValue);
+            let settings = parseJsonOrElse<TSettings>(rawValue, {});
     
             return settings;
         }
 
         getSettingsForValue<TSettings extends Attribute.Settings>(value: Attv.Attribute.Value, element: HTMLElement): TSettings {
             let rawValue = element.attvAttr(value.attribute.settingsName);
-            let settings = DataSettings.parseSettings<TSettings>(rawValue);
+            let settings = parseJsonOrElse<TSettings>(rawValue, {});
             settings.attributeValue = settings.attributeValue || value;
     
             return settings;
-        }
-
-        static parseSettings<TSettings>(rawValue: string): TSettings  {    
-            if (Attv.isString(rawValue)) {
-                // does it look like json?
-                if (rawValue?.startsWith('{') && rawValue?.endsWith('}')) {
-                    rawValue = `(${rawValue})`;
-                }
-        
-                // json ex: ({ name: 'value' }). so we just 
-                if (Attv.isEvaluatable(rawValue)) {
-                    //do eval
-                    rawValue = Attv.eval(rawValue);
-                }
-            }
-        
-            return parseJsonOrElse(rawValue) || { } as TSettings;
         }
     }
 }
@@ -945,14 +928,30 @@ namespace Attv {
         return Attv.Dom.parseDom(any);
     }
 
-    export function parseJsonOrElse(any: any) {
+    export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any): TAny {  
+        if (Attv.isString(any)) {
+            let text = any as string;
+            // does it look like json?
+            if (text?.startsWith('{') && text?.endsWith('}')) {
+                text = `(${text})`;
+            }
+    
+            // json ex: ({ name: 'value' }). so we just 
+            if (Attv.isEvaluatable(text)) {
+                //do eval
+                text = Attv.eval(text);
+            }
+
+            any = text;
+        }
+
         try {
             any = JSON.parse(any);
         } catch {
             // nothing
         }
 
-        return any;
+        return (any || orDefault) as TAny;
     }
 
     export function generateElementId(attributeId: string) {

@@ -62,8 +62,11 @@ namespace Attv.DataPartial {
                 options.method = this.resolver.resolve<DataMethod>(DataMethod.UniqueId).getMethod(element);
 
                 options.callback = (ajaxOptions: Attv.Ajax.AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
+                    if (!wasSuccessful) {
+                        return;
+                    }
+
                     content = xhr.response;
-                    
                     this.doRender(element, content, options);
 
                     // [data-callback]

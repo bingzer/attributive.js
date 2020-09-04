@@ -69,6 +69,9 @@ var Attv;
                     options.url = this.resolver.resolve(Attv.DataUrl.UniqueId).getUrl(element);
                     options.method = this.resolver.resolve(Attv.DataMethod.UniqueId).getMethod(element);
                     options.callback = function (ajaxOptions, wasSuccessful, xhr) {
+                        if (!wasSuccessful) {
+                            return;
+                        }
                         content = xhr.response;
                         _this.doRender(element, content, options);
                         // [data-callback]

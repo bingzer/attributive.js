@@ -143,14 +143,6 @@ var Attv;
             var jsFunction = this.getValue(element).getRaw(element);
             return Attv.eval(jsFunction);
         };
-        DataCallback.prototype.fn = function (element) {
-            var _this = this;
-            var args = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                args[_i - 1] = arguments[_i];
-            }
-            return function (args) { return _this.callback(element); };
-        };
         DataCallback.UniqueId = 'DataCallback';
         return DataCallback;
     }(Attv.Attribute));
@@ -270,10 +262,6 @@ var Attv;
         }
         DataData.prototype.getData = function (element) {
             var rawValue = this.getValue(element).getRaw(element);
-            if (Attv.isEvaluatable(rawValue)) {
-                //do eval
-                rawValue = Attv.eval(rawValue);
-            }
             return Attv.parseJsonOrElse(rawValue);
         };
         DataData.UniqueId = 'DataData';

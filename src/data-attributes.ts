@@ -139,10 +139,6 @@ namespace Attv {
             let jsFunction = this.getValue(element).getRaw(element);
             return Attv.eval(jsFunction);
         }
-
-        fn(element: HTMLElement, ...args: any[]): any {
-            return (args) => this.callback(element);
-        }
     }
 
     /**
@@ -262,13 +258,7 @@ namespace Attv {
         
         getData(element: HTMLElement): any {
             let rawValue = this.getValue(element).getRaw(element);
-
-            if (Attv.isEvaluatable(rawValue)) {
-                //do eval
-                rawValue = Attv.eval(rawValue);
-            }
-
-            return parseJsonOrElse(rawValue);
+            return parseJsonOrElse<any>(rawValue);
         }
     }
 
@@ -606,7 +596,7 @@ namespace Attv {
             }
             
             render(templatedContent: string, model?: any): string {
-                model = Attv.parseJsonOrElse(model);
+                model = Attv.parseJsonOrElse<any>(model);
 
                 let templateElement = Attv.createHTMLElement(templatedContent);
                 let rootElement = Attv.createHTMLElement('');

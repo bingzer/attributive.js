@@ -1,8 +1,9 @@
 <div>
     <h3><code>[data-partial]</code></h3>
 
-    <div data-partial="auto" data-url="samples/partial.html" data-data="({name: 'value'})">uses [data-partial]</div>
+    <div data-partial="auto" data-url="samples/partial.html" data-data="{name: 'value'}" data-callback="console.log('******* loaded ********')">uses [data-partial]</div>
 
+    <div data-partial="auto" data-url="samples/non-existance-file.html">uses [data-partial] no file found</div>
 
     <form action="samples/sample.json"
         data-partial="form"
