@@ -103,7 +103,7 @@ var Attv;
             DataPartialTableValue.prototype.loadElement = function (element) {
                 if (!this.attribute.isElementLoaded(element)) {
                     this.render(element);
-                    this.attribute.markElementLoaded(element, true);
+                    return this.attribute.markElementLoaded(element, true);
                 }
                 return true;
             };

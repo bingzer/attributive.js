@@ -69,26 +69,27 @@ var Attv;
         /**
          * [data-partial]="tab"
          */
-        var DataTabDialogAttributeValue = /** @class */ (function (_super) {
-            __extends(DataTabDialogAttributeValue, _super);
-            function DataTabDialogAttributeValue(attribute) {
+        var DataPartialTabValue = /** @class */ (function (_super) {
+            __extends(DataPartialTabValue, _super);
+            function DataPartialTabValue(attribute) {
                 return _super.call(this, 'tab', attribute) || this;
             }
-            DataTabDialogAttributeValue.prototype.loadElement = function (element) {
+            DataPartialTabValue.prototype.loadElement = function (element) {
                 return false;
             };
-            DataTabDialogAttributeValue.prototype.render = function (element, content, options) {
+            DataPartialTabValue.prototype.render = function (element, content, options) {
                 if (!this.attribute.isElementLoaded(element)) {
                     _super.prototype.render.call(this, element, content, options);
+                    this.attribute.markElementLoaded(element, true);
                 }
             };
-            DataTabDialogAttributeValue.prototype.doRender = function (element, content, options) {
+            DataPartialTabValue.prototype.doRender = function (element, content, options) {
                 _super.prototype.doRender.call(this, element, content, options);
                 this.attribute.markElementLoaded(element, true);
             };
-            return DataTabDialogAttributeValue;
+            return DataPartialTabValue;
         }(Attv.DataPartial.DefaultValue));
-        DataTab.DataTabDialogAttributeValue = DataTabDialogAttributeValue;
+        DataTab.DataPartialTabValue = DataPartialTabValue;
     })(DataTab = Attv.DataTab || (Attv.DataTab = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
@@ -238,7 +239,7 @@ var Attv;
     Attv.DataTabContent = DataTabContent;
     (function (DataTabContent) {
         /**
-         * [data-tab-item]="*"
+         * [data-tab-content]="*"
          */
         var DefaultAttributeValue = /** @class */ (function (_super) {
             __extends(DefaultAttributeValue, _super);
@@ -249,19 +250,19 @@ var Attv;
                 return _this;
             }
             DefaultAttributeValue.prototype.loadElement = function (element) {
+                element.attvShow();
                 if (!this.attribute.isElementLoaded(element)) {
-                    element.attvShow();
                     // [data-content]
                     var dataContent = this.resolver.resolve(Attv.DataContent.UniqueId);
                     if (dataContent.exists(element)) {
                         element.attvHtml(dataContent.getContent(element));
-                        return;
+                        return this.attribute.markElementLoaded(element, true);
                     }
                     // [data-partial]
                     var dataPartial = this.resolver.resolve(Attv.DataPartial.UniqueId);
                     if (dataPartial.exists(element)) {
                         dataPartial.renderPartial(element);
-                        return;
+                        return this.attribute.markElementLoaded(element, true);
                     }
                     Attv.loadElements(element);
                     this.attribute.markElementLoaded(element, true);
@@ -302,7 +303,7 @@ Attv.loader.pre.push(function () {
         list.push(new Attv.DataTabContent.DefaultAttributeValue(attribute));
     });
     Attv.registerAttributeValue(Attv.DataPartial.UniqueId, function (attribute, list) {
-        list.push(new Attv.DataTab.DataTabDialogAttributeValue(attribute));
+        list.push(new Attv.DataTab.DataPartialTabValue(attribute));
     });
 });
 

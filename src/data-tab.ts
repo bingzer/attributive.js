@@ -34,25 +34,24 @@ namespace Attv.DataTab {
         }
         
         loadElement(element: HTMLElement): boolean {
-            return this.loadSettings(element, 
-                (settings) => {
-                    let dataTabItem = this.resolver.resolve<DataTabItem>(DataTabItem.UniqueId);
-        
-                    element.querySelectorAll(dataTabItem.toString()).forEach((itemElement: HTMLElement) => {
-                        dataTabItem.getValue(itemElement).loadElement(itemElement);
-                    });
-
-                    settings.style = Attv.DataTab.DefaultSettings.getStyle(settings);
+            return this.loadSettings(element, settings => {
+                let dataTabItem = this.resolver.resolve<DataTabItem>(DataTabItem.UniqueId);
     
-                    this.attribute.markElementLoaded(element, true);
+                element.querySelectorAll(dataTabItem.toString()).forEach((itemElement: HTMLElement) => {
+                    dataTabItem.getValue(itemElement).loadElement(itemElement);
                 });
+
+                settings.style = Attv.DataTab.DefaultSettings.getStyle(settings);
+
+                this.attribute.markElementLoaded(element, true);
+            });
         }
     }
 
     /**
      * [data-partial]="tab"
      */
-    export class DataTabDialogAttributeValue extends Attv.DataPartial.DefaultValue {
+    export class DataPartialTabValue extends Attv.DataPartial.DefaultValue {
         
         constructor (attribute: Attv.Attribute) {
             super('tab', attribute)
@@ -65,6 +64,8 @@ namespace Attv.DataTab {
         render(element: HTMLElement, content?: string, options?: Ajax.AjaxOptions) {
             if (!this.attribute.isElementLoaded(element)) {
                 super.render(element, content, options);
+
+                this.attribute.markElementLoaded(element, true);
             }
         }
         
@@ -236,7 +237,7 @@ namespace Attv {
     export namespace DataTabContent {
         
         /**
-         * [data-tab-item]="*"
+         * [data-tab-content]="*"
          */
         export class DefaultAttributeValue extends Attribute.Value {
             
@@ -248,21 +249,21 @@ namespace Attv {
             }
             
             loadElement(element: HTMLElement): boolean {
-                if (!this.attribute.isElementLoaded(element)) {
-                    element.attvShow();
-        
+                element.attvShow();
+
+                if (!this.attribute.isElementLoaded(element)) {        
                     // [data-content]
                     let dataContent = this.resolver.resolve<DataContent>(DataContent.UniqueId);
                     if (dataContent.exists(element)) {
                         element.attvHtml(dataContent.getContent(element));
-                        return;
+                        return this.attribute.markElementLoaded(element, true);
                     }
         
                     // [data-partial]
                     let dataPartial = this.resolver.resolve<DataPartial>(DataPartial.UniqueId);
                     if (dataPartial.exists(element)) {
                         dataPartial.renderPartial(element);
-                        return;
+                        return this.attribute.markElementLoaded(element, true);
                     }
         
                     Attv.loadElements(element);
@@ -370,7 +371,7 @@ Attv.loader.pre.push(() => {
 
     Attv.registerAttributeValue(Attv.DataPartial.UniqueId,
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTab.DataTabDialogAttributeValue(attribute));
+            list.push(new Attv.DataTab.DataPartialTabValue(attribute));
         }
     );
 });

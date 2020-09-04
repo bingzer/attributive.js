@@ -96,7 +96,7 @@ namespace Attv.DataTable {
             if (!this.attribute.isElementLoaded(element)) {
                 this.render(element);
                 
-                this.attribute.markElementLoaded(element, true);
+                return this.attribute.markElementLoaded(element, true);
             }
 
             return true;
