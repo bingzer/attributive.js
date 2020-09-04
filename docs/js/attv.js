@@ -364,7 +364,7 @@ String.prototype.equalsIgnoreCase = function (other) {
                     if (callback) {
                         callback(this.settings);
                     }
-                    Attv.Attribute.Settings.commit(this.settings);
+                    Attv.Attribute.Settings.commit(element, this.settings);
                 }
                 return true;
             };
@@ -449,7 +449,8 @@ String.prototype.equalsIgnoreCase = function (other) {
     (function (Attribute) {
         var Settings;
         (function (Settings) {
-            function commit(settings) {
+            var excludeProperties = ['attributeValue', 'override', 'style', 'styleUrls', 'jsUrls'];
+            function commit(element, settings) {
                 var apply = true;
                 if (settings.style) {
                     var elementId = 'style-' + settings.attributeValue.attribute.settingsName;
@@ -502,6 +503,10 @@ String.prototype.equalsIgnoreCase = function (other) {
                         }
                     });
                 }
+                var applicableKeys = Object.keys(settings).filter(function (key) { return !excludeProperties.some(function (prop) { return prop.equalsIgnoreCase(key); }); });
+                var settingsObject = {};
+                applicableKeys.forEach(function (r) { return settingsObject[r] = settings[r]; });
+                element.attvAttr(settings.attributeValue.attribute.settingsName, settingsObject);
             }
             Settings.commit = commit;
         })(Settings = Attribute.Settings || (Attribute.Settings = {}));

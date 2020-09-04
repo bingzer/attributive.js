@@ -1,7 +1,7 @@
 namespace Attv {
 
     /**
-     * [data-tab]
+     * [data-table]
      */
     export class DataTable extends Attv.Attribute {
         static readonly UniqueId = 'DataTable';
@@ -42,13 +42,18 @@ namespace Attv.DataTable {
          */
         loadElement(element: HTMLElement): boolean {
             if (!this.attribute.isElementLoaded(element)) {
-                let dataTemplate = this.resolver.resolve<DataTemplate>(DataTemplate.UniqueId);
-                let dataPartial = this.resolver.resolve<DataPartial>(DataPartial.UniqueId);
+                this.loadSettings<TableSettings>(element, settings => {
+                    let dataTemplate = this.resolver.resolve<DataTemplate>(DataTemplate.UniqueId);
+                    let dataPartial = this.resolver.resolve<DataPartial>(DataPartial.UniqueId);
+    
+                    dataTemplate.getValue(element).loadElement(element);
+                    dataPartial.getValue(element).loadElement(element);
 
-                dataTemplate.getValue(element).loadElement(element);
-                dataPartial.getValue(element).loadElement(element);
+                    settings.pageNumber = 100;
+                    Attv.Attribute.Settings.commit(element, settings);
+                });
 
-                this.attribute.markElementLoaded(element, true);
+                return this.attribute.markElementLoaded(element, true);
             }
 
             return true;
@@ -143,6 +148,15 @@ namespace Attv.DataTable {
 namespace Attv.DataTable {
         
     export interface TableSettings extends Attv.Attribute.Settings {
+        /**
+         * Number of record per paging
+         */
+        pageSize?: number;
+
+        /**
+         * Current page number
+         */
+        pageNumber?: number;
     }
 
     export namespace TableSettings {

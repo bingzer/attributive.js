@@ -14,7 +14,7 @@ var __extends = (this && this.__extends) || (function () {
 var Attv;
 (function (Attv) {
     /**
-     * [data-tab]
+     * [data-table]
      */
     var DataTable = /** @class */ (function (_super) {
         __extends(DataTable, _super);
@@ -53,12 +53,17 @@ var Attv;
              * @param root the root
              */
             DefaultValue.prototype.loadElement = function (element) {
+                var _this = this;
                 if (!this.attribute.isElementLoaded(element)) {
-                    var dataTemplate = this.resolver.resolve(Attv.DataTemplate.UniqueId);
-                    var dataPartial = this.resolver.resolve(Attv.DataPartial.UniqueId);
-                    dataTemplate.getValue(element).loadElement(element);
-                    dataPartial.getValue(element).loadElement(element);
-                    this.attribute.markElementLoaded(element, true);
+                    this.loadSettings(element, function (settings) {
+                        var dataTemplate = _this.resolver.resolve(Attv.DataTemplate.UniqueId);
+                        var dataPartial = _this.resolver.resolve(Attv.DataPartial.UniqueId);
+                        dataTemplate.getValue(element).loadElement(element);
+                        dataPartial.getValue(element).loadElement(element);
+                        settings.pageNumber = 100;
+                        Attv.Attribute.Settings.commit(element, settings);
+                    });
+                    return this.attribute.markElementLoaded(element, true);
                 }
                 return true;
             };

@@ -449,7 +449,7 @@ namespace Attv.Attribute {
                     callback(this.settings as TSettings);
                 }
     
-                Attv.Attribute.Settings.commit(this.settings);
+                Attv.Attribute.Settings.commit(element, this.settings);
             }
 
             return true;
@@ -568,7 +568,9 @@ namespace Attv.Attribute {
     }
 
     export namespace Settings {
-        export function commit(settings: Settings) {
+        let excludeProperties = ['attributeValue', 'override', 'style', 'styleUrls', 'jsUrls'];
+
+        export function commit(element: HTMLElement, settings: Settings) {
             let apply = true;
     
             if (settings.style) {
@@ -629,6 +631,12 @@ namespace Attv.Attribute {
                     }
                 });
             }
+
+            let applicableKeys = Object.keys(settings).filter(key => !excludeProperties.some(prop => prop.equalsIgnoreCase(key)));
+            let settingsObject = {};
+            applicableKeys.forEach(r => settingsObject[r] = settings[r]);
+
+            element.attvAttr(settings.attributeValue.attribute.settingsName, settingsObject);
         }
     }
 }
