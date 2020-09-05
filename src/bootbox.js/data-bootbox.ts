@@ -90,6 +90,48 @@ namespace Attv.Bootbox {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////// [data-dialog] ///////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv.Bootbox.Dialog {
+    
+    /**
+     * [data-dialog]="default|click"
+     */
+    export class DefaultValue extends Attv.DataDialog.DefaultValue {
+
+        constructor (attributeValue: string, 
+            attribute: Attv.Attribute, 
+            validators: Attv.Validators.AttributeValidator[] = [
+                new Validators.RequiredElement(['a', 'button'])
+            ]) {
+            super(attributeValue, attribute, validators);
+        }
+
+        protected showDialog(settings: DataDialog.DialogSettings): HTMLElement {
+            let templateHtmlElement = Attv.createHTMLElement(settings.templateHtml);
+            let dialogElement = templateHtmlElement.querySelector('dialog') as HTMLDialogElement;
+
+            if (settings.content) {
+                dialogElement.querySelector(settings.contentSelector).attvHtml(settings.content);
+            }
+
+            let bootboxOptions = settings as any;
+            bootboxOptions.message = dialogElement.attvHtml();
+            bootboxOptions.onShown = (e: Event) => {
+                let modal = e.target as HTMLElement;
+
+                if (settings.callback) {
+                    settings.callback(modal.querySelector(settings.contentSelector));
+                }
+            }
+
+            return bootbox.dialog(bootboxOptions);
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////// Settings //////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -133,5 +175,10 @@ Attv.loader.pre.push(() => {
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
             list.push(new Attv.Bootbox.DefaultValue('alert', attribute));
             list.push(new Attv.Bootbox.ConfirmValue('confirm', attribute));
+        });
+
+    Attv.registerAttributeValue(Attv.DataDialog.UniqueId,
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
+            list.push(new Attv.Bootbox.Dialog.DefaultValue(Attv.configuration.defaultTag, attribute));
         });
 });

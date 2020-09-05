@@ -92,6 +92,47 @@ var Attv;
     })(Bootbox = Attv.Bootbox || (Attv.Bootbox = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////// [data-dialog] ///////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+(function (Attv) {
+    var Bootbox;
+    (function (Bootbox) {
+        var Dialog;
+        (function (Dialog) {
+            /**
+             * [data-dialog]="default|click"
+             */
+            var DefaultValue = /** @class */ (function (_super) {
+                __extends(DefaultValue, _super);
+                function DefaultValue(attributeValue, attribute, validators) {
+                    if (validators === void 0) { validators = [
+                        new Attv.Validators.RequiredElement(['a', 'button'])
+                    ]; }
+                    return _super.call(this, attributeValue, attribute, validators) || this;
+                }
+                DefaultValue.prototype.showDialog = function (settings) {
+                    var templateHtmlElement = Attv.createHTMLElement(settings.templateHtml);
+                    var dialogElement = templateHtmlElement.querySelector('dialog');
+                    if (settings.content) {
+                        dialogElement.querySelector(settings.contentSelector).attvHtml(settings.content);
+                    }
+                    var bootboxOptions = settings;
+                    bootboxOptions.message = dialogElement.attvHtml();
+                    bootboxOptions.onShown = function (e) {
+                        var modal = e.target;
+                        if (settings.callback) {
+                            settings.callback(modal.querySelector(settings.contentSelector));
+                        }
+                    };
+                    return bootbox.dialog(bootboxOptions);
+                };
+                return DefaultValue;
+            }(Attv.DataDialog.DefaultValue));
+            Dialog.DefaultValue = DefaultValue;
+        })(Dialog = Bootbox.Dialog || (Bootbox.Dialog = {}));
+    })(Bootbox = Attv.Bootbox || (Attv.Bootbox = {}));
+})(Attv || (Attv = {}));
+////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// Validators ////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 (function (Attv) {
@@ -120,6 +161,9 @@ Attv.loader.pre.push(function () {
     Attv.registerAttributeValue(Attv.DataWall.UniqueId, function (attribute, list) {
         list.push(new Attv.Bootbox.DefaultValue('alert', attribute));
         list.push(new Attv.Bootbox.ConfirmValue('confirm', attribute));
+    });
+    Attv.registerAttributeValue(Attv.DataDialog.UniqueId, function (attribute, list) {
+        list.push(new Attv.Bootbox.Dialog.DefaultValue(Attv.configuration.defaultTag, attribute));
     });
 });
 

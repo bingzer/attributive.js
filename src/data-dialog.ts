@@ -82,7 +82,7 @@ namespace Attv.DataDialog {
             }
         }
 
-        private showDialog(settings: DataDialog.DialogSettings): HTMLDialogElement {
+        protected showDialog(settings: DataDialog.DialogSettings): HTMLElement {
             let templateHtmlElement = Attv.createHTMLElement(settings.templateHtml);
             let dialogElement = templateHtmlElement.querySelector('dialog') as HTMLDialogElement;
 
