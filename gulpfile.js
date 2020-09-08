@@ -21,7 +21,7 @@ function tsc() {
         .pipe(gulp.dest('docs/js/'));
 }
 
-function watch() {
+function watchTs() {
     return gulp.watch('src/**/*.ts', gulp.series(tsc));
 }
 
@@ -72,6 +72,7 @@ function concatAttributiveJs(name) {
 }
 
 const build = gulp.series(docsJsClean, tsc, uglifyAttributiveJs, concatAttributiveJs(), concatAttributiveJs('core'), concatAttributiveJs('xtra'));
+const watch = gulp.series(build, watchTs);
 
 exports.default = build;
 exports.watch = watch;
