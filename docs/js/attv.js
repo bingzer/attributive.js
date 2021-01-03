@@ -548,6 +548,80 @@ String.prototype.equalsIgnoreCase = function (other) {
     }(Attv.Attribute));
     Attv.DataSettings = DataSettings;
 })(Attv || (Attv = {}));
+(function (Attv) {
+    var Attribute;
+    (function (Attribute) {
+        var QuerySelectorValue = /** @class */ (function (_super) {
+            __extends(QuerySelectorValue, _super);
+            function QuerySelectorValue(attribute) {
+                return _super.call(this, undefined, attribute) || this;
+            }
+            QuerySelectorValue.prototype.getTargetElement = function (element) {
+                var selector = this.getRaw(element);
+                return document.querySelector(selector);
+            };
+            /**
+             * To string
+             */
+            QuerySelectorValue.prototype.toString = function (prettyPrint) {
+                if (prettyPrint) {
+                    return "[" + this.attribute.name + "]='<QuerySelector>'";
+                }
+                else {
+                    _super.prototype.toString.call(this, prettyPrint);
+                }
+            };
+            return QuerySelectorValue;
+        }(Attribute.Value));
+        Attribute.QuerySelectorValue = QuerySelectorValue;
+        var JsExpressionValue = /** @class */ (function (_super) {
+            __extends(JsExpressionValue, _super);
+            function JsExpressionValue(attribute) {
+                return _super.call(this, undefined, attribute) || this;
+            }
+            JsExpressionValue.prototype.evaluate = function (element) {
+                var jsFunction = this.getRaw(element);
+                return Attv.eval(jsFunction);
+            };
+            /**
+             * To string
+             */
+            JsExpressionValue.prototype.toString = function (prettyPrint) {
+                if (prettyPrint) {
+                    return "[" + this.attribute.name + "]='<JsExpression>'";
+                }
+                else {
+                    _super.prototype.toString.call(this, prettyPrint);
+                }
+            };
+            return JsExpressionValue;
+        }(Attribute.Value));
+        Attribute.JsExpressionValue = JsExpressionValue;
+        var NumberValue = /** @class */ (function (_super) {
+            __extends(NumberValue, _super);
+            function NumberValue(attribute) {
+                return _super.call(this, undefined, attribute) || this;
+            }
+            NumberValue.prototype.getNumber = function (element) {
+                var raw = this.getRaw(element);
+                return parseInt(raw);
+            };
+            /**
+             * To string
+             */
+            NumberValue.prototype.toString = function (prettyPrint) {
+                if (prettyPrint) {
+                    return "[" + this.attribute.name + "]='<Number>'";
+                }
+                else {
+                    _super.prototype.toString.call(this, prettyPrint);
+                }
+            };
+            return NumberValue;
+        }(Attribute.Value));
+        Attribute.NumberValue = NumberValue;
+    })(Attribute = Attv.Attribute || (Attv.Attribute = {}));
+})(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Validators //////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -960,6 +1034,7 @@ String.prototype.equalsIgnoreCase = function (other) {
     }
     function preRegister() {
         Attv.log('Attv v.' + Attv.version);
+        Attv.registerAttribute('data-settings', function (name) { return new Attv.DataSettings(name); });
     }
     function register() {
         for (var i = 0; i < attributeRegistrar.length; i++) {
@@ -973,9 +1048,7 @@ String.prototype.equalsIgnoreCase = function (other) {
     }
     Attv.loader.init.push(initialize);
     Attv.loader.pre.push(preRegister);
-    Attv.loader.post.push(register);
-    Attv.loader.post.push(Attv.loadElements);
-    Attv.loader.post.push(cleanup);
+    Attv.loader.post.push(register, Attv.loadElements, cleanup);
 })(Attv || (Attv = {}));
 Attv.onDocumentReady(function () {
     for (var i = 0; i < Attv.loader.init.length; i++) {

@@ -46,8 +46,12 @@ namespace Attv.Docs {
         writer.clear();
         writer.write(`Documentation for ${attribute.toString()}. ${attribute.description || ''}`, "attribute");
         attribute.values.forEach(val => {
-            writer.write(`   ${val.toString(true)}`, "attribute-value");
+            writer.write(`${val.toString(true)}`, "attribute-value");
         });
+
+        if (attribute.values?.length === 0 && !attribute.isStrict) {
+            writer.write(`${attribute.toString()}='*'`);
+        }
     }
 
 

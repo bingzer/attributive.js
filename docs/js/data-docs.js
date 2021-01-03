@@ -38,13 +38,17 @@ var Attv;
         Docs.HtmlWriter = HtmlWriter;
         var consoleWriter = new ConsoleWriter();
         function showHelp(uniqueIdOrName, writer) {
+            var _a;
             if (writer === void 0) { writer = consoleWriter; }
             var attribute = Attv.attributes.filter(function (att) { return att.uniqueId == uniqueIdOrName || att.name === uniqueIdOrName; })[0];
             writer.clear();
             writer.write("Documentation for " + attribute.toString() + ". " + (attribute.description || ''), "attribute");
             attribute.values.forEach(function (val) {
-                writer.write("   " + val.toString(true), "attribute-value");
+                writer.write("" + val.toString(true), "attribute-value");
             });
+            if (((_a = attribute.values) === null || _a === void 0 ? void 0 : _a.length) === 0 && !attribute.isStrict) {
+                writer.write(attribute.toString() + "='*'");
+            }
         }
         Docs.showHelp = showHelp;
     })(Docs = Attv.Docs || (Attv.Docs = {}));

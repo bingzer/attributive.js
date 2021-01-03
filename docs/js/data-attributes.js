@@ -29,7 +29,7 @@ var Attv;
             // [data-method]
             var dataMethod = attributeValue.resolver.resolve(DataMethod.UniqueId);
             var method = dataMethod.getMethod(element);
-            if (method === 'get') {
+            if (method.equalsIgnoreCase('get')) {
                 // [data-data]
                 var dataData = attributeValue.resolver.resolve(DataData.UniqueId);
                 var data = dataData.getData(element);
@@ -172,8 +172,7 @@ var Attv;
             return _super.call(this, DataTarget.UniqueId, name) || this;
         }
         DataTarget.prototype.getTargetElement = function (element) {
-            var selector = this.getValue(element).getRaw(element);
-            return document.querySelector(selector);
+            return this.getValue(element).getTargetElement(element);
         };
         DataTarget.UniqueId = 'DataTarget';
         return DataTarget;
@@ -188,7 +187,7 @@ var Attv;
             return _super.call(this, DataTimeout.UniqueId, name) || this;
         }
         DataTimeout.prototype.timeout = function (element, fn) {
-            var ms = parseInt(this.getValue(element).getRaw(element));
+            var ms = this.getValue(element).getNumber(element);
             if (ms) {
                 window.setTimeout(fn, ms);
             }
@@ -209,7 +208,7 @@ var Attv;
             return _super.call(this, DataInterval.UniqueId, name) || this;
         }
         DataInterval.prototype.interval = function (element, fn) {
-            var ms = parseInt(this.getValue(element).getRaw(element));
+            var ms = this.getValue(element).getNumber(element);
             if (ms) {
                 var timer = new DataInterval.IntervalTimer(ms, fn);
                 DataInterval.step(timer, ms);
@@ -299,21 +298,6 @@ var Attv;
         return DataBind;
     }(Attv.Attribute));
     Attv.DataBind = DataBind;
-    /**
-     * [data-bind-when]='*'
-     */
-    var DataBindWhen = /** @class */ (function (_super) {
-        __extends(DataBindWhen, _super);
-        function DataBindWhen(name) {
-            return _super.call(this, DataBindWhen.UniqueId, name) || this;
-        }
-        DataBindWhen.prototype.bind = function (element, any) {
-            element.attvHtml((any === null || any === void 0 ? void 0 : any.toString()) || '');
-        };
-        DataBindWhen.UniqueId = 'DataBindWhen';
-        return DataBindWhen;
-    }(Attv.Attribute));
-    Attv.DataBindWhen = DataBindWhen;
     /**
      * [data-enabled]='true|false'
      */
@@ -428,13 +412,20 @@ Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-method', function (name) { return new Attv.DataMethod(name); }, function (attribute, list) {
         list.push(new Attv.DataMethod.DefaultValue(attribute));
     });
-    Attv.registerAttribute('data-callback', function (name) { return new Attv.DataCallback(name); });
-    Attv.registerAttribute('data-target', function (name) { return new Attv.DataTarget(name); });
+    Attv.registerAttribute('data-callback', function (name) { return new Attv.DataCallback(name); }, function (attribute, list) {
+        list.push(new Attv.Attribute.JsExpressionValue(attribute));
+    });
+    Attv.registerAttribute('data-target', function (name) { return new Attv.DataTarget(name); }, function (attribute, list) {
+        list.push(new Attv.Attribute.QuerySelectorValue(attribute));
+    });
+    Attv.registerAttribute('data-timeout', function (name) { return new Attv.DataTimeout(name); }, function (attribute, list) {
+        list.push(new Attv.Attribute.NumberValue(attribute));
+    });
+    Attv.registerAttribute('data-interval', function (name) { return new Attv.DataInterval(name); }, function (attribute, list) {
+        list.push(new Attv.Attribute.NumberValue(attribute));
+    });
     Attv.registerAttribute('data-content', function (name) { return new Attv.DataContent(name); });
-    Attv.registerAttribute('data-timeout', function (name) { return new Attv.DataTimeout(name); });
-    Attv.registerAttribute('data-interval', function (name) { return new Attv.DataInterval(name); });
     Attv.registerAttribute('data-data', function (name) { return new Attv.DataData(name); });
-    Attv.registerAttribute('data-settings', function (name) { return new Attv.DataSettings(name); });
     Attv.registerAttribute('data-cache', function (name) { return new Attv.DataCache(name); });
     Attv.registerAttribute('data-title', function (name) { return new Attv.DataTitle(name); });
     Attv.registerAttribute('data-bind', function (name) { return new Attv.DataBind(name); });

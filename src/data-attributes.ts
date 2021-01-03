@@ -21,7 +21,7 @@ namespace Attv {
             let dataMethod = attributeValue.resolver.resolve<DataMethod>(DataMethod.UniqueId);
             let method = dataMethod.getMethod(element);
 
-            if (method === 'get') {
+            if (method.equalsIgnoreCase('get')) {
                 // [data-data]
                 let dataData = attributeValue.resolver.resolve<DataData>(DataData.UniqueId);
                 let data = dataData.getData(element);
@@ -169,9 +169,7 @@ namespace Attv {
         }
 
         getTargetElement(element: HTMLElement): HTMLElement {
-            let selector = this.getValue(element).getRaw(element);
-
-            return document.querySelector(selector) as HTMLElement;
+            return this.getValue<Attv.Attribute.QuerySelectorValue>(element).getTargetElement(element);
         }
     }
 
@@ -183,10 +181,10 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataTimeout.UniqueId, name);
-        }
+        } 
 
         timeout(element: HTMLElement, fn: () => void) {
-            let ms = parseInt(this.getValue(element).getRaw(element));
+            let ms = this.getValue<Attv.Attribute.NumberValue>(element).getNumber(element);
 
             if (ms) {
                 window.setTimeout(fn, ms);
@@ -207,7 +205,7 @@ namespace Attv {
         }
 
         interval(element: HTMLElement, fn: () => void) {
-            let ms = parseInt(this.getValue(element).getRaw(element));
+            let ms = this.getValue<Attv.Attribute.NumberValue>(element).getNumber(element);
 
             if (ms) {
                 let timer = new DataInterval.IntervalTimer(ms, fn);
@@ -286,21 +284,6 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataBind.UniqueId, name);
-        }
-
-        bind(element: HTMLElement, any: any) {
-            element.attvHtml(any?.toString() || '');
-        }
-    }
-
-    /**
-     * [data-bind-when]='*'
-     */
-    export class DataBindWhen extends Attv.Attribute {
-        static readonly UniqueId = 'DataBindWhen';
-
-        constructor (name: string) {
-            super(DataBindWhen.UniqueId, name);
         }
 
         bind(element: HTMLElement, any: any) {
@@ -433,13 +416,32 @@ Attv.loader.pre.push(() => {
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
             list.push(new Attv.DataMethod.DefaultValue(attribute));
         });
-    Attv.registerAttribute('data-callback', (name: string) => new Attv.DataCallback(name));
-    Attv.registerAttribute('data-target',  (name: string) => new Attv.DataTarget(name));
+    Attv.registerAttribute('data-callback', 
+        (name: string) => new Attv.DataCallback(name),
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
+            list.push(new Attv.Attribute.JsExpressionValue(attribute))
+        }
+    );
+    Attv.registerAttribute('data-target',  
+        (name: string) => new Attv.DataTarget(name),
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
+            list.push(new Attv.Attribute.QuerySelectorValue(attribute))
+        }
+    );
+    Attv.registerAttribute('data-timeout', 
+        (name: string) => new Attv.DataTimeout(name),
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
+            list.push(new Attv.Attribute.NumberValue(attribute))
+        }
+    );
+    Attv.registerAttribute('data-interval', 
+        (name: string) => new Attv.DataInterval(name),
+        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
+            list.push(new Attv.Attribute.NumberValue(attribute))
+        }
+    );
     Attv.registerAttribute('data-content', (name: string) => new Attv.DataContent(name));
-    Attv.registerAttribute('data-timeout', (name: string) => new Attv.DataTimeout(name));
-    Attv.registerAttribute('data-interval', (name: string) => new Attv.DataInterval(name));
     Attv.registerAttribute('data-data', (name: string) => new Attv.DataData(name));
-    Attv.registerAttribute('data-settings', (name: string) => new Attv.DataSettings(name));
     Attv.registerAttribute('data-cache', (name: string) => new Attv.DataCache(name));
     Attv.registerAttribute('data-title', (name: string) => new Attv.DataTitle(name));
     Attv.registerAttribute('data-bind', (name: string) => new Attv.DataBind(name));

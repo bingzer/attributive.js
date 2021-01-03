@@ -28,7 +28,14 @@ function watchTs() {
 function uglifyAttributiveJs(name) {
     return pipeline(
         gulp.src('docs/js/**/*.js'),
-        uglify(),
+        uglify({
+            compress: {
+                global_defs: {
+                    ATTV_DEBUG : false,
+                    ATTV_LOGGING_ENABLED : false
+                }
+            }
+        }),
         gulp.dest('docs/js/dist/')
     );
 }
@@ -45,7 +52,6 @@ function concatAttributiveJs(name) {
         "core": [
             'docs/js/dist/attv.js',
             'docs/js/dist/data-attributes.js',
-            'docs/js/dist/data-docs.js',
             'docs/js/dist/data-partial.js'
         ],
         "xtra": [

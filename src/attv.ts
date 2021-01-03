@@ -297,7 +297,7 @@ namespace Attv {
          * When set to true. All attribute values needs to be registered. 
          * NO wildcard.
          */
-        protected isStrict: boolean = false;
+        public isStrict: boolean = false;
 
         /**
          * 
@@ -675,6 +675,76 @@ namespace Attv {
             settings.attributeValue = settings.attributeValue || value;
     
             return settings;
+        }
+    }
+}
+
+namespace Attv.Attribute {
+    
+    export class QuerySelectorValue extends Attribute.Value {
+        constructor (attribute: Attribute) {
+            super(undefined, attribute)
+        }
+
+        getTargetElement(element: HTMLElement): HTMLElement {
+            let selector = this.getRaw(element);
+
+            return document.querySelector(selector) as HTMLElement;
+        }
+
+        /**
+         * To string
+         */
+        toString(prettyPrint?: boolean): string {
+            if (prettyPrint) {
+                return `[${this.attribute.name}]='<QuerySelector>'`;
+            } else {
+                super.toString(prettyPrint);
+            }
+        }
+    }
+
+    export class JsExpressionValue extends Attribute.Value {
+        constructor (attribute: Attribute) {
+            super(undefined, attribute)
+        }
+
+        evaluate(element: HTMLElement): any {
+            let jsFunction = this.getRaw(element);
+            return Attv.eval(jsFunction);
+        }
+
+        /**
+         * To string
+         */
+        toString(prettyPrint?: boolean): string {
+            if (prettyPrint) {
+                return `[${this.attribute.name}]='<JsExpression>'`;
+            } else {
+                super.toString(prettyPrint);
+            }
+        }
+    }
+
+    export class NumberValue extends Attribute.Value {
+        constructor (attribute: Attribute) {
+            super(undefined, attribute)
+        }
+
+        getNumber(element: HTMLElement): number {
+            let raw = this.getRaw(element);
+            return parseInt(raw);
+        }
+
+        /**
+         * To string
+         */
+        toString(prettyPrint?: boolean): string {
+            if (prettyPrint) {
+                return `[${this.attribute.name}]='<Number>'`;
+            } else {
+                super.toString(prettyPrint);
+            }
         }
     }
 }
@@ -1156,6 +1226,7 @@ namespace Attv {
 
     function preRegister() {
         Attv.log('Attv v.' + Attv.version);
+        Attv.registerAttribute('data-settings', (name: string) => new Attv.DataSettings(name));
     }
 
     function register() {
@@ -1173,9 +1244,7 @@ namespace Attv {
 
     Attv.loader.init.push(initialize);
     Attv.loader.pre.push(preRegister);
-    Attv.loader.post.push(register);
-    Attv.loader.post.push(loadElements);
-    Attv.loader.post.push(cleanup);
+    Attv.loader.post.push(register, loadElements, cleanup);
 }
 
 Attv.onDocumentReady(() => {
