@@ -16,8 +16,8 @@ textarea.template-sample {
     <textarea class="template-sample">
 <div id="template2" data-template="default" data-renderer="json2html">
     <h4><strong>This is from div template</strong></h4>
-    <ul data-bind="$root">
-        <li>
+    <ul>
+        <li data-bind="$root">
             <p>
                 Name: <span data-bind="name"></span>
             </p>
@@ -42,20 +42,20 @@ textarea.template-sample {
     <textarea class="template-sample">
 <script type="text/html" id="template1" data-template="script" data-renderer="json2html">
     <h4><strong>This is from script template</strong></h4>
-    <ul data-bind="$root">
-        <li>
+    <ul>
+        <li data-bind="$root">
             <p>
                 Name: <span data-bind="name"></span>
             </p>
             <p>
                 contact <br/>
-                Email: <span data-bind="contact.email"></span><br/>
+                Email: <span data-bind="contact.email" data-bind-when="contact.email === 'hello'"></span><br/>
                 Phone: <span data-bind="contact.phone"></span><br/>
             </p>
             <p>
                 Friends
-                <ul data-bind="friends">
-                    <li>
+                <ul>
+                    <li data-bind="friends">
                         Friends number <span data-bind="id"></span>. name = <span data-bind="name"></span>
                     </li>
                 </ul>

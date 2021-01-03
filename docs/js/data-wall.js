@@ -23,7 +23,7 @@ var Attv;
             _this.name = name;
             _this.isStrict = true;
             _this.dependency.uses.push(Attv.DataContent.UniqueId);
-            _this.dependency.internals.push(Attv.DataCallback.UniqueId);
+            _this.dependency.internals.push(Attv.DataCallback.UniqueId, Attv.DataUrl.UniqueId);
             return _this;
         }
         DataWall.UniqueId = "DataWall";

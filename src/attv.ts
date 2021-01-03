@@ -414,7 +414,6 @@ namespace Attv.Attribute {
      */
     export class Value {
         public readonly resolver: Resolver = new Resolver(this);
-        public description: string;
         public settings: Settings;
         
         constructor (protected value: string, 

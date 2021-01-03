@@ -294,6 +294,21 @@ namespace Attv {
     }
 
     /**
+     * [data-bind-when]='*'
+     */
+    export class DataBindWhen extends Attv.Attribute {
+        static readonly UniqueId = 'DataBindWhen';
+
+        constructor (name: string) {
+            super(DataBindWhen.UniqueId, name);
+        }
+
+        bind(element: HTMLElement, any: any) {
+            element.attvHtml(any?.toString() || '');
+        }
+    }
+
+    /**
      * [data-enabled]='true|false'
      */
     export class DataEnabled extends Attv.Attribute {

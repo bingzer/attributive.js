@@ -46,7 +46,7 @@ namespace Attv.Docs {
         writer.clear();
         writer.write(`Documentation for ${attribute.toString()}. ${attribute.description || ''}`, "attribute");
         attribute.values.forEach(val => {
-            writer.write(`   ${val.toString(true)}. ${val.description || ''}`, "attribute-value");
+            writer.write(`   ${val.toString(true)}`, "attribute-value");
         });
     }
 

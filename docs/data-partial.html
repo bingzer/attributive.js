@@ -1,10 +1,13 @@
 <div>
     <h3><code>[data-partial]</code></h3>
 
+    <hr/>
     <div data-partial="auto" data-url="samples/partial.html" data-data="{name: 'value'}" data-callback="console.log('******* loaded ********')">uses [data-partial]</div>
 
+    <hr/>
     <div data-partial="auto" data-url="samples/non-existance-file.html">uses [data-partial] no file found</div>
 
+    <hr/>
     <form action="samples/sample.json"
         data-partial="form"
         data-template-source="#template1"
@@ -17,15 +20,24 @@
         </div>
     </form>
     
+    <hr/>
         
     <button type="submit"
         data-partial="click"
         data-url="samples/partial.html"
         data-target="#container2">Click here 2222</button>
 
+    <hr/>
+    <button type="submit"
+        data-partial="click"
+        data-url="samples/partial.html"
+        data-target="#container2">Click here 3333</button>
+
+    <hr/>
     <div id="container2">
         <p>Content should be here *container2</p>
     </div>
+    <hr/>
     <!-- 
     <div data-partial="auto"></div>
 
@@ -40,8 +52,8 @@
 
 <script type="text/html" id="template1" data-template="script" data-renderer="json2html">
     <h4><strong>This is from script template</strong></h4>
-    <ul data-bind="$root">
-        <li>
+    <ul style="max-height: 350px; overflow: auto; border: 1px solid gray">
+        <li data-bind="$root" >
             <p>
                 Name: <span data-bind="name"></span>
             </p>
@@ -52,8 +64,8 @@
             </p>
             <p>
                 Friends
-                <ul data-bind="friends">
-                    <li>
+                <ul>
+                    <li data-bind="friends">
                         Friends number <span data-bind="id"></span>. name = <span data-bind="name"></span>
                     </li>
                 </ul>

@@ -12,11 +12,10 @@ namespace Attv {
             this.isStrict = true;
 
             this.dependency.uses.push(DataContent.UniqueId);
-            this.dependency.internals.push(DataCallback.UniqueId);
+            this.dependency.internals.push(DataCallback.UniqueId, DataUrl.UniqueId);
         }
 
     }
-
     // --- AttributeValues
 
     export namespace DataWall {

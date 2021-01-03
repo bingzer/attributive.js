@@ -300,6 +300,21 @@ var Attv;
     }(Attv.Attribute));
     Attv.DataBind = DataBind;
     /**
+     * [data-bind-when]='*'
+     */
+    var DataBindWhen = /** @class */ (function (_super) {
+        __extends(DataBindWhen, _super);
+        function DataBindWhen(name) {
+            return _super.call(this, DataBindWhen.UniqueId, name) || this;
+        }
+        DataBindWhen.prototype.bind = function (element, any) {
+            element.attvHtml((any === null || any === void 0 ? void 0 : any.toString()) || '');
+        };
+        DataBindWhen.UniqueId = 'DataBindWhen';
+        return DataBindWhen;
+    }(Attv.Attribute));
+    Attv.DataBindWhen = DataBindWhen;
+    /**
      * [data-enabled]='true|false'
      */
     var DataEnabled = /** @class */ (function (_super) {
