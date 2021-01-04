@@ -1,3 +1,5 @@
+var ATTV_DEBUG: boolean = true;
+var ATTV_VERBOSE_LOGGING: boolean = true;
 
 namespace Attv {
     /**
@@ -803,7 +805,7 @@ namespace Attv {
 
         isDebug: boolean;
 
-        isLoggingEnabled: boolean;
+        isVerboseLogging: boolean;
 
         readonly defaultTag: string;
 
@@ -812,9 +814,18 @@ namespace Attv {
 
     export class DefaultConfiguration implements Configuration {
 
-        isDebug: boolean = true;
+        isDebug: boolean = false;
+        isVerboseLogging: boolean = false;
+        
+        constructor() {
+            if (ATTV_DEBUG) {
+                this.isDebug = true;
+            }
 
-        isLoggingEnabled: boolean = true;
+            if (ATTV_VERBOSE_LOGGING) {
+                this.isVerboseLogging = true;
+            }
+        }
 
         get defaultTag(): string  {
             return "default";
@@ -982,11 +993,13 @@ namespace Attv {
     }
 
     export function log(...data: any[]) {
-        if (!Attv.configuration.isLoggingEnabled && data[0] !== 'fatal') {
-            return;
+        let level = data[0];
+        if (!Attv.configuration.isVerboseLogging) {
+            if (['debug', 'warning', 'error'].indexOf(level) !== -1) {
+                return;
+            }
         }
 
-        let level = data[0];
         if (Attv.configuration.logLevels?.indexOf(level) >= 0) {
             data = data.splice(1);
         }

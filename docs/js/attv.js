@@ -18,6 +18,8 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
             r[k] = a[j];
     return r;
 };
+var ATTV_DEBUG = true;
+var ATTV_VERBOSE_LOGGING = true;
 var Attv;
 (function (Attv) {
     /**
@@ -658,8 +660,14 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
 (function (Attv) {
     var DefaultConfiguration = /** @class */ (function () {
         function DefaultConfiguration() {
-            this.isDebug = true;
-            this.isLoggingEnabled = true;
+            this.isDebug = false;
+            this.isVerboseLogging = false;
+            if (ATTV_DEBUG) {
+                this.isDebug = true;
+            }
+            if (ATTV_VERBOSE_LOGGING) {
+                this.isVerboseLogging = true;
+            }
         }
         Object.defineProperty(DefaultConfiguration.prototype, "defaultTag", {
             get: function () {
@@ -831,10 +839,12 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
         for (var _i = 0; _i < arguments.length; _i++) {
             data[_i] = arguments[_i];
         }
-        if (!Attv.configuration.isLoggingEnabled && data[0] !== 'fatal') {
-            return;
-        }
         var level = data[0];
+        if (!Attv.configuration.isVerboseLogging) {
+            if (['debug', 'warning', 'error'].indexOf(level) !== -1) {
+                return;
+            }
+        }
         if (((_a = Attv.configuration.logLevels) === null || _a === void 0 ? void 0 : _a.indexOf(level)) >= 0) {
             data = data.splice(1);
         }
