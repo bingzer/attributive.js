@@ -293,6 +293,8 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataBind.UniqueId, name);
+
+            this.wildcard = "<jsExpression>";
         }
 
         bind(element: HTMLElement, any: any) {

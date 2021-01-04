@@ -300,7 +300,9 @@ var Attv;
     var DataBind = /** @class */ (function (_super) {
         __extends(DataBind, _super);
         function DataBind(name) {
-            return _super.call(this, DataBind.UniqueId, name) || this;
+            var _this = _super.call(this, DataBind.UniqueId, name) || this;
+            _this.wildcard = "<jsExpression>";
+            return _this;
         }
         DataBind.prototype.bind = function (element, any) {
             element.attvHtml((any === null || any === void 0 ? void 0 : any.toString()) || '');

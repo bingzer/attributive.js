@@ -482,7 +482,7 @@ namespace Attv.Attribute {
          */
         toString(prettyPrint?: boolean): string {
             if (prettyPrint) {
-                return `[${this.attribute.name}]='${this.value || '*'}'`;
+                return `[${this.attribute.name}]='${this.value || this.attribute.wildcard }'`;
             } else {
                 return `[${this.attribute.name}]${this.value ? `=${this.value}`: ''}`;
             }
@@ -1072,7 +1072,7 @@ namespace Attv {
                     let isValidated = true;
                     for (var i = 0; i < attributeValue.validators.length; i++) {
                         let validator = attributeValue.validators[i];
-                        isValidated = isValidated = validator.validate(attributeValue, element);
+                        isValidated = isValidated && validator.validate(attributeValue, element);
                     }
 
                     if (!isValidated) {
@@ -1150,7 +1150,7 @@ namespace Attv {
         register(): Attribute {
             let attribute = this.fn(this.attributeName);
             
-            Attv.log('debug', `${attribute}`, attribute);
+            //Attv.log('debug', `${attribute.toString()}`, attribute);
 
             let attributeValues: Attribute.Value[] = [];
 
@@ -1167,7 +1167,9 @@ namespace Attv {
             attribute.registerAttributeValues(values);
 
             if (attributeValues.length > 0) {
-                Attv.log('debug', `${attributeValues.map(v => v.toString(true))}`, attributeValues);
+                attributeValues.forEach(v => {
+                    Attv.log('debug', v.toString(true), attributeValues);
+                })
             } else {
                 // wild card
                 Attv.log('debug', `${attribute.toString()}='${attribute.wildcard}'`);

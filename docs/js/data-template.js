@@ -132,6 +132,7 @@ var Attv;
         function DataTemplateSource(name) {
             var _this = _super.call(this, DataTemplateSource.UniqueId, name, false) || this;
             _this.name = name;
+            _this.wildcard = "<querySelector>";
             return _this;
         }
         DataTemplateSource.prototype.renderTemplate = function (element, model) {

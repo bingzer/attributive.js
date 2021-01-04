@@ -400,7 +400,7 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
              */
             Value.prototype.toString = function (prettyPrint) {
                 if (prettyPrint) {
-                    return "[" + this.attribute.name + "]='" + (this.value || '*') + "'";
+                    return "[" + this.attribute.name + "]='" + (this.value || this.attribute.wildcard) + "'";
                 }
                 else {
                     return "[" + this.attribute.name + "]" + (this.value ? "=" + this.value : '');
@@ -894,7 +894,7 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
                     var isValidated = true;
                     for (var i = 0; i < attributeValue.validators.length; i++) {
                         var validator = attributeValue.validators[i];
-                        isValidated = isValidated = validator.validate(attributeValue, element);
+                        isValidated = isValidated && validator.validate(attributeValue, element);
                     }
                     if (!isValidated) {
                         return;
@@ -963,7 +963,7 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
         }
         AttributeRegistration.prototype.register = function () {
             var attribute = this.fn(this.attributeName);
-            Attv.log('debug', "" + attribute, attribute);
+            //Attv.log('debug', `${attribute.toString()}`, attribute);
             var attributeValues = [];
             if (this.valuesFn) {
                 this.valuesFn(attribute, attributeValues);
@@ -975,7 +975,9 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
             var values = attributeValues.reverse();
             attribute.registerAttributeValues(values);
             if (attributeValues.length > 0) {
-                Attv.log('debug', "" + attributeValues.map(function (v) { return v.toString(true); }), attributeValues);
+                attributeValues.forEach(function (v) {
+                    Attv.log('debug', v.toString(true), attributeValues);
+                });
             }
             else {
                 // wild card

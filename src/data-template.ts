@@ -130,6 +130,8 @@ namespace Attv {
 
         constructor (public name: string) {
             super(DataTemplateSource.UniqueId, name, false);
+
+            this.wildcard = "<querySelector>";
         }
 
         renderTemplate(element: HTMLElement, model: any): string {
