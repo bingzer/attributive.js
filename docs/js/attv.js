@@ -117,7 +117,11 @@ HTMLElement.prototype.attvAttr = function (name, value) {
     // element.attr('name', 'value')
     else {
         value = element.dataset[datasetName];
-        if (!value) {
+        // Fixed boolean attribute names
+        if (value === 'false' || value === 'true') {
+            return value === 'true';
+        }
+        if (Attv.isUndefined(value)) {
             // get from the attrbitue
             value = element.getAttribute(name) || undefined;
         }

@@ -218,14 +218,14 @@ namespace Attv {
             if (ms) {
                 let timer = new DataInterval.IntervalTimer(ms, fn);
                 DataInterval.step(timer, ms);
-            } else {
-                fn();
             }
+
+            fn();
         }
 
         private static step(intervalTimer: DataInterval.IntervalTimer, timestamp: number) {
-            if (intervalTimer.start == undefined) {
-                intervalTimer.start = timestamp;
+            if (intervalTimer.start === undefined) {
+                intervalTimer.start = timestamp - intervalTimer.timer;
             }
 
             const elapsed = timestamp - intervalTimer.start;

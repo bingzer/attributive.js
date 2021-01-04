@@ -224,13 +224,11 @@ var Attv;
                 var timer = new DataInterval.IntervalTimer(ms, fn);
                 DataInterval.step(timer, ms);
             }
-            else {
-                fn();
-            }
+            fn();
         };
         DataInterval.step = function (intervalTimer, timestamp) {
-            if (intervalTimer.start == undefined) {
-                intervalTimer.start = timestamp;
+            if (intervalTimer.start === undefined) {
+                intervalTimer.start = timestamp - intervalTimer.timer;
             }
             var elapsed = timestamp - intervalTimer.start;
             if (elapsed > intervalTimer.timer) {
