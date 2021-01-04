@@ -533,7 +533,9 @@ String.prototype.equalsIgnoreCase = function (other) {
     var DataSettings = /** @class */ (function (_super) {
         __extends(DataSettings, _super);
         function DataSettings(name) {
-            return _super.call(this, DataSettings.UniqueId, name) || this;
+            var _this = _super.call(this, DataSettings.UniqueId, name) || this;
+            _this.wildcard = "<json>";
+            return _this;
         }
         /**
          * Returns the option object (json)
@@ -554,80 +556,6 @@ String.prototype.equalsIgnoreCase = function (other) {
         return DataSettings;
     }(Attv.Attribute));
     Attv.DataSettings = DataSettings;
-})(Attv || (Attv = {}));
-(function (Attv) {
-    var Attribute;
-    (function (Attribute) {
-        var QuerySelectorValue2 = /** @class */ (function (_super) {
-            __extends(QuerySelectorValue2, _super);
-            function QuerySelectorValue2(attribute) {
-                return _super.call(this, undefined, attribute) || this;
-            }
-            QuerySelectorValue2.prototype.getTargetElement = function (element) {
-                var selector = this.getRaw(element);
-                return document.querySelector(selector);
-            };
-            /**
-             * To string
-             */
-            QuerySelectorValue2.prototype.toString = function (prettyPrint) {
-                if (prettyPrint) {
-                    return "[" + this.attribute.name + "]='<QuerySelector>'";
-                }
-                else {
-                    _super.prototype.toString.call(this, prettyPrint);
-                }
-            };
-            return QuerySelectorValue2;
-        }(Attribute.Value));
-        Attribute.QuerySelectorValue2 = QuerySelectorValue2;
-        var JsExpressionValue2 = /** @class */ (function (_super) {
-            __extends(JsExpressionValue2, _super);
-            function JsExpressionValue2(attribute) {
-                return _super.call(this, undefined, attribute) || this;
-            }
-            JsExpressionValue2.prototype.evaluate = function (element) {
-                var jsFunction = this.getRaw(element);
-                return Attv.eval(jsFunction);
-            };
-            /**
-             * To string
-             */
-            JsExpressionValue2.prototype.toString = function (prettyPrint) {
-                if (prettyPrint) {
-                    return "[" + this.attribute.name + "]='<JsExpression>'";
-                }
-                else {
-                    _super.prototype.toString.call(this, prettyPrint);
-                }
-            };
-            return JsExpressionValue2;
-        }(Attribute.Value));
-        Attribute.JsExpressionValue2 = JsExpressionValue2;
-        var NumberValue2 = /** @class */ (function (_super) {
-            __extends(NumberValue2, _super);
-            function NumberValue2(attribute) {
-                return _super.call(this, undefined, attribute) || this;
-            }
-            NumberValue2.prototype.getNumber = function (element) {
-                var raw = this.getRaw(element);
-                return parseInt(raw);
-            };
-            /**
-             * To string
-             */
-            NumberValue2.prototype.toString = function (prettyPrint) {
-                if (prettyPrint) {
-                    return "[" + this.attribute.name + "]='<Number>'";
-                }
-                else {
-                    _super.prototype.toString.call(this, prettyPrint);
-                }
-            };
-            return NumberValue2;
-        }(Attribute.Value));
-        Attribute.NumberValue2 = NumberValue2;
-    })(Attribute = Attv.Attribute || (Attv.Attribute = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Validators //////////////////////////////////////
@@ -1021,6 +949,10 @@ String.prototype.equalsIgnoreCase = function (other) {
             attribute.registerAttributeValues(values);
             if (attributeValues.length > 0) {
                 Attv.log('debug', "" + attributeValues.map(function (v) { return v.toString(true); }), attributeValues);
+            }
+            else {
+                // wild card
+                Attv.log('debug', attribute.toString() + "='" + attribute.wildcard + "'");
             }
             return attribute;
         };

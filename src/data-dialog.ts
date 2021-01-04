@@ -202,12 +202,14 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataModal.UniqueId, name, false);
+
+            this.wildcard = "<boolean>";
         }
 
         isModal(element: HTMLElement): boolean {
             let rawValue = this.getValue(element).getRaw(element);
 
-            return rawValue === 'true';
+            return rawValue?.equalsIgnoreCase('true');
         }
     }
 }

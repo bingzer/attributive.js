@@ -116,16 +116,16 @@ var Attv;
         /**
          * [data-tab-item]="*"
          */
-        var DefaultAttributeValue = /** @class */ (function (_super) {
-            __extends(DefaultAttributeValue, _super);
-            function DefaultAttributeValue(attribute, validators) {
+        var DefaultValue = /** @class */ (function (_super) {
+            __extends(DefaultValue, _super);
+            function DefaultValue(attribute, validators) {
                 if (validators === void 0) { validators = []; }
                 var _this = _super.call(this, undefined, attribute, validators) || this;
                 _this.resolver.uses.push(Attv.DataEnabled.UniqueId, Attv.DataActive.UniqueId, Attv.DataTabContent.UniqueId);
                 _this.resolver.internals.push(Attv.DataTab.UniqueId);
                 return _this;
             }
-            DefaultAttributeValue.prototype.loadElement = function (element) {
+            DefaultValue.prototype.loadElement = function (element) {
                 var _this = this;
                 if (!this.attribute.isElementLoaded(element)) {
                     var dataTab = this.resolver.resolve(Attv.DataTab.UniqueId);
@@ -188,7 +188,7 @@ var Attv;
                 }
                 return true;
             };
-            DefaultAttributeValue.prototype.setItemActive = function (dataActive, item, isActive, siblings) {
+            DefaultValue.prototype.setItemActive = function (dataActive, item, isActive, siblings) {
                 var _this = this;
                 var _a, _b;
                 // mark everybody else not active
@@ -202,7 +202,7 @@ var Attv;
                     dataActive.setActive(item.parentElement, isActive);
                 }
             };
-            DefaultAttributeValue.prototype.displayContent = function (tab, item, siblings) {
+            DefaultValue.prototype.displayContent = function (tab, item, siblings) {
                 var dataTabContent = this.resolver.resolve(Attv.DataTabContent.UniqueId);
                 var contentName = this.getRaw(item);
                 var contentElement = tab.parentElement.querySelector("[" + dataTabContent.name + "=\"" + contentName + "\"]");
@@ -214,9 +214,9 @@ var Attv;
                 }
                 return false;
             };
-            return DefaultAttributeValue;
+            return DefaultValue;
         }(Attv.Attribute.Value));
-        DataTabItem.DefaultAttributeValue = DefaultAttributeValue;
+        DataTabItem.DefaultValue = DefaultValue;
     })(DataTabItem = Attv.DataTabItem || (Attv.DataTabItem = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
@@ -241,15 +241,15 @@ var Attv;
         /**
          * [data-tab-content]="*"
          */
-        var DefaultAttributeValue = /** @class */ (function (_super) {
-            __extends(DefaultAttributeValue, _super);
-            function DefaultAttributeValue(attribute, validators) {
+        var DefaultValue = /** @class */ (function (_super) {
+            __extends(DefaultValue, _super);
+            function DefaultValue(attribute, validators) {
                 if (validators === void 0) { validators = []; }
                 var _this = _super.call(this, undefined, attribute, validators) || this;
                 _this.resolver.uses.push(Attv.DataContent.UniqueId, Attv.DataPartial.UniqueId, Attv.DataActive.UniqueId);
                 return _this;
             }
-            DefaultAttributeValue.prototype.loadElement = function (element) {
+            DefaultValue.prototype.loadElement = function (element) {
                 element.attvShow();
                 if (!this.attribute.isElementLoaded(element)) {
                     // [data-content]
@@ -269,9 +269,9 @@ var Attv;
                 }
                 return true;
             };
-            return DefaultAttributeValue;
+            return DefaultValue;
         }(Attv.Attribute.Value));
-        DataTabContent.DefaultAttributeValue = DefaultAttributeValue;
+        DataTabContent.DefaultValue = DefaultValue;
     })(DataTabContent = Attv.DataTabContent || (Attv.DataTabContent = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////
@@ -297,10 +297,10 @@ Attv.loader.pre.push(function () {
         list.push(new Attv.DataTab.DefaultValue(Attv.configuration.defaultTag, attribute));
     });
     Attv.registerAttribute('data-tab-item', function (attributeName) { return new Attv.DataTabItem(attributeName); }, function (attribute, list) {
-        list.push(new Attv.DataTabItem.DefaultAttributeValue(attribute));
+        list.push(new Attv.DataTabItem.DefaultValue(attribute));
     });
     Attv.registerAttribute('data-tab-content', function (attributeName) { return new Attv.DataTabContent(attributeName); }, function (attribute, list) {
-        list.push(new Attv.DataTabContent.DefaultAttributeValue(attribute));
+        list.push(new Attv.DataTabContent.DefaultValue(attribute));
     });
     Attv.registerAttributeValue(Attv.DataPartial.UniqueId, function (attribute, list) {
         list.push(new Attv.DataTab.DataPartialTabValue(attribute));

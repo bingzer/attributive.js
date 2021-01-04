@@ -115,14 +115,15 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataCache.UniqueId, name);
-            this.wildcard = "boolean";
+            this.wildcard = "<boolean>";
         }
 
         useCache(element: HTMLElement): boolean {
             let value = this.getValue(element).getRaw(element);
             if (isUndefined(value) || value === null)
                 return true;
-            return value === 'true';
+
+            return value?.equalsIgnoreCase('true');
         }
     }
 
@@ -134,7 +135,7 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataCallback.UniqueId, name);
-            this.wildcard = "jsExpression";
+            this.wildcard = "<jsExpression>";
         }
 
         callback(element: HTMLElement): any {
@@ -168,7 +169,7 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataTarget.UniqueId, name);
-            this.wildcard = "querySelector";
+            this.wildcard = "<querySelector>";
         }
 
         getTargetElement(element: HTMLElement): HTMLElement {
@@ -186,7 +187,7 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataTimeout.UniqueId, name);
-            this.wildcard = "number";
+            this.wildcard = "<number>";
         } 
 
         timeout(element: HTMLElement, fn: () => void) {
@@ -208,7 +209,7 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataInterval.UniqueId, name);
-            this.wildcard = "number";
+            this.wildcard = "<number>";
         }
 
         interval(element: HTMLElement, fn: () => void) {
@@ -259,7 +260,7 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataData.UniqueId, name);
-            this.wildcard = "json";
+            this.wildcard = "<json>";
         }
         
         getData(element: HTMLElement): any {
@@ -307,7 +308,7 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataEnabled.UniqueId, name);
-            this.wildcard = "boolean";
+            this.wildcard = "<boolean>";
         }
 
         /**
@@ -329,13 +330,13 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataActive.UniqueId, name);
-            this.wildcard = "boolean";
+            this.wildcard = "<boolean>";
         }
         
         isActive(element: HTMLElement) {
             let rawValue = this.getValue(element).getRaw(element);
 
-            return rawValue === 'true';
+            return rawValue?.equalsIgnoreCase('true');
         }
 
         setActive(element: HTMLElement, isActive: boolean) {
@@ -464,7 +465,7 @@ namespace Attv {
         /**
          * [data-loading]='default'
          */
-        export class DefaultAttributeValue extends Attv.Attribute.Value  {
+        export class DefaultValue extends Attv.Attribute.Value  {
             
             constructor (attributeValue: string, 
                 attribute: Attv.Attribute) {
@@ -535,7 +536,7 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-loading', 
         (name: string) => new Attv.DataLoading(name),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataLoading.DefaultAttributeValue(Attv.configuration.defaultTag, attribute));
+            list.push(new Attv.DataLoading.DefaultValue(Attv.configuration.defaultTag, attribute));
         });
 });
 

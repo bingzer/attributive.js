@@ -164,11 +164,13 @@ var Attv;
     var DataModal = /** @class */ (function (_super) {
         __extends(DataModal, _super);
         function DataModal(name) {
-            return _super.call(this, DataModal.UniqueId, name, false) || this;
+            var _this = _super.call(this, DataModal.UniqueId, name, false) || this;
+            _this.wildcard = "<boolean>";
+            return _this;
         }
         DataModal.prototype.isModal = function (element) {
             var rawValue = this.getValue(element).getRaw(element);
-            return rawValue === 'true';
+            return rawValue === null || rawValue === void 0 ? void 0 : rawValue.equalsIgnoreCase('true');
         };
         DataModal.UniqueId = "DataModal";
         return DataModal;

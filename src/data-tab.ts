@@ -102,7 +102,7 @@ namespace Attv {
         /**
          * [data-tab-item]="*"
          */
-        export class DefaultAttributeValue extends Attribute.Value {
+        export class DefaultValue extends Attribute.Value {
             
             constructor (attribute: Attv.Attribute, 
                 validators: Validators.AttributeValidator[] = []) {
@@ -239,7 +239,7 @@ namespace Attv {
         /**
          * [data-tab-content]="*"
          */
-        export class DefaultAttributeValue extends Attribute.Value {
+        export class DefaultValue extends Attribute.Value {
             
             constructor (attribute: Attv.Attribute, 
                 validators: Validators.AttributeValidator[] = []) {
@@ -361,12 +361,12 @@ Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-tab-item', 
         (attributeName: string) => new Attv.DataTabItem(attributeName),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTabItem.DefaultAttributeValue(attribute));
+            list.push(new Attv.DataTabItem.DefaultValue(attribute));
         });
     Attv.registerAttribute('data-tab-content', 
         (attributeName: string) => new Attv.DataTabContent(attributeName),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTabContent.DefaultAttributeValue(attribute));
+            list.push(new Attv.DataTabContent.DefaultValue(attribute));
         });
 
     Attv.registerAttributeValue(Attv.DataPartial.UniqueId,

@@ -297,7 +297,7 @@ namespace Attv {
          * When set to 'none' means no wildcard. All attribute values needs to be registered. 
          * Default to 'none'.
          */
-        public wildcard:  "*" | "number" | "boolean" | "querySelector" | "jsExpression" | "json" | "none" = "*";
+        public wildcard:  "*" | "<number>" | "<boolean>" | "<querySelector>" | "<jsExpression>" | "<json>" | "none" = "*";
 
         public get isStrict(): boolean {
             return this.wildcard.equalsIgnoreCase('none');
@@ -660,6 +660,7 @@ namespace Attv {
     
         constructor (name: string) {
             super(DataSettings.UniqueId, name);
+            this.wildcard = "<json>";
         }
         
         /**
@@ -679,76 +680,6 @@ namespace Attv {
             settings.attributeValue = settings.attributeValue || value;
     
             return settings;
-        }
-    }
-}
-
-namespace Attv.Attribute {
-    
-    export class QuerySelectorValue2 extends Attribute.Value {
-        constructor (attribute: Attribute) {
-            super(undefined, attribute)
-        }
-
-        getTargetElement(element: HTMLElement): HTMLElement {
-            let selector = this.getRaw(element);
-
-            return document.querySelector(selector) as HTMLElement;
-        }
-
-        /**
-         * To string
-         */
-        toString(prettyPrint?: boolean): string {
-            if (prettyPrint) {
-                return `[${this.attribute.name}]='<QuerySelector>'`;
-            } else {
-                super.toString(prettyPrint);
-            }
-        }
-    }
-
-    export class JsExpressionValue2 extends Attribute.Value {
-        constructor (attribute: Attribute) {
-            super(undefined, attribute)
-        }
-
-        evaluate(element: HTMLElement): any {
-            let jsFunction = this.getRaw(element);
-            return Attv.eval(jsFunction);
-        }
-
-        /**
-         * To string
-         */
-        toString(prettyPrint?: boolean): string {
-            if (prettyPrint) {
-                return `[${this.attribute.name}]='<JsExpression>'`;
-            } else {
-                super.toString(prettyPrint);
-            }
-        }
-    }
-
-    export class NumberValue2 extends Attribute.Value {
-        constructor (attribute: Attribute) {
-            super(undefined, attribute)
-        }
-
-        getNumber(element: HTMLElement): number {
-            let raw = this.getRaw(element);
-            return parseInt(raw);
-        }
-
-        /**
-         * To string
-         */
-        toString(prettyPrint?: boolean): string {
-            if (prettyPrint) {
-                return `[${this.attribute.name}]='<Number>'`;
-            } else {
-                super.toString(prettyPrint);
-            }
         }
     }
 }
@@ -1209,6 +1140,9 @@ namespace Attv {
 
             if (attributeValues.length > 0) {
                 Attv.log('debug', `${attributeValues.map(v => v.toString(true))}`, attributeValues);
+            } else {
+                // wild card
+                Attv.log('debug', `${attribute.toString()}='${attribute.wildcard}'`);
             }
 
             return attribute;
