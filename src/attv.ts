@@ -159,10 +159,12 @@ interface String {
     dashToCamelCase: () => string;
 }
 
-String.prototype.contains = function (text: string): boolean {
-    let obj: String = this as String;
-
-    return obj.indexOf(text) >= 0;
+if (!('contains' in String)) {
+    String.prototype.contains = function (text: string): boolean {
+        let obj: String = this as String;
+    
+        return obj.indexOf(text) >= 0;
+    }
 }
 
 String.prototype.startsWith = function (text: string): boolean {
@@ -1093,6 +1095,12 @@ namespace Attv {
     let attributeRegistrar: AttributeRegistration[] = [];
     let valueRegistrar: ValueRegistration[] = [];
 
+    /**
+     * Register an attribute
+     * @param attributeName the attribute name (ie: data-partial, data-stuffs)
+     * @param fn callback function to create the attribute
+     * @param valuesFn callback function register attribute values to the attribute
+     */
     export function registerAttribute(attributeName: string, 
         fn: (attributeName: string) => Attribute,
         valuesFn?: (attribute: Attribute, list: Attribute.Value[]) => void): void {
@@ -1101,6 +1109,11 @@ namespace Attv {
         attributeRegistrar.push(registry);
     }
 
+    /**
+     * Adds attribute value to an attribute
+     * @param id Attribute's unique id
+     * @param valuesFn callback function register attribute values to the attribute
+     */
     export function registerAttributeValue(id: string, valuesFn?: (attribute: Attribute, list: Attribute.Value[]) => void): void {
         let registry = new ValueRegistration(id, valuesFn);
 
@@ -1108,7 +1121,7 @@ namespace Attv {
     }
     
     /**
-     * This only work during loader.pre
+     * Unregister attribute. This only work during loader.pre
      * @param attributeName attribute name
      */
     export function unregisterAttribute(attributeName: string): void {
