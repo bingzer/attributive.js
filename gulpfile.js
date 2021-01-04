@@ -52,15 +52,16 @@ function concatAttributiveJs(name) {
         "core": [
             'docs/js/dist/attv.js',
             'docs/js/dist/data-attributes.js',
+            'docs/js/dist/data-template.js',
             'docs/js/dist/data-partial.js'
         ],
         "xtra": [
             'docs/js/dist/attv.js',
             'docs/js/dist/data-attributes.js',
-            'docs/js/dist/data-wall.js',
-            'docs/js/dist/data-docs.js',
             'docs/js/dist/data-template.js',
             'docs/js/dist/data-partial.js',
+            'docs/js/dist/data-wall.js',
+            'docs/js/dist/data-docs.js',
             'docs/js/dist/data-tab.js',
             'docs/js/dist/data-table.js',
             'docs/js/dist/data-dialog.js'
