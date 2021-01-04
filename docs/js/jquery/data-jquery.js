@@ -23,7 +23,7 @@ var Attv;
             function DataJQuery(name) {
                 var _this = _super.call(this, DataJQuery.UniqueId, name, true) || this;
                 _this.name = name;
-                _this.isStrict = true;
+                _this.wildcard = "none";
                 return _this;
             }
             DataJQuery.UniqueId = "DataJQuery";

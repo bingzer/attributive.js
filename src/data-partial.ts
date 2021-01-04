@@ -9,7 +9,7 @@ namespace Attv {
         constructor (public name: string) {
             super(DataPartial.UniqueId, name, true);
 
-            this.isStrict = true;
+            this.wildcard = "none";
             this.dependency.requires.push(DataUrl.UniqueId);
         }
 

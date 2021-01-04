@@ -28,7 +28,7 @@ var Attv;
         function DataTab(name) {
             var _this = _super.call(this, DataTab.UniqueId, name, true) || this;
             _this.name = name;
-            _this.isStrict = true;
+            _this.wildcard = "none";
             _this.dependency.uses.push(Attv.DataTabContent.UniqueId, Attv.DataTabItem.UniqueId);
             return _this;
         }

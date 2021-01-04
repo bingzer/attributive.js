@@ -9,7 +9,7 @@ namespace Attv {
         constructor (public name: string) {
             super(DataTable.UniqueId, name, true);
 
-            this.isStrict = true;
+            this.wildcard = "none";
         }
     }
 }

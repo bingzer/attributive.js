@@ -294,10 +294,14 @@ namespace Attv {
         public priority: number = 1;
 
         /**
-         * When set to true. All attribute values needs to be registered. 
-         * NO wildcard.
+         * When set to 'none' means no wildcard. All attribute values needs to be registered. 
+         * Default to 'none'.
          */
-        public isStrict: boolean = false;
+        public wildcard:  "*" | "number" | "boolean" | "querySelector" | "jsExpression" | "json" | "none" = "*";
+
+        public get isStrict(): boolean {
+            return this.wildcard.equalsIgnoreCase('none');
+        }
 
         /**
          * 
@@ -681,7 +685,7 @@ namespace Attv {
 
 namespace Attv.Attribute {
     
-    export class QuerySelectorValue extends Attribute.Value {
+    export class QuerySelectorValue2 extends Attribute.Value {
         constructor (attribute: Attribute) {
             super(undefined, attribute)
         }
@@ -704,7 +708,7 @@ namespace Attv.Attribute {
         }
     }
 
-    export class JsExpressionValue extends Attribute.Value {
+    export class JsExpressionValue2 extends Attribute.Value {
         constructor (attribute: Attribute) {
             super(undefined, attribute)
         }
@@ -726,7 +730,7 @@ namespace Attv.Attribute {
         }
     }
 
-    export class NumberValue extends Attribute.Value {
+    export class NumberValue2 extends Attribute.Value {
         constructor (attribute: Attribute) {
             super(undefined, attribute)
         }

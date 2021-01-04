@@ -23,7 +23,7 @@ var Attv;
             function DataBootstrap(name) {
                 var _this = _super.call(this, DataBootstrap.UniqueId, name, true) || this;
                 _this.name = name;
-                _this.isStrict = true;
+                _this.wildcard = "none";
                 _this.priority = 0;
                 return _this;
             }

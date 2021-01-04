@@ -9,7 +9,7 @@ namespace Attv {
         constructor (public name: string) {
             super(DataTab.UniqueId, name, true);
 
-            this.isStrict = true;
+            this.wildcard = "none";
 
             this.dependency.uses.push(DataTabContent.UniqueId, DataTabItem.UniqueId);
         }

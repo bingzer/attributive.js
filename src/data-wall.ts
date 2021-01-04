@@ -9,7 +9,7 @@ namespace Attv {
         constructor (public name: string) {
             super(DataWall.UniqueId, name, true);
 
-            this.isStrict = true;
+            this.wildcard = "none";
 
             this.dependency.uses.push(DataContent.UniqueId);
             this.dependency.internals.push(DataCallback.UniqueId, DataUrl.UniqueId);

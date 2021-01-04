@@ -21,7 +21,7 @@ var Attv;
         function DataPartial(name) {
             var _this = _super.call(this, DataPartial.UniqueId, name, true) || this;
             _this.name = name;
-            _this.isStrict = true;
+            _this.wildcard = "none";
             _this.dependency.requires.push(Attv.DataUrl.UniqueId);
             return _this;
         }

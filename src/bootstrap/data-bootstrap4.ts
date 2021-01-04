@@ -10,8 +10,8 @@ namespace Attv.Bootstrap4 {
 
         constructor (public name: string) {
             super(DataBootstrap.UniqueId, name, true);
-            
-            this.isStrict = true;
+
+            this.wildcard = "none";
             this.priority = 0;
         }
 

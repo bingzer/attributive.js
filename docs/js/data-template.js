@@ -21,7 +21,7 @@ var Attv;
         function DataTemplate(name) {
             var _this = _super.call(this, DataTemplate.UniqueId, name, true) || this;
             _this.name = name;
-            _this.isStrict = true;
+            _this.wildcard = "none";
             return _this;
         }
         DataTemplate.prototype.renderTemplate = function (elementOrSelector, modelOrContent) {

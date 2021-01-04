@@ -21,7 +21,7 @@ var Attv;
         function DataWall(name) {
             var _this = _super.call(this, DataWall.UniqueId, name, true) || this;
             _this.name = name;
-            _this.isStrict = true;
+            _this.wildcard = "none";
             _this.dependency.uses.push(Attv.DataContent.UniqueId);
             _this.dependency.internals.push(Attv.DataCallback.UniqueId, Attv.DataUrl.UniqueId);
             return _this;

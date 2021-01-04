@@ -9,7 +9,7 @@ namespace Attv {
         constructor (name: string) {
             super(DataDialog.UniqueId, name, true);
 
-            this.isStrict = true;
+            this.wildcard = "none";
 
             this.dependency.uses.push(DataContent.UniqueId, DataUrl.UniqueId, DataModal.UniqueId, DataTitle.UniqueId, DataPartial.UniqueId);
             this.dependency.internals.push(DataCallback.UniqueId);

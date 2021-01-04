@@ -119,7 +119,9 @@ var Attv;
     var DataCache = /** @class */ (function (_super) {
         __extends(DataCache, _super);
         function DataCache(name) {
-            return _super.call(this, DataCache.UniqueId, name) || this;
+            var _this = _super.call(this, DataCache.UniqueId, name) || this;
+            _this.wildcard = "boolean";
+            return _this;
         }
         DataCache.prototype.useCache = function (element) {
             var value = this.getValue(element).getRaw(element);
@@ -137,7 +139,9 @@ var Attv;
     var DataCallback = /** @class */ (function (_super) {
         __extends(DataCallback, _super);
         function DataCallback(name) {
-            return _super.call(this, DataCallback.UniqueId, name) || this;
+            var _this = _super.call(this, DataCallback.UniqueId, name) || this;
+            _this.wildcard = "jsExpression";
+            return _this;
         }
         DataCallback.prototype.callback = function (element) {
             var jsFunction = this.getValue(element).getRaw(element);
@@ -169,10 +173,13 @@ var Attv;
     var DataTarget = /** @class */ (function (_super) {
         __extends(DataTarget, _super);
         function DataTarget(name) {
-            return _super.call(this, DataTarget.UniqueId, name) || this;
+            var _this = _super.call(this, DataTarget.UniqueId, name) || this;
+            _this.wildcard = "querySelector";
+            return _this;
         }
         DataTarget.prototype.getTargetElement = function (element) {
-            return this.getValue(element).getTargetElement(element);
+            var selector = this.getValue(element).getRaw(element);
+            return document.querySelector(selector);
         };
         DataTarget.UniqueId = 'DataTarget';
         return DataTarget;
@@ -184,10 +191,12 @@ var Attv;
     var DataTimeout = /** @class */ (function (_super) {
         __extends(DataTimeout, _super);
         function DataTimeout(name) {
-            return _super.call(this, DataTimeout.UniqueId, name) || this;
+            var _this = _super.call(this, DataTimeout.UniqueId, name) || this;
+            _this.wildcard = "number";
+            return _this;
         }
         DataTimeout.prototype.timeout = function (element, fn) {
-            var ms = this.getValue(element).getNumber(element);
+            var ms = parseInt(this.getValue(element).getRaw(element));
             if (ms) {
                 window.setTimeout(fn, ms);
             }
@@ -205,10 +214,12 @@ var Attv;
     var DataInterval = /** @class */ (function (_super) {
         __extends(DataInterval, _super);
         function DataInterval(name) {
-            return _super.call(this, DataInterval.UniqueId, name) || this;
+            var _this = _super.call(this, DataInterval.UniqueId, name) || this;
+            _this.wildcard = "number";
+            return _this;
         }
         DataInterval.prototype.interval = function (element, fn) {
-            var ms = this.getValue(element).getNumber(element);
+            var ms = parseInt(this.getValue(element).getRaw(element));
             if (ms) {
                 var timer = new DataInterval.IntervalTimer(ms, fn);
                 DataInterval.step(timer, ms);
@@ -257,7 +268,9 @@ var Attv;
     var DataData = /** @class */ (function (_super) {
         __extends(DataData, _super);
         function DataData(name) {
-            return _super.call(this, DataData.UniqueId, name) || this;
+            var _this = _super.call(this, DataData.UniqueId, name) || this;
+            _this.wildcard = "json";
+            return _this;
         }
         DataData.prototype.getData = function (element) {
             var rawValue = this.getValue(element).getRaw(element);
@@ -304,7 +317,9 @@ var Attv;
     var DataEnabled = /** @class */ (function (_super) {
         __extends(DataEnabled, _super);
         function DataEnabled(name) {
-            return _super.call(this, DataEnabled.UniqueId, name) || this;
+            var _this = _super.call(this, DataEnabled.UniqueId, name) || this;
+            _this.wildcard = "boolean";
+            return _this;
         }
         /**
          * Assume everything is enabled except when specifically set to 'false'
@@ -324,7 +339,9 @@ var Attv;
     var DataActive = /** @class */ (function (_super) {
         __extends(DataActive, _super);
         function DataActive(name) {
-            return _super.call(this, DataActive.UniqueId, name) || this;
+            var _this = _super.call(this, DataActive.UniqueId, name) || this;
+            _this.wildcard = "boolean";
+            return _this;
         }
         DataActive.prototype.isActive = function (element) {
             var rawValue = this.getValue(element).getRaw(element);
@@ -412,18 +429,10 @@ Attv.loader.pre.push(function () {
     Attv.registerAttribute('data-method', function (name) { return new Attv.DataMethod(name); }, function (attribute, list) {
         list.push(new Attv.DataMethod.DefaultValue(attribute));
     });
-    Attv.registerAttribute('data-callback', function (name) { return new Attv.DataCallback(name); }, function (attribute, list) {
-        list.push(new Attv.Attribute.JsExpressionValue(attribute));
-    });
-    Attv.registerAttribute('data-target', function (name) { return new Attv.DataTarget(name); }, function (attribute, list) {
-        list.push(new Attv.Attribute.QuerySelectorValue(attribute));
-    });
-    Attv.registerAttribute('data-timeout', function (name) { return new Attv.DataTimeout(name); }, function (attribute, list) {
-        list.push(new Attv.Attribute.NumberValue(attribute));
-    });
-    Attv.registerAttribute('data-interval', function (name) { return new Attv.DataInterval(name); }, function (attribute, list) {
-        list.push(new Attv.Attribute.NumberValue(attribute));
-    });
+    Attv.registerAttribute('data-callback', function (name) { return new Attv.DataCallback(name); });
+    Attv.registerAttribute('data-target', function (name) { return new Attv.DataTarget(name); });
+    Attv.registerAttribute('data-timeout', function (name) { return new Attv.DataTimeout(name); });
+    Attv.registerAttribute('data-interval', function (name) { return new Attv.DataInterval(name); });
     Attv.registerAttribute('data-content', function (name) { return new Attv.DataContent(name); });
     Attv.registerAttribute('data-data', function (name) { return new Attv.DataData(name); });
     Attv.registerAttribute('data-cache', function (name) { return new Attv.DataCache(name); });
@@ -444,7 +453,7 @@ Attv.loader.pre.push(function () {
         __extends(DataLoading, _super);
         function DataLoading(name) {
             var _this = _super.call(this, DataLoading.UniqueId, name, true) || this;
-            _this.isStrict = true;
+            _this.wildcard = "none";
             return _this;
         }
         DataLoading.UniqueId = 'DataLoading';

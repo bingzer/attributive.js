@@ -46,8 +46,8 @@ var Attv;
             attribute.values.forEach(function (val) {
                 writer.write("" + val.toString(true), "attribute-value");
             });
-            if (((_a = attribute.values) === null || _a === void 0 ? void 0 : _a.length) === 0 && !attribute.isStrict) {
-                writer.write(attribute.toString() + "='*'");
+            if (((_a = attribute.values) === null || _a === void 0 ? void 0 : _a.length) === 0) {
+                writer.write(attribute.toString() + "='" + attribute.wildcard + "'");
             }
         }
         Docs.showHelp = showHelp;

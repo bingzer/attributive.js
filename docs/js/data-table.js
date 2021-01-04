@@ -21,7 +21,7 @@ var Attv;
         function DataTable(name) {
             var _this = _super.call(this, DataTable.UniqueId, name, true) || this;
             _this.name = name;
-            _this.isStrict = true;
+            _this.wildcard = "none";
             return _this;
         }
         DataTable.UniqueId = 'DataTable';

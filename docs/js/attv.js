@@ -240,14 +240,21 @@ String.prototype.equalsIgnoreCase = function (other) {
              */
             this.priority = 1;
             /**
-             * When set to true. All attribute values needs to be registered.
-             * NO wildcard.
+             * When set to 'none' means no wildcard. All attribute values needs to be registered.
+             * Default to 'none'.
              */
-            this.isStrict = false;
+            this.wildcard = "*";
             this.loadedName = this.name + "-loaded";
             this.settingsName = this.name + "-settings";
             this.dependency.internals.push(Attv.DataSettings.UniqueId);
         }
+        Object.defineProperty(Attribute.prototype, "isStrict", {
+            get: function () {
+                return this.wildcard.equalsIgnoreCase('none');
+            },
+            enumerable: false,
+            configurable: true
+        });
         /**
          * Register attribute values
          * @param attributeValues attribute values
@@ -551,19 +558,19 @@ String.prototype.equalsIgnoreCase = function (other) {
 (function (Attv) {
     var Attribute;
     (function (Attribute) {
-        var QuerySelectorValue = /** @class */ (function (_super) {
-            __extends(QuerySelectorValue, _super);
-            function QuerySelectorValue(attribute) {
+        var QuerySelectorValue2 = /** @class */ (function (_super) {
+            __extends(QuerySelectorValue2, _super);
+            function QuerySelectorValue2(attribute) {
                 return _super.call(this, undefined, attribute) || this;
             }
-            QuerySelectorValue.prototype.getTargetElement = function (element) {
+            QuerySelectorValue2.prototype.getTargetElement = function (element) {
                 var selector = this.getRaw(element);
                 return document.querySelector(selector);
             };
             /**
              * To string
              */
-            QuerySelectorValue.prototype.toString = function (prettyPrint) {
+            QuerySelectorValue2.prototype.toString = function (prettyPrint) {
                 if (prettyPrint) {
                     return "[" + this.attribute.name + "]='<QuerySelector>'";
                 }
@@ -571,22 +578,22 @@ String.prototype.equalsIgnoreCase = function (other) {
                     _super.prototype.toString.call(this, prettyPrint);
                 }
             };
-            return QuerySelectorValue;
+            return QuerySelectorValue2;
         }(Attribute.Value));
-        Attribute.QuerySelectorValue = QuerySelectorValue;
-        var JsExpressionValue = /** @class */ (function (_super) {
-            __extends(JsExpressionValue, _super);
-            function JsExpressionValue(attribute) {
+        Attribute.QuerySelectorValue2 = QuerySelectorValue2;
+        var JsExpressionValue2 = /** @class */ (function (_super) {
+            __extends(JsExpressionValue2, _super);
+            function JsExpressionValue2(attribute) {
                 return _super.call(this, undefined, attribute) || this;
             }
-            JsExpressionValue.prototype.evaluate = function (element) {
+            JsExpressionValue2.prototype.evaluate = function (element) {
                 var jsFunction = this.getRaw(element);
                 return Attv.eval(jsFunction);
             };
             /**
              * To string
              */
-            JsExpressionValue.prototype.toString = function (prettyPrint) {
+            JsExpressionValue2.prototype.toString = function (prettyPrint) {
                 if (prettyPrint) {
                     return "[" + this.attribute.name + "]='<JsExpression>'";
                 }
@@ -594,22 +601,22 @@ String.prototype.equalsIgnoreCase = function (other) {
                     _super.prototype.toString.call(this, prettyPrint);
                 }
             };
-            return JsExpressionValue;
+            return JsExpressionValue2;
         }(Attribute.Value));
-        Attribute.JsExpressionValue = JsExpressionValue;
-        var NumberValue = /** @class */ (function (_super) {
-            __extends(NumberValue, _super);
-            function NumberValue(attribute) {
+        Attribute.JsExpressionValue2 = JsExpressionValue2;
+        var NumberValue2 = /** @class */ (function (_super) {
+            __extends(NumberValue2, _super);
+            function NumberValue2(attribute) {
                 return _super.call(this, undefined, attribute) || this;
             }
-            NumberValue.prototype.getNumber = function (element) {
+            NumberValue2.prototype.getNumber = function (element) {
                 var raw = this.getRaw(element);
                 return parseInt(raw);
             };
             /**
              * To string
              */
-            NumberValue.prototype.toString = function (prettyPrint) {
+            NumberValue2.prototype.toString = function (prettyPrint) {
                 if (prettyPrint) {
                     return "[" + this.attribute.name + "]='<Number>'";
                 }
@@ -617,9 +624,9 @@ String.prototype.equalsIgnoreCase = function (other) {
                     _super.prototype.toString.call(this, prettyPrint);
                 }
             };
-            return NumberValue;
+            return NumberValue2;
         }(Attribute.Value));
-        Attribute.NumberValue = NumberValue;
+        Attribute.NumberValue2 = NumberValue2;
     })(Attribute = Attv.Attribute || (Attv.Attribute = {}));
 })(Attv || (Attv = {}));
 ////////////////////////////////////////////////////////////////////////////////////

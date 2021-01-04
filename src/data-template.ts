@@ -9,7 +9,7 @@ namespace Attv {
         constructor (public name: string) {
             super(DataTemplate.UniqueId, name, true);
 
-            this.isStrict = true;
+            this.wildcard = "none";
         }
 
         renderTemplate(elementOrSelector: HTMLElement | string, modelOrContent: any): string {

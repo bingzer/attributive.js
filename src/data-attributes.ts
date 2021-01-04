@@ -115,6 +115,7 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataCache.UniqueId, name);
+            this.wildcard = "boolean";
         }
 
         useCache(element: HTMLElement): boolean {
@@ -133,6 +134,7 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataCallback.UniqueId, name);
+            this.wildcard = "jsExpression";
         }
 
         callback(element: HTMLElement): any {
@@ -166,10 +168,13 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataTarget.UniqueId, name);
+            this.wildcard = "querySelector";
         }
 
         getTargetElement(element: HTMLElement): HTMLElement {
-            return this.getValue<Attv.Attribute.QuerySelectorValue>(element).getTargetElement(element);
+            let selector = this.getValue(element).getRaw(element);
+
+            return document.querySelector(selector) as HTMLElement;
         }
     }
 
@@ -181,10 +186,11 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataTimeout.UniqueId, name);
+            this.wildcard = "number";
         } 
 
         timeout(element: HTMLElement, fn: () => void) {
-            let ms = this.getValue<Attv.Attribute.NumberValue>(element).getNumber(element);
+            let ms = parseInt(this.getValue(element).getRaw(element));
 
             if (ms) {
                 window.setTimeout(fn, ms);
@@ -202,10 +208,11 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataInterval.UniqueId, name);
+            this.wildcard = "number";
         }
 
         interval(element: HTMLElement, fn: () => void) {
-            let ms = this.getValue<Attv.Attribute.NumberValue>(element).getNumber(element);
+            let ms = parseInt(this.getValue(element).getRaw(element));
 
             if (ms) {
                 let timer = new DataInterval.IntervalTimer(ms, fn);
@@ -252,6 +259,7 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataData.UniqueId, name);
+            this.wildcard = "json";
         }
         
         getData(element: HTMLElement): any {
@@ -299,6 +307,7 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataEnabled.UniqueId, name);
+            this.wildcard = "boolean";
         }
 
         /**
@@ -320,6 +329,7 @@ namespace Attv {
 
         constructor (name: string) {
             super(DataActive.UniqueId, name);
+            this.wildcard = "boolean";
         }
         
         isActive(element: HTMLElement) {
@@ -416,30 +426,11 @@ Attv.loader.pre.push(() => {
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
             list.push(new Attv.DataMethod.DefaultValue(attribute));
         });
-    Attv.registerAttribute('data-callback', 
-        (name: string) => new Attv.DataCallback(name),
-        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.Attribute.JsExpressionValue(attribute))
-        }
-    );
-    Attv.registerAttribute('data-target',  
-        (name: string) => new Attv.DataTarget(name),
-        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.Attribute.QuerySelectorValue(attribute))
-        }
-    );
-    Attv.registerAttribute('data-timeout', 
-        (name: string) => new Attv.DataTimeout(name),
-        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.Attribute.NumberValue(attribute))
-        }
-    );
-    Attv.registerAttribute('data-interval', 
-        (name: string) => new Attv.DataInterval(name),
-        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.Attribute.NumberValue(attribute))
-        }
-    );
+
+    Attv.registerAttribute('data-callback', (name: string) => new Attv.DataCallback(name));
+    Attv.registerAttribute('data-target', (name: string) => new Attv.DataTarget(name));
+    Attv.registerAttribute('data-timeout', (name: string) => new Attv.DataTimeout(name));
+    Attv.registerAttribute('data-interval', (name: string) => new Attv.DataInterval(name));
     Attv.registerAttribute('data-content', (name: string) => new Attv.DataContent(name));
     Attv.registerAttribute('data-data', (name: string) => new Attv.DataData(name));
     Attv.registerAttribute('data-cache', (name: string) => new Attv.DataCache(name));
@@ -464,7 +455,7 @@ namespace Attv {
         constructor (name: string) {
             super(DataLoading.UniqueId, name, true);
 
-            this.isStrict = true;
+            this.wildcard = "none";
         }
     }
 

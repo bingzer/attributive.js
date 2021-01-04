@@ -49,8 +49,8 @@ namespace Attv.Docs {
             writer.write(`${val.toString(true)}`, "attribute-value");
         });
 
-        if (attribute.values?.length === 0 && !attribute.isStrict) {
-            writer.write(`${attribute.toString()}='*'`);
+        if (attribute.values?.length === 0) {
+            writer.write(`${attribute.toString()}='${attribute.wildcard}'`);
         }
     }
 

@@ -8,8 +8,8 @@ namespace Attv.JQuery {
 
         constructor (public name: string) {
             super(DataJQuery.UniqueId, name, true);
-            
-            this.isStrict = true;
+
+            this.wildcard = "none";
         }
 
     }
