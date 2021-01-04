@@ -202,7 +202,7 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
             if (Attv.isUndefined(option.url))
                 return undefined;
             var url = option.url;
-            if (option.method === 'get') {
+            if (option.data && option.method === 'get') {
                 url += "?" + objectToQuerystring(option.data);
             }
             return url;
@@ -804,15 +804,16 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
             // json ex: ({ name: 'value' }). so we just 
             if (Attv.isEvaluatable(text)) {
                 //do eval
-                text = Attv.eval(text);
+                any = Attv.eval(text);
             }
-            any = text;
-        }
-        try {
-            any = JSON.parse(any);
-        }
-        catch (_a) {
-            // nothing
+            else {
+                try {
+                    any = JSON.parse(text);
+                }
+                catch (_a) {
+                    // nothing
+                }
+            }
         }
         return (any || orDefault);
     }

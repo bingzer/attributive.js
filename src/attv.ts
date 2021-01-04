@@ -259,7 +259,7 @@ namespace Attv.Ajax {
             return undefined;
 
         let url = option.url;
-        if (option.method === 'get') {
+        if (option.data && option.method === 'get') {
             url += `?${objectToQuerystring(option.data)}`;
         } 
         
@@ -960,16 +960,14 @@ namespace Attv {
             // json ex: ({ name: 'value' }). so we just 
             if (Attv.isEvaluatable(text)) {
                 //do eval
-                text = Attv.eval(text);
+                any = Attv.eval(text);
+            } else {
+                try {
+                    any = JSON.parse(text);
+                } catch {
+                    // nothing
+                }
             }
-
-            any = text;
-        }
-
-        try {
-            any = JSON.parse(any);
-        } catch {
-            // nothing
         }
 
         return (any || orDefault) as TAny;
