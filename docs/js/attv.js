@@ -69,7 +69,7 @@ HTMLElement.prototype.attvAttr = function (name, value) {
     name = (_b = (_a = name === null || name === void 0 ? void 0 : name.toString()) === null || _a === void 0 ? void 0 : _a.replace('[', '')) === null || _b === void 0 ? void 0 : _b.replace(']', '');
     var element = this;
     var datasetName = (name === null || name === void 0 ? void 0 : name.startsWith('data-')) && name.replace(/^data\-/, '').dashToCamelCase();
-    // element.attr()
+    // GETTER: element.attr()
     if (Attv.isUndefined(name)) {
         var atts = {};
         for (var i = 0; i < element.attributes.length; i++) {
@@ -80,7 +80,7 @@ HTMLElement.prototype.attvAttr = function (name, value) {
         // returns all attributes
         return atts;
     }
-    // element.attr('data')
+    // SETTER: element.attr('data-xxx', 'value')
     if (name === 'data') {
         if (Attv.isUndefined(value)) {
             // get all data 
@@ -99,7 +99,7 @@ HTMLElement.prototype.attvAttr = function (name, value) {
             throw Error('Only object can be assigned to dataset');
         }
     }
-    // element.attr('name')
+    // SETTER: element.attr('name', 'value')
     else if (Attv.isDefined(value)) {
         if (datasetName) {
             if (Attv.isObject(value)) {
@@ -114,13 +114,9 @@ HTMLElement.prototype.attvAttr = function (name, value) {
         }
         return element;
     }
-    // element.attr('name', 'value')
+    // GETTER: element.attr('name')
     else {
         value = element.dataset[datasetName];
-        // Fixed boolean attribute names
-        if (value === 'false' || value === 'true') {
-            return value === 'true';
-        }
         if (Attv.isUndefined(value)) {
             // get from the attrbitue
             value = element.getAttribute(name) || undefined;
@@ -316,7 +312,7 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
             }
             // #3. generic attribute
             if (!attributeValue) {
-                var rawAttributeValue = element === null || element === void 0 ? void 0 : element.attvAttr(this.name);
+                var rawAttributeValue = element === null || element === void 0 ? void 0 : element.getAttribute(this.name);
                 attributeValue = new Attribute.Value(rawAttributeValue, this);
             }
             return attributeValue;
@@ -795,6 +791,11 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
     }
     Attv.createHTMLElement = createHTMLElement;
     function parseJsonOrElse(any, orDefault) {
+        // Fixed boolean attribute names
+        if (any === 'false' || any === 'true') {
+            return (any === 'true');
+        }
+        // if string
         if (Attv.isString(any)) {
             var text = any;
             // does it look like json?

@@ -87,7 +87,7 @@ HTMLElement.prototype.attvAttr = function (name: string, value?: any): HTMLEleme
     let element = this as HTMLElement;
     let datasetName = name?.startsWith('data-') && name.replace(/^data\-/, '').dashToCamelCase();
 
-    // element.attr()
+    // GETTER: element.attr()
     if (Attv.isUndefined(name)) {
         let atts = {};
         for (var i = 0; i < element.attributes.length; i++) {
@@ -99,7 +99,7 @@ HTMLElement.prototype.attvAttr = function (name: string, value?: any): HTMLEleme
         // returns all attributes
         return atts;
     }
-    // element.attr('data')
+    // SETTER: element.attr('data-xxx', 'value')
     if (name === 'data') {
         if (Attv.isUndefined(value)) {
             // get all data 
@@ -119,7 +119,7 @@ HTMLElement.prototype.attvAttr = function (name: string, value?: any): HTMLEleme
             throw Error('Only object can be assigned to dataset');
         }
     }
-    // element.attr('name')
+    // SETTER: element.attr('name', 'value')
     else if (Attv.isDefined(value)) {
         if (datasetName) {
             if (Attv.isObject(value)) {
@@ -135,13 +135,9 @@ HTMLElement.prototype.attvAttr = function (name: string, value?: any): HTMLEleme
 
         return element;
     } 
-    // element.attr('name', 'value')
+    // GETTER: element.attr('name')
     else {
         value = element.dataset[datasetName];
-        // Fixed boolean attribute names
-        if (value === 'false' || value === 'true') {
-            return value === 'true';
-        }
 
         if (Attv.isUndefined(value)) {
             // get from the attrbitue
@@ -387,7 +383,7 @@ namespace Attv {
 
             // #3. generic attribute
             if (!attributeValue) {
-                let rawAttributeValue = element?.attvAttr(this.name) as string;
+                let rawAttributeValue = element?.getAttribute(this.name);
                 attributeValue = new Attribute.Value(rawAttributeValue, this) as TValue;
             }
 
@@ -950,6 +946,12 @@ namespace Attv {
     }
 
     export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any): TAny {  
+        // Fixed boolean attribute names
+        if (any === 'false' || any === 'true') {
+            return (any === 'true') as any;
+        }
+
+        // if string
         if (Attv.isString(any)) {
             let text = any as string;
             // does it look like json?
