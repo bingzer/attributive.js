@@ -159,7 +159,7 @@ interface String {
     dashToCamelCase: () => string;
 }
 
-if (!('contains' in String)) {
+if (typeof String.prototype.contains !== 'function') {
     String.prototype.contains = function (text: string): boolean {
         let obj: String = this as String;
     
@@ -167,36 +167,46 @@ if (!('contains' in String)) {
     }
 }
 
-String.prototype.startsWith = function (text: string): boolean {
-    let obj: String = this as String;
+if (typeof String.prototype.startsWith !== 'function') {
+    String.prototype.startsWith = function (text: string): boolean {
+        let obj: String = this as String;
 
-    return obj.indexOf(text) == 0;
+        return obj.indexOf(text) == 0;
+    }
 }
 
-String.prototype.endsWith = function (text: string): boolean {
-    let obj: String = this as String;
+if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function (text: string): boolean {
+        let obj: String = this as String;
 
-    return obj.indexOf(text, this.length - text.length) !== -1;
+        return obj.indexOf(text, this.length - text.length) !== -1;
+    }
 }
 
-String.prototype.camelCaseToDash = function (): string {
-    let text: String = this as String;
+if (typeof String.prototype.camelCaseToDash !== 'function') {
+    String.prototype.camelCaseToDash = function (): string {
+        let text: String = this as String;
 
-    return text.replace( /([a-z])([A-Z])/g, '$1-$2' ).toLowerCase();
+        return text.replace( /([a-z])([A-Z])/g, '$1-$2' ).toLowerCase();
+    }
 }
 
-String.prototype.dashToCamelCase = function (): string {
-    let text: String = this as String;
+if (typeof String.prototype.dashToCamelCase !== 'function') {
+    String.prototype.dashToCamelCase = function (): string {
+        let text: String = this as String;
 
-    return text.toLowerCase().replace(/-(.)/g, function(match, group1) {
-        return group1.toUpperCase();
-    });
+        return text.toLowerCase().replace(/-(.)/g, function(match, group1) {
+            return group1.toUpperCase();
+        });
+    }
 }
 
-String.prototype.equalsIgnoreCase = function (other: string): boolean {
-    let text: String = this as String;
+if (typeof String.prototype.equalsIgnoreCase !== 'function') {
+    String.prototype.equalsIgnoreCase = function (other: string): boolean {
+        let text: String = this as String;
 
-    return text?.toLowerCase() === other?.toLowerCase();
+        return text?.toLowerCase() === other?.toLowerCase();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

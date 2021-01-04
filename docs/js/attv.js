@@ -128,32 +128,44 @@ HTMLElement.prototype.attvAttr = function (name, value) {
         return Attv.parseJsonOrElse(value);
     }
 };
-String.prototype.contains = function (text) {
-    var obj = this;
-    return obj.indexOf(text) >= 0;
-};
-String.prototype.startsWith = function (text) {
-    var obj = this;
-    return obj.indexOf(text) == 0;
-};
-String.prototype.endsWith = function (text) {
-    var obj = this;
-    return obj.indexOf(text, this.length - text.length) !== -1;
-};
-String.prototype.camelCaseToDash = function () {
-    var text = this;
-    return text.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-};
-String.prototype.dashToCamelCase = function () {
-    var text = this;
-    return text.toLowerCase().replace(/-(.)/g, function (match, group1) {
-        return group1.toUpperCase();
-    });
-};
-String.prototype.equalsIgnoreCase = function (other) {
-    var text = this;
-    return (text === null || text === void 0 ? void 0 : text.toLowerCase()) === (other === null || other === void 0 ? void 0 : other.toLowerCase());
-};
+if (typeof String.prototype.contains !== 'function') {
+    String.prototype.contains = function (text) {
+        var obj = this;
+        return obj.indexOf(text) >= 0;
+    };
+}
+if (typeof String.prototype.startsWith !== 'function') {
+    String.prototype.startsWith = function (text) {
+        var obj = this;
+        return obj.indexOf(text) == 0;
+    };
+}
+if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function (text) {
+        var obj = this;
+        return obj.indexOf(text, this.length - text.length) !== -1;
+    };
+}
+if (typeof String.prototype.camelCaseToDash !== 'function') {
+    String.prototype.camelCaseToDash = function () {
+        var text = this;
+        return text.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+    };
+}
+if (typeof String.prototype.dashToCamelCase !== 'function') {
+    String.prototype.dashToCamelCase = function () {
+        var text = this;
+        return text.toLowerCase().replace(/-(.)/g, function (match, group1) {
+            return group1.toUpperCase();
+        });
+    };
+}
+if (typeof String.prototype.equalsIgnoreCase !== 'function') {
+    String.prototype.equalsIgnoreCase = function (other) {
+        var text = this;
+        return (text === null || text === void 0 ? void 0 : text.toLowerCase()) === (other === null || other === void 0 ? void 0 : other.toLowerCase());
+    };
+}
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Attv.Ajax ///////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -911,18 +923,29 @@ String.prototype.equalsIgnoreCase = function (other) {
 (function (Attv) {
     var attributeRegistrar = [];
     var valueRegistrar = [];
+    /**
+     * Register an attribute
+     * @param attributeName the attribute name (ie: data-partial, data-stuffs)
+     * @param fn callback function to create the attribute
+     * @param valuesFn callback function register attribute values to the attribute
+     */
     function registerAttribute(attributeName, fn, valuesFn) {
         var registry = new AttributeRegistration(attributeName, fn, valuesFn);
         attributeRegistrar.push(registry);
     }
     Attv.registerAttribute = registerAttribute;
+    /**
+     * Adds attribute value to an attribute
+     * @param id Attribute's unique id
+     * @param valuesFn callback function register attribute values to the attribute
+     */
     function registerAttributeValue(id, valuesFn) {
         var registry = new ValueRegistration(id, valuesFn);
         valueRegistrar.push(registry);
     }
     Attv.registerAttributeValue = registerAttributeValue;
     /**
-     * This only work during loader.pre
+     * Unregister attribute. This only work during loader.pre
      * @param attributeName attribute name
      */
     function unregisterAttribute(attributeName) {
