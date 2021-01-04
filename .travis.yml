@@ -5,3 +5,4 @@ before_script:
   - npm i -g typescript typings
   - typings install
   - tsc
+script: 'true'
