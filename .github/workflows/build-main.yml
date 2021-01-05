@@ -1,0 +1,46 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: [window-latest]
+
+    strategy:
+      matrix:
+        os: [windows-latest] # [macOS-latest, windows-latest, ubuntu-latest]
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Setup Environments
+        run: echo ${{ env.VERSION }}
+        
+      - name: Setup repo
+        uses: actions/checkout@v2
+        
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2.1.4
+
+      - name: npm install
+        run: npm install
+        
+      - name: gulp
+        run: gulp
+        
+      - name: Production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: arttributive.js
+          path: docs/**/*
+          retention-days: 5
