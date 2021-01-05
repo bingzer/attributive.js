@@ -13,15 +13,14 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-
-env:
-    MAJOR: 0
-    MINOR: 0
-    PATCH: 1
-    VERSION: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}.${{ github.run_number }}
     
 jobs:
-  test:
+  build:
+    env:
+        MAJOR: 0
+        MINOR: 0
+        PATCH: 1
+        VERSION: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}.${{ github.run_number }}
     runs-on: ${{ matrix.os }} # runs a test on Ubuntu, Windows and macOS
 
     strategy:
