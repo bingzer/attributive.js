@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Build Main Branch
 
 # Controls when the action will run. 
 on:
@@ -24,7 +24,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Setup Environments
-        run: echo ${{ env.VERSION }}
+        run: echo TODO
         
       - name: Setup repo
         uses: actions/checkout@v2
