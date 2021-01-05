@@ -20,20 +20,17 @@ jobs:
 
     strategy:
       matrix:
-        deno: ["v1.x", "nightly"]
-        os: [macOS-latest, windows-latest, ubuntu-latest]
+        os: [windows-latest] # [macOS-latest, windows-latest, ubuntu-latest]
 
     steps:
       - name: Setup repo
         uses: actions/checkout@v2
+        
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2.1.4
 
-      - name: Setup Deno
-        uses: denolib/setup-deno@c7d7968ad4a59c159a777f79adddad6872ee8d96
-        with:
-          deno-version: ${{ matrix.deno }} # tests across multiple Deno versions
-
-      - name: Cache Dependencies
-        run: deno cache deps.ts
-
-      - name: Run Tests
-        run: deno test -A --unstable
+      - name: yarn install
+        run: yarn install
+        
+      - name: tsc
+        uses: icrawl/action-tsc@v1
