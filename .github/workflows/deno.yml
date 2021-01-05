@@ -14,6 +14,12 @@ on:
   pull_request:
     branches: [main]
 
+env:
+    MAJOR: 0
+    MINOR: 0
+    PATCH: 1
+    VERSION: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}.${{ github.run_number }}
+    
 jobs:
   test:
     runs-on: ${{ matrix.os }} # runs a test on Ubuntu, Windows and macOS
@@ -25,11 +31,6 @@ jobs:
     steps:
       - name: Setup Environments
         run: echo ${{ env.VERSION }}
-        env: 
-          MAJOR: 0
-          MINOR: 0
-          PATCH: 1
-          VERSION: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}.${{ github.run_number }}
         
       - name: Setup repo
         uses: actions/checkout@v2
