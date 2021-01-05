@@ -23,6 +23,14 @@ jobs:
         os: [windows-latest] # [macOS-latest, windows-latest, ubuntu-latest]
 
     steps:
+      - name: Setup Environments
+        run: echo ${{ env.VERSION }}
+        env: 
+          MAJOR: 0
+          MINOR: 0
+          PATCH: 1
+          VERSION: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}.${{ github.run_number }}
+        
       - name: Setup repo
         uses: actions/checkout@v2
         
@@ -38,6 +46,6 @@ jobs:
       - name: Production artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: dist
-          path: docs/js/**.**
+          name: arttributive.js.${{ env.VERSION }}
+          path: docs/**/*
           retention-days: 5
