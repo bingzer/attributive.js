@@ -34,3 +34,10 @@ jobs:
         
       - name: gulp
         run: gulp
+        
+      - name: Production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: docs/js/**.**
+          retention-days: 5
