@@ -29,8 +29,8 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.4
 
-      - name: yarn install
-        run: yarn install
+      - name: npm install
+        run: npm install
         
-      - name: tsc
-        uses: icrawl/action-tsc@v1
+      - name: gulp
+        run: gulp
