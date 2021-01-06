@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/bingzer/attributive.js.svg?branch=main)](https://travis-ci.org/bingzer/attributive.js)
+![Build Main Branch](https://github.com/bingzer/attributive.js/workflows/Build%20Main%20Branch/badge.svg)
 
 # attributive.js
 
