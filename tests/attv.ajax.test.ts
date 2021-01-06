@@ -52,4 +52,24 @@ describe('Attv.Ajax', () => {
 
         expect(Attv.Ajax.buildUrl(ajaxOptions)).toBeUndefined();
     });
+
+    it('Should construct query string from an object', () => {
+        let obj = {
+            name: 'value'
+        };
+
+        let actual = Attv.Ajax.objectToQuerystring(obj);
+        expect(actual).toEqual('name=value');
+    });
+
+    it('Should construct query string from an object with multiple properties', () => {
+        let obj = {
+            name: 'value',
+            name2: 100,
+            name3: 'with space'
+        };
+
+        let actual = Attv.Ajax.objectToQuerystring(obj);
+        expect(actual).toEqual('name=value&name2=100&name3=with%20space');
+    });
 });
