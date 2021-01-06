@@ -1,5 +1,4 @@
-const g = require('../src/attv')
-global.Attv = g.Attv;
+global.Attv = require('../src/attv').Attv;
 
 // ------------------------------------------------- //
 
