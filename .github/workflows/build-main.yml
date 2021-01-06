@@ -32,11 +32,11 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.4
 
-      - name: npm install
+      - name: Run npm install
         run: npm install
         
-      - name: gulp
-        run: gulp
+      - name: Run npm test
+        run: npm test
         
       - name: Production artifacts
         uses: actions/upload-artifact@v2
