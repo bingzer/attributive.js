@@ -221,10 +221,13 @@ namespace Attv.Ajax {
         data?: any;
         callback?: (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest) => void;
         headers?: {name: string, value: string}[];
+        createHttpRequest?: () => XMLHttpRequest;
     }
         
     export function sendAjax(options: AjaxOptions) {
-        let xhr = new XMLHttpRequest();
+        options.method = options.method || 'get';
+
+        let xhr = options.createHttpRequest ? options.createHttpRequest() : new XMLHttpRequest();
         xhr.onreadystatechange = function (e: Event) {
             let xhr = this as XMLHttpRequest;
             if (xhr.readyState == 4) {
@@ -257,7 +260,7 @@ namespace Attv.Ajax {
             return undefined;
 
         let url = option.url;
-        if (option.data && option.method === 'get') {
+        if (option.data && (!option.method || option.method === 'get')) {
             url += `?${objectToQuerystring(option.data)}`;
         } 
         

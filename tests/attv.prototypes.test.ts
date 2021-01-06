@@ -93,7 +93,7 @@ describe('HtmlElement.prototypes', () => {
         element.style.border = '1px solid black';
 
         let received = element.attvAttr();
-        console.log(received);
+        
         expect(received['data-json']).toBeTruthy();
         expect(received.style).toBeTruthy();
     });
