@@ -44,7 +44,7 @@ namespace Attv.Docs {
         let attribute = Attv.attributes.filter(att => att.uniqueId == uniqueIdOrName || att.name === uniqueIdOrName)[0];
 
         writer.clear();
-        writer.write(`Documentation for ${attribute.toString()}. ${attribute.description || ''}`, "attribute");
+        writer.write(`Documentation for ${attribute.toString()}.`, "attribute");
         attribute.values.forEach(val => {
             writer.write(`${val.toString(true)}`, "attribute-value");
         });

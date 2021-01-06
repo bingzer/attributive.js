@@ -301,7 +301,6 @@ namespace Attv {
     export class Attribute {
         public readonly values: Attribute.Value[] = [];
 
-        public readonly description: string;
         public readonly dependency: Attribute.Dependency = new Attribute.Dependency();
         public readonly loadedName: string;
         public readonly settingsName: string;
