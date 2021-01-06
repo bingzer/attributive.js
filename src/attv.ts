@@ -1,5 +1,5 @@
-var ATTV_DEBUG: boolean = true;
-var ATTV_VERBOSE_LOGGING: boolean = true;
+const ATTV_DEBUG: boolean = true;
+const ATTV_VERBOSE_LOGGING: boolean = true;
 
 namespace Attv {
     /**
@@ -35,7 +35,7 @@ Element.prototype.attvHtml = function (html?: string): string | any {
             let scripts = innerHtmlElement.querySelectorAll('script');
             for (let i = 0; i < scripts.length; i++) {
                 if(scripts[i].type?.toLowerCase()?.contains('javascript')) {
-                    eval(scripts[i].text);
+                    Attv.eval$(scripts[i].text);
                 }
             }
         }
@@ -940,7 +940,7 @@ namespace Attv {
         return any?.startsWith('(') && any?.endsWith(')');
     }
 
-    export function eval(any: string) {
+    export function eval$(any: string) {
         return window.eval(any);
     }
 
@@ -973,7 +973,7 @@ namespace Attv {
             // json ex: ({ name: 'value' }). so we just 
             if (Attv.isEvaluatable(text)) {
                 //do eval
-                any = Attv.eval(text);
+                any = Attv.eval$(text);
             } else {
                 try {
                     any = JSON.parse(text);
@@ -1245,3 +1245,11 @@ Attv.onDocumentReady(() => {
     Attv.loader.pre = [];
     Attv.loader.post = [];
 });
+
+if (typeof exports !== 'undefined') {
+    module.exports = { 
+        Attv,
+        ATTV_DEBUG,
+        ATTV_VERBOSE_LOGGING
+    };
+}

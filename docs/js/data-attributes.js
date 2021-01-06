@@ -145,7 +145,7 @@ var Attv;
         }
         DataCallback.prototype.callback = function (element) {
             var jsFunction = this.getValue(element).getRaw(element);
-            return Attv.eval(jsFunction);
+            return Attv.eval$(jsFunction);
         };
         DataCallback.UniqueId = 'DataCallback';
         return DataCallback;

@@ -140,7 +140,7 @@ namespace Attv {
 
         callback(element: HTMLElement): any {
             let jsFunction = this.getValue(element).getRaw(element);
-            return Attv.eval(jsFunction);
+            return Attv.eval$(jsFunction);
         }
     }
 

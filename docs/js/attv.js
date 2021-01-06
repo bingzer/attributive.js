@@ -41,7 +41,7 @@ Element.prototype.attvHtml = function (html) {
             var scripts = innerHtmlElement.querySelectorAll('script');
             for (var i = 0; i < scripts.length; i++) {
                 if ((_b = (_a = scripts[i].type) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === null || _b === void 0 ? void 0 : _b.contains('javascript')) {
-                    eval(scripts[i].text);
+                    Attv.eval$(scripts[i].text);
                 }
             }
         }
@@ -781,10 +781,10 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
         return (any === null || any === void 0 ? void 0 : any.startsWith('(')) && (any === null || any === void 0 ? void 0 : any.endsWith(')'));
     }
     Attv.isEvaluatable = isEvaluatable;
-    function eval(any) {
+    function eval$(any) {
         return window.eval(any);
     }
-    Attv.eval = eval;
+    Attv.eval$ = eval$;
     function navigate(url, target) {
         if (target) {
             window.open(url, target);
@@ -813,7 +813,7 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
             // json ex: ({ name: 'value' }). so we just 
             if (Attv.isEvaluatable(text)) {
                 //do eval
-                any = Attv.eval(text);
+                any = Attv.eval$(text);
             }
             else {
                 try {
@@ -1044,5 +1044,12 @@ Attv.onDocumentReady(function () {
     Attv.loader.pre = [];
     Attv.loader.post = [];
 });
+if (typeof exports !== 'undefined') {
+    module.exports = {
+        Attv: Attv,
+        ATTV_DEBUG: ATTV_DEBUG,
+        ATTV_VERBOSE_LOGGING: ATTV_VERBOSE_LOGGING
+    };
+}
 
 //# sourceMappingURL=attv.js.map
