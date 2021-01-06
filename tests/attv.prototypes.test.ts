@@ -106,3 +106,49 @@ describe('HtmlElement.prototypes', () => {
         expect(received).toBeTruthy();
     });
 });
+
+describe('String.prototypes', () => {
+    it('Should have all required Element prototypes', () => {
+        expect(String.prototype.contains).toBeTruthy();
+        expect(String.prototype.equalsIgnoreCase).toBeTruthy();
+        expect(String.prototype.camelCaseToDash).toBeTruthy();
+        expect(String.prototype.dashToCamelCase).toBeTruthy();
+    });
+
+    it('Should return true when string contains some text', () => {
+        let text = "Hello World, This is the string";
+
+        expect(text.contains('World')).toBeTruthy();
+        expect(text.contains('Hello')).toBeTruthy();
+        expect(text.contains('string')).toBeTruthy();
+    });
+
+    it('Should return true when string contains some text (Case sensitive)', () => {
+        let text = "Hello World, This is the string";
+
+        expect(text.contains('world')).toBeFalsy();
+        expect(text.contains('hEllo')).toBeFalsy();
+        expect(text.contains('sTring')).toBeFalsy();
+    });
+
+    it('Should return true when comparing string (equalsIgnoreCase)', () => {
+        let text = "Hello World";
+
+        expect(text.equalsIgnoreCase('hellO WorlD')).toBeTruthy();
+        expect(text.equalsIgnoreCase('HeLlo WOrlD')).toBeTruthy();
+        expect(text.equalsIgnoreCase('Hello World')).toBeTruthy();
+
+        expect(text.equalsIgnoreCase('Hello Mars')).toBeFalsy();
+    });
+
+    it('Should transform to camel-case from dash-case', () => {
+        expect("helloWorld".camelCaseToDash().equalsIgnoreCase('hello-world')).toBeTruthy();
+        expect("helloWorldGuys".camelCaseToDash().equalsIgnoreCase('hello-world-guys')).toBeTruthy();
+    });
+
+    it('Should transform to dash-case from camel-case', () => {
+        expect("hello-world".dashToCamelCase().equalsIgnoreCase('helloWorld')).toBeTruthy();
+        expect("hello-world-guys".dashToCamelCase().equalsIgnoreCase('helloWorldGuys')).toBeTruthy();
+    });
+
+});
