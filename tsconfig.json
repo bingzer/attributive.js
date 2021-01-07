@@ -2,6 +2,12 @@
     "compilerOptions": {
       "target": "es5",
       "sourceMap": true,
-      "outDir": "docs/js"
-    }
+      "outDir": "build",
+      "declarationDir": "build",
+      "declaration": true
+    },
+    "exclude": [
+      "build/",
+      "dist/"
+    ]
   }

@@ -7,10 +7,18 @@ var sourcemaps = require('gulp-sourcemaps');
 var typescript = require('gulp-typescript');
 var tsProject = typescript.createProject('tsconfig.json');
 var packageJson = require('./package.json');
+var flatten = require('gulp-flatten');
 var version = packageJson.version;
 
-function docsJsClean() {
-    return del('docs/js');
+const DIST_DIR = 'dist';
+const BUILD_DIR = 'build';
+
+function tsClean() {
+    return del(BUILD_DIR);
+}
+
+function distClean() {
+    return del(DIST_DIR)
 }
 
 function tsc() {
@@ -18,7 +26,7 @@ function tsc() {
         .pipe(sourcemaps.init())
         .pipe(tsProject())
         .pipe(sourcemaps.write('.', { sourceRoot: './', includeContent: false }))
-        .pipe(gulp.dest('docs/js/'));
+        .pipe(gulp.dest(BUILD_DIR));
 }
 
 function watchTs() {
@@ -27,7 +35,7 @@ function watchTs() {
 
 function uglifyAttributiveJs(name) {
     return pipeline(
-        gulp.src('docs/js/**/*.js'),
+        gulp.src(BUILD_DIR + '/**/*.js'),
         uglify({
             compress: {
                 global_defs: {
@@ -36,7 +44,7 @@ function uglifyAttributiveJs(name) {
                 }
             }
         }),
-        gulp.dest('docs/js/dist/')
+        gulp.dest(BUILD_DIR)
     );
 }
 
@@ -47,24 +55,24 @@ function concatAttributiveJs(name) {
 
     var files = {
         "default": [
-            'docs/js/dist/attv.js'
+            BUILD_DIR + '/attv.js'
         ],
         "core": [
-            'docs/js/dist/attv.js',
-            'docs/js/dist/data-attributes.js',
-            'docs/js/dist/data-template.js',
-            'docs/js/dist/data-partial.js'
+            BUILD_DIR + '/attv.js',
+            BUILD_DIR + '/data-attributes.js',
+            BUILD_DIR + '/data-template.js',
+            BUILD_DIR + '/data-partial.js'
         ],
         "xtra": [
-            'docs/js/dist/attv.js',
-            'docs/js/dist/data-attributes.js',
-            'docs/js/dist/data-template.js',
-            'docs/js/dist/data-partial.js',
-            'docs/js/dist/xtras/data-wall.js',
-            'docs/js/dist/xtras/data-docs.js',
-            'docs/js/dist/xtras/data-tab.js',
-            'docs/js/dist/xtras/data-table.js',
-            'docs/js/dist/xtras/data-dialog.js'
+            BUILD_DIR + '/attv.js',
+            BUILD_DIR + '/data-attributes.js',
+            BUILD_DIR + '/data-template.js',
+            BUILD_DIR + '/data-partial.js',
+            BUILD_DIR + '/xtras/data-wall.js',
+            BUILD_DIR + '/xtras/data-docs.js',
+            BUILD_DIR + '/xtras/data-tab.js',
+            BUILD_DIR + '/xtras/data-table.js',
+            BUILD_DIR + '/xtras/data-dialog.js'
         ],
     }
 
@@ -73,12 +81,20 @@ function concatAttributiveJs(name) {
         sourcemaps.init(),
         concat('attributive' + suffix + version + '.min.js'),
         sourcemaps.write('.'),
-        gulp.dest('docs/js/dist/')
+        gulp.dest(DIST_DIR)
     )
         
 }
 
-const build = gulp.series(docsJsClean, tsc, uglifyAttributiveJs, concatAttributiveJs(), concatAttributiveJs('core'), concatAttributiveJs('xtra'));
+function grabDts() {
+    return pipeline(
+        gulp.src(BUILD_DIR + '/**/*.d.ts'),
+        flatten(),
+        gulp.dest(DIST_DIR)
+    );
+}
+
+const build = gulp.series(distClean, tsClean, tsc, uglifyAttributiveJs, concatAttributiveJs(), concatAttributiveJs('core'), concatAttributiveJs('xtra'), grabDts);
 const watch = gulp.series(build, watchTs);
 
 exports.default = build;

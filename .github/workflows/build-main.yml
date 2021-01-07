@@ -42,5 +42,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: arttributive.js
-          path: docs/**/*
+          path: dist/**/*
           retention-days: 5

@@ -31,8 +31,5 @@ Using **attributive.js**, you can simply put `[data-partial]` to load the html:
 
 The purpose of **attributive.js** is to eliminate a boilerplate and repetitive javascript code by using html attributes.
 
-### Dependencies
-NONE
-
 ### Demo
-[https://bingzer.github.io/attributive.js/](https://bingzer.github.io/attributive.js/)
+Coming soon
