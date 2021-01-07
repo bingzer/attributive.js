@@ -325,7 +325,6 @@ namespace Attv {
          * 
          * @param uniqueId unique id
          * @param name  the attribute name
-         * @param description description
          * @param isAutoLoad is auto-load
          */
         constructor (
@@ -440,7 +439,8 @@ namespace Attv.Attribute {
         
         constructor (protected value: string, 
             public attribute: Attribute,
-            public validators: Validators.AttributeValidator[] = []) {
+            public validators: Validators.AttributeValidator[] = [],
+            private loadElementFn: (element: HTMLElement) => boolean = undefined) {
         }
 
         /**
@@ -455,6 +455,10 @@ namespace Attv.Attribute {
          * @param element the Element
          */
         loadElement(element: HTMLElement): boolean {
+            if (this.loadElementFn) {
+                return this.loadElementFn(element) || true;
+            }
+
             return true;
         }
 
@@ -1165,9 +1169,6 @@ namespace Attv {
 
         register(): Attribute {
             let attribute = this.fn(this.attributeName);
-            
-            //Attv.log('debug', `${attribute.toString()}`, attribute);
-
             let attributeValues: Attribute.Value[] = [];
 
             if (this.valuesFn) {
