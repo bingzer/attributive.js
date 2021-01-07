@@ -2,7 +2,7 @@ global.Attv = require('../src/attv').Attv;
 
 // ------------------------------------------------- //
 
-describe('Attv.Attributes', () => {
+describe('Attv.Attribute', () => {
     it('Should have Attv.Attribute type', () => {
         expect(Attv.Attribute).toBeDefined();
     });
