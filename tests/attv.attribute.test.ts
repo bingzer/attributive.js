@@ -93,4 +93,81 @@ describe('Attv.Attributes', () => {
 
         expect(att.exists(elem)).toBeFalsy();
     });
+
+    it('Should return the attribute value (default attribute value)', () => {
+        let elem = document.createElement('div');
+        elem.setAttribute('data-attribute', 'some-value');
+
+        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+
+        let val = att.getValue(elem);
+
+        expect(val).toBeTruthy();
+        expect(val.getRaw(elem)).toBe('some-value');
+    });
+
+    it('Should return the first registered attribute value', () => {
+        Attv.configuration = new Attv.DefaultConfiguration();
+
+        let elem = document.createElement('div');
+
+        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let val = new Attv.Attribute.Value('some-value', att);
+
+        att.registerAttributeValues([val]);
+
+        let expected = att.getValue(elem);
+
+        expect(expected).toBe(val);
+    });
+
+    it('Should throw error when a strict attribute do not have default attribute value', () => {
+        let elem = document.createElement('div');
+
+        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        att.wildcard = 'none';
+
+        expect(() => att.getValue(elem)).toThrowError();
+    });
+
+    it('Should return true when the element is already loaded', () => {
+        let elem = document.createElement('div');
+        elem.setAttribute('data-attribute-loaded', 'true');
+
+        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+
+        expect(att.isElementLoaded(elem)).toBeTruthy();
+    });
+
+    it('Should return true when the element is not loaded', () => {
+        let elem = document.createElement('div');
+
+        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+
+        expect(att.isElementLoaded(elem)).toBeFalsy();
+    });
+
+    it('Should mark element loaded to true', () => {
+        let elem = document.createElement('div');
+
+        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        att.markElementLoaded(elem, true);
+
+        expect(att.isElementLoaded(elem)).toBeTruthy();
+    });
+
+    it('Should mark element loaded to false', () => {
+        let elem = document.createElement('div');
+
+        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        att.markElementLoaded(elem, false);
+
+        expect(att.isElementLoaded(elem)).toBeFalsy();
+    });
+
+    it('Should print toString()', () => {
+        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+
+        expect(att.toString()).toBe('[data-attribute]');
+    });
 });
