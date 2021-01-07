@@ -1,8 +1,17 @@
-global.Attv = require('../src/attv').Attv;
+beforeEach(() => {
+    expect(global.Attv).toBeFalsy();
+
+    global.Attv = require('../src/attv').Attv;
+});
+
+afterEach(() => {
+    global.Attv = undefined;
+});
 
 // ------------------------------------------------- //
 
 describe('Attv.Ajax', () => {
+    
     it('Should have Attv.Ajax', () => {
         expect(Attv.Ajax).toBeTruthy();
         expect(Attv.Ajax.sendAjax).toBeTruthy();
