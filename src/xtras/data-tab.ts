@@ -7,7 +7,7 @@ namespace Attv {
         static readonly UniqueId = 'DataTab';
 
         constructor () {
-            super(DataTab.UniqueId);
+            super(DataTab.UniqueId, true);
 
             this.wildcard = "none";
 

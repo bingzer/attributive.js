@@ -7,7 +7,7 @@ namespace Attv {
         static readonly UniqueId = "DataDialog";
 
         constructor () {
-            super(DataDialog.UniqueId);
+            super(DataDialog.UniqueId, true);
 
             this.wildcard = "none";
 

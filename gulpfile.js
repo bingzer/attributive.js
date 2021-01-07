@@ -45,35 +45,36 @@ function uglifyAttributiveJs(name) {
                 }
             }
         }),
-        gulp.dest(BUILD_DIR)
+        gulp.dest(DIST_DIR)
     );
 }
 
 function concatAttributiveJs(name) {
+    const JS_DIR = DIST_DIR;
     var suffix = name ? ("." + name + ".") : ".";
     if (!name) 
         name = "default";
 
     var files = {
         "default": [
-            BUILD_DIR + '/attv.js'
+            JS_DIR + '/attv.js'
         ],
         "core": [
-            BUILD_DIR + '/attv.js',
-            BUILD_DIR + '/data-attributes.js',
-            BUILD_DIR + '/data-template.js',
-            BUILD_DIR + '/data-partial.js'
+            JS_DIR + '/attv.js',
+            JS_DIR + '/data-attributes.js',
+            JS_DIR + '/data-template.js',
+            JS_DIR + '/data-partial.js'
         ],
         "xtra": [
-            BUILD_DIR + '/attv.js',
-            BUILD_DIR + '/data-attributes.js',
-            BUILD_DIR + '/data-template.js',
-            BUILD_DIR + '/data-partial.js',
-            BUILD_DIR + '/xtras/data-wall.js',
-            BUILD_DIR + '/xtras/data-docs.js',
-            BUILD_DIR + '/xtras/data-tab.js',
-            BUILD_DIR + '/xtras/data-table.js',
-            BUILD_DIR + '/xtras/data-dialog.js'
+            JS_DIR + '/attv.js',
+            JS_DIR + '/data-attributes.js',
+            JS_DIR + '/data-template.js',
+            JS_DIR + '/data-partial.js',
+            JS_DIR + '/xtras/data-wall.js',
+            JS_DIR + '/xtras/data-docs.js',
+            JS_DIR + '/xtras/data-tab.js',
+            JS_DIR + '/xtras/data-table.js',
+            JS_DIR + '/xtras/data-dialog.js'
         ],
     }
 
@@ -90,7 +91,6 @@ function concatAttributiveJs(name) {
 function grabDts() {
     return pipeline(
         gulp.src(BUILD_DIR + '/**/*.d.ts'),
-        flatten(),
         gulp.dest(DIST_DIR)
     );
 }
