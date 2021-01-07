@@ -527,7 +527,7 @@ namespace Attv.Attribute {
          * Returns the data attribute
          * @param attributeId id
          */
-        resolve<TAttribute extends Attribute>(attributeId: string) {
+        resolve<TAttribute extends Attribute>(attributeId: string): TAttribute {
             let attribute = Attv.getAttribute(attributeId) as TAttribute;
 
             if (!this.allDependencies().some(dep => dep === attributeId)) {
