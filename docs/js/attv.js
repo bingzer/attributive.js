@@ -172,7 +172,8 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
     (function (Ajax) {
         function sendAjax(options) {
             var _a;
-            var xhr = new XMLHttpRequest();
+            options.method = options.method || 'get';
+            var xhr = options.createHttpRequest ? options.createHttpRequest() : new XMLHttpRequest();
             xhr.onreadystatechange = function (e) {
                 var xhr = this;
                 if (xhr.readyState == 4) {
@@ -200,7 +201,7 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
             if (Attv.isUndefined(option.url))
                 return undefined;
             var url = option.url;
-            if (option.data && option.method === 'get') {
+            if (option.data && (!option.method || option.method === 'get')) {
                 url += "?" + objectToQuerystring(option.data);
             }
             return url;
@@ -263,6 +264,9 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
             this.dependency.internals.push(Attv.DataSettings.UniqueId);
         }
         Object.defineProperty(Attribute.prototype, "isStrict", {
+            /**
+             * Returns true when the wildcard === 'none'
+             */
             get: function () {
                 return this.wildcard.equalsIgnoreCase('none');
             },

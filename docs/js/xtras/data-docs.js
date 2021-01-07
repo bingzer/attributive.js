@@ -42,7 +42,7 @@ var Attv;
             if (writer === void 0) { writer = consoleWriter; }
             var attribute = Attv.attributes.filter(function (att) { return att.uniqueId == uniqueIdOrName || att.name === uniqueIdOrName; })[0];
             writer.clear();
-            writer.write("Documentation for " + attribute.toString() + ". " + (attribute.description || ''), "attribute");
+            writer.write("Documentation for " + attribute.toString() + ".", "attribute");
             attribute.values.forEach(function (val) {
                 writer.write("" + val.toString(true), "attribute-value");
             });
