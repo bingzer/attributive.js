@@ -40,7 +40,8 @@ function uglifyAttributiveJs(name) {
             compress: {
                 global_defs: {
                     ATTV_DEBUG : false,
-                    ATTV_VERBOSE_LOGGING : false
+                    ATTV_VERBOSE_LOGGING : false,
+                    ATTV_VERSION : version
                 }
             }
         }),

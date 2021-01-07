@@ -1,12 +1,6 @@
 const ATTV_DEBUG: boolean = true;
 const ATTV_VERBOSE_LOGGING: boolean = true;
-
-namespace Attv {
-    /**
-     * Version. This should be replaced and updated by the CI/CD process
-     */
-    export const version: string = '0.0.1';
-}
+const ATTV_VERSION: string = '0.0.1';
 
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// PROTOTYPES //////////////////////////////////////
@@ -29,7 +23,7 @@ Element.prototype.attvHtml = function (html?: string): string | any {
     } else {
         element.innerHTML = html;
 
-        if (html) {
+        if (html) { 
             // look for scripts
             let innerHtmlElement = Attv.createHTMLElement(html);
             let scripts = innerHtmlElement.querySelectorAll('script');
@@ -210,6 +204,10 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Attv.Ajax ///////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv {
+    export const version = ATTV_VERSION;
+}
 
 namespace Attv.Ajax {
 
