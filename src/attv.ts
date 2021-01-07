@@ -316,6 +316,9 @@ namespace Attv {
          */
         public wildcard:  "*" | "<number>" | "<boolean>" | "<querySelector>" | "<jsExpression>" | "<json>" | "none" = "*";
 
+        /**
+         * Returns true when the wildcard === 'none'
+         */
         public get isStrict(): boolean {
             return this.wildcard.equalsIgnoreCase('none');
         }
