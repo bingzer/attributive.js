@@ -6,8 +6,8 @@ namespace Attv {
     export class DataTab extends Attv.Attribute {
         static readonly UniqueId = 'DataTab';
 
-        constructor (public name: string) {
-            super(DataTab.UniqueId, name, true);
+        constructor () {
+            super(DataTab.UniqueId);
 
             this.wildcard = "none";
 
@@ -27,10 +27,8 @@ namespace Attv.DataTab {
      */
     export class DefaultValue extends Attribute.Value {
         
-        constructor (attributeValue: string, 
-            attribute: Attv.Attribute, 
-            validators: Validators.AttributeValidator[] = []) {
-            super(attributeValue, attribute, validators);
+        constructor (attributeValue: string) {
+            super(attributeValue);
         }
         
         loadElement(element: HTMLElement): boolean {
@@ -53,8 +51,8 @@ namespace Attv.DataTab {
      */
     export class DataPartialTabValue extends Attv.DataPartial.DefaultValue {
         
-        constructor (attribute: Attv.Attribute) {
-            super('tab', attribute)
+        constructor () {
+            super('tab')
         }
     
         loadElement(element: HTMLElement): boolean {
@@ -89,8 +87,8 @@ namespace Attv {
     export class DataTabItem extends Attv.Attribute {
         static readonly UniqueId = 'DataTabItem';
 
-        constructor (public name: string) {
-            super(DataTabItem.UniqueId, name);
+        constructor () {
+            super(DataTabItem.UniqueId);
 
             this.dependency.uses.push(DataEnabled.UniqueId, DataActive.UniqueId);
             this.dependency.internals.push(DataRoute.UniqueId);
@@ -104,9 +102,8 @@ namespace Attv {
          */
         export class DefaultValue extends Attribute.Value {
             
-            constructor (attribute: Attv.Attribute, 
-                validators: Validators.AttributeValidator[] = []) {
-                super(undefined, attribute, validators);
+            constructor () {
+                super();
 
                 this.resolver.uses.push(DataEnabled.UniqueId, DataActive.UniqueId, DataTabContent.UniqueId);
                 this.resolver.internals.push(DataTab.UniqueId);
@@ -228,8 +225,8 @@ namespace Attv {
     export class DataTabContent extends Attv.Attribute {
         static readonly UniqueId = 'DataTabContent';
 
-        constructor (public name: string) {
-            super(DataTabContent.UniqueId, name);
+        constructor () {
+            super(DataTabContent.UniqueId);
         }
 
     }
@@ -241,10 +238,8 @@ namespace Attv {
          */
         export class DefaultValue extends Attribute.Value {
             
-            constructor (attribute: Attv.Attribute, 
-                validators: Validators.AttributeValidator[] = []) {
-                super(undefined, attribute, validators);
-                
+            constructor () {
+                super();
                 this.resolver.uses.push(DataContent.UniqueId, DataPartial.UniqueId, DataActive.UniqueId);
             }
             
@@ -354,24 +349,24 @@ ${settings.attributeValue.attribute} [data-tab-item][data-enabled="false"]:hover
 
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-tab', 
-        (attributeName: string) => new Attv.DataTab(attributeName),
+        () => new Attv.DataTab(),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTab.DefaultValue(Attv.configuration.defaultTag, attribute));
+            list.push(new Attv.DataTab.DefaultValue(Attv.configuration.defaultTag));
         });
     Attv.registerAttribute('data-tab-item', 
-        (attributeName: string) => new Attv.DataTabItem(attributeName),
+        () => new Attv.DataTabItem(),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTabItem.DefaultValue(attribute));
+            list.push(new Attv.DataTabItem.DefaultValue());
         });
     Attv.registerAttribute('data-tab-content', 
-        (attributeName: string) => new Attv.DataTabContent(attributeName),
+        () => new Attv.DataTabContent(),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTabContent.DefaultValue(attribute));
+            list.push(new Attv.DataTabContent.DefaultValue());
         });
 
     Attv.registerAttributeValue(Attv.DataPartial.UniqueId,
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTab.DataPartialTabValue(attribute));
+            list.push(new Attv.DataTab.DataPartialTabValue());
         }
     );
 });

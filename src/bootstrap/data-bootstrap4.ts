@@ -8,8 +8,8 @@ namespace Attv.Bootstrap4 {
     export class DataBootstrap extends Attv.Attribute {
         static readonly UniqueId = "DataBootstrap4";
 
-        constructor (public name: string) {
-            super(DataBootstrap.UniqueId, name, true);
+        constructor () {
+            super(DataBootstrap.UniqueId, true);
 
             this.wildcard = "none";
             this.priority = 0;
@@ -29,13 +29,10 @@ namespace Attv.Bootstrap4 {
      */
     export class Bootstrap4Value extends Attv.Attribute.Value {
         
-        constructor (attributeValue: string, 
-            attribute: Attv.Attribute, 
-            validators: Validators.AttributeValidator[] = [
-                new Validators.RequiredElement(['body'])
-            ]) {
-            super(attributeValue, attribute, validators);
+        constructor (attributeValue: string) {
+            super(attributeValue);
 
+            this.validators.push(new Validators.RequiredElement(['body']));
             this.resolver.uses.push(DataRenderer.UniqueId);
             this.resolver.internals.push(DataTemplateHtml.UniqueId);
         }
@@ -60,8 +57,8 @@ namespace Attv.Bootstrap4 {
      */
     export class DataPartialTabValue extends Attv.DataPartial.DefaultValue {
         
-        constructor (attribute: Attv.Attribute) {
-            super("tab", attribute);
+        constructor () {
+            super("tab");
         }
 
         loadElement(element: HTMLElement): boolean {
@@ -150,13 +147,13 @@ namespace Attv.Bootstrap4 {
 
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-bootstrap', 
-        (attributeName: string) => new Attv.Bootstrap4.DataBootstrap(attributeName),
+        () => new Attv.Bootstrap4.DataBootstrap(),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.Bootstrap4.Bootstrap4Value('bootstrap4', attribute));
+            list.push(new Attv.Bootstrap4.Bootstrap4Value('bootstrap4'));
         });
 
     Attv.registerAttributeValue(Attv.DataPartial.UniqueId,
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.Bootstrap4.DataPartialTabValue(attribute));
+            list.push(new Attv.Bootstrap4.DataPartialTabValue());
         });
 });

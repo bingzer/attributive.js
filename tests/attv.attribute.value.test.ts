@@ -16,8 +16,11 @@ describe('Attv.Attribute.Value', () => {
     });
 
     it('Should create Attv.Attribute.Value', () => {
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
-        let val = new Attv.Attribute.Value('value', att);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
+
+        let val = new Attv.Attribute.Value('value');
+        val.attribute = att;
 
         expect(val.attribute).toBe(att);
         expect(val.validators.length).toBe(0);
@@ -29,8 +32,11 @@ describe('Attv.Attribute.Value', () => {
         let elem = document.createElement('div');
         elem.setAttribute('data-attribute', 'some-value');
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
-        let val = new Attv.Attribute.Value('some-value', att);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
+
+        let val = new Attv.Attribute.Value();
+        val.attribute = att;
 
         let expected = val.getRaw(elem);
 
@@ -40,9 +46,12 @@ describe('Attv.Attribute.Value', () => {
     it('Should return the raw value when assigned value is undfeiend', () => {
         let elem = document.createElement('div');
         elem.setAttribute('data-attribute', 'some-value-custom');
+        
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
-        let val = new Attv.Attribute.Value(undefined, att);
+        let val = new Attv.Attribute.Value();
+        val.attribute = att;
 
         let expected = val.getRaw(elem);
 
@@ -52,9 +61,12 @@ describe('Attv.Attribute.Value', () => {
     it('Should always return true by default', () => {
         let elem = document.createElement('div');
         elem.setAttribute('data-attribute', 'some-value');
+        
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
-        let val = new Attv.Attribute.Value('some-value', att);
+        let val = new Attv.Attribute.Value('value');
+        val.attribute = att;
 
         let expected = val.loadElement(elem);
 
@@ -70,9 +82,12 @@ describe('Attv.Attribute.Value', () => {
 
         let elem = document.createElement('div');
         elem.setAttribute('data-attribute', 'some-value');
+        
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
-        let val = new Attv.Attribute.Value('some-value', att);
+        let val = new Attv.Attribute.Value('value');
+        val.attribute = att;
 
         let expected = val.loadSettings(elem, settings => {
             expect(settings).toBeDefined();
@@ -81,18 +96,24 @@ describe('Attv.Attribute.Value', () => {
         expect(expected).toBe(true);
     });
 
-    it('Should print the string representation', () => {
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
-        let val = new Attv.Attribute.Value('some-value', att);
+    it('Should print the string representation', () => {        
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
+
+        let val = new Attv.Attribute.Value('some-value');
+        val.attribute = att;
 
         let expected = val.toString();
 
         expect(expected).toBe('[data-attribute]=some-value');
     });
 
-    it('Should print the string representation (pretty print - no assigned value)', () => {
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
-        let val = new Attv.Attribute.Value(undefined, att);
+    it('Should print the string representation (pretty print - no assigned value)', () => {        
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
+
+        let val = new Attv.Attribute.Value();
+        val.attribute = att;
 
         let expected = val.toString(true);
 

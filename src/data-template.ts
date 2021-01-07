@@ -6,8 +6,8 @@ namespace Attv {
     export class DataTemplate extends Attv.Attribute {
         static readonly UniqueId = 'DataTemplate';
 
-        constructor (public name: string) {
-            super(DataTemplate.UniqueId, name, true);
+        constructor () {
+            super(DataTemplate.UniqueId, true);
 
             this.wildcard = "none";
         }
@@ -42,10 +42,8 @@ namespace Attv.DataTemplate {
      */
     export class DefaultValue extends Attv.Attribute.Value {
         
-        constructor (attributeValue: string, 
-            attribute: Attv.Attribute, 
-            validators: Validators.AttributeValidator[] = []) {
-            super(attributeValue, attribute, validators);
+        constructor (attributeValue: string) {
+            super(attributeValue);
 
             this.resolver.uses.push(DataRenderer.UniqueId);
             this.resolver.internals.push(DataTemplateHtml.UniqueId);
@@ -80,11 +78,9 @@ namespace Attv.DataTemplate {
      */
     export class ScriptValue extends DefaultValue {
         
-        constructor (attribute: Attv.Attribute) {
-            super('script', attribute, [ 
-                new Validators.RequiredElement(['script']),
-                new Validators.RequiredAttributeWithValue([{ name: 'type', value: 'text/html'}])
-            ])
+        constructor () {
+            super('script')
+            this.validators.push(new Validators.RequiredElement(['script']), new Validators.RequiredAttributeWithValue([{ name: 'type', value: 'text/html'}]));
         }
 
         loadElement(element: HTMLElement): boolean {
@@ -110,8 +106,8 @@ namespace Attv {
     export class DataTemplateHtml extends Attribute {
         static readonly UniqueId = 'DataTemplateHtml';
 
-        constructor (public name: string) {
-            super(DataTemplateHtml.UniqueId, name, false);
+        constructor () {
+            super(DataTemplateHtml.UniqueId);
         }
     }
 }
@@ -128,8 +124,8 @@ namespace Attv {
     export class DataTemplateSource extends Attribute {
         static readonly UniqueId = 'DataTemplateSource';
 
-        constructor (public name: string) {
-            super(DataTemplateSource.UniqueId, name, false);
+        constructor () {
+            super(DataTemplateSource.UniqueId);
 
             this.wildcard = "<querySelector>";
         }
@@ -157,19 +153,19 @@ namespace Attv {
 ////////////////////////////////////////////////////////////////////////////////////
 
 Attv.loader.pre.push(() => {
-    Attv.registerAttribute('data-template-html',  (attributeName: string) => new Attv.DataTemplateHtml(attributeName));
+    Attv.registerAttribute('data-template-html',  () => new Attv.DataTemplateHtml());
     Attv.registerAttribute('data-template-source', 
-        (attributeName: string) => new Attv.DataTemplateSource(attributeName),
+        () => new Attv.DataTemplateSource(),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            let attributeValue = new Attv.Attribute.Value(undefined, attribute);
+            let attributeValue = new Attv.Attribute.Value(undefined);
             attributeValue.resolver.uses.push(Attv.DataTemplate.UniqueId);
 
             list.push(attributeValue);
         });
     Attv.registerAttribute('data-template', 
-        (attributeName: string) => new Attv.DataTemplate(attributeName),
+        () => new Attv.DataTemplate(),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTemplate.DefaultValue(Attv.configuration.defaultTag, attribute));
-            list.push(new Attv.DataTemplate.ScriptValue(attribute));
+            list.push(new Attv.DataTemplate.DefaultValue(Attv.configuration.defaultTag));
+            list.push(new Attv.DataTemplate.ScriptValue());
         });
 });

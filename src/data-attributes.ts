@@ -7,8 +7,8 @@ namespace Attv {
     export class DataUrl extends Attv.Attribute {
         static readonly UniqueId = 'DataUrl';
 
-        constructor (name: string) {
-            super(DataUrl.UniqueId, name);
+        constructor () {
+            super(DataUrl.UniqueId);
 
             this.dependency.requires.push(DataMethod.UniqueId, DataData.UniqueId, DataCache.UniqueId);
         }
@@ -46,10 +46,6 @@ namespace Attv {
     export namespace DataUrl {
 
         export class DefaultValue extends Attribute.Value {
-            constructor (attribute: Attribute) {
-                super(undefined, attribute);
-            }
-
             getRaw(element: HTMLElement): string {
                 let rawValue = super.getRaw(element);
 
@@ -76,8 +72,8 @@ namespace Attv {
         static readonly UniqueId = 'DataMethod';
         static readonly DefaultMethod = 'get';
 
-        constructor (name: string) {
-            super(DataMethod.UniqueId, name);
+        constructor () {
+            super(DataMethod.UniqueId);
         }
 
         getMethod(element: HTMLElement): Ajax.AjaxMethod {
@@ -86,10 +82,6 @@ namespace Attv {
     }
     export namespace DataMethod {
         export class DefaultValue extends Attribute.Value {
-            constructor (attribute: Attribute) {
-                super(undefined, attribute)
-            }
-
             getRaw(element: HTMLElement): string {
                 let rawValue = super.getRaw(element);
 
@@ -113,8 +105,8 @@ namespace Attv {
     export class DataCache extends Attv.Attribute {
         static readonly UniqueId = 'DataCache';
 
-        constructor (name: string) {
-            super(DataCache.UniqueId, name);
+        constructor () {
+            super(DataCache.UniqueId);
             this.wildcard = "<boolean>";
         }
 
@@ -133,8 +125,8 @@ namespace Attv {
     export class DataCallback extends Attv.Attribute {
         static readonly UniqueId = 'DataCallback';
 
-        constructor (name: string) {
-            super(DataCallback.UniqueId, name);
+        constructor () {
+            super(DataCallback.UniqueId);
             this.wildcard = "<jsExpression>";
         }
 
@@ -150,8 +142,8 @@ namespace Attv {
     export class DataContent extends Attv.Attribute {
         static readonly UniqueId = 'DataContent';
 
-        constructor (name: string) {
-            super(DataContent.UniqueId, name);
+        constructor () {
+            super(DataContent.UniqueId);
         }
 
         getContent(element: HTMLElement): any {
@@ -167,8 +159,8 @@ namespace Attv {
     export class DataTarget extends Attv.Attribute {
         static readonly UniqueId = 'DataTarget';
 
-        constructor (name: string) {
-            super(DataTarget.UniqueId, name);
+        constructor () {
+            super(DataTarget.UniqueId);
             this.wildcard = "<querySelector>";
         }
 
@@ -185,8 +177,8 @@ namespace Attv {
     export class DataTimeout extends Attv.Attribute {
         static readonly UniqueId = 'DataTimeout';
 
-        constructor (name: string) {
-            super(DataTimeout.UniqueId, name);
+        constructor () {
+            super(DataTimeout.UniqueId);
             this.wildcard = "<number>";
         } 
 
@@ -207,8 +199,8 @@ namespace Attv {
     export class DataInterval extends Attv.Attribute {
         static readonly UniqueId = 'DataInterval';
 
-        constructor (name: string) {
-            super(DataInterval.UniqueId, name);
+        constructor () {
+            super(DataInterval.UniqueId);
             this.wildcard = "<number>";
         }
 
@@ -258,8 +250,8 @@ namespace Attv {
     export class DataData extends Attv.Attribute {
         static readonly UniqueId = 'DataData';
 
-        constructor (name: string) {
-            super(DataData.UniqueId, name);
+        constructor () {
+            super(DataData.UniqueId);
             this.wildcard = "<json>";
         }
         
@@ -275,8 +267,8 @@ namespace Attv {
     export class DataTitle extends Attv.Attribute {
         static readonly UniqueId = 'DataTitle';
 
-        constructor (name: string) {
-            super(DataTitle.UniqueId, name);
+        constructor () {
+            super(DataTitle.UniqueId);
         }
         
         getTitle(element: HTMLElement): string {
@@ -291,8 +283,8 @@ namespace Attv {
     export class DataBind extends Attv.Attribute {
         static readonly UniqueId = 'DataBind';
 
-        constructor (name: string) {
-            super(DataBind.UniqueId, name);
+        constructor () {
+            super(DataBind.UniqueId);
 
             this.wildcard = "<jsExpression>";
         }
@@ -308,8 +300,8 @@ namespace Attv {
     export class DataEnabled extends Attv.Attribute {
         static readonly UniqueId = 'DataEnabled';
 
-        constructor (name: string) {
-            super(DataEnabled.UniqueId, name);
+        constructor () {
+            super(DataEnabled.UniqueId);
             this.wildcard = "<boolean>";
         }
 
@@ -330,8 +322,8 @@ namespace Attv {
     export class DataActive extends Attv.Attribute {
         static readonly UniqueId = 'DataActive';
 
-        constructor (name: string) {
-            super(DataActive.UniqueId, name);
+        constructor () {
+            super(DataActive.UniqueId);
             this.wildcard = "<boolean>";
         }
         
@@ -353,8 +345,8 @@ namespace Attv {
     export class DataRoute extends Attv.Attribute {
         static readonly UniqueId = 'DataRoute';
 
-        constructor (name: string) {
-            super(DataRoute.UniqueId, name);
+        constructor () {
+            super(DataRoute.UniqueId);
         }
 
         getRoute(element: HTMLElement) {
@@ -420,28 +412,28 @@ namespace Attv {
 
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-url', 
-        (name: string) => new Attv.DataUrl(name),
-        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataUrl.DefaultValue(attribute));
+        () => new Attv.DataUrl(),
+        (att: Attv.Attribute, list: Attv.Attribute.Value[]) => {
+            list.push(new Attv.DataUrl.DefaultValue());
         });
     Attv.registerAttribute('data-method', 
-        (name: string) => new Attv.DataMethod(name),
-        (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataMethod.DefaultValue(attribute));
+        () => new Attv.DataMethod(),
+        (att: Attv.Attribute, list: Attv.Attribute.Value[]) => {
+            list.push(new Attv.DataMethod.DefaultValue());
         });
 
-    Attv.registerAttribute('data-callback', (name: string) => new Attv.DataCallback(name));
-    Attv.registerAttribute('data-target', (name: string) => new Attv.DataTarget(name));
-    Attv.registerAttribute('data-timeout', (name: string) => new Attv.DataTimeout(name));
-    Attv.registerAttribute('data-interval', (name: string) => new Attv.DataInterval(name));
-    Attv.registerAttribute('data-content', (name: string) => new Attv.DataContent(name));
-    Attv.registerAttribute('data-data', (name: string) => new Attv.DataData(name));
-    Attv.registerAttribute('data-cache', (name: string) => new Attv.DataCache(name));
-    Attv.registerAttribute('data-title', (name: string) => new Attv.DataTitle(name));
-    Attv.registerAttribute('data-bind', (name: string) => new Attv.DataBind(name));
-    Attv.registerAttribute('data-active', (name: string) => new Attv.DataActive(name));
-    Attv.registerAttribute('data-enabled', (name: string) => new Attv.DataEnabled(name));
-    Attv.registerAttribute('data-route', (name: string) => new Attv.DataRoute(name));
+    Attv.registerAttribute('data-callback', () => new Attv.DataCallback());
+    Attv.registerAttribute('data-target', () => new Attv.DataTarget());
+    Attv.registerAttribute('data-timeout', () => new Attv.DataTimeout());
+    Attv.registerAttribute('data-interval', () => new Attv.DataInterval());
+    Attv.registerAttribute('data-content', () => new Attv.DataContent());
+    Attv.registerAttribute('data-data', () => new Attv.DataData());
+    Attv.registerAttribute('data-cache', () => new Attv.DataCache());
+    Attv.registerAttribute('data-title', () => new Attv.DataTitle());
+    Attv.registerAttribute('data-bind', () => new Attv.DataBind());
+    Attv.registerAttribute('data-active', () => new Attv.DataActive());
+    Attv.registerAttribute('data-enabled', () => new Attv.DataEnabled());
+    Attv.registerAttribute('data-route', () => new Attv.DataRoute());
 });
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -455,8 +447,8 @@ namespace Attv {
     export class DataLoading extends Attv.Attribute {
         static readonly UniqueId = 'DataLoading';
 
-        constructor (name: string) {
-            super(DataLoading.UniqueId, name, true);
+        constructor () {
+            super(DataLoading.UniqueId, true);
 
             this.wildcard = "none";
         }
@@ -469,9 +461,8 @@ namespace Attv {
          */
         export class DefaultValue extends Attv.Attribute.Value  {
             
-            constructor (attributeValue: string, 
-                attribute: Attv.Attribute) {
-                super(attributeValue, attribute);
+            constructor (attributeValue: string) {
+                super(attributeValue);
             }
     
             loadElement(element: HTMLElement): boolean {
@@ -536,9 +527,9 @@ namespace Attv {
 
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-loading', 
-        (name: string) => new Attv.DataLoading(name),
+        () => new Attv.DataLoading(),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataLoading.DefaultValue(Attv.configuration.defaultTag, attribute));
+            list.push(new Attv.DataLoading.DefaultValue(Attv.configuration.defaultTag));
         });
 });
 
@@ -554,8 +545,8 @@ namespace Attv {
     export class DataRenderer extends Attv.Attribute {
         static readonly UniqueId = 'DataRenderer';
 
-        constructor (name: string) {
-            super(DataRenderer.UniqueId, name);
+        constructor () {
+            super(DataRenderer.UniqueId);
         }
 
         render(content: string, model: any, element?: HTMLElement, attributeValue?: DataRenderer.DefaultValue): string {       
@@ -574,8 +565,8 @@ namespace Attv {
          */
         export class DefaultValue extends Attv.Attribute.Value  {
             
-            constructor (attributeValue: string, attribute: Attv.Attribute) {
-                super(attributeValue, attribute);
+            constructor (attributeValue: string) {
+                super(attributeValue);
             }
     
             loadElement(element: HTMLElement): boolean {
@@ -595,8 +586,8 @@ namespace Attv {
     
             private dataBind: DataBind;
             
-            constructor (attributeValue: string = 'json2html', attribute: Attv.Attribute) {
-                super(attributeValue, attribute);
+            constructor (attributeValue: string = 'json2html') {
+                super(attributeValue);
 
                 this.resolver.requires.push(DataBind.UniqueId);
                 this.dataBind = this.resolver.resolve<DataBind>(DataBind.UniqueId);
@@ -680,9 +671,9 @@ namespace Attv {
 
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-renderer', 
-        (name: string) => new Attv.DataRenderer(name),
+        () => new Attv.DataRenderer(),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataRenderer.DefaultValue(Attv.configuration.defaultTag, attribute));
-            list.push(new Attv.DataRenderer.Json2HtmlValue('json2Html', attribute));
+            list.push(new Attv.DataRenderer.DefaultValue(Attv.configuration.defaultTag));
+            list.push(new Attv.DataRenderer.Json2HtmlValue('json2Html'));
         });
 });

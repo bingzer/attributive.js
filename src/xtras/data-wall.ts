@@ -6,8 +6,8 @@ namespace Attv {
     export class DataWall extends Attv.Attribute {
         static readonly UniqueId = "DataWall";
 
-        constructor (public name: string) {
-            super(DataWall.UniqueId, name, true);
+        constructor () {
+            super(DataWall.UniqueId, true);
 
             this.wildcard = "none";
 
@@ -25,12 +25,10 @@ namespace Attv {
          */
         export class DefaultValue extends Attribute.Value {
 
-            constructor (attributeValue: string, 
-                attribute: Attv.Attribute, 
-                validators: Validators.AttributeValidator[] = [
-                    new Validators.RequiredElement(['a', 'button'])
-                ]) {
-                super(attributeValue, attribute, validators);
+            constructor (attributeValue: string) {
+                super(attributeValue);
+
+                this.validators.push(new Validators.RequiredElement(['a', 'button']));
             }
             
             loadElement(element: HTMLElement): boolean {
@@ -75,10 +73,8 @@ namespace Attv {
          * [data-wall]="confirm"
          */
         export class ConfirmValue extends DefaultValue {
-            constructor (attributeValue: string,
-                attribute: Attv.Attribute, 
-                validators: Validators.AttributeValidator[] = []) {
-                super(attributeValue, attribute, validators);
+            constructor (attributeValue: string) {
+                super(attributeValue);
             }
 
             protected onclick(element: HTMLElement, ev: Event): boolean {
@@ -102,11 +98,11 @@ namespace Attv {
 
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-wall', 
-        (attributeName: string) => new Attv.DataWall(attributeName),
+        () => new Attv.DataWall(),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataWall.DefaultValue('alert', attribute));
-            list.push(new Attv.DataWall.ConfirmValue('confirm', attribute));
-            list.push(new Attv.DataWall.DefaultValue('native-alert', attribute));
-            list.push(new Attv.DataWall.ConfirmValue('native-confirm', attribute));
+            list.push(new Attv.DataWall.DefaultValue('alert'));
+            list.push(new Attv.DataWall.ConfirmValue('confirm'));
+            list.push(new Attv.DataWall.DefaultValue('native-alert'));
+            list.push(new Attv.DataWall.ConfirmValue('native-confirm'));
         });
 });

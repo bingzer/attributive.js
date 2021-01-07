@@ -6,8 +6,8 @@ namespace Attv {
     export class DataPartial extends Attv.Attribute {
         static readonly UniqueId = "DataPartial";
 
-        constructor (public name: string) {
-            super(DataPartial.UniqueId, name, true);
+        constructor () {
+            super(DataPartial.UniqueId, true);
 
             this.wildcard = "none";
             this.dependency.requires.push(DataUrl.UniqueId);
@@ -39,13 +39,9 @@ namespace Attv.DataPartial {
      */
     export class DefaultValue extends Attv.Attribute.Value {
         
-        constructor (attributeValue: string, 
-            attribute: Attv.Attribute, 
-            validators: Validators.AttributeValidator[] = [
-                new Validators.RequiredAttribute([DataUrl.UniqueId])
-            ]) {
-            super(attributeValue, attribute, validators);
-
+        constructor (attributeValue: string) {
+            super(attributeValue);
+            this.validators.push(new Validators.RequiredAttribute([DataUrl.UniqueId]));
             this.resolver.uses.push(DataTemplateSource.UniqueId, DataTimeout.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId, DataInterval.UniqueId);
         }
 
@@ -126,8 +122,8 @@ namespace Attv.DataPartial {
      */
     export class AutoValue extends DefaultValue {
         
-        constructor (attribute: Attv.Attribute) {
-            super('auto', attribute)
+        constructor () {
+            super('auto')
         }
         
 
@@ -143,11 +139,9 @@ namespace Attv.DataPartial {
      */
     export class ClickValue extends DefaultValue {
         
-        constructor (attribute: Attv.Attribute) {
-            super('click', attribute, [
-                new Validators.RequiredAttribute([DataUrl.UniqueId]),
-                new Validators.RequiredElement(['button', 'a'])
-            ])
+        constructor () {
+            super('click');
+            this.validators.push(new Validators.RequiredAttribute([DataUrl.UniqueId]), new Validators.RequiredElement(['button', 'a']));
         }
 
         loadElement(element: HTMLElement): boolean {
@@ -165,11 +159,9 @@ namespace Attv.DataPartial {
      */
     export class FormValue extends DefaultValue {
         
-        constructor (attribute: Attv.Attribute) {
-            super('form', attribute, [
-                new Validators.RequiredAttribute([DataUrl.UniqueId]),
-                new Validators.RequiredElement(['form'])
-            ])
+        constructor () {
+            super('form');
+            this.validators.push(new Validators.RequiredAttribute([DataUrl.UniqueId]), new Validators.RequiredElement(['form']));
         }
 
         loadElement(element: HTMLElement): boolean {
@@ -191,12 +183,12 @@ namespace Attv.DataPartial {
 
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-partial', 
-        (attributeName: string) => new Attv.DataPartial(attributeName),
+        () => new Attv.DataPartial(),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataPartial.DefaultValue(Attv.configuration.defaultTag, attribute));
-            list.push(new Attv.DataPartial.DefaultValue('lazy', attribute));
-            list.push(new Attv.DataPartial.AutoValue(attribute));
-            list.push(new Attv.DataPartial.ClickValue(attribute));
-            list.push(new Attv.DataPartial.FormValue(attribute));
+            list.push(new Attv.DataPartial.DefaultValue(Attv.configuration.defaultTag));
+            list.push(new Attv.DataPartial.DefaultValue('lazy'));
+            list.push(new Attv.DataPartial.AutoValue());
+            list.push(new Attv.DataPartial.ClickValue());
+            list.push(new Attv.DataPartial.FormValue());
         });
 });

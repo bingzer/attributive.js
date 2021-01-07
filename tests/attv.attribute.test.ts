@@ -16,7 +16,8 @@ describe('Attv.Attribute', () => {
     });
 
     it('Should create Attv.Attribute', () => {
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
 
         expect(att).toBeTruthy();
         expect(att.name).toBe('data-attribute');
@@ -25,7 +26,8 @@ describe('Attv.Attribute', () => {
     });
 
     it('Should create Attv.Attribute (isAutoLoad = false)', () => {
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', false);
+        let att = new Attv.Attribute('uniqueId', false);
+        att.name = 'data-attribute';
 
         expect(att).toBeTruthy();
         expect(att.name).toBe('data-attribute');
@@ -34,7 +36,8 @@ describe('Attv.Attribute', () => {
     });
 
     it('Should assign default properties', () => {
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
 
         expect(att.priority).toBe(1);
         expect(att.values.length).toBe(0);
@@ -46,20 +49,26 @@ describe('Attv.Attribute', () => {
     });
 
     it('Should not be strict', () => {
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
+
         expect(att.isStrict);
     });
 
     it('Should be strict', () => {
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
         att.wildcard = 'none';
 
         expect(att.isStrict);
     });
 
     it('Should register an attribute value', () => {
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
-        let val = new Attv.Attribute.Value('value', att);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
+
+        let val = new Attv.Attribute.Value('value');
+        val.attribute = att;
 
         att.registerAttributeValues([val]);
 
@@ -68,12 +77,15 @@ describe('Attv.Attribute', () => {
     });
 
     it('Should register an attribute value and add the attribute dependencies to its resolver', () => {
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
+        
         att.dependency.internals.push('internal-dep');
         att.dependency.uses.push('use-dep');
         att.dependency.requires.push('require-dep');
 
-        let val = new Attv.Attribute.Value('value', att);
+        let val = new Attv.Attribute.Value('value');
+        val.attribute = att;
 
         att.registerAttributeValues([val]);
 
@@ -89,7 +101,8 @@ describe('Attv.Attribute', () => {
         let elem = document.createElement('div');
         elem.setAttribute('data-attribute', 'some-value');
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
 
         expect(att.exists(elem)).toBeTruthy();
     });
@@ -97,7 +110,8 @@ describe('Attv.Attribute', () => {
     it('Should return false when an element does not have this attribute', () => {
         let elem = document.createElement('div');
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
 
         expect(att.exists(elem)).toBeFalsy();
     });
@@ -106,7 +120,8 @@ describe('Attv.Attribute', () => {
         let elem = document.createElement('div');
         elem.setAttribute('data-attribute', 'some-value');
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
 
         let val = att.getValue(elem);
 
@@ -119,8 +134,11 @@ describe('Attv.Attribute', () => {
 
         let elem = document.createElement('div');
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
-        let val = new Attv.Attribute.Value('some-value', att);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
+
+        let val = new Attv.Attribute.Value('some-value');
+        val.attribute = att;
 
         att.registerAttributeValues([val]);
 
@@ -132,7 +150,8 @@ describe('Attv.Attribute', () => {
     it('Should throw error when a strict attribute do not have default attribute value', () => {
         let elem = document.createElement('div');
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
         att.wildcard = 'none';
 
         expect(() => att.getValue(elem)).toThrowError();
@@ -142,7 +161,8 @@ describe('Attv.Attribute', () => {
         let elem = document.createElement('div');
         elem.setAttribute('data-attribute-loaded', 'true');
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
 
         expect(att.isElementLoaded(elem)).toBeTruthy();
     });
@@ -150,7 +170,8 @@ describe('Attv.Attribute', () => {
     it('Should return true when the element is not loaded', () => {
         let elem = document.createElement('div');
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
 
         expect(att.isElementLoaded(elem)).toBeFalsy();
     });
@@ -158,7 +179,8 @@ describe('Attv.Attribute', () => {
     it('Should mark element loaded to true', () => {
         let elem = document.createElement('div');
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
         att.markElementLoaded(elem, true);
 
         expect(att.isElementLoaded(elem)).toBeTruthy();
@@ -167,14 +189,16 @@ describe('Attv.Attribute', () => {
     it('Should mark element loaded to false', () => {
         let elem = document.createElement('div');
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
         att.markElementLoaded(elem, false);
 
         expect(att.isElementLoaded(elem)).toBeFalsy();
     });
 
     it('Should print toString()', () => {
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
 
         expect(att.toString()).toBe('[data-attribute]');
     });

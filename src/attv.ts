@@ -300,8 +300,7 @@ namespace Attv {
         public readonly values: Attribute.Value[] = [];
 
         public readonly dependency: Attribute.Dependency = new Attribute.Dependency();
-        public readonly loadedName: string;
-        public readonly settingsName: string;
+        public name: string;
 
         /**
          * zero-index priority
@@ -321,18 +320,20 @@ namespace Attv {
             return this.wildcard.equalsIgnoreCase('none');
         }
 
+        public get loadedName(): string {
+            return this.name + '-loaded';
+        }
+
+        public get settingsName(): string {
+            return this.name + '-settings';
+        }
+
         /**
          * 
          * @param uniqueId unique id
-         * @param name  the attribute name
          * @param isAutoLoad is auto-load
          */
-        constructor (
-            public uniqueId: string,
-            public name: string, 
-            public isAutoLoad: boolean = false) {
-            this.loadedName = this.name + "-loaded";
-            this.settingsName = this.name + "-settings";
+        constructor (public uniqueId: string, public isAutoLoad: boolean = false) {
             this.dependency.internals.push(DataSettings.UniqueId);
         }
         
@@ -347,6 +348,7 @@ namespace Attv {
                 attributeValues[i].resolver.requires.push(...this.dependency.requires);
                 attributeValues[i].resolver.uses.push(...this.dependency.uses);
                 attributeValues[i].resolver.internals.push(...this.dependency.internals);
+                attributeValues[i].attribute = this;
             }
 
             this.values.push(...attributeValues);
@@ -388,7 +390,8 @@ namespace Attv {
             // #3. generic attribute
             if (!attributeValue) {
                 let rawAttributeValue = element?.getAttribute(this.name);
-                attributeValue = new Attribute.Value(rawAttributeValue, this) as TValue;
+                attributeValue = new Attribute.Value(rawAttributeValue) as TValue;
+                attributeValue.attribute = this;
             }
 
             return attributeValue;
@@ -435,12 +438,11 @@ namespace Attv.Attribute {
      */
     export class Value {
         public readonly resolver: Resolver = new Resolver(this);
+        public readonly validators: Validators.AttributeValidator[] = [];
         public settings: Settings;
+        public attribute: Attribute;
         
-        constructor (protected value: string, 
-            public attribute: Attribute,
-            public validators: Validators.AttributeValidator[] = [],
-            private loadElementFn: (element: HTMLElement) => boolean = undefined) {
+        constructor (protected value: string = undefined, private loadElementFn: (element: HTMLElement) => boolean = undefined) {
         }
 
         /**
@@ -680,8 +682,8 @@ namespace Attv {
     export class DataSettings extends Attv.Attribute {
         static readonly UniqueId = 'DataSettings';
     
-        constructor (name: string) {
-            super(DataSettings.UniqueId, name);
+        constructor () {
+            super(DataSettings.UniqueId);
             this.wildcard = "<json>";
         }
         
@@ -1132,10 +1134,10 @@ namespace Attv {
      * @param valuesFn callback function register attribute values to the attribute
      */
     export function registerAttribute(attributeName: string, 
-        fn: (attributeName: string) => Attribute,
+        fn: () => Attribute,
         valuesFn?: (attribute: Attribute, list: Attribute.Value[]) => void): void {
-        let registry = new AttributeRegistration(attributeName, fn, valuesFn);
 
+        let registry = new AttributeRegistration(attributeName, fn, valuesFn);
         attributeRegistrar.push(registry);
     }
 
@@ -1161,14 +1163,14 @@ namespace Attv {
     }
 
     class AttributeRegistration {
-        constructor (public attributeName: string, 
-            private fn: (attributeName: string) => Attribute,
-            private valuesFn?: (attribute: Attribute, list: Attribute.Value[]) => void) {
+        constructor (public attributeName: string,  private fn: () => Attribute, private valuesFn?: (attribute: Attribute, list: Attribute.Value[]) => void) {
             // do nothing
         }
 
         register(): Attribute {
-            let attribute = this.fn(this.attributeName);
+            let attribute = this.fn();
+            attribute.name = this.attributeName;
+
             let attributeValues: Attribute.Value[] = [];
 
             if (this.valuesFn) {
@@ -1211,7 +1213,7 @@ namespace Attv {
 
     function preRegister() {
         Attv.log('Attv v.' + Attv.version);
-        Attv.registerAttribute('data-settings', (name: string) => new Attv.DataSettings(name));
+        Attv.registerAttribute('data-settings', () => new Attv.DataSettings());
     }
 
     function register() {

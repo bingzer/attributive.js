@@ -7,7 +7,7 @@ namespace Attv.JQuery {
         static readonly UniqueId = "DataJQuery";
 
         constructor (public name: string) {
-            super(DataJQuery.UniqueId, name, true);
+            super(DataJQuery.UniqueId, true);
 
             this.wildcard = "none";
         }

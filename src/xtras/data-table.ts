@@ -6,8 +6,8 @@ namespace Attv {
     export class DataTable extends Attv.Attribute {
         static readonly UniqueId = 'DataTable';
 
-        constructor (public name: string) {
-            super(DataTable.UniqueId, name, true);
+        constructor () {
+            super(DataTable.UniqueId, true);
 
             this.wildcard = "none";
         }
@@ -26,13 +26,10 @@ namespace Attv.DataTable {
      */
     export class DefaultValue extends Attribute.Value {
         
-        constructor (attributeValue: string, 
-            attribute: Attv.Attribute, 
-            validators: Validators.AttributeValidator[] = [
-                new Validators.RequiredElement(['table'])
-            ]) {
-            super(attributeValue, attribute, validators);
+        constructor (attributeValue: string) {
+            super(attributeValue);
 
+            this.validators.push(new Validators.RequiredElement(['table']));
             this.resolver.uses.push(DataTemplate.UniqueId, DataPartial.UniqueId);
         }
     
@@ -71,12 +68,10 @@ namespace Attv.DataTable {
      */
     export class DataPartialTableValue extends Attv.DataPartial.DefaultValue {
         
-        constructor (attribute: Attv.Attribute, 
-            validators: Validators.AttributeValidator[] = [
-                new Validators.RequiredAttribute([DataUrl.UniqueId])
-            ]) {
-            super('table', attribute, validators);
+        constructor () {
+            super('table');
 
+            this.validators.push(new Validators.RequiredAttribute([DataUrl.UniqueId]));
             this.resolver.uses.push(DataTemplateSource.UniqueId, DataTimeout.UniqueId, DataMethod.UniqueId, DataCallback.UniqueId, DataTarget.UniqueId, DataInterval.UniqueId);
         }
 
@@ -115,11 +110,9 @@ namespace Attv.DataTable {
      */
     export class DataTemplateTableValue extends Attv.DataTemplate.DefaultValue {
         
-        constructor (attribute: Attv.Attribute, 
-            validators: Validators.AttributeValidator[] = [
-                new Validators.RequiredElement(['table'])
-            ]) {
-            super('table', attribute, validators);
+        constructor () {
+            super('table');
+            this.validators.push(new Validators.RequiredElement(['table']));
         }
 
         loadElement(element: HTMLElement): boolean {
@@ -176,18 +169,18 @@ namespace Attv.DataTable {
 
 Attv.loader.pre.push(() => {
     Attv.registerAttribute('data-table', 
-        (attributeName: string) => new Attv.DataTable(attributeName),
+        () => new Attv.DataTable(),
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTable.DefaultValue(Attv.configuration.defaultTag, attribute));
+            list.push(new Attv.DataTable.DefaultValue(Attv.configuration.defaultTag));
         });
 
     Attv.registerAttributeValue(Attv.DataTemplate.UniqueId,
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTable.DataTemplateTableValue(attribute));
+            list.push(new Attv.DataTable.DataTemplateTableValue());
         });
 
     Attv.registerAttributeValue(Attv.DataPartial.UniqueId,
         (attribute: Attv.Attribute, list: Attv.Attribute.Value[]) => {
-            list.push(new Attv.DataTable.DataPartialTableValue(attribute));
+            list.push(new Attv.DataTable.DataPartialTableValue());
         });
 });
