@@ -19,26 +19,38 @@ describe('Attv.Attribute.Resolver', () => {
     });
 
     it('Should be a subtype of Attv.Attribute.Dependency', () => {
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
-        let val = new Attv.Attribute.Value('some-value', att);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
+
+        let val = new Attv.Attribute.Value('some-value');
+        val.attribute = att;
+
         let resolver = new Attv.Attribute.Resolver(val);
 
         expect(resolver instanceof Attv.Attribute.Dependency).toBeTruthy();
     });
 
     it('Should create Attv.Attribute.Resolver', () => {
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
-        let val = new Attv.Attribute.Value('some-value', att);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
+
+        let val = new Attv.Attribute.Value('some-value');
+        val.attribute = att;
+
         let resolver = new Attv.Attribute.Resolver(val);
 
         expect(resolver.allDependencies).toBeTruthy();
     });
 
     it('Should be able to resolve the dependency', () => {
-        let somethingAtt = new Attv.Attribute('abcd', 'data-something', true);
+        let somethingAtt = new Attv.Attribute('abcd', true);
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
-        let val = new Attv.Attribute.Value('some-value', att);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
+
+        let val = new Attv.Attribute.Value('some-value');
+        val.attribute = att;
+        
 
         att.dependency.internals.push('abcd');
 
@@ -58,10 +70,14 @@ describe('Attv.Attribute.Resolver', () => {
     it('Should add data-attribute to an alement', () => {
         let elem = document.createElement('div');
 
-        let somethingAtt = new Attv.Attribute('abcd', 'data-something', true);
+        let somethingAtt = new Attv.Attribute('abcd', true);
+        somethingAtt.name = 'data-something';
 
-        let att = new Attv.Attribute('uniqueId', 'data-attribute', true);
-        let val = new Attv.Attribute.Value('some-value', att);
+        let att = new Attv.Attribute('uniqueId', true);
+        att.name = 'data-attribute';
+
+        let val = new Attv.Attribute.Value('some-value');
+        val.attribute = att;
 
         att.dependency.internals.push('abcd');
 
