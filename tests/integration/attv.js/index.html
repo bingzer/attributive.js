@@ -3,28 +3,30 @@
 	<title>Test Usage</title>
 </head>
 <body>
-	<div data-write-hello-world="default">
+	<div data-hello="default">
+        <!-- Hello World here-->
+    </div>
+	<div data-hello="es6">
+        <!-- Hello World here-->
+    </div>
+	<div data-hello="es5">
+        <!-- Hello World here-->
+    </div>
+	<div data-hello="invalid">
         <!-- Hello World here-->
     </div>
 
-	<div data-write-hello-world="es6">
-        <!-- Hello World here-->
-    </div>
-	<div data-write-hello-world="es5">
-        <!-- Hello World here-->
-    </div>
-	
-	<div data-write-hello-world="invalid-value">
+	<div data-lazy="default">
         <!-- Hello World here-->
     </div>
     
     <script type="text/javascript" src="/build/attv.js"></script>
     <script type="text/javascript" defer>
 
-Attv.register('data-write-hello-world', { isAutoLoad: true, wildcard: 'none' }, function (att) {
+Attv.register('data-hello', { isAutoLoad: true, wildcard: 'none' }, function (att) {
 
     att.value('default', function (value, element) {
-        element.innerHTML = 'hello. this is from default' + value.getRaw(element);
+        element.innerHTML = 'hello. this is from default ' + this.toString();
     });
 
     // -- using ES6 class
@@ -35,7 +37,7 @@ Attv.register('data-write-hello-world', { isAutoLoad: true, wildcard: 'none' }, 
         }
 
         load = function (element) {
-            element.innerHTML = 'hello. this is from custom. from attribute ' + this.attribute.toString();
+            element.innerHTML = 'hello. Es6Class. from attribute ' + this.toString();
         }
     }
 
@@ -51,12 +53,20 @@ Attv.register('data-write-hello-world', { isAutoLoad: true, wildcard: 'none' }, 
     }
     Es5Class.prototype = Object.create(Attv.Attribute.Value.prototype);
     Es5Class.prototype.load = function (element) {
-        element.innerHTML = 'hello. this is from es5. from attribute ' + this.attribute.toString();
+        element.innerHTML = 'hello. Es5Class. from attribute ' + this.toString();
+        return false;
     };
 
     att.value(att => new Es5Class());
 
-})
+});
+
+Attv.register('data-lazy', { isAutoLoad: true }, function (att) {
+
+    att.value('default', function (value, element) {
+        element.innerHTML = 'This is a lazy load from ' + this.toString();
+    });
+});
     </script>
 </body>
 </html>

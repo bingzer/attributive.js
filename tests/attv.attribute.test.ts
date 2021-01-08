@@ -126,7 +126,7 @@ describe('Attv.Attribute', () => {
         let val = att.getValue(elem);
 
         expect(val).toBeTruthy();
-        expect(val.getRaw(elem)).toBe('some-value');
+        expect(val.raw(elem)).toBe('some-value');
     });
 
     it('Should return the first registered attribute value', () => {

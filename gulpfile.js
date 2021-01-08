@@ -64,18 +64,7 @@ function concatAttributiveJs(name) {
             JS_DIR + '/data-attributes.js',
             JS_DIR + '/data-template.js',
             JS_DIR + '/data-partial.js'
-        ],
-        "xtra": [
-            JS_DIR + '/attv.js',
-            JS_DIR + '/data-attributes.js',
-            JS_DIR + '/data-template.js',
-            JS_DIR + '/data-partial.js',
-            JS_DIR + '/xtras/data-wall.js',
-            JS_DIR + '/xtras/data-docs.js',
-            JS_DIR + '/xtras/data-tab.js',
-            JS_DIR + '/xtras/data-table.js',
-            JS_DIR + '/xtras/data-dialog.js'
-        ],
+        ]
     }
 
     return () => pipeline(
@@ -95,7 +84,7 @@ function grabDts() {
     );
 }
 
-const build = gulp.series(distClean, tsClean, tsc, uglifyAttributiveJs, concatAttributiveJs(), concatAttributiveJs('core'), concatAttributiveJs('xtra'), grabDts);
+const build = gulp.series(distClean, tsClean, tsc, uglifyAttributiveJs, concatAttributiveJs(), concatAttributiveJs('core'), grabDts);
 const watch = gulp.series(build, watchTs);
 
 exports.default = build;

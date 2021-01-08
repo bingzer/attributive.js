@@ -38,7 +38,7 @@ describe('Attv.Attribute.Value', () => {
         let val = new Attv.Attribute.Value();
         val.attribute = att;
 
-        let expected = val.getRaw(elem);
+        let expected = val.raw(elem);
 
         expect(expected).toEqual('some-value');
     });
@@ -53,7 +53,7 @@ describe('Attv.Attribute.Value', () => {
         let val = new Attv.Attribute.Value();
         val.attribute = att;
 
-        let expected = val.getRaw(elem);
+        let expected = val.raw(elem);
 
         expect(expected).toEqual('some-value-custom');
     });

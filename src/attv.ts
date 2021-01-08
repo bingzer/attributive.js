@@ -370,7 +370,7 @@ namespace Attv {
          */
         getValue<TValue extends Attribute.Value>(element: HTMLElement): TValue {
             let value = element?.attvAttr(this.name);
-            let attributeValue = this.values.filter(val => val.getRaw(element)?.equalsIgnoreCase(value))[0] as TValue;
+            let attributeValue = this.values.filter(val => val.value?.equalsIgnoreCase(value))[0] as TValue;
 
             // Print/throw an error
             // when no 'attributeValue' found and there's 'element' to evaluate and isStrict is marked true
@@ -381,7 +381,7 @@ namespace Attv {
             // #1. if attribute is undefined
             // find the one with the default tag
             if (!attributeValue) {
-                attributeValue = this.values.filter(val => val.getRaw(element)?.equalsIgnoreCase(Attv.configuration.defaultTag))[0] as TValue;
+                attributeValue = this.values.filter(val => val.raw(element)?.equalsIgnoreCase(Attv.configuration.defaultTag))[0] as TValue;
             }
 
             // #2. find the first attribute
@@ -463,14 +463,14 @@ namespace Attv.Attribute {
         public settings: Settings;
         public attribute: Attribute;
         
-        constructor (protected value: string, private loadElementFn: LoadElementFn = undefined) {
+        constructor (public value: string, private loadElementFn: LoadElementFn = undefined) {
         }
 
         /**
          * Returns raw string
          */
-        getRaw(element: HTMLElement): string {
-            return this.value?.toString() || element?.attvAttr(this.attribute.name);
+        raw(element: HTMLElement): string {
+            return element?.attvAttr(this.attribute.name);
         }
     
         /**
@@ -508,12 +508,8 @@ namespace Attv.Attribute {
         /**
          * To string
          */
-        toString(prettyPrint?: boolean): string {
-            if (prettyPrint) {
-                return `[${this.attribute.name}]='${this.value || this.attribute.wildcard }'`;
-            } else {
-                return `[${this.attribute.name}]${this.value ? `=${this.value}`: ''}`;
-            }
+        toString(): string {
+            return `[${this.attribute.name}="${this.value || this.attribute.wildcard }"]`;
         }
     }
 
@@ -723,7 +719,7 @@ namespace Attv {
          * @param element the element
          */
         getSettings<TSettings>(element: HTMLElement): TSettings {
-            let rawValue = this.getValue(element).getRaw(element);
+            let rawValue = this.getValue(element).raw(element);
             let settings = parseJsonOrElse<TSettings>(rawValue, {});
     
             return settings;
@@ -767,8 +763,8 @@ namespace Attv.Validators {
             for (let i = 0; i < attributes.length; i++) {
                 let attribute = attributes[i];
                 let attributeValue = attribute.getValue(element);
-                if (!attributeValue?.getRaw(element)) {
-                    Attv.log('error', `${value.toString(true)} is requiring ${attribute} to be present in DOM`, element)
+                if (!attributeValue?.raw(element)) {
+                    Attv.log('error', `${value} is requiring ${attribute} to be present in DOM`, element)
                 }
 
                 isValidated = isValidated && !!attribute;
@@ -795,7 +791,7 @@ namespace Attv.Validators {
                 let attribute = this.requiredAttributes[i];
                 let requiredAttribute = element.attvAttr(attribute.name);
                 if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
-                    Attv.log('error', `${value.toString(true)} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
+                    Attv.log('error', `${value} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
                 }
 
                 isValidated = isValidated && !!requiredAttribute;
@@ -827,7 +823,7 @@ namespace Attv.Validators {
             }
 
             if (!isValidated) {
-                Attv.log('error', `${value.toString(true)} can only be attached to elements [${this.elementTagNames}]`, element)
+                Attv.log('error', `${value} can only be attached to elements [${this.elementTagNames}]`, element)
             }
 
             return isValidated;
@@ -1134,8 +1130,8 @@ namespace Attv {
 
                     // #4. Load the stuff!
                     let isLoaded = attributeValue.load(element);
-                    if (isLoaded) {
-                        attribute.markElementLoaded(element, isLoaded);
+                    if (Attv.isUndefined(isLoaded) || isLoaded) {
+                        attribute.markElementLoaded(element, true);
                     }
                 }
                 catch (error) {
@@ -1246,7 +1242,7 @@ namespace Attv {
 
             if (attributeValues.length > 0) {
                 attributeValues.forEach(v => {
-                    Attv.log('debug', v.toString(true), attributeValues);
+                    Attv.log('debug', v, attributeValues);
                 })
             } else {
                 // wild card
