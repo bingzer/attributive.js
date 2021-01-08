@@ -29,22 +29,17 @@ describe('Attv constants and global vars', () => {
 });
 
 
-Attv.register('data-write-hello-world', { isAutoLoad: true }, (att) => {
-    att.set('default', (value, element) => {
+Attv.register('data-write-hello-world', { isAutoLoad: true }, (attribute) => {
+    attribute.value('default', (value, element) => {
         element.innerHTML = 'hello. this is from default' + value.getRaw(element);
-        return true;
     });
-    att.set('another', (value, element) => {
+    attribute.value('another', (value, element) => {
         element.innerHTML = 'hello. this is from another';
         element.style.border = '1px solid gray';
     });
 
-    att.set('anotherone', {
-        create: () => {
-            return new Attv.Attribute.Value('anotherone', (value, element) => {
-                element.innerHTML = 'hello. this is from anotherone';
-            });
-        }
-    })
+    let val = new Attv.Attribute.Value();
+
+    attribute.value(att => val);
 
 })

@@ -313,7 +313,7 @@ namespace Attv {
          * When set to 'none' means no wildcard. All attribute values needs to be registered. 
          * Default to 'none'.
          */
-        public wildcard:  "*" | "<number>" | "<boolean>" | "<querySelector>" | "<jsExpression>" | "<json>" | "none" = "*";
+        public wildcard: Attv.Attribute.WildcardType = "*";
 
         /**
          * Returns true when the wildcard === 'none'
@@ -426,19 +426,23 @@ namespace Attv {
             return `[${this.name}]`;
         }
 
+        /**
+         * Sets value
+         * @param attributeValue the attribute value
+         * @param loadElementFnOrOptions either LoadElementFn or ValueOptions
+         */
+        value(value: Attv.Attribute.StringOrValueFn, loadElementFn?: Attv.Attribute.LoadElementFn) {
+            let attributeValue: Attv.Attribute.Value;
 
-        set(attributeValue: string, loadElementFnOrCreate?: Attv.Attribute.LoadElementFnOrAttributeValueOptions) {
-            let value: Attv.Attribute.Value;
-
-            if (Attv.isType(loadElementFnOrCreate, 'function')) {
-                let loadElementFn = loadElementFnOrCreate as Attv.Attribute.LoadElementFn;
-                value = new Attv.Attribute.Value(attributeValue, loadElementFn);
-            } else {
-                let options = loadElementFnOrCreate as Attv.Attribute.AttributeValueOptions;
-                value = options.create(attributeValue);
+            if (Attv.isString(value)) {
+                attributeValue = new Attv.Attribute.Value(value as string, loadElementFn); 
+            } else if (Attv.isType(value, 'function')) {
+                attributeValue = (value as Attv.Attribute.ValueFn)(this);
             }
 
-            this.values.push(value);
+            attributeValue.attribute = this;
+            
+            this.values.push(attributeValue);
         }
     }
 
@@ -459,7 +463,7 @@ namespace Attv.Attribute {
         public settings: Settings;
         public attribute: Attribute;
         
-        constructor (protected value: string = undefined, private loadElementFn: LoadElementFn = undefined) {
+        constructor (protected value: string, private loadElementFn: LoadElementFn = undefined) {
         }
 
         /**
@@ -473,7 +477,7 @@ namespace Attv.Attribute {
          * Load element
          * @param element the Element
          */
-        loadElement(element: HTMLElement): boolean {
+        loadElement(element: HTMLElement): BooleanOrVoid {
             if (this.loadElementFn) {
                 return this.loadElementFn(this, element) || true;
             }
@@ -573,12 +577,15 @@ namespace Attv.Attribute {
         }
     }
 
-    export interface AttributeValueOptions {
-        create: (attributeValue: string) => Attribute.Value;
+    export type StringOrValueFn = string | ValueFn;
+
+    export interface ValueFn {
+        (attribute: Attv.Attribute): Attv.Attribute.Value;
     }
 
-    export type LoadElementFnOrAttributeValueOptions = LoadElementFn | AttributeValueOptions;
+    export type LoadElementFnOrValueFn = LoadElementFn | ValueFn;
     export type LoadElementFn = (value: Attv.Attribute.Value, element: HTMLElement) => BooleanOrVoid;
+    export type WildcardType = "*" | "<number>" | "<boolean>" | "<querySelector>" | "<jsExpression>" | "<json>" | "none";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1154,21 +1161,28 @@ namespace Attv {
     export interface AttributeOptions {
         id?: string;
         isAutoLoad?: boolean;
+        wildcard?: Attv.Attribute.WildcardType;
     }
 
     export function register(attributeName: string, options? : AttributeOptions, attFn?: (attribute: Attribute) => void ): void {
-        let registry = new AttributeRegistration(attributeName, 
-            () => {
-                let att = new Attribute(attributeName, options.isAutoLoad);
-                att.isAutoLoad = options.isAutoLoad;
-
-                return att;
-            },
-            (att, list) => {
-                attFn(att);
-            });
-
-        attributeRegistrar.push(registry);
+        Attv.loader.pre.push(() => {
+            let registry = new AttributeRegistration(attributeName, 
+                () => {
+                    let att = new Attribute(attributeName, options.isAutoLoad);
+                    att.isAutoLoad = options.isAutoLoad;
+                    if (Attv.isDefined(options.wildcard)) {
+                        att.wildcard = options.wildcard;
+                    }
+    
+                    return att;
+                },
+                (att, list) => {
+                    attFn(att);
+                });
+    
+            
+            attributeRegistrar.push(registry);
+        });
     }
 
     /**

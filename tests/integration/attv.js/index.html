@@ -6,38 +6,57 @@
 	<div data-write-hello-world="default">
         <!-- Hello World here-->
     </div>
-	<div data-write-hello-world="another">
+
+	<div data-write-hello-world="es6">
         <!-- Hello World here-->
     </div>
-	<div data-write-hello-world="anotherone">
+	<div data-write-hello-world="es5">
+        <!-- Hello World here-->
+    </div>
+	
+	<div data-write-hello-world="invalid-value">
         <!-- Hello World here-->
     </div>
     
     <script type="text/javascript" src="/build/attv.js"></script>
     <script type="text/javascript" defer>
+    
+Attv.register('data-write-hello-world', { isAutoLoad: true, wildcard: 'none' }, function (att) {
 
-Attv.loader.pre.push(() => {
+    att.value('default', function (value, element) {
+        element.innerHTML = 'hello. this is from default' + value.getRaw(element);
+    });
 
-    Attv.register('data-write-hello-world', { isAutoLoad: true }, (att) => {
-        att.set('default', function (value, element) {
-            element.innerHTML = 'hello. this is from default' + value.getRaw(element);
-        });
-        att.set('another', function (value, element) {
-            element.innerHTML = 'hello. this is from another';
-            element.style.border = '1px solid gray';
-        });
+    // -- using ES6 class
 
-        att.set('anotherone', {
-            create: (attributeValue) => {
-                return new Attv.Attribute.Value(attributeValue, (value, element) => {
-                    element.innerHTML = 'hello. this is from anotherone';
-                });
-            }
-        })
+    class Es6Class extends Attv.Attribute.Value {
+        constructor() {
+            super("es6");
+        }
 
-    })
+        loadElement = function (element) {
+            element.innerHTML = 'hello. this is from custom. from attribute ' + this.attribute.toString();
+        }
+    }
 
-});
+    att.value(att => new Es6Class());
+
+
+    // -- using ES5 class
+
+    function Es5Class() {
+        Attv.Attribute.Value.call(this, 'es5');
+
+        return this;
+    }
+    Es5Class.prototype = Object.create(Attv.Attribute.Value.prototype);
+    Es5Class.prototype.loadElement = function (element) {
+        element.innerHTML = 'hello. this is from es5. from attribute ' + this.attribute.toString();
+    };
+
+    att.value(att => new Es5Class());
+
+})
     </script>
 </body>
 </html>
