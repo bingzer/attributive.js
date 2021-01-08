@@ -201,13 +201,15 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
     }
 }
 
+namespace Attv {
+    export type BooleanOrVoid = boolean | void;
+
+    export const version = ATTV_VERSION;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Attv.Ajax ///////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
-
-namespace Attv {
-    export const version = ATTV_VERSION;
-}
 
 namespace Attv.Ajax {
 
@@ -423,6 +425,21 @@ namespace Attv {
         toString(): string {
             return `[${this.name}]`;
         }
+
+
+        set(attributeValue: string, loadElementFnOrCreate?: Attv.Attribute.LoadElementFnOrAttributeValueOptions) {
+            let value: Attv.Attribute.Value;
+
+            if (Attv.isType(loadElementFnOrCreate, 'function')) {
+                let loadElementFn = loadElementFnOrCreate as Attv.Attribute.LoadElementFn;
+                value = new Attv.Attribute.Value(attributeValue, loadElementFn);
+            } else {
+                let options = loadElementFnOrCreate as Attv.Attribute.AttributeValueOptions;
+                value = options.create(attributeValue);
+            }
+
+            this.values.push(value);
+        }
     }
 
 }
@@ -442,7 +459,7 @@ namespace Attv.Attribute {
         public settings: Settings;
         public attribute: Attribute;
         
-        constructor (protected value: string = undefined, private loadElementFn: (element: HTMLElement) => boolean = undefined) {
+        constructor (protected value: string = undefined, private loadElementFn: LoadElementFn = undefined) {
         }
 
         /**
@@ -458,7 +475,7 @@ namespace Attv.Attribute {
          */
         loadElement(element: HTMLElement): boolean {
             if (this.loadElementFn) {
-                return this.loadElementFn(element) || true;
+                return this.loadElementFn(this, element) || true;
             }
 
             return true;
@@ -555,6 +572,13 @@ namespace Attv.Attribute {
             element.attvAttr(attribute.name, any);
         }
     }
+
+    export interface AttributeValueOptions {
+        create: (attributeValue: string) => Attribute.Value;
+    }
+
+    export type LoadElementFnOrAttributeValueOptions = LoadElementFn | AttributeValueOptions;
+    export type LoadElementFn = (value: Attv.Attribute.Value, element: HTMLElement) => BooleanOrVoid;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -941,7 +965,7 @@ namespace Attv {
         return isType(any, 'object');
     }
 
-    export function isType(any: any, expectedType: 'undefined' | 'string' | 'boolean' | 'number' | 'object'): boolean {
+    export function isType(any: any, expectedType: 'undefined' | 'string' | 'boolean' | 'number' | 'object' | 'function'): boolean {
         return typeof(any) === expectedType;
     }
 
@@ -1127,6 +1151,26 @@ namespace Attv {
     let attributeRegistrar: AttributeRegistration[] = [];
     let valueRegistrar: ValueRegistration[] = [];
 
+    export interface AttributeOptions {
+        id?: string;
+        isAutoLoad?: boolean;
+    }
+
+    export function register(attributeName: string, options? : AttributeOptions, attFn?: (attribute: Attribute) => void ): void {
+        let registry = new AttributeRegistration(attributeName, 
+            () => {
+                let att = new Attribute(attributeName, options.isAutoLoad);
+                att.isAutoLoad = options.isAutoLoad;
+
+                return att;
+            },
+            (att, list) => {
+                attFn(att);
+            });
+
+        attributeRegistrar.push(registry);
+    }
+
     /**
      * Register an attribute
      * @param attributeName the attribute name (ie: data-partial, data-stuffs)
@@ -1216,7 +1260,7 @@ namespace Attv {
         Attv.registerAttribute('data-settings', () => new Attv.DataSettings());
     }
 
-    function register() {
+    function registerAttributes() {
         for (var i = 0; i < attributeRegistrar.length; i++) {
             let attribute = attributeRegistrar[i].register();
 
@@ -1231,7 +1275,7 @@ namespace Attv {
 
     Attv.loader.init.push(initialize);
     Attv.loader.pre.push(preRegister);
-    Attv.loader.post.push(register, loadElements, cleanup);
+    Attv.loader.post.push(registerAttributes, loadElements, cleanup);
 }
 
 Attv.onDocumentReady(() => {

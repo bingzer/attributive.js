@@ -6,25 +6,38 @@
 	<div data-write-hello-world="default">
         <!-- Hello World here-->
     </div>
+	<div data-write-hello-world="another">
+        <!-- Hello World here-->
+    </div>
+	<div data-write-hello-world="anotherone">
+        <!-- Hello World here-->
+    </div>
     
     <script type="text/javascript" src="/build/attv.js"></script>
     <script type="text/javascript" defer>
 
 Attv.loader.pre.push(() => {
 
-    Attv.registerAttribute('data-write-hello-world', 
-        function () {
-            return new Attv.Attribute('Write-Hello-World', true); 
-        },
-        function (attribute, list) {
-            list.push(new Attv.Attribute.Value('default', function (element) {
-                element.innerHTML = 'Hello World';
-            }));
-        }
-    );
+    Attv.register('data-write-hello-world', { isAutoLoad: true }, (att) => {
+        att.set('default', function (value, element) {
+            element.innerHTML = 'hello. this is from default' + value.getRaw(element);
+        });
+        att.set('another', function (value, element) {
+            element.innerHTML = 'hello. this is from another';
+            element.style.border = '1px solid gray';
+        });
+
+        att.set('anotherone', {
+            create: (attributeValue) => {
+                return new Attv.Attribute.Value(attributeValue, (value, element) => {
+                    element.innerHTML = 'hello. this is from anotherone';
+                });
+            }
+        })
+
+    })
 
 });
-
     </script>
 </body>
 </html>
