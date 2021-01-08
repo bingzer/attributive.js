@@ -127,7 +127,7 @@ namespace Attv.DataPartial {
         }
         
 
-        loadElement(element: HTMLElement): boolean {
+        load(element: HTMLElement): boolean {
             this.render(element);
 
             return true;
@@ -144,7 +144,7 @@ namespace Attv.DataPartial {
             this.validators.push(new Validators.RequiredAttribute([DataUrl.UniqueId]), new Validators.RequiredElement(['button', 'a']));
         }
 
-        loadElement(element: HTMLElement): boolean {
+        load(element: HTMLElement): boolean {
             element.onclick = (ev: Event) => {
                 this.render(element);
                 return false;
@@ -164,7 +164,7 @@ namespace Attv.DataPartial {
             this.validators.push(new Validators.RequiredAttribute([DataUrl.UniqueId]), new Validators.RequiredElement(['form']));
         }
 
-        loadElement(element: HTMLElement): boolean {
+        load(element: HTMLElement): boolean {
             let formElement = element as HTMLFormElement;
             formElement.onsubmit = (ev: Event) => {
                 this.render(formElement);

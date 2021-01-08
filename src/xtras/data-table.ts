@@ -37,14 +37,14 @@ namespace Attv.DataTable {
          * Find all element and construct
          * @param root the root
          */
-        loadElement(element: HTMLElement): boolean {
+        load(element: HTMLElement): boolean {
             if (!this.attribute.isElementLoaded(element)) {
                 this.loadSettings<TableSettings>(element, settings => {
                     let dataTemplate = this.resolver.resolve<DataTemplate>(DataTemplate.UniqueId);
                     let dataPartial = this.resolver.resolve<DataPartial>(DataPartial.UniqueId);
     
-                    dataTemplate.getValue(element).loadElement(element);
-                    dataPartial.getValue(element).loadElement(element);
+                    dataTemplate.getValue(element).load(element);
+                    dataPartial.getValue(element).load(element);
 
                     settings.pageNumber = 100;
                     Attv.Attribute.Settings.commit(element, settings);
@@ -87,7 +87,7 @@ namespace Attv.DataTable {
             return targetElement;
         }
 
-        loadElement(element: HTMLElement): boolean {
+        load(element: HTMLElement): boolean {
             if (!this.attribute.isElementLoaded(element)) {
                 this.render(element);
                 
@@ -115,7 +115,7 @@ namespace Attv.DataTable {
             this.validators.push(new Validators.RequiredElement(['table']));
         }
 
-        loadElement(element: HTMLElement): boolean {
+        load(element: HTMLElement): boolean {
             if (!this.attribute.isElementLoaded(element)) {
                 let tbody = element.querySelector('tbody');
                 let templateHtml = tbody.attvHtml();

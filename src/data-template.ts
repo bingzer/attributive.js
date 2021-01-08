@@ -49,7 +49,7 @@ namespace Attv.DataTemplate {
             this.resolver.internals.push(DataTemplateHtml.UniqueId);
         }
 
-        loadElement(element: HTMLElement): boolean {
+        load(element: HTMLElement): boolean {
             let templateHtml = element.attvHtml();
 
             this.resolver.addAttribute(DataTemplateHtml.UniqueId, element, templateHtml);
@@ -83,7 +83,7 @@ namespace Attv.DataTemplate {
             this.validators.push(new Validators.RequiredElement(['script']), new Validators.RequiredAttributeWithValue([{ name: 'type', value: 'text/html'}]));
         }
 
-        loadElement(element: HTMLElement): boolean {
+        load(element: HTMLElement): boolean {
             // we don't need to do anything
             return true;
         }

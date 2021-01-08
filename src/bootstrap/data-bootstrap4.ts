@@ -37,7 +37,7 @@ namespace Attv.Bootstrap4 {
             this.resolver.internals.push(DataTemplateHtml.UniqueId);
         }
 
-        loadElement(element: HTMLElement): boolean {
+        load(element: HTMLElement): boolean {
             if (!this.attribute.isElementLoaded(element)) {
                 return this.loadSettings<BootstrapSettings>(element, settings => {
                     if (settings.injectJs)
@@ -61,7 +61,7 @@ namespace Attv.Bootstrap4 {
             super("tab");
         }
 
-        loadElement(element: HTMLElement): boolean {
+        load(element: HTMLElement): boolean {
             if (!this.attribute.isElementLoaded(element)) {
                 if (Attv.isUndefined(window['$'])) {
                     return false;

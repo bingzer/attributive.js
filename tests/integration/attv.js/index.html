@@ -20,7 +20,7 @@
     
     <script type="text/javascript" src="/build/attv.js"></script>
     <script type="text/javascript" defer>
-    
+
 Attv.register('data-write-hello-world', { isAutoLoad: true, wildcard: 'none' }, function (att) {
 
     att.value('default', function (value, element) {
@@ -34,7 +34,7 @@ Attv.register('data-write-hello-world', { isAutoLoad: true, wildcard: 'none' }, 
             super("es6");
         }
 
-        loadElement = function (element) {
+        load = function (element) {
             element.innerHTML = 'hello. this is from custom. from attribute ' + this.attribute.toString();
         }
     }
@@ -50,7 +50,7 @@ Attv.register('data-write-hello-world', { isAutoLoad: true, wildcard: 'none' }, 
         return this;
     }
     Es5Class.prototype = Object.create(Attv.Attribute.Value.prototype);
-    Es5Class.prototype.loadElement = function (element) {
+    Es5Class.prototype.load = function (element) {
         element.innerHTML = 'hello. this is from es5. from attribute ' + this.attribute.toString();
     };
 

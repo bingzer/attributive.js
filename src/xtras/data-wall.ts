@@ -31,7 +31,7 @@ namespace Attv {
                 this.validators.push(new Validators.RequiredElement(['a', 'button']));
             }
             
-            loadElement(element: HTMLElement): boolean {
+            load(element: HTMLElement): boolean {
                 // remove onclick
                 if (element.attvAttr('onclick')) {
                     this.resolver.addAttribute(DataCallback.UniqueId, element, element.attvAttr('onclick'));

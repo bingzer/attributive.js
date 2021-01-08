@@ -31,12 +31,12 @@ namespace Attv.DataTab {
             super(attributeValue);
         }
         
-        loadElement(element: HTMLElement): boolean {
+        load(element: HTMLElement): boolean {
             return this.loadSettings(element, settings => {
                 let dataTabItem = this.resolver.resolve<DataTabItem>(DataTabItem.UniqueId);
     
                 element.querySelectorAll(dataTabItem.toString()).forEach((itemElement: HTMLElement) => {
-                    dataTabItem.getValue(itemElement).loadElement(itemElement);
+                    dataTabItem.getValue(itemElement).load(itemElement);
                 });
 
                 settings.style = Attv.DataTab.DefaultSettings.getStyle(settings);
@@ -55,7 +55,7 @@ namespace Attv.DataTab {
             super('tab')
         }
     
-        loadElement(element: HTMLElement): boolean {
+        load(element: HTMLElement): boolean {
             return false;
         }
 
@@ -109,7 +109,7 @@ namespace Attv {
                 this.resolver.internals.push(DataTab.UniqueId);
             }
             
-            loadElement(element: HTMLElement): boolean {
+            load(element: HTMLElement): boolean {
                 if (!this.attribute.isElementLoaded(element)) {
                     let dataTab = this.resolver.resolve<DataTab>(DataTab.UniqueId);
                     let dataActive = this.resolver.resolve<DataActive>(DataActive.UniqueId);
@@ -204,7 +204,7 @@ namespace Attv {
                     // hide all children
                     parentElement.querySelectorAll(dataTabContent.toString()).forEach((e: HTMLElement) => e.attvHide());
 
-                    dataTabContent.getValue(contentElement).loadElement(contentElement);
+                    dataTabContent.getValue(contentElement).load(contentElement);
                 }
     
                 return false;
@@ -243,7 +243,7 @@ namespace Attv {
                 this.resolver.uses.push(DataContent.UniqueId, DataPartial.UniqueId, DataActive.UniqueId);
             }
             
-            loadElement(element: HTMLElement): boolean {
+            load(element: HTMLElement): boolean {
                 element.attvShow();
 
                 if (!this.attribute.isElementLoaded(element)) {        

@@ -68,7 +68,7 @@ describe('Attv.Attribute.Value', () => {
         let val = new Attv.Attribute.Value('value');
         val.attribute = att;
 
-        let expected = val.loadElement(elem);
+        let expected = val.load(elem);
 
         expect(expected).toEqual(true);
     });

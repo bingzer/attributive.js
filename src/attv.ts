@@ -477,7 +477,7 @@ namespace Attv.Attribute {
          * Load element
          * @param element the Element
          */
-        loadElement(element: HTMLElement): BooleanOrVoid {
+        load(element: HTMLElement): BooleanOrVoid {
             if (this.loadElementFn) {
                 return this.loadElementFn(this, element) || true;
             }
@@ -1133,7 +1133,7 @@ namespace Attv {
                     }
 
                     // #4. Load the stuff!
-                    let isLoaded = attributeValue.loadElement(element);
+                    let isLoaded = attributeValue.load(element);
                     if (isLoaded) {
                         attribute.markElementLoaded(element, isLoaded);
                     }
@@ -1166,6 +1166,7 @@ namespace Attv {
 
     export function register(attributeName: string, options? : AttributeOptions, attFn?: (attribute: Attribute) => void ): void {
         Attv.loader.pre.push(() => {
+            
             let registry = new AttributeRegistration(attributeName, 
                 () => {
                     let att = new Attribute(attributeName, options.isAutoLoad);

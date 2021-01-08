@@ -465,7 +465,7 @@ namespace Attv {
                 super(attributeValue);
             }
     
-            loadElement(element: HTMLElement): boolean {
+            load(element: HTMLElement): boolean {
                 return this.loadSettings<SpinnerSettings>(
                     element,
                     settings => {
@@ -569,7 +569,7 @@ namespace Attv {
                 super(attributeValue);
             }
     
-            loadElement(element: HTMLElement): boolean {
+            load(element: HTMLElement): boolean {
                 return true;
             }
             
@@ -593,7 +593,7 @@ namespace Attv {
                 this.dataBind = this.resolver.resolve<DataBind>(DataBind.UniqueId);
             }
     
-            loadElement(element: HTMLElement): boolean {
+            load(element: HTMLElement): boolean {
                 return true;
             }
             
