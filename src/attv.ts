@@ -317,11 +317,6 @@ namespace Attv {
         public name: string;
 
         /**
-         * zero-index priority
-         */
-        public priority?: number;
-
-        /**
          * When set to 'none' means no wildcard. All attribute values needs to be registered. 
          * Default to 'none'.
          */
@@ -351,10 +346,10 @@ namespace Attv {
         }
 
         /**
-         * Returns true when the wildcard === 'none'
+         * Returns true when the wildcard is anything but 'none'
          */
-        isStrict(): boolean {
-            return this.wildcard.equalsIgnoreCase('none');
+        allowsWildcard(): boolean {
+            return !this.wildcard.equalsIgnoreCase('none');
         }
 
         /**
@@ -366,35 +361,44 @@ namespace Attv {
         }
 
         /**
+         * Returns raw string 
+         */
+        raw(element: HTMLElement): string {
+            return element.getAttribute(this.name) || undefined;
+        }
+
+        /**
          * Returns the current attribute value
          * @param element the element
          */
         getValue<TValue extends Attribute.Value>(element: HTMLElement): TValue {
             let value = element?.attvAttr(this.name);
+
+            // #1. Find an attribute value with the exact match
             let attributeValue = this.values.filter(val => val.value?.equalsIgnoreCase(value))[0] as TValue;
 
-            // Print/throw an error
-            // when no 'attributeValue' found and there's 'element' to evaluate and isStrict is marked true
-            if (!attributeValue && this.isStrict) {
-                Attv.log('fatal', `${this}='${value || ''}' is not valid`, element);
-            }
-            
-            // #1. if attribute is undefined
-            // find the one with the default tag
-            if (!attributeValue) {
-                attributeValue = this.values.filter(val => val.raw(element)?.equalsIgnoreCase(Attv.configuration.defaultTag))[0] as TValue;
-            }
+            if (this.allowsWildcard()) {
+                // #2. Find the 'default' value if this attribute allows wildcard
+                if (!attributeValue) {
+                    attributeValue = this.values.filter(val => val.value?.equalsIgnoreCase(Attv.configuration.defaultTag))[0] as TValue
+                }
 
-            // #2. find the first attribute
-            if (!attributeValue) {
-                attributeValue = this.values[0] as TValue;
+                // #2. Find the first 'default' value if this attribute allows wildcard
+                if (!attributeValue) {
+                    attributeValue = this.values.filter(val => Attv.isUndefined(val.value))[0] as TValue
+                }
+                
+                // #3. find the first if this attribute allows wildcard
+                if (!attributeValue) {
+                    attributeValue = new Attribute.Value() as TValue;
+                    attributeValue.attribute = this;
+                    this.values.push(attributeValue);
+                }
             }
 
             // #3. generic attribute
             if (!attributeValue) {
-                let rawAttributeValue = element?.getAttribute(this.name);
-                attributeValue = new Attribute.Value(rawAttributeValue) as TValue;
-                attributeValue.attribute = this;
+                Attv.log('fatal', `${this}='${value || ''}' is not valid`, element);
             }
 
             return attributeValue;
@@ -406,7 +410,7 @@ namespace Attv {
          */
         isElementLoaded(element: HTMLElement): boolean {
             let isLoaded = element.attvAttr(this.loadedName());
-            return isLoaded === 'true' || !!isLoaded;
+            return isLoaded === 'true' || !!isLoaded; 
         }
 
         /**
@@ -483,13 +487,6 @@ namespace Attv.Attribute {
         
         constructor (public value: string = undefined, private loadElementFn?: LoadElementFn) {
 
-        }
-
-        /**
-         * Returns raw string
-         */
-        raw(element: HTMLElement): string {
-            return element?.attvAttr(this.attribute.name);
         }
     
         /**
@@ -691,7 +688,7 @@ namespace Attv.DataSettings {
          * @param element the element
          */
         getSettings<TSettings>(element: HTMLElement): TSettings {
-            let rawValue = this.raw(element);
+            let rawValue = this.attribute.raw(element);
             let settings = parseJsonOrElse<TSettings>(rawValue, {});
     
             return settings;
@@ -734,8 +731,7 @@ namespace Attv.Validators {
             // check for other require attributes
             for (let i = 0; i < attributes.length; i++) {
                 let attribute = attributes[i];
-                let attributeValue = attribute.getValue(element);
-                if (!attributeValue?.raw(element)) {
+                if (!attribute?.raw(element)) {
                     Attv.log('error', `${value} is requiring ${attribute} to be present in DOM`, element)
                 }
 
@@ -813,8 +809,8 @@ namespace Attv {
 
         isDebug: boolean;
 
-        isVerboseLogging: boolean;
-
+        isVerboseLogging: boolean;        
+        
         readonly defaultTag: string;
 
         readonly logLevels: string[];
@@ -835,7 +831,7 @@ namespace Attv {
             }
         }
 
-        get defaultTag(): string  {
+        get defaultTag(): string {
             return "default";
         }
 
@@ -1072,7 +1068,7 @@ namespace Attv {
         Attv.log('debug', 'Loading element', root);
         
         // auto load all attvs that are marked auto load
-        attributes.filter(attribute => attribute.isAutoLoad).sort((a, b) => a.priority < b.priority ? -1 : 0).forEach((attribute, index) => {
+        attributes.filter(attribute => attribute.isAutoLoad).forEach((attribute, index) => {
             let elements = root.querySelectorAll(`${attribute}`);
             elements.forEach((element: HTMLElement, index) => {
                 try {
@@ -1156,8 +1152,8 @@ namespace Attv {
      * @param element the element
      * @param value the value
      */
-    export function addAttribute(uniqueId: string, element: HTMLElement, any: string) {
-        let attribute = this.resolve(uniqueId);
+    export function addAttribute(attributeKey: string, element: HTMLElement, any: string) {
+        let attribute = this.resolve(attributeKey);
         element.attvAttr(attribute.name, any);
     }
  
