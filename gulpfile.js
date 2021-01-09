@@ -84,7 +84,7 @@ function grabDts() {
     );
 }
 
-const build = gulp.series(distClean, tsClean, tsc, uglifyAttributiveJs, concatAttributiveJs(), concatAttributiveJs('core'), grabDts);
+const build = gulp.series(distClean, tsClean, tsc, uglifyAttributiveJs, concatAttributiveJs(), grabDts);
 const watch = gulp.series(build, watchTs);
 
 exports.default = build;

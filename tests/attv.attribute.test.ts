@@ -21,7 +21,7 @@ describe('Attv.Attribute', () => {
 
         expect(att).toBeTruthy();
         expect(att.name).toBe('data-attribute');
-        expect(att.uniqueId).toBe('uniqueId');
+        expect(att.key).toBe('uniqueId');
         expect(att.isAutoLoad).toBeTruthy();
     });
 
@@ -31,7 +31,7 @@ describe('Attv.Attribute', () => {
 
         expect(att).toBeTruthy();
         expect(att.name).toBe('data-attribute');
-        expect(att.uniqueId).toBe('uniqueId');
+        expect(att.key).toBe('uniqueId');
         expect(att.isAutoLoad).toBeFalsy();
     });
 

@@ -299,15 +299,27 @@ namespace Attv {
     * Base class for data-attributes
     */
     export class Attribute {
+
+        /**
+         * The attribute values
+         */
         public readonly values: Attribute.Value[] = [];
 
-        public readonly dependency: Attribute.Dependency = new Attribute.Dependency();
+        /**
+         * The dependencies
+         */
+        public readonly dependencies: Attribute.Dependency = {};
+
+        /**
+         * This attribute name. Most of the time,
+         * this should be that same as the key
+         */
         public name: string;
 
         /**
          * zero-index priority
          */
-        public priority: number = 1;
+        public priority?: number;
 
         /**
          * When set to 'none' means no wildcard. All attribute values needs to be registered. 
@@ -316,44 +328,33 @@ namespace Attv {
         public wildcard: Attv.Attribute.WildcardType = "*";
 
         /**
-         * Returns true when the wildcard === 'none'
+         * Is Auto load? (default is false)
          */
-        public get isStrict(): boolean {
-            return this.wildcard.equalsIgnoreCase('none');
-        }
-
-        public get loadedName(): string {
-            return this.name + '-loaded';
-        }
-
-        public get settingsName(): string {
-            return this.name + '-settings';
-        }
+        public isAutoLoad: boolean = false;
 
         /**
          * 
-         * @param uniqueId unique id
-         * @param isAutoLoad is auto-load
+         * @param key the unique key for this attribute
+         * @param isAutoLoad 
          */
-        constructor (public uniqueId: string, public isAutoLoad: boolean = false) {
-            this.dependency.internals.push(DataSettings.UniqueId);
+        constructor (public key: string) {
+            this.name = key;
+            this.dependencies.internals = [DataSettings.Key];
         }
-        
-        /**
-         * Register attribute values
-         * @param attributeValues attribute values
-         */
-        registerAttributeValues(attributeValues: Attribute.Value[]) {
-            // add dependency
-            for (let i = 0; i < attributeValues.length; i++) {
-                // add dependency
-                attributeValues[i].resolver.requires.push(...this.dependency.requires);
-                attributeValues[i].resolver.uses.push(...this.dependency.uses);
-                attributeValues[i].resolver.internals.push(...this.dependency.internals);
-                attributeValues[i].attribute = this;
-            }
 
-            this.values.push(...attributeValues);
+        loadedName() {
+            return this.name + '-loaded';
+        }
+
+        settingsName() {
+            return this.name = "-settings";
+        }
+
+        /**
+         * Returns true when the wildcard === 'none'
+         */
+        isStrict(): boolean {
+            return this.wildcard.equalsIgnoreCase('none');
         }
 
         /**
@@ -404,7 +405,7 @@ namespace Attv {
          * @param element element to check
          */
         isElementLoaded(element: HTMLElement): boolean {
-            let isLoaded = element.attvAttr(this.loadedName);
+            let isLoaded = element.attvAttr(this.loadedName());
             return isLoaded === 'true' || !!isLoaded;
         }
 
@@ -414,7 +415,7 @@ namespace Attv {
          * @param isLoaded is loaded?
          */
         markElementLoaded(element: HTMLElement, isLoaded: boolean): boolean {
-            element.attvAttr(this.loadedName, isLoaded);
+            element.attvAttr(this.loadedName(), isLoaded);
 
             return isLoaded;
         }
@@ -431,7 +432,7 @@ namespace Attv {
          * @param attributeValue the attribute value
          * @param loadElementFnOrOptions either LoadElementFn or ValueOptions
          */
-        value(value: Attv.Attribute.StringOrValueFn, loadElementFn?: Attv.Attribute.LoadElementFn) {
+        map(value: Attv.Attribute.ValueFnOrString, loadElementFn?: Attv.Attribute.LoadElementFn) {
             let attributeValue: Attv.Attribute.Value;
 
             if (Attv.isString(value)) {
@@ -441,8 +442,23 @@ namespace Attv {
             }
 
             attributeValue.attribute = this;
+            attributeValue.dependencies.internals = this.copyDependencies(this.dependencies.internals, attributeValue.dependencies.internals);
+            attributeValue.dependencies.requires = this.copyDependencies(this.dependencies.requires, attributeValue.dependencies.requires);
+            attributeValue.dependencies.uses = this.copyDependencies(this.dependencies.uses, attributeValue.dependencies.uses);
             
             this.values.push(attributeValue);
+        }
+
+        private copyDependencies(source: string[], target: string[]) {
+            if (source?.length > 0) {
+                if (Attv.isUndefined(target)) {
+                    target = [];
+                }
+
+                target.push(...source);
+            }
+
+            return target;
         }
     }
 
@@ -458,12 +474,15 @@ namespace Attv.Attribute {
      * Base class for attribute-value
      */
     export class Value {
-        public readonly resolver: Resolver = new Resolver(this);
+        
+        public readonly dependencies: Attribute.Dependency = {};
+
         public readonly validators: Validators.AttributeValidator[] = [];
         public settings: Settings;
         public attribute: Attribute;
         
-        constructor (public value: string, private loadElementFn: LoadElementFn = undefined) {
+        constructor (public value: string = undefined, private loadElementFn?: LoadElementFn) {
+
         }
 
         /**
@@ -491,9 +510,9 @@ namespace Attv.Attribute {
          * @param orDefault (optional) default settings
          */
         loadSettings<TSettings extends Settings>(element: HTMLElement, callback?: (settings: TSettings) => void): boolean {
-            let dataSettings = this.resolver.resolve<DataSettings>(DataSettings.UniqueId);
+            let dataSetting = Attv.resolveValue<DataSettings.Value>(DataSettings.Key, element);
             
-            this.settings = dataSettings.getSettingsForValue<TSettings>(this, element);
+            this.settings = dataSetting.getSettingsForValue<TSettings>(this, element);
             if (this.settings) {
                 if (callback) {
                     callback(this.settings as TSettings);
@@ -511,75 +530,33 @@ namespace Attv.Attribute {
         toString(): string {
             return `[${this.attribute.name}="${this.value || this.attribute.wildcard }"]`;
         }
-    }
+    }    
 
-    export class Dependency {
+    export interface Dependency {
 
         /**
          * List of attribute Ids that we require
          */
-        readonly requires: string[] = [];
+        requires?: string[];
 
         /**
          * List of attribute Id that we use
          */
-        readonly uses: string[] = [];
+        uses?: string[];
 
         /**
          * List of attribute Id that we internvally use
          */
-        readonly internals: string[] = [];
-
-        /**
-         * List of all dependencies
-         */
-        allDependencies(): string[] {
-            return this.requires.concat(this.uses).concat(this.internals);
-        }
+        internals?: string[];
     }
-
-    export class Resolver extends Dependency {
-        
-        constructor (private attributeValue: Attribute.Value) {
-            super();
-        }
-
-        /**
-         * Returns the data attribute
-         * @param attributeId id
-         */
-        resolve<TAttribute extends Attribute>(attributeId: string): TAttribute {
-            let attribute = Attv.getAttribute(attributeId) as TAttribute;
-
-            if (!this.allDependencies().some(dep => dep === attributeId)) {
-                Attv.log('warning', `${attribute || attributeId} should be declared as the dependant in ${this.attributeValue.attribute}. This is for documentation purposes`);
-            }
-
-            if (!attribute) {
-                throw new Error(`${attribute || attributeId} can not be found. Did you register ${attribute || attributeId}?`);
-            }
-
-            return attribute;
-        }
-
-        /**
-         * Adds a dependency data attribute to the 'element'
-         * @param element the element
-         * @param value the value
-         */
-        addAttribute(uniqueId: string, element: HTMLElement, any: string) {
-            let attribute = this.resolve(uniqueId);
-            element.attvAttr(attribute.name, any);
-        }
-    }
-
-    export type StringOrValueFn = string | ValueFn;
 
     export interface ValueFn {
         (attribute: Attv.Attribute): Attv.Attribute.Value;
     }
 
-    export type LoadElementFnOrValueFn = LoadElementFn | ValueFn;
+
+    export type ValueFnOrString = string | ValueFn;
+    export type ValueFnOrLoadElementFn = LoadElementFn | ValueFn;
     export type LoadElementFn = (value: Attv.Attribute.Value, element: HTMLElement) => BooleanOrVoid;
     export type WildcardType = "*" | "<number>" | "<boolean>" | "<querySelector>" | "<jsExpression>" | "<json>" | "none";
 }
@@ -692,7 +669,7 @@ namespace Attv.Attribute {
             let settingsObject = {};
             applicableKeys.forEach(r => settingsObject[r] = settings[r]);
 
-            element.attvAttr(settings.attributeValue.attribute.settingsName, settingsObject);
+            element.attvAttr(settings.attributeValue.attribute.settingsName(), settingsObject);
         }
     }
 }
@@ -701,32 +678,27 @@ namespace Attv.Attribute {
 ///////////////////////// 1st class attributes /////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
-namespace Attv {
+namespace Attv.DataSettings {
+    export const Key = 'data-settings';
 
     /**
      * [data-settings]='*|json'
      */
-    export class DataSettings extends Attv.Attribute {
-        static readonly UniqueId = 'DataSettings';
-    
-        constructor () {
-            super(DataSettings.UniqueId);
-            this.wildcard = "<json>";
-        }
+    export class Value extends Attv.Attribute.Value {
         
         /**
          * Returns the option object (json)
          * @param element the element
          */
         getSettings<TSettings>(element: HTMLElement): TSettings {
-            let rawValue = this.getValue(element).raw(element);
+            let rawValue = this.raw(element);
             let settings = parseJsonOrElse<TSettings>(rawValue, {});
     
             return settings;
         }
 
         getSettingsForValue<TSettings extends Attribute.Settings>(value: Attv.Attribute.Value, element: HTMLElement): TSettings {
-            let rawValue = element.attvAttr(value.attribute.settingsName);
+            let rawValue = element.attvAttr(value.attribute.settingsName());
             let settings = parseJsonOrElse<TSettings>(rawValue, {});
             settings.attributeValue = settings.attributeValue || value;
     
@@ -1141,108 +1113,77 @@ namespace Attv {
         });
     }
 
-    export function getAttribute(id: string): Attribute {
-        return attributes.filter(att => att.uniqueId == id)[0];
+    export function getAttribute(attributeKey: string): Attribute {
+        return Attv.attributes.filter(att => att.key == attributeKey)[0];
     }
+
+    
+    /**
+     * Returns the data attribute
+     * @param attributeKey id
+     */
+    export function resolve(attributeKey: string): Attribute {
+        let attribute = Attv.getAttribute(attributeKey);
+
+        if (attribute) {
+            let deps = attribute.dependencies.requires?.concat(attribute.dependencies.uses).concat(attribute.dependencies.internals);
+    
+            if (!deps.some(dep => dep === attributeKey)) {
+                Attv.log('warning', `${attribute || attributeKey} should be declared as the dependant in ${this.attributeValue.attribute}. This is for documentation purposes`);
+            }
+        }
+
+        if (!attribute) {
+            throw new Error(`${attribute || attributeKey} can not be found. Did you register ${attribute || attributeKey}?`);
+        }
+
+        return attribute;
+    }
+    
+    /**
+     * Returns the data attribute
+     * @param attributeKey id
+     */
+    export function resolveValue<TValue extends Attribute.Value>(attributeKey: string, element: HTMLElement): TValue {
+        let attribute = resolve(attributeKey);
+
+        return attribute.getValue<TValue>(element);
+    }
+
+    /**
+     * Adds a dependency data attribute to the 'element'
+     * @param element the element
+     * @param value the value
+     */
+    export function addAttribute(uniqueId: string, element: HTMLElement, any: string) {
+        let attribute = this.resolve(uniqueId);
+        element.attvAttr(attribute.name, any);
+    }
+ 
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////// Attv Registrations ///////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
+namespace Attv.Internals {
+    export var registrar: Internals.AttributeRegistration[] = [];
 
-namespace Attv {
-    let attributeRegistrar: AttributeRegistration[] = [];
-    let valueRegistrar: ValueRegistration[] = [];
+    export class AttributeRegistration {
 
-    export interface AttributeOptions {
-        id?: string;
-        isAutoLoad?: boolean;
-        wildcard?: Attv.Attribute.WildcardType;
-    }
-
-    export function register(attributeName: string, options? : AttributeOptions, attFn?: (attribute: Attribute) => void ): void {
-        Attv.loader.pre.push(() => {
-            
-            let registry = new AttributeRegistration(attributeName, 
-                () => {
-                    let att = new Attribute(attributeName, options.isAutoLoad);
-                    att.isAutoLoad = options.isAutoLoad;
-                    if (Attv.isDefined(options.wildcard)) {
-                        att.wildcard = options.wildcard;
-                    }
-    
-                    return att;
-                },
-                (att, list) => {
-                    attFn(att);
-                });
-    
-            
-            attributeRegistrar.push(registry);
-        });
-    }
-
-    /**
-     * Register an attribute
-     * @param attributeName the attribute name (ie: data-partial, data-stuffs)
-     * @param fn callback function to create the attribute
-     * @param valuesFn callback function register attribute values to the attribute
-     */
-    export function registerAttribute(attributeName: string, 
-        fn: () => Attribute,
-        valuesFn?: (attribute: Attribute, list: Attribute.Value[]) => void): void {
-
-        let registry = new AttributeRegistration(attributeName, fn, valuesFn);
-        attributeRegistrar.push(registry);
-    }
-
-    /**
-     * Adds attribute value to an attribute
-     * @param id Attribute's unique id
-     * @param valuesFn callback function register attribute values to the attribute
-     */
-    export function registerAttributeValue(id: string, valuesFn?: (attribute: Attribute, list: Attribute.Value[]) => void): void {
-        let registry = new ValueRegistration(id, valuesFn);
-
-        valueRegistrar.push(registry);
-    }
-    
-    /**
-     * Unregister attribute. This only work during loader.pre
-     * @param attributeName attribute name
-     */
-    export function unregisterAttribute(attributeName: string): void {
-        let attributes = attributeRegistrar.filter(factory => factory.attributeName !== attributeName);
-        attributeRegistrar.splice(0, attributeRegistrar.length);
-        attributeRegistrar.push(...attributes);
-    }
-
-    class AttributeRegistration {
-        constructor (public attributeName: string,  private fn: () => Attribute, private valuesFn?: (attribute: Attribute, list: Attribute.Value[]) => void) {
-            // do nothing
+        constructor (public key: string, public options: AttributeRegistrationOptions, public valuesFn?: (attribute: Attribute) => void) {
+            options.create = options.create || ((key) => new Attribute(key));
+            options.isAutoLoad = Attv.isDefined(options.isAutoLoad) ? true : false;
+            options.attributeName = options.attributeName || key;
+            options.wildcard = options.wildcard || '*';
         }
 
         register(): Attribute {
-            let attribute = this.fn();
-            attribute.name = this.attributeName;
-
-            let attributeValues: Attribute.Value[] = [];
+            let attribute = this.options.create(this.key);
 
             if (this.valuesFn) {
-                this.valuesFn(attribute, attributeValues);
+                this.valuesFn(attribute);
             }
 
-            // from valueRegistrar
-            valueRegistrar.filter(r => r.attributeUniqueId === attribute.uniqueId).forEach(r => {
-                r.register(attribute, attributeValues);
-            });
-    
-            let values = attributeValues.reverse();
-            attribute.registerAttributeValues(values);
-
-            if (attributeValues.length > 0) {
-                attributeValues.forEach(v => {
-                    Attv.log('debug', v, attributeValues);
+            if (attribute.values.length > 0) {
+                attribute.values.forEach(v => {
+                    Attv.log('debug', v.toString());
                 })
             } else {
                 // wild card
@@ -1253,11 +1194,36 @@ namespace Attv {
         }
     }
 
-    class ValueRegistration {
-        constructor (public attributeUniqueId: string, 
-            public register: (attribute: Attribute, list: Attribute.Value[]) => void) {
+    export class ValueRegistration {
+        constructor (public attributeKey: string, public registerFn: (attribute: Attribute, list: Attribute.Value[]) => void) {
             // do nothing
         }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////// Attv Registrations ///////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv {
+
+    export interface AttributeRegistrationOptions {
+        attributeName?: string;
+        isAutoLoad?: boolean;
+        wildcard?: Attv.Attribute.WildcardType;
+        create?: (attributeKey: string) => Attribute;
+    }
+
+    export function register(attributeKey: string, options? : AttributeRegistrationOptions, valuesFn?: (attribute: Attribute) => void ): void {
+        Attv.loader.pre.push(() => {
+
+            if (!options.attributeName)
+                options.attributeName = attributeKey;
+            
+            let registration = new Internals.AttributeRegistration(attributeKey, options, valuesFn);
+            
+            Attv.Internals.registrar.push(registration);
+        });
     }
 
     function initialize() {
@@ -1268,20 +1234,22 @@ namespace Attv {
 
     function preRegister() {
         Attv.log('Attv v.' + Attv.version);
-        Attv.registerAttribute('data-settings', () => new Attv.DataSettings());
+        
+        Attv.register(DataSettings.Key, { wildcard: '<json>' }, attribute => {
+            attribute.map(() => new DataSettings.Value());
+        });
     }
 
     function registerAttributes() {
-        for (var i = 0; i < attributeRegistrar.length; i++) {
-            let attribute = attributeRegistrar[i].register();
+        for (var i = 0; i < Attv.Internals.registrar.length; i++) {
+            let attribute = Attv.Internals.registrar[i].register();
 
             attributes.push(attribute);
         }
     }
 
     function cleanup() {
-        attributeRegistrar = [];
-        valueRegistrar = [];
+        Attv.Internals.registrar = [];
     }
 
     Attv.loader.init.push(initialize);

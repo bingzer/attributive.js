@@ -16,7 +16,7 @@
         <!-- Hello World here-->
     </div>
 
-	<div data-lazy="default">
+	<div data-custom="default">
         <!-- Hello World here-->
     </div>
     
@@ -25,7 +25,7 @@
 
 Attv.register('data-hello', { isAutoLoad: true, wildcard: 'none' }, function (att) {
 
-    att.value('default', function (value, element) {
+    att.map('default', function (value, element) {
         element.innerHTML = 'hello. this is from default ' + this.toString();
     });
 
@@ -41,7 +41,7 @@ Attv.register('data-hello', { isAutoLoad: true, wildcard: 'none' }, function (at
         }
     }
 
-    att.value(att => new Es6Class());
+    att.map(att => new Es6Class());
 
 
     // -- using ES5 class
@@ -57,13 +57,13 @@ Attv.register('data-hello', { isAutoLoad: true, wildcard: 'none' }, function (at
         return false;
     };
 
-    att.value(att => new Es5Class());
+    att.map(att => new Es5Class());
 
 });
 
-Attv.register('data-lazy', { isAutoLoad: true }, function (att) {
+Attv.register('data-key-here', { isAutoLoad: true, attributeName: 'data-custom' }, function (att) {
 
-    att.value('default', function (value, element) {
+    att.map('default', function (value, element) {
         element.innerHTML = 'This is a lazy load from ' + this.toString();
     });
 });
