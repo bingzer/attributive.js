@@ -6,12 +6,14 @@ beforeEach(() => {
     global.Attv = g.Attv;
     global['ATTV_DEBUG'] = g.ATTV_DEBUG;
     global['ATTV_VERBOSE_LOGGING'] = g.ATTV_VERBOSE_LOGGING;
+    global['ATTV_VERSION'] = g.ATTV_VERSION;
 });
 
 afterEach(() => {
     global.Attv = undefined;
     global['ATTV_DEBUG'] = undefined;
     global['ATTV_VERBOSE_LOGGING'] = undefined;
+    global['ATTV_VERSION'] = undefined;
 });
 
 // ------------------------------------------------- //
@@ -20,26 +22,11 @@ afterEach(() => {
 
 describe('Attv constants and global vars', () => {
     it('Should have Attv global variables', () => {
-        expect(ATTV_DEBUG).toBeTruthy();
-        expect(ATTV_VERBOSE_LOGGING).toBeTruthy();
+        expect(ATTV_DEBUG).toBeDefined();
+        expect(ATTV_VERBOSE_LOGGING).toBeDefined();
+        expect(ATTV_VERSION).toBeDefined();
 
         expect(Attv).toBeDefined();
         expect(Attv.version).toBeDefined();
     })
 });
-
-
-Attv.register('data-write-hello-world', { isAutoLoad: true }, (attribute) => {
-    attribute.map('default', (value, element) => {
-        element.innerHTML = 'hello. this is from default' + attribute.raw(element);
-    });
-    attribute.map('another', (value, element) => {
-        element.innerHTML = 'hello. this is from another';
-        element.style.border = '1px solid gray';
-    });
-
-    let val = new Attv.Attribute.Value('defin');
-
-    attribute.map(att => val);
-
-})

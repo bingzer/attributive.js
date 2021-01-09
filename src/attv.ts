@@ -342,7 +342,7 @@ namespace Attv {
         }
 
         settingsName() {
-            return this.name = "-settings";
+            return this.name + "-settings";
         }
 
         /**
@@ -1278,6 +1278,7 @@ if (typeof exports !== 'undefined') {
     module.exports = { 
         Attv,
         ATTV_DEBUG,
-        ATTV_VERBOSE_LOGGING
+        ATTV_VERBOSE_LOGGING,
+        ATTV_VERSION
     };
 }
