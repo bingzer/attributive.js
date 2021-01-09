@@ -1127,14 +1127,15 @@ namespace Attv {
 
         if (attribute) {
             let deps = attribute.dependencies.requires?.concat(attribute.dependencies.uses).concat(attribute.dependencies.internals);
+            let isMissingDepedencies = Attv.isDefined(deps) && deps.some(dep => dep === attributeKey)
     
-            if (!deps.some(dep => dep === attributeKey)) {
-                Attv.log('warning', `${attribute || attributeKey} should be declared as the dependant in ${this.attributeValue.attribute}. This is for documentation purposes`);
+            if (isMissingDepedencies) {
+                Attv.log('warning', `${attribute} should be declared as the dependant in ${attribute}. This is for documentation purposes`);
             }
         }
 
         if (!attribute) {
-            throw new Error(`${attribute || attributeKey} can not be found. Did you register ${attribute || attributeKey}?`);
+            throw new Error(`Attribute [${attributeKey}] can not be found. Did you register ${attributeKey}?`);
         }
 
         return attribute;
@@ -1169,13 +1170,15 @@ namespace Attv.Internals {
 
         constructor (public key: string, public options: AttributeRegistrationOptions, public valuesFn?: (attribute: Attribute) => void) {
             options.create = options.create || ((key) => new Attribute(key));
-            options.isAutoLoad = Attv.isDefined(options.isAutoLoad) ? true : false;
-            options.attributeName = options.attributeName || key;
-            options.wildcard = options.wildcard || '*';
         }
 
         register(): Attribute {
-            let attribute = this.options.create(this.key);
+            let fn = this.options.create || ((key) => new Attribute(key));
+
+            let attribute = fn(this.key);
+            attribute.isAutoLoad = Attv.isDefined(this.options.isAutoLoad) ? this.options.isAutoLoad : false;
+            attribute.name = this.options.attributeName || this.key;
+            attribute.wildcard = this.options.wildcard || '*';
 
             if (this.valuesFn) {
                 this.valuesFn(attribute);
