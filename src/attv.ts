@@ -308,7 +308,7 @@ namespace Attv {
         /**
          * The dependencies
          */
-        public readonly dependencies: Attribute.Dependency = {};
+        public readonly dependency: Attribute.Dependency = {};
 
         /**
          * This attribute name. Most of the time,
@@ -334,7 +334,7 @@ namespace Attv {
          */
         constructor (public key: string) {
             this.name = key;
-            this.dependencies.internals = [DataSettings.Key];
+            this.dependency.internals = [DataSettings.Key];
         }
 
         loadedName() {
@@ -446,9 +446,9 @@ namespace Attv {
             }
 
             attributeValue.attribute = this;
-            attributeValue.dependencies.internals = this.copyDependencies(this.dependencies.internals, attributeValue.dependencies.internals);
-            attributeValue.dependencies.requires = this.copyDependencies(this.dependencies.requires, attributeValue.dependencies.requires);
-            attributeValue.dependencies.uses = this.copyDependencies(this.dependencies.uses, attributeValue.dependencies.uses);
+            attributeValue.dependencies.internals = this.copyDependencies(this.dependency.internals, attributeValue.dependencies.internals);
+            attributeValue.dependencies.requires = this.copyDependencies(this.dependency.requires, attributeValue.dependencies.requires);
+            attributeValue.dependencies.uses = this.copyDependencies(this.dependency.uses, attributeValue.dependencies.uses);
             
             this.values.push(attributeValue);
         }
@@ -1122,7 +1122,7 @@ namespace Attv {
         let attribute = Attv.getAttribute(attributeKey);
 
         if (attribute) {
-            let deps = attribute.dependencies.requires?.concat(attribute.dependencies.uses).concat(attribute.dependencies.internals);
+            let deps = attribute.dependency.requires?.concat(attribute.dependency.uses).concat(attribute.dependency.internals);
             let isMissingDepedencies = Attv.isDefined(deps) && deps.some(dep => dep === attributeKey)
     
             if (isMissingDepedencies) {

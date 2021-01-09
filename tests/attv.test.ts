@@ -31,13 +31,11 @@ describe('Attv constants and global vars', () => {
 
 Attv.register('data-write-hello-world', { isAutoLoad: true }, (attribute) => {
     attribute.map('default', (value, element) => {
-        element.innerHTML = 'hello. this is from default' + value.raw(element);
+        element.innerHTML = 'hello. this is from default' + attribute.raw(element);
     });
     attribute.map('another', (value, element) => {
         element.innerHTML = 'hello. this is from another';
         element.style.border = '1px solid gray';
-
-        value.
     });
 
     let val = new Attv.Attribute.Value('defin');
