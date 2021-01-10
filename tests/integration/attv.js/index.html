@@ -57,19 +57,23 @@ Attv.register('data-hello', { isAutoLoad: true, wildcard: 'none' }, function (at
     Es5Class.prototype = Object.create(Attv.Attribute.Value.prototype);
     Es5Class.prototype.load = function (element) {
         element.innerHTML = 'hello. Es5Class. from attribute ' + this.toString();
-        return false;
+        return true;
     };
 
     att.map(att => new Es5Class());
 
 });
 
-Attv.register('data-key-here', { isAutoLoad: true, attributeName: 'data-custom' }, function (att) {
+window.setTimeout(() => {
+    Attv.register('data-key-here', { isAutoLoad: true, attributeName: 'data-custom' }, function (att) {
 
-    att.map('default', function (value, element) {
-        element.innerHTML = 'This is a lazy load from ' + this.toString();
+        att.map('default', function (value, element) {
+            element.innerHTML = 'This is a lazy load from ' + this.toString();
+        });
     });
-});
+
+    Attv.Registrar.run();
+}, 2000);
     </script>
 </body>
 </html>

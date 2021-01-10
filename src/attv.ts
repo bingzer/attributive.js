@@ -1013,7 +1013,6 @@ namespace Attv {
         } else if (level === 'error') {
             console.error(...data);
         } else if (level === 'fatal') {
-            console.error(...data);
             throw new Error(...data);
         } else if (level === 'debug') {
             console.debug(...data);
@@ -1023,8 +1022,12 @@ namespace Attv {
     }
 
     export function onDocumentReady(fn: () => void): void {
-        // without jQuery (doesn't work in older IEs)
-        document.addEventListener('DOMContentLoaded', fn, false);
+        if (document.readyState == 'loading') {
+            // without jQuery (doesn't work in older IEs)
+            document.addEventListener('DOMContentLoaded', fn, false);
+        } else {
+            fn();
+        }
     }
 
 }
@@ -1038,27 +1041,6 @@ namespace Attv {
 
     export var configuration: Configuration;
     export const attributes: Attribute[] = [];
-
-    export const loader: {
-        /**
-         * Initialization. Reserved for internal use
-         */
-        init: (() => void)[],
-
-        /**
-         * Before attribute registrations
-         */
-        pre: (() => void)[],
-
-        /**
-         * During attribute registrations
-         */
-        post: (() => void)[]
-    } = {
-        init: [],
-        pre: [],
-        post: []
-    };
 
     export function loadElements(root?: HTMLElement): void {
         if (isUndefined(root)) {
@@ -1113,6 +1095,9 @@ namespace Attv {
         return Attv.attributes.filter(att => att.key == attributeKey)[0];
     }
 
+    export function register(attributeKey: string, options? : Attv.Registrar.AttributeRegistrationOptions, valuesFn?: (attribute: Attribute) => void ): void {
+        Attv.Registrar.registerAttribute(attributeKey, options, valuesFn);
+    }
     
     /**
      * Returns the data attribute
@@ -1159,22 +1144,99 @@ namespace Attv {
  
 }
 
-namespace Attv.Internals {
-    export var registrar: Internals.AttributeRegistration[] = [];
+namespace Attv.Registrar {
 
-    export class AttributeRegistration {
+    export interface AttributeRegistrationOptions {
+        attributeName?: string;
+        isAutoLoad?: boolean;
+        wildcard?: Attv.Attribute.WildcardType;
+        override?: boolean;
+        create?: (attributeKey: string) => Attribute;
+    }
 
-        constructor (public key: string, public options: AttributeRegistrationOptions, public valuesFn?: (attribute: Attribute) => void) {
+    let registrations: AttributeRegistration[] = [];
+    let isInitialized = false;
+    let init: (() => void)[] = [];
+    let pre: (() => void)[] = [];
+    let post: (() => void)[] = [];
+
+    function initialize() {
+        if (!Attv.configuration) {
+            Attv.configuration = new DefaultConfiguration();
+        }
+        Attv.log('Attv v.' + Attv.version);
+
+        isInitialized = true;
+    }
+
+    function registerBuiltinAttributes() {
+        registerAttribute(DataSettings.Key, { wildcard: '<json>' }, attribute => {
+            attribute.map(() => new DataSettings.Value());
+        });
+    }
+
+    function registerAllAttributes() {
+        for (var i = 0; i < registrations.length; i++) {
+            let attribute = registrations[i].register();
+
+            attributes.push(attribute);
+        }
+    }
+
+    function cleanup() {
+        registrations = [];
+    }
+
+    export function run() {
+        if (!isInitialized) {
+            init.push(initialize);
+            pre.push(registerBuiltinAttributes);
+        }
+
+        post.push(registerAllAttributes, cleanup, loadElements);
+
+        Attv.onDocumentReady(() => {
+            for (var i = 0; i < init.length; i++) {
+                init[i]();
+            }
+        
+            for (var i = 0; i < pre.length; i++) {
+                pre[i]();
+            }
+        
+            for (var i = 0; i < post.length; i++) {
+                post[i]();
+            }
+        
+            init = [];
+            pre = [];
+            post = [];
+        });
+    }
+
+    class AttributeRegistration {
+
+        constructor (public attributeKey: string, public options: AttributeRegistrationOptions, public valuesFn?: (attribute: Attribute) => void) {
             options.create = options.create || ((key) => new Attribute(key));
         }
 
         register(): Attribute {
-            let fn = this.options.create || ((key) => new Attribute(key));
+            let shouldOverride = false;
 
-            let attribute = fn(this.key);
-            attribute.isAutoLoad = Attv.isDefined(this.options.isAutoLoad) ? this.options.isAutoLoad : false;
-            attribute.name = this.options.attributeName || this.key;
-            attribute.wildcard = this.options.wildcard || '*';
+            // see if there's an existing attribute
+            let attribute = Attv.getAttribute(this.attributeKey);
+
+            if (!attribute) {
+                shouldOverride = true;
+                let fn = this.options.create || ((key) => new Attribute(key));
+                attribute = fn(this.attributeKey);
+            }
+
+            if (shouldOverride) {
+                attribute.isAutoLoad = Attv.isDefined(this.options.isAutoLoad) ? this.options.isAutoLoad : false;
+                attribute.name = this.options.attributeName || this.attributeKey;
+                attribute.wildcard = this.options.wildcard || '*';
+            }
 
             if (this.valuesFn) {
                 this.valuesFn(attribute);
@@ -1193,86 +1255,22 @@ namespace Attv.Internals {
         }
     }
 
-    export class ValueRegistration {
-        constructor (public attributeKey: string, public registerFn: (attribute: Attribute, list: Attribute.Value[]) => void) {
-            // do nothing
-        }
+    export function registerAttribute(attributeKey: string, options? : AttributeRegistrationOptions, valuesFn?: (attribute: Attribute) => void ): void {
+        pre.push(() => {
+            if (!options.attributeName)
+                options.attributeName = attributeKey;
+            
+            let registration = new AttributeRegistration(attributeKey, options, valuesFn);
+            
+            registrations.push(registration);
+        });
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// Attv Registrations ///////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
-
-namespace Attv {
-
-    export interface AttributeRegistrationOptions {
-        attributeName?: string;
-        isAutoLoad?: boolean;
-        wildcard?: Attv.Attribute.WildcardType;
-        create?: (attributeKey: string) => Attribute;
-    }
-
-    export function register(attributeKey: string, options? : AttributeRegistrationOptions, valuesFn?: (attribute: Attribute) => void ): void {
-        Attv.loader.pre.push(() => {
-
-            if (!options.attributeName)
-                options.attributeName = attributeKey;
-            
-            let registration = new Internals.AttributeRegistration(attributeKey, options, valuesFn);
-            
-            Attv.Internals.registrar.push(registration);
-        });
-    }
-
-    function initialize() {
-        if (!Attv.configuration) {
-            Attv.configuration = new DefaultConfiguration();
-        }
-    }
-
-    function preRegister() {
-        Attv.log('Attv v.' + Attv.version);
-        
-        Attv.register(DataSettings.Key, { wildcard: '<json>' }, attribute => {
-            attribute.map(() => new DataSettings.Value());
-        });
-    }
-
-    function registerAttributes() {
-        for (var i = 0; i < Attv.Internals.registrar.length; i++) {
-            let attribute = Attv.Internals.registrar[i].register();
-
-            attributes.push(attribute);
-        }
-    }
-
-    function cleanup() {
-        Attv.Internals.registrar = [];
-    }
-
-    Attv.loader.init.push(initialize);
-    Attv.loader.pre.push(preRegister);
-    Attv.loader.post.push(registerAttributes, loadElements, cleanup);
-}
-
-Attv.onDocumentReady(() => {
-    for (var i = 0; i < Attv.loader.init.length; i++) {
-        Attv.loader.init[i]();
-    }
-
-    for (var i = 0; i < Attv.loader.pre.length; i++) {
-        Attv.loader.pre[i]();
-    }
-
-    for (var i = 0; i < Attv.loader.post.length; i++) {
-        Attv.loader.post[i]();
-    }
-
-    Attv.loader.init = [];
-    Attv.loader.pre = [];
-    Attv.loader.post = [];
-});
+Attv.Registrar.run();
 
 if (typeof exports !== 'undefined') {
     module.exports = { 
