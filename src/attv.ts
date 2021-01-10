@@ -3,7 +3,7 @@ const ATTV_VERBOSE_LOGGING: boolean = true;
 const ATTV_VERSION: string = '0.0.1';
 
 ////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// PROTOTYPES //////////////////////////////////////
+//////////////////////////// Element.Prototypes ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
 interface Element {
@@ -35,6 +35,10 @@ Element.prototype.attvHtml = function (html?: string): string | any {
         }
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////
+//////////////////////// HTMLElement.Prototypes ////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
 interface HTMLElement  {
     /**
@@ -144,6 +148,10 @@ HTMLElement.prototype.attvAttr = function (name: string, value?: any): HTMLEleme
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// String.Prototypes //////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
 interface String {
     contains: (text: string) => boolean;
     equalsIgnoreCase: (other: string) => boolean;
@@ -201,114 +209,61 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////// Attv ////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
 namespace Attv {
-    export type BooleanOrVoid = boolean | void;
 
     export const version = ATTV_VERSION;
-}
 
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// Attv.Ajax ///////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
+    export interface Dependency {
 
-namespace Attv.Ajax {
+        /**
+         * List of attribute Ids that we require
+         */
+        requires?: string[];
 
-    export type AjaxMethod = 'post' | 'put' | 'delete' | 'patch' | 'get' | 'option';
+        /**
+         * List of attribute Id that we use
+         */
+        uses?: string[];
 
-    export interface AjaxOptions {
-        url: string;
-        method?: AjaxMethod;
-        data?: any;
-        callback?: (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest) => void;
-        headers?: {name: string, value: string}[];
-        createHttpRequest?: () => XMLHttpRequest;
-    }
-        
-    export function sendAjax(options: AjaxOptions) {
-        options.method = options.method || 'get';
-
-        let xhr = options.createHttpRequest ? options.createHttpRequest() : new XMLHttpRequest();
-        xhr.onreadystatechange = function (e: Event) {
-            let xhr = this as XMLHttpRequest;
-            if (xhr.readyState == 4) {
-                let wasSuccessful = this.status >= 200 && this.status < 400;
-
-                if (options?.callback) {
-                    options?.callback(options, wasSuccessful, xhr);
-                }
-            }
-        };
-        xhr.onerror = function (e: ProgressEvent<EventTarget>) {
-            if (options?.callback) {
-                options?.callback(options, false, xhr);
-            }
-        }
-
-        // header
-        options.headers?.forEach(header => xhr.setRequestHeader(header.name, header.value));
-
-        // last check
-        if (isUndefined(options.url))
-            throw new Error('url is empty');
-
-        xhr.open(options.method, options.url, true);
-        xhr.send();
+        /**
+         * List of attribute Id that we internvally use
+         */
+        internals?: string[];
     }
 
-    export function buildUrl(option: AjaxOptions): string {
-        if (isUndefined(option.url))
-            return undefined;
-
-        let url = option.url;
-        if (option.data && (!option.method || option.method === 'get')) {
-            url += `?${objectToQuerystring(option.data)}`;
-        } 
-        
-        return url;
+    export interface ValueFn {
+        (attribute: Attv.Attribute): Attv.AttributeValue;
     }
 
-    export function objectToQuerystring(any: any): string {
-        if (!any)
-            return '';
 
-        if (isString(any)) {
-            any = parseJsonOrElse(any);
-            if (isString(any)) {
-                return any;
-            }
-        }
-
-        return Object.keys(any)
-                .sort()
-                .map(key => {
-                    return window.encodeURIComponent(key)
-                        + '='
-                        + window.encodeURIComponent(any[key]);
-                })
-                .join('&');
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// Base classes ////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-
-namespace Attv {
+    export type BooleanOrVoid = boolean | void;
+    export type ValueFnOrString = string | ValueFn;
+    export type ValueFnOrLoadElementFn = LoadElementFn | ValueFn;
+    export type LoadElementFn = (value: Attv.AttributeValue, element: HTMLElement) => BooleanOrVoid;
+    export type WildcardType = "*" | "<number>" | "<boolean>" | "<querySelector>" | "<jsExpression>" | "<json>" | "none";
     
+    
+    ////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////// Attv.Attribute ////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
     /**
     * Base class for data-attributes
     */
-    export class Attribute {
+   export class Attribute {
 
         /**
          * The attribute values
          */
-        public readonly values: Attribute.Value[] = [];
+        public readonly values: AttributeValue[] = [];
 
         /**
          * The dependencies
          */
-        public readonly dependency: Attribute.Dependency = {};
+        public readonly dependency: Dependency = {};
 
         /**
          * This attribute name. Most of the time,
@@ -320,7 +275,7 @@ namespace Attv {
          * When set to 'none' means no wildcard. All attribute values needs to be registered. 
          * Default to 'none'.
          */
-        public wildcard: Attv.Attribute.WildcardType = "*";
+        public wildcard: Attv.WildcardType = "*";
 
         /**
          * Is Auto load? (default is false)
@@ -371,7 +326,7 @@ namespace Attv {
          * Returns the current attribute value
          * @param element the element
          */
-        getValue<TValue extends Attribute.Value>(element: HTMLElement): TValue {
+        getValue<TValue extends AttributeValue>(element: HTMLElement): TValue {
             let value = element?.attvAttr(this.name);
 
             // #1. Find an attribute value with the exact match
@@ -390,7 +345,7 @@ namespace Attv {
                 
                 // #3. find the first if this attribute allows wildcard
                 if (!attributeValue) {
-                    attributeValue = new Attribute.Value() as TValue;
+                    attributeValue = new AttributeValue() as TValue;
                     attributeValue.attribute = this;
                     this.values.push(attributeValue);
                 }
@@ -402,6 +357,18 @@ namespace Attv {
             }
 
             return attributeValue;
+        }
+
+        /**
+         * 
+         * @param element the element
+         * @param orDefault (optional) default settings
+         */
+        getSettings<TAny>(element: HTMLElement): TAny {
+            let dataSetting = Attv.resolveValue<DataSettings.Value>(DataSettings.Key, element);
+            let setting = dataSetting.getSettings<TAny>(element);
+
+            return setting;
         }
 
         /**
@@ -436,13 +403,13 @@ namespace Attv {
          * @param attributeValue the attribute value
          * @param loadElementFnOrOptions either LoadElementFn or ValueOptions
          */
-        map(value: Attv.Attribute.ValueFnOrString, loadElementFn?: Attv.Attribute.LoadElementFn) {
-            let attributeValue: Attv.Attribute.Value;
+        map(value: Attv.ValueFnOrString, loadElementFn?: Attv.LoadElementFn) {
+            let attributeValue: Attv.AttributeValue;
 
             if (Attv.isString(value)) {
-                attributeValue = new Attv.Attribute.Value(value as string, loadElementFn); 
+                attributeValue = new Attv.AttributeValue(value as string, loadElementFn); 
             } else if (Attv.isType(value, 'function')) {
-                attributeValue = (value as Attv.Attribute.ValueFn)(this);
+                attributeValue = (value as Attv.ValueFn)(this);
             }
 
             attributeValue.attribute = this;
@@ -466,27 +433,22 @@ namespace Attv {
         }
     }
 
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// Attv.Attributes /////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-
-namespace Attv.Attribute {
+    
+    ////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////// Attv.AttributeValue //////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Base class for attribute-value
      */
-    export class Value {
+    export class AttributeValue {
         
-        public readonly dependencies: Attribute.Dependency = {};
+        public readonly dependencies: Dependency = {};
 
         public readonly validators: Validators.AttributeValidator[] = [];
-        public settings: Settings;
         public attribute: Attribute;
         
         constructor (public value: string = undefined, private loadElementFn?: LoadElementFn) {
-
         }
     
         /**
@@ -502,26 +464,6 @@ namespace Attv.Attribute {
         }
 
         /**
-         * 
-         * @param element the element
-         * @param orDefault (optional) default settings
-         */
-        loadSettings<TSettings extends Settings>(element: HTMLElement, callback?: (settings: TSettings) => void): boolean {
-            let dataSetting = Attv.resolveValue<DataSettings.Value>(DataSettings.Key, element);
-            
-            this.settings = dataSetting.getSettingsForValue<TSettings>(this, element);
-            if (this.settings) {
-                if (callback) {
-                    callback(this.settings as TSettings);
-                }
-    
-                Attv.Attribute.Settings.commit(element, this.settings);
-            }
-
-            return true;
-        }
-
-        /**
          * To string
          */
         toString(): string {
@@ -529,294 +471,11 @@ namespace Attv.Attribute {
         }
     }    
 
-    export interface Dependency {
+    ////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////// Attv.Configuration///////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
 
-        /**
-         * List of attribute Ids that we require
-         */
-        requires?: string[];
-
-        /**
-         * List of attribute Id that we use
-         */
-        uses?: string[];
-
-        /**
-         * List of attribute Id that we internvally use
-         */
-        internals?: string[];
-    }
-
-    export interface ValueFn {
-        (attribute: Attv.Attribute): Attv.Attribute.Value;
-    }
-
-
-    export type ValueFnOrString = string | ValueFn;
-    export type ValueFnOrLoadElementFn = LoadElementFn | ValueFn;
-    export type LoadElementFn = (value: Attv.Attribute.Value, element: HTMLElement) => BooleanOrVoid;
-    export type WildcardType = "*" | "<number>" | "<boolean>" | "<querySelector>" | "<jsExpression>" | "<json>" | "none";
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////// Attv.Attribute.Settings /////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-
-namespace Attv.Attribute {
-    
-    /**
-     * Attribute configuration
-     */
-    export interface Settings {
-
-        /**
-         * The attribute value
-         * that this settings belongs to.
-         * This is required.
-         */
-        attributeValue: Attv.Attribute.Value;
-
-        /**
-         * True to override existing style
-         */
-        override?: boolean;
-
-        /**
-         * Inside the <style></style>
-         */
-        style?: string;
-
-        /**
-         * Style urls
-         */
-        styleUrls?: {name: string, url: string, options?: any}[];
-
-        /**
-         * Javascript urls
-         */
-        jsUrls?: {name: string, url: string, options?: any}[];
-    }
-
-    export namespace Settings {
-        let excludeProperties = ['attributeValue', 'override', 'style', 'styleUrls', 'jsUrls'];
-
-        export function commit(element: HTMLElement, settings: Settings) {
-            let apply = true;
-    
-            if (settings.style) {
-                let elementId = 'style-' + settings.attributeValue.attribute.settingsName;
-                let styleElement = document.querySelector(`style#${elementId}`) as HTMLStyleElement;
-                apply = settings.override || !styleElement;
-    
-                if (!styleElement) {
-                    styleElement = Attv.createHTMLElement('<style>') as HTMLStyleElement;
-                    styleElement.id = elementId;
-        
-                    document.head.append(styleElement);
-                }
-        
-                if (apply) {
-                    styleElement.innerHTML = settings.style;
-                }
-            }
-    
-            if (settings.styleUrls) {
-                settings.styleUrls.forEach(styleUrl => {
-                    let elementId = `link-${styleUrl.name}-${settings.attributeValue.attribute.settingsName}`;
-                    let linkElement = document.querySelector(`link#${elementId}`) as HTMLLinkElement;
-                    apply = settings.override || !linkElement;
-    
-                    if (!linkElement) {
-                        linkElement = Attv.createHTMLElement('<link>') as HTMLLinkElement;
-                        document.head.append(linkElement);
-                    }
-    
-                    if (apply) {
-                        linkElement.id = elementId;
-                        linkElement.rel = "stylesheet";
-                        linkElement.href = styleUrl.url;
-                        linkElement.integrity = styleUrl.options?.integrity;
-                        linkElement.crossOrigin = styleUrl.options?.crossorigin;
-                    }
-                });
-            }
-    
-            if (settings.jsUrls) {
-                settings.jsUrls.forEach(jsUrl => {
-                    let elementId = `script-${jsUrl.name}-${settings.attributeValue.attribute.settingsName}`;
-                    let scriptElement = document.querySelector(`script#${elementId}`) as HTMLScriptElement;
-                    apply = settings.override || !scriptElement;
-    
-                    if (!scriptElement) {
-                        scriptElement = Attv.createHTMLElement('<script>') as HTMLScriptElement;
-                        document.body.append(scriptElement);
-                    }
-    
-                    if (apply) {
-                        scriptElement.id = elementId;
-                        scriptElement.src = jsUrl.url;
-                        scriptElement.integrity = jsUrl.options?.integrity;
-                        scriptElement.crossOrigin = jsUrl.options?.crossorigin;
-                        scriptElement.onload = () => Attv.loadElements();
-                    }
-                });
-            }
-
-            let applicableKeys = Object.keys(settings).filter(key => !excludeProperties.some(prop => prop.equalsIgnoreCase(key)));
-            let settingsObject = {};
-            applicableKeys.forEach(r => settingsObject[r] = settings[r]);
-
-            element.attvAttr(settings.attributeValue.attribute.settingsName(), settingsObject);
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-///////////////////////// 1st class attributes /////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-
-namespace Attv.DataSettings {
-    export const Key = 'data-settings';
-
-    /**
-     * [data-settings]='*|json'
-     */
-    export class Value extends Attv.Attribute.Value {
-        
-        /**
-         * Returns the option object (json)
-         * @param element the element
-         */
-        getSettings<TSettings>(element: HTMLElement): TSettings {
-            let rawValue = this.attribute.raw(element);
-            let settings = parseJsonOrElse<TSettings>(rawValue, {});
-    
-            return settings;
-        }
-
-        getSettingsForValue<TSettings extends Attribute.Settings>(value: Attv.Attribute.Value, element: HTMLElement): TSettings {
-            let rawValue = element.attvAttr(value.attribute.settingsName());
-            let settings = parseJsonOrElse<TSettings>(rawValue, {});
-            settings.attributeValue = settings.attributeValue || value;
-    
-            return settings;
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// Validators //////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-
-namespace Attv.Validators {
-
-    export interface AttributeValidator {
-        validate(value: Attribute.Value, element: Element): boolean;
-    }
-
-    /**
-     * DOM is required to have an attribute specified by attribute ids
-     */
-    export class RequiredAttribute implements AttributeValidator {
-
-        constructor (private requiredAttributeIds: string[]) {
-            // do nothing
-        }
-    
-        validate(value: Attribute.Value, element: HTMLElement): boolean {
-            let isValidated = true;
-
-            let attributes = this.requiredAttributeIds.map(attId => Attv.getAttribute(attId));
-
-            // check for other require attributes
-            for (let i = 0; i < attributes.length; i++) {
-                let attribute = attributes[i];
-                if (!attribute?.raw(element)) {
-                    Attv.log('error', `${value} is requiring ${attribute} to be present in DOM`, element)
-                }
-
-                isValidated = isValidated && !!attribute;
-            }
-
-            return isValidated;
-        }
-    }
-
-    /**
-     * DOM is required to have an attribute of [name]=[value]
-     */
-    export class RequiredAttributeWithValue implements AttributeValidator {
-
-        constructor (private requiredAttributes: { name: string, value: string}[]) {
-            // do nothing
-        }
-    
-        validate(value: Attribute.Value, element: HTMLElement): boolean {
-            let isValidated = true;
-
-            // check for other require attributes
-            for (let i = 0; i < this.requiredAttributes.length; i++) {
-                let attribute = this.requiredAttributes[i];
-                let requiredAttribute = element.attvAttr(attribute.name);
-                if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
-                    Attv.log('error', `${value} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
-                }
-
-                isValidated = isValidated && !!requiredAttribute;
-            }
-
-            return isValidated;
-        }
-    }
-
-    /**
-     * Requirement Any element
-     */
-    export class RequiredElement implements AttributeValidator {
-
-        constructor (private elementTagNames: string[]) {
-            // do nothing
-        }
-
-        validate(value: Attribute.Value, element: Element): boolean {
-            let isValidated = false;
-
-            // check for element that this attribute belongs to
-            for (let i = 0; i < this.elementTagNames.length; i++) {
-                let elementName = this.elementTagNames[i];
-                if (element.tagName.equalsIgnoreCase(elementName)) {
-                    isValidated = true;
-                    break;
-                }
-            }
-
-            if (!isValidated) {
-                Attv.log('error', `${value} can only be attached to elements [${this.elementTagNames}]`, element)
-            }
-
-            return isValidated;
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// Configuration ///////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-
-namespace Attv {
-
-    export interface Configuration {
-
-        isDebug: boolean;
-
-        isVerboseLogging: boolean;        
-        
-        readonly defaultTag: string;
-
-        readonly logLevels: string[];
-    }
-
-    export class DefaultConfiguration implements Configuration {
+    export class Configuration {
 
         isDebug: boolean = false;
         isVerboseLogging: boolean = false;
@@ -839,87 +498,296 @@ namespace Attv {
             return ['log', 'warning', 'error', 'debug', 'fatal'];
         }
     }
-}
 
-////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////// Attv.DomParser ////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////// Attv.Registrar////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
 
-namespace Attv.Dom {
+    export namespace Registrar {
 
-    export var domParser: DOMParser;
-    export const htmlTags: { tag: string, parentTag: string }[] = [
-        { tag: 'tr', parentTag: 'tbody' },
-        { tag: 'th', parentTag: 'thead' },
-        { tag: 'td', parentTag: 'tr' },
-    ];
-
-    export function getParentTag(elementOrTag: HTMLElement | string) {
-        let tagName: string = (elementOrTag as HTMLElement)?.tagName || elementOrTag as string;
-        let parentTag = Attv.Dom.htmlTags.filter(tag => tag.tag.equalsIgnoreCase(tagName))[0]?.parentTag;
-        if (!parentTag) {
-            parentTag = 'div';
+        export interface AttributeRegistrationOptions {
+            attributeName?: string;
+            isAutoLoad?: boolean;
+            wildcard?: Attv.WildcardType;
+            override?: boolean;
+            create?: (attributeKey: string) => Attribute;
         }
-
-        return parentTag;
-    }
-
-    export function createHTMLElement(tagName: string, innerHtml: string): HTMLElement {
-        let parentTag = getParentTag(tagName);
-        
-        let htmlElement = document.createElement(parentTag);
-        htmlElement.innerHTML = innerHtml;
-
-        return htmlElement;
-    }
-
-    export function parseDom(any: string | HTMLElement): HTMLElement {
-        if (isString(any)) {
-            let text = any as string;
-            let htmlElement: HTMLElement;
-            let tag: string = text.toString();
-
-            if (tag.startsWith('<') && tag.endsWith('>')) {
-                let tempTag = tag.substring(1, tag.length - 1);
-                try {
-                    htmlElement = window.document.createElement(tempTag);
-                } catch (e) {
-                    // ignore
-                }
-            }
-
-            if (!htmlElement) {
-                try {
-                    if (!Attv.Dom.domParser) {
-                        Attv.Dom.domParser = new DOMParser();
-                    }
     
-                    let domDocument = Attv.Dom.domParser.parseFromString(text, 'text/xml');
-                    tag = domDocument.firstElementChild.tagName;
-                    if (domDocument.querySelector('parsererror')) {
-                        tag = 'div';
-                    }
-                } catch (e) {
-                    // ignore
+        let registrations: AttributeRegistration[] = [];
+        let isInitialized = false;
+        let init: (() => void)[] = [];
+        let pre: (() => void)[] = [];
+        let post: (() => void)[] = [];
+    
+        function initialize() {
+            if (!Attv.configuration) {
+                Attv.configuration = new Configuration();
+            }
+            Attv.log('Attv v.' + Attv.version);
+    
+            isInitialized = true;
+        }
+    
+        function registerBuiltinAttributes() {
+            registerAttribute(DataSettings.Key, { wildcard: '<json>' }, attribute => {
+                attribute.map(() => new DataSettings.Value());
+            });
+        }
+    
+        function registerAllAttributes() {
+            for (var i = 0; i < registrations.length; i++) {
+                let attribute = registrations[i].register();
+    
+                attributes.push(attribute);
+            }
+        }
+    
+        function cleanup() {
+            registrations = [];
+        }
+    
+        export function run() {
+            if (!isInitialized) {
+                init.push(initialize);
+                pre.push(registerBuiltinAttributes);
+            }
+    
+            post.push(registerAllAttributes, cleanup, loadElements);
+    
+            Attv.onDocumentReady(() => {
+                for (var i = 0; i < init.length; i++) {
+                    init[i]();
                 }
+            
+                for (var i = 0; i < pre.length; i++) {
+                    pre[i]();
+                }
+            
+                for (var i = 0; i < post.length; i++) {
+                    post[i]();
+                }
+            
+                init = [];
+                pre = [];
+                post = [];
+            });
+        }
+    
+        class AttributeRegistration {
+    
+            constructor (public attributeKey: string, public options: AttributeRegistrationOptions, public valuesFn?: (attribute: Attribute) => void) {
+                options.create = options.create || ((key) => new Attribute(key));
+            }
+    
+            register(): Attribute {
+                let shouldOverride = false;
+    
+                // see if there's an existing attribute
+                let attribute = Attv.getAttribute(this.attributeKey);
+    
+                if (!attribute) {
+                    shouldOverride = true;
+                    let fn = this.options.create || ((key) => new Attribute(key));
+                    attribute = fn(this.attributeKey);
+                }
+    
+                if (shouldOverride) {
+                    attribute.isAutoLoad = Attv.isDefined(this.options.isAutoLoad) ? this.options.isAutoLoad : false;
+                    attribute.name = this.options.attributeName || this.attributeKey;
+                    attribute.wildcard = this.options.wildcard || '*';
+                }
+    
+                if (this.valuesFn) {
+                    this.valuesFn(attribute);
+                }
+    
+                if (attribute.values.length > 0) {
+                    attribute.values.forEach(v => {
+                        Attv.log('debug', v.toString());
+                    })
+                } else {
+                    // wild card
+                    Attv.log('debug', `${attribute.toString()}='${attribute.wildcard}'`);
+                }
+    
+                return attribute;
+            }
+        }
+    
+        export function registerAttribute(attributeKey: string, options? : AttributeRegistrationOptions, valuesFn?: (attribute: Attribute) => void ): void {
+            pre.push(() => {
+                if (!options.attributeName)
+                    options.attributeName = attributeKey;
+                
+                let registration = new AttributeRegistration(attributeKey, options, valuesFn);
+                
+                registrations.push(registration);
+            });
+        }
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////// Attv.Dom //////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
 
-                htmlElement = Attv.Dom.createHTMLElement(tag, text);
+    export namespace Dom {
+
+        export var domParser: DOMParser;
+        export const htmlTags: { tag: string, parentTag: string }[] = [
+            { tag: 'tr', parentTag: 'tbody' },
+            { tag: 'th', parentTag: 'thead' },
+            { tag: 'td', parentTag: 'tr' },
+        ];
+
+        export function getParentTag(elementOrTag: HTMLElement | string) {
+            let tagName: string = (elementOrTag as HTMLElement)?.tagName || elementOrTag as string;
+            let parentTag = Attv.Dom.htmlTags.filter(tag => tag.tag.equalsIgnoreCase(tagName))[0]?.parentTag;
+            if (!parentTag) {
+                parentTag = 'div';
             }
 
-            any = htmlElement;
+            return parentTag;
         }
 
-        return any as HTMLElement;
+        export function createHTMLElement(tagName: string, innerHtml: string): HTMLElement {
+            let parentTag = getParentTag(tagName);
+            
+            let htmlElement = document.createElement(parentTag);
+            htmlElement.innerHTML = innerHtml;
+
+            return htmlElement;
+        }
+
+        export function parseDom(any: string | HTMLElement): HTMLElement {
+            if (isString(any)) {
+                let text = any as string;
+                let htmlElement: HTMLElement;
+                let tag: string = text.toString();
+
+                if (tag.startsWith('<') && tag.endsWith('>')) {
+                    let tempTag = tag.substring(1, tag.length - 1);
+                    try {
+                        htmlElement = window.document.createElement(tempTag);
+                    } catch (e) {
+                        // ignore
+                    }
+                }
+
+                if (!htmlElement) {
+                    try {
+                        if (!Attv.Dom.domParser) {
+                            Attv.Dom.domParser = new DOMParser();
+                        }
+        
+                        let domDocument = Attv.Dom.domParser.parseFromString(text, 'text/xml');
+                        tag = domDocument.firstElementChild.tagName;
+                        if (domDocument.querySelector('parsererror')) {
+                            tag = 'div';
+                        }
+                    } catch (e) {
+                        // ignore
+                    }
+
+                    htmlElement = Attv.Dom.createHTMLElement(tag, text);
+                }
+
+                any = htmlElement;
+            }
+
+            return any as HTMLElement;
+        }
     }
-}
 
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// Helper functions ////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////// Attv.Ajax ///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+    
+    export namespace Ajax {
+        export type AjaxMethod = 'post' | 'put' | 'delete' | 'patch' | 'get' | 'option';
 
-namespace Attv {
+        export interface AjaxOptions {
+            url: string;
+            method?: AjaxMethod;
+            data?: any;
+            callback?: (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest) => void;
+            headers?: {name: string, value: string}[];
+            createHttpRequest?: () => XMLHttpRequest;
+        }
+            
+        export function sendAjax(options: AjaxOptions) {
+            options.method = options.method || 'get';
+    
+            let xhr = options.createHttpRequest ? options.createHttpRequest() : new XMLHttpRequest();
+            xhr.onreadystatechange = function (e: Event) {
+                let xhr = this as XMLHttpRequest;
+                if (xhr.readyState == 4) {
+                    let wasSuccessful = this.status >= 200 && this.status < 400;
+    
+                    if (options?.callback) {
+                        options?.callback(options, wasSuccessful, xhr);
+                    }
+                }
+            };
+            xhr.onerror = function (e: ProgressEvent<EventTarget>) {
+                if (options?.callback) {
+                    options?.callback(options, false, xhr);
+                }
+            }
+    
+            // header
+            options.headers?.forEach(header => xhr.setRequestHeader(header.name, header.value));
+    
+            // last check
+            if (isUndefined(options.url))
+                throw new Error('url is empty');
+    
+            xhr.open(options.method, options.url, true);
+            xhr.send();
+        }
+    
+        export function buildUrl(option: AjaxOptions): string {
+            if (isUndefined(option.url))
+                return undefined;
+    
+            let url = option.url;
+            if (option.data && (!option.method || option.method === 'get')) {
+                url += `?${objectToQuerystring(option.data)}`;
+            } 
+            
+            return url;
+        }
+    
+        export function objectToQuerystring(any: any): string {
+            if (!any)
+                return '';
+    
+            if (isString(any)) {
+                any = parseJsonOrElse(any);
+                if (isString(any)) {
+                    return any;
+                }
+            }
+    
+            return Object.keys(any)
+                    .sort()
+                    .map(key => {
+                        return window.encodeURIComponent(key)
+                            + '='
+                            + window.encodeURIComponent(any[key]);
+                    })
+                    .join('&');
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////// Helper functions ////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+
     let idCounter = 0;
 
+    export var configuration: Configuration;
+    export const attributes: Attribute[] = [];
+    
     export function isUndefined(any: any): boolean {
         return isType(any, 'undefined');
     }
@@ -1030,18 +898,6 @@ namespace Attv {
         }
     }
 
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// Attv Functions ///////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-
-namespace Attv {
-
-    export var configuration: Configuration;
-    export const attributes: Attribute[] = [];
-
     export function loadElements(root?: HTMLElement): void {
         if (isUndefined(root)) {
             root = document.querySelector('html');
@@ -1126,7 +982,7 @@ namespace Attv {
      * Returns the data attribute
      * @param attributeKey id
      */
-    export function resolveValue<TValue extends Attribute.Value>(attributeKey: string, element: HTMLElement): TValue {
+    export function resolveValue<TValue extends AttributeValue>(attributeKey: string, element: HTMLElement): TValue {
         let attribute = resolve(attributeKey);
 
         return attribute.getValue<TValue>(element);
@@ -1141,135 +997,131 @@ namespace Attv {
         let attribute = this.resolve(attributeKey);
         element.attvAttr(attribute.name, any);
     }
- 
 }
 
-namespace Attv.Registrar {
+////////////////////////////////////////////////////////////////////////////////////
+///////////////////////// 1st class attributes /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
-    export interface AttributeRegistrationOptions {
-        attributeName?: string;
-        isAutoLoad?: boolean;
-        wildcard?: Attv.Attribute.WildcardType;
-        override?: boolean;
-        create?: (attributeKey: string) => Attribute;
-    }
+namespace Attv.DataSettings {
+    export const Key = 'data-settings';
 
-    let registrations: AttributeRegistration[] = [];
-    let isInitialized = false;
-    let init: (() => void)[] = [];
-    let pre: (() => void)[] = [];
-    let post: (() => void)[] = [];
-
-    function initialize() {
-        if (!Attv.configuration) {
-            Attv.configuration = new DefaultConfiguration();
-        }
-        Attv.log('Attv v.' + Attv.version);
-
-        isInitialized = true;
-    }
-
-    function registerBuiltinAttributes() {
-        registerAttribute(DataSettings.Key, { wildcard: '<json>' }, attribute => {
-            attribute.map(() => new DataSettings.Value());
-        });
-    }
-
-    function registerAllAttributes() {
-        for (var i = 0; i < registrations.length; i++) {
-            let attribute = registrations[i].register();
-
-            attributes.push(attribute);
-        }
-    }
-
-    function cleanup() {
-        registrations = [];
-    }
-
-    export function run() {
-        if (!isInitialized) {
-            init.push(initialize);
-            pre.push(registerBuiltinAttributes);
-        }
-
-        post.push(registerAllAttributes, cleanup, loadElements);
-
-        Attv.onDocumentReady(() => {
-            for (var i = 0; i < init.length; i++) {
-                init[i]();
-            }
+    /**
+     * [data-settings]='*|json'
+     */
+    export class Value extends Attv.AttributeValue {
         
-            for (var i = 0; i < pre.length; i++) {
-                pre[i]();
-            }
-        
-            for (var i = 0; i < post.length; i++) {
-                post[i]();
-            }
-        
-            init = [];
-            pre = [];
-            post = [];
-        });
-    }
-
-    class AttributeRegistration {
-
-        constructor (public attributeKey: string, public options: AttributeRegistrationOptions, public valuesFn?: (attribute: Attribute) => void) {
-            options.create = options.create || ((key) => new Attribute(key));
+        /**
+         * Returns the option object (json)
+         * @param element the element
+         */
+        getSettings<TAny>(element: HTMLElement): TAny {
+            let rawValue = this.attribute.raw(element);
+            let settings = parseJsonOrElse<TAny>(rawValue, {});
+    
+            return settings;
         }
-
-        register(): Attribute {
-            let shouldOverride = false;
-
-            // see if there's an existing attribute
-            let attribute = Attv.getAttribute(this.attributeKey);
-
-            if (!attribute) {
-                shouldOverride = true;
-                let fn = this.options.create || ((key) => new Attribute(key));
-                attribute = fn(this.attributeKey);
-            }
-
-            if (shouldOverride) {
-                attribute.isAutoLoad = Attv.isDefined(this.options.isAutoLoad) ? this.options.isAutoLoad : false;
-                attribute.name = this.options.attributeName || this.attributeKey;
-                attribute.wildcard = this.options.wildcard || '*';
-            }
-
-            if (this.valuesFn) {
-                this.valuesFn(attribute);
-            }
-
-            if (attribute.values.length > 0) {
-                attribute.values.forEach(v => {
-                    Attv.log('debug', v.toString());
-                })
-            } else {
-                // wild card
-                Attv.log('debug', `${attribute.toString()}='${attribute.wildcard}'`);
-            }
-
-            return attribute;
-        }
-    }
-
-    export function registerAttribute(attributeKey: string, options? : AttributeRegistrationOptions, valuesFn?: (attribute: Attribute) => void ): void {
-        pre.push(() => {
-            if (!options.attributeName)
-                options.attributeName = attributeKey;
-            
-            let registration = new AttributeRegistration(attributeKey, options, valuesFn);
-            
-            registrations.push(registration);
-        });
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////// Attv Registrations ///////////////////////////////
+////////////////////////////////// Validators //////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
+
+namespace Attv.Validators {
+
+    export interface AttributeValidator {
+        validate(value: AttributeValue, element: Element): boolean;
+    }
+
+    /**
+     * DOM is required to have an attribute specified by attribute ids
+     */
+    export class RequiredAttribute implements AttributeValidator {
+
+        constructor (private requiredAttributeIds: string[]) {
+            // do nothing
+        }
+    
+        validate(value: AttributeValue, element: HTMLElement): boolean {
+            let isValidated = true;
+
+            let attributes = this.requiredAttributeIds.map(attId => Attv.getAttribute(attId));
+
+            // check for other require attributes
+            for (let i = 0; i < attributes.length; i++) {
+                let attribute = attributes[i];
+                if (!attribute?.raw(element)) {
+                    Attv.log('error', `${value} is requiring ${attribute} to be present in DOM`, element)
+                }
+
+                isValidated = isValidated && !!attribute;
+            }
+
+            return isValidated;
+        }
+    }
+
+    /**
+     * DOM is required to have an attribute of [name]=[value]
+     */
+    export class RequiredAttributeWithValue implements AttributeValidator {
+
+        constructor (private requiredAttributes: { name: string, value: string}[]) {
+            // do nothing
+        }
+    
+        validate(value: AttributeValue, element: HTMLElement): boolean {
+            let isValidated = true;
+
+            // check for other require attributes
+            for (let i = 0; i < this.requiredAttributes.length; i++) {
+                let attribute = this.requiredAttributes[i];
+                let requiredAttribute = element.attvAttr(attribute.name);
+                if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
+                    Attv.log('error', `${value} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
+                }
+
+                isValidated = isValidated && !!requiredAttribute;
+            }
+
+            return isValidated;
+        }
+    }
+
+    /**
+     * Requirement Any element
+     */
+    export class RequiredElement implements AttributeValidator {
+
+        constructor (private elementTagNames: string[]) {
+            // do nothing
+        }
+
+        validate(value: AttributeValue, element: Element): boolean {
+            let isValidated = false;
+
+            // check for element that this attribute belongs to
+            for (let i = 0; i < this.elementTagNames.length; i++) {
+                let elementName = this.elementTagNames[i];
+                if (element.tagName.equalsIgnoreCase(elementName)) {
+                    isValidated = true;
+                    break;
+                }
+            }
+
+            if (!isValidated) {
+                Attv.log('error', `${value} can only be attached to elements [${this.elementTagNames}]`, element)
+            }
+
+            return isValidated;
+        }
+    }
+}
+
+
+
+
 Attv.Registrar.run();
 
 if (typeof exports !== 'undefined') {

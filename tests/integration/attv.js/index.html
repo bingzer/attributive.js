@@ -57,7 +57,7 @@ Attv.register('data-hello', { isAutoLoad: true, wildcard: 'none' }, function (at
 
     // -- using ES6 class
 
-    class Es6Class extends Attv.Attribute.Value {
+    class Es6Class extends Attv.AttributeValue {
         constructor() {
             super("es6");
         }
@@ -73,11 +73,11 @@ Attv.register('data-hello', { isAutoLoad: true, wildcard: 'none' }, function (at
     // -- using ES5 class
 
     function Es5Class() {
-        Attv.Attribute.Value.call(this, 'es5');
+        Attv.AttributeValue.call(this, 'es5');
 
         return this;
     }
-    Es5Class.prototype = Object.create(Attv.Attribute.Value.prototype);
+    Es5Class.prototype = Object.create(Attv.AttributeValue.prototype);
     Es5Class.prototype.load = function (element) {
         element.innerHTML = 'hello. Es5Class. from attribute ' + this.toString();
         return false;
