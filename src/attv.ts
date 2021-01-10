@@ -217,6 +217,12 @@ namespace Attv {
 
     export const version = ATTV_VERSION;
 
+    export type BooleanOrVoid = boolean | void;
+    export type ValueFnOrString = string | ValueFn;
+    export type ValueFnOrLoadElementFn = LoadElementFn | ValueFn;
+    export type LoadElementFn = (value: Attv.AttributeValue, element: HTMLElement) => BooleanOrVoid;
+    export type WildcardType = "*" | "<number>" | "<boolean>" | "<querySelector>" | "<jsExpression>" | "<json>" | "none";
+
     export interface Dependency {
 
         /**
@@ -238,13 +244,6 @@ namespace Attv {
     export interface ValueFn {
         (attribute: Attv.Attribute): Attv.AttributeValue;
     }
-
-
-    export type BooleanOrVoid = boolean | void;
-    export type ValueFnOrString = string | ValueFn;
-    export type ValueFnOrLoadElementFn = LoadElementFn | ValueFn;
-    export type LoadElementFn = (value: Attv.AttributeValue, element: HTMLElement) => BooleanOrVoid;
-    export type WildcardType = "*" | "<number>" | "<boolean>" | "<querySelector>" | "<jsExpression>" | "<json>" | "none";
     
     
     ////////////////////////////////////////////////////////////////////////////////////
