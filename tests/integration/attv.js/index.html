@@ -15,12 +15,24 @@
 	<div data-hello="invalid">
         <!-- Hello World here-->
     </div>
-
-	<div id="test-div" data-custom="defaultx" data-settings="{}">
+	<div data-hello="refresh">
         <!-- Hello World here-->
     </div>
-	<div id="test-div" data-custom="anything" data-settings="{}">
-        <!-- Hello World here-->
+
+    <div style="margin: 10px; border: 1px solid gray">
+        <div id="test-div" data-custom="replace" data-settings="{timer: 2000}">
+            <p>This part is going to get replaced within 2 seconds</p>
+        </div>
+        <div id="test-div" data-custom="replace" data-settings="{timer: 5000}">
+            <p>This part is going to get replaced within 5 seconds</p>
+        </div>
+    </div>
+
+    <div style="margin: 10px; border: 1px solid gray">
+        <h2>Delay register</h2>
+        <div id="test-div" data-register="default">
+            <p>This part is going to get replaced within 2 seconds</p>
+        </div>
     </div>
     
     <script type="text/javascript" src="/build/attv.js"></script>
@@ -30,6 +42,17 @@ Attv.register('data-hello', { isAutoLoad: true, wildcard: 'none' }, function (at
 
     att.map('default', function (value, element) {
         element.innerHTML = 'hello. this is from default ' + this.toString();
+    });
+
+    att.map('refresh', function (value, element) {
+        var that = this;
+        var ckounter = 0;
+        var ckint = window.setInterval(function () {
+            element.innerHTML = 'hello. this is from refresh ' + that.toString() + '. Counter = ' + ckounter++;
+            if (ckounter > 20) {
+                window.clearInterval(ckint);
+            }
+        }, 500);
     });
 
     // -- using ES6 class
@@ -57,18 +80,26 @@ Attv.register('data-hello', { isAutoLoad: true, wildcard: 'none' }, function (at
     Es5Class.prototype = Object.create(Attv.Attribute.Value.prototype);
     Es5Class.prototype.load = function (element) {
         element.innerHTML = 'hello. Es5Class. from attribute ' + this.toString();
-        return true;
+        return false;
     };
 
     att.map(att => new Es5Class());
 
 });
 
+Attv.register('data-delay', { isAutoLoad: true }, function (att) {
+
+    att.map('default', function (value, element) {
+        element.innerHTML = 'This is a lazy load from ' + this.toString();
+    });
+});
+
+
 window.setTimeout(() => {
-    Attv.register('data-key-here', { isAutoLoad: true, attributeName: 'data-custom' }, function (att) {
+    Attv.register('data-delay-register', { isAutoLoad: true, attributeName: 'data-register' }, function (att) {
 
         att.map('default', function (value, element) {
-            element.innerHTML = 'This is a lazy load from ' + this.toString();
+            element.innerHTML = 'This is a delay register from ' + this.toString();
         });
     });
 
