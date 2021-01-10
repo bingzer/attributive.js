@@ -703,7 +703,7 @@ namespace Attv {
 
                 if (Attv.isObject(v)) {
                     let vObj = v as ValidatingObj;
-                    validatorFn = builtIns[vObj.name] as ValidatingFn;
+                    validatorFn = builtIns[vObj.name || Object.keys(vObj)[0]] as ValidatingFn;  // no workies
                     validatorOptions = vObj.options;
                 } else {
                     validatorFn = v as ValidatingFn;
