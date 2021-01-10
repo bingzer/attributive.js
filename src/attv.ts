@@ -633,9 +633,10 @@ namespace Attv {
         export type ValidatingFn = (value: AttributeValue, element: HTMLElement, options?: any) => boolean;
         export type ValidatingType = ValidatingObj | ValidatingFn;
 
-        let builtIns: { [key: string]: ValidatingFn}[] = [
+        let builtIns: { name: string, fn: ValidatingFn}[] = [
             {
-                "RequiringAttributeKeys": (value, element, options) => {
+                name: "RequiringAttributeKeys",
+                fn: (value, element, options) => {
                     let isValidated = true;
             
                     let attributes = options.keys.map(attId => Attv.getAttribute(attId));
@@ -653,7 +654,8 @@ namespace Attv {
                     return isValidated;
                 }
             }, {
-                "RequiringAttributeWithValue": (value, element, options) => {
+                name: "RequiringAttributeWithValue",
+                fn: (value, element, options) => {
                     let isValidated = true;
             
                     // check for other require attributes
@@ -670,7 +672,8 @@ namespace Attv {
                     return isValidated;
                 }
             }, {
-                "RequiringElements": (value, element, options) => {
+                name: "RequiringElements",
+                fn: (value, element, options) => {
                     let isValidated = false;
 
                     // check for element that this attribute belongs to
@@ -703,7 +706,7 @@ namespace Attv {
 
                 if (Attv.isObject(v)) {
                     let vObj = v as ValidatingObj;
-                    validatorFn = builtIns[vObj.name || Object.keys(vObj)[0]] as ValidatingFn;  // no workies
+                    validatorFn = builtIns.filter(v => v.name === vObj.name)[0].fn;  // no workies
                     validatorOptions = vObj.options;
                 } else {
                     validatorFn = v as ValidatingFn;

@@ -93,7 +93,7 @@ Attv.register('data-hello', { isAutoLoad: true, wildcard: 'none' }, function (at
 Attv.register('data-delay', { isAutoLoad: true }, function (att) {
 
     att.map('default', function (value, element) {
-        value.validators = [ { "RequiringAttributeKeys" : [ 'data-settings' ] }];
+        value.validators = [ { name: "RequiringAttributeKeys", options: { keys: [ 'data-settings' ] } }];
 
         var that = this;
         var setting = value.attribute.getSettings(element);
