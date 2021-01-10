@@ -444,7 +444,7 @@ namespace Attv {
         
         public readonly dependencies: Dependency = {};
 
-        public readonly validators: Validators.AttributeValidator[] = [];
+        public validators: Validators.ValidatingType[] = [];
         public attribute: Attribute;
         
         constructor (public value: string = undefined, private loadElementFn?: LoadElementFn) {
@@ -624,6 +624,103 @@ namespace Attv {
             });
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////// Validators //////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+    export namespace Validators {
+        export type ValidatingObj = { name: string, options?: any };
+        export type ValidatingFn = (value: AttributeValue, element: HTMLElement, options?: any) => boolean;
+        export type ValidatingType = ValidatingObj | ValidatingFn;
+
+        let builtIns: { [key: string]: ValidatingFn}[] = [
+            {
+                "RequiringAttributeKeys": (value, element, options) => {
+                    let isValidated = true;
+            
+                    let attributes = options.keys.map(attId => Attv.getAttribute(attId));
+            
+                    // check for other require attributes
+                    for (let i = 0; i < attributes.length; i++) {
+                        let attribute = attributes[i];
+                        if (!attribute?.raw(element)) {
+                            Attv.log('error', `${value} is requiring ${attribute} to be present in DOM`, element)
+                        }
+            
+                        isValidated = isValidated && !!attribute;
+                    }
+            
+                    return isValidated;
+                }
+            }, {
+                "RequiringAttributeWithValue": (value, element, options) => {
+                    let isValidated = true;
+            
+                    // check for other require attributes
+                    for (let i = 0; i < options.requiredAttributes.length; i++) {
+                        let attribute = options.requiredAttributes[i];
+                        let requiredAttribute = element.attvAttr(attribute.name);
+                        if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
+                            Attv.log('error', `${value} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
+                        }
+            
+                        isValidated = isValidated && !!requiredAttribute;
+                    }
+            
+                    return isValidated;
+                }
+            }, {
+                "RequiringElements": (value, element, options) => {
+                    let isValidated = false;
+
+                    // check for element that this attribute belongs to
+                    for (let i = 0; i < options.elementTagNames.length; i++) {
+                        let elementName = options.elementTagNames[i];
+                        if (element.tagName.equalsIgnoreCase(elementName)) {
+                            isValidated = true;
+                            break;
+                        }
+                    }
+
+                    if (!isValidated) {
+                        Attv.log('error', `${value} can only be attached to elements [${options.elementTagNames}]`, element)
+                    }
+
+                    return isValidated;
+                }
+            }
+        ];
+
+        export function validate(value: AttributeValue, element: HTMLElement): boolean {
+            if (!value.validators || value.validators.length === 0)
+                return true;
+
+            let isValidated = true;
+
+            value.validators.forEach(v => {
+                let validatorFn: ValidatingFn;
+                let validatorOptions: any;
+
+                if (Attv.isObject(v)) {
+                    let vObj = v as ValidatingObj;
+                    validatorFn = builtIns[vObj.name] as ValidatingFn;
+                    validatorOptions = vObj.options;
+                } else {
+                    validatorFn = v as ValidatingFn;
+                }
+
+                isValidated = isValidated && validatorFn(value, element, validatorOptions);
+            });
+
+            return isValidated;
+        }
+
+        export function registerValidator(name: string, fn: ValidatingFn) {
+            builtIns[name] = fn;
+        }
+        
+    }
+
     
     ////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////// Attv.Dom //////////////////////////////////
@@ -923,12 +1020,7 @@ namespace Attv {
                     }
 
                     // #3. Validate
-                    let isValidated = true;
-                    for (var i = 0; i < attributeValue.validators.length; i++) {
-                        let validator = attributeValue.validators[i];
-                        isValidated = isValidated && validator.validate(attributeValue, element);
-                    }
-
+                    let isValidated = Attv.Validators.validate(attributeValue, element);
                     if (!isValidated) {
                         return;
                     }
@@ -1023,100 +1115,6 @@ namespace Attv.DataSettings {
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////// Validators //////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-
-namespace Attv.Validators {
-
-    export interface AttributeValidator {
-        validate(value: AttributeValue, element: Element): boolean;
-    }
-
-    /**
-     * DOM is required to have an attribute specified by attribute ids
-     */
-    export class RequiredAttribute implements AttributeValidator {
-
-        constructor (private requiredAttributeIds: string[]) {
-            // do nothing
-        }
-    
-        validate(value: AttributeValue, element: HTMLElement): boolean {
-            let isValidated = true;
-
-            let attributes = this.requiredAttributeIds.map(attId => Attv.getAttribute(attId));
-
-            // check for other require attributes
-            for (let i = 0; i < attributes.length; i++) {
-                let attribute = attributes[i];
-                if (!attribute?.raw(element)) {
-                    Attv.log('error', `${value} is requiring ${attribute} to be present in DOM`, element)
-                }
-
-                isValidated = isValidated && !!attribute;
-            }
-
-            return isValidated;
-        }
-    }
-
-    /**
-     * DOM is required to have an attribute of [name]=[value]
-     */
-    export class RequiredAttributeWithValue implements AttributeValidator {
-
-        constructor (private requiredAttributes: { name: string, value: string}[]) {
-            // do nothing
-        }
-    
-        validate(value: AttributeValue, element: HTMLElement): boolean {
-            let isValidated = true;
-
-            // check for other require attributes
-            for (let i = 0; i < this.requiredAttributes.length; i++) {
-                let attribute = this.requiredAttributes[i];
-                let requiredAttribute = element.attvAttr(attribute.name);
-                if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
-                    Attv.log('error', `${value} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
-                }
-
-                isValidated = isValidated && !!requiredAttribute;
-            }
-
-            return isValidated;
-        }
-    }
-
-    /**
-     * Requirement Any element
-     */
-    export class RequiredElement implements AttributeValidator {
-
-        constructor (private elementTagNames: string[]) {
-            // do nothing
-        }
-
-        validate(value: AttributeValue, element: Element): boolean {
-            let isValidated = false;
-
-            // check for element that this attribute belongs to
-            for (let i = 0; i < this.elementTagNames.length; i++) {
-                let elementName = this.elementTagNames[i];
-                if (element.tagName.equalsIgnoreCase(elementName)) {
-                    isValidated = true;
-                    break;
-                }
-            }
-
-            if (!isValidated) {
-                Attv.log('error', `${value} can only be attached to elements [${this.elementTagNames}]`, element)
-            }
-
-            return isValidated;
-        }
-    }
-}
 
 
 
