@@ -639,16 +639,18 @@ namespace Attv {
                 fn: (value, element, options) => {
                     let isValidated = true;
             
-                    let attributes = options.keys.map(attId => Attv.getAttribute(attId));
+                    let attributes: Attribute[] = options.keys.map(key => Attv.getAttribute(key));
             
                     // check for other require attributes
                     for (let i = 0; i < attributes.length; i++) {
                         let attribute = attributes[i];
-                        if (!attribute?.raw(element)) {
+                        let exists = attribute.exists(element);
+
+                        if (!exists) {
                             Attv.log('error', `${value} is requiring ${attribute} to be present in DOM`, element)
                         }
-            
-                        isValidated = isValidated && !!attribute;
+
+                        isValidated = isValidated && exists;
                     }
             
                     return isValidated;
