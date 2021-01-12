@@ -1120,17 +1120,13 @@ namespace Attv.DataSettings {
     }
 }
 
-
-
-
-
 Attv.Registrar.run();
 
-if (typeof exports !== 'undefined') {
-    module.exports = { 
-        Attv,
-        ATTV_DEBUG,
-        ATTV_VERBOSE_LOGGING,
-        ATTV_VERSION
-    };
-}
+// if (typeof exports !== 'undefined') {
+//     module.exports = { 
+//         Attv,
+//         ATTV_DEBUG,
+//         ATTV_VERBOSE_LOGGING,
+//         ATTV_VERSION
+//     };
+// }
