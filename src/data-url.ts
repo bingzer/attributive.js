@@ -51,6 +51,4 @@ namespace Attv {
     } 
 }
 
-Attv.register(() => new Attv.DataUrl(), att => {
-    att.map(() => new Attv.AttributeValue());
-});
+Attv.register(() => new Attv.DataUrl());

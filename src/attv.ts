@@ -90,7 +90,7 @@ HTMLElement.prototype.attvAttr = function (name: string, value?: any): HTMLEleme
     // GETTER: element.attr()
     if (Attv.isUndefined(name)) {
         let atts = {};
-        for (var i = 0; i < element.attributes.length; i++) {
+        for (let i = 0; i < element.attributes.length; i++) {
             let attName = element.attributes[i].name;
             let value = Attv.parseJsonOrElse(element.attributes[i].value);
 
@@ -367,10 +367,10 @@ namespace Attv {
          * @param orDefault (optional) default settings
          */
         getSettings<TAny>(element: HTMLElement): TAny {
-            let dataSetting = Attv.resolveValue<DataSettings.Value>(this, DataSettings.Key, element);
-            let setting = dataSetting.getSettings<TAny>(element);
+            let dataSettings = this.resolve<DataSettings>(DataSettings.Key);
+            let settings = dataSettings.getSettings<TAny>(element);
 
-            return setting;
+            return settings;
         }
 
         /**
@@ -562,13 +562,11 @@ namespace Attv {
         }
     
         function registerBuiltinAttributes() {
-            registerAttribute(DataSettings.Key, { wildcard: '<json>' }, attribute => {
-                attribute.map(() => new DataSettings.Value());
-            });
+            Attv.register(() => new DataSettings());
         }
     
         function registerAllAttributes() {
-            for (var i = 0; i < registrations.length; i++) {
+            for (let i = registrations.length - 1; i >= 0; i--) {
                 let attribute = registrations[i].register();
     
                 if (attributes.indexOf(attribute) < 0) {
@@ -590,17 +588,9 @@ namespace Attv {
             post.push(registerAllAttributes, cleanup, loadElements);
     
             Attv.onDocumentReady(() => {
-                for (var i = 0; i < init.length; i++) {
-                    init[i]();
-                }
-            
-                for (var i = 0; i < pre.length; i++) {
-                    pre[i]();
-                }
-            
-                for (var i = 0; i < post.length; i++) {
-                    post[i]();
-                }
+                init.forEach(run => run());
+                pre.forEach(run => run());
+                post.forEach(run => run());
             
                 init = [];
                 pre = [];
@@ -1135,40 +1125,29 @@ namespace Attv {
         let attribute = this.resolve(attributeKey);
         element.attvAttr(attribute.name, any);
     }
-}
 
-////////////////////////////////////////////////////////////////////////////////////
-///////////////////////// 1st class attributes /////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////// 1st class attributes /////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
 
-namespace Attv.DataSettings {
-    export const Key = 'data-settings';
+    export class DataSettings extends Attv.Attribute {
+        static readonly Key: string = 'data-settings';
 
-    /**
-     * [data-settings]='*|json'
-     */
-    export class Value extends Attv.AttributeValue {
-        
+        constructor() {
+            super(DataSettings.Key);
+        }
+            
         /**
          * Returns the option object (json)
          * @param element the element
          */
         getSettings<TAny>(element: HTMLElement): TAny {
-            let rawValue = this.attribute.raw(element);
-            let settings = parseJsonOrElse<TAny>(rawValue, {});
-    
+            let rawValue = this.raw(element);
+            let settings = Attv.parseJsonOrElse<TAny>(rawValue, {});
+
             return settings;
         }
     }
 }
 
 Attv.Registrar.run();
-
-// if (typeof exports !== 'undefined') {
-//     module.exports = { 
-//         Attv,
-//         ATTV_DEBUG,
-//         ATTV_VERBOSE_LOGGING,
-//         ATTV_VERSION
-//     };
-// }
