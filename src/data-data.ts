@@ -9,7 +9,7 @@ namespace Attv {
         }
         
         getData(element: HTMLElement) {
-            let rawValue = Attv.getAttribute(Key).raw(element);
+            let rawValue = this.raw(element);
             return Attv.parseJsonOrElse<any>(rawValue);
         }
     } 

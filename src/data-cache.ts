@@ -9,7 +9,7 @@ namespace Attv {
         }
         
         useCache(element: HTMLElement) {
-            let value = Attv.getAttribute(Key).raw(element);
+            let value = this.raw(element);
             if (isUndefined(value) || value === null)
                 return true;
     
