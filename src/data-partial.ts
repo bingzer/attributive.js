@@ -7,6 +7,7 @@ namespace Attv {
 
         constructor() {
             super(DataPartial.Key);
+            this.isAutoLoad = true;
         }
 
         renderPartial(element: HTMLElement | string, content?: string): void {
@@ -16,7 +17,7 @@ namespace Attv {
     
             let htmlElement = element as HTMLElement;
     
-            let attribute = Attv.getAttribute(Key);
+            let attribute = Attv.getAttribute(Attv.DataPartial.Key);
             let attributeValue = attribute.getValue(element as HTMLElement);
     
             throw new Error('todo');
@@ -55,10 +56,6 @@ Attv.register(() => new Attv.DataPartial(), att => {
     att.map(() => new Attv.DataPartial.Value());
     att.map(() => new Attv.DataPartial.Value('auto'));
     att.map(() => new Attv.DataPartial.Lazy());
-});
-
-Attv.register(Attv.DataPartial.Key, att => {
     att.map(() => new Attv.DataPartial.Form());
     att.map(() => new Attv.DataPartial.Click());
-    att.map(() => new Attv.DataPartial.Lazy());
 });

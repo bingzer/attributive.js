@@ -329,10 +329,17 @@ namespace Attv {
          * Returns the parsed object from raw()
          * @param element the element
          */
-        object<TAny>(element: HTMLElement): TAny {
+        parseRaw<TAny>(element: HTMLElement): TAny {
             let raw = this.raw(element);
 
-            return Attv.parseJsonOrElse(raw);
+            switch (this.wildcard) {
+                case "<querySelector>":
+                    return document.querySelector(raw) as any;
+                case "<jsExpression>":
+                    return Attv.eval$(raw);
+                default:
+                    return Attv.parseJsonOrElse(raw) as TAny;
+            }
         }
 
         /**
@@ -378,8 +385,8 @@ namespace Attv {
          * @param orDefault (optional) default settings
          */
         getSettings<TAny>(element: HTMLElement): TAny {
-            let dataSettings = this.resolve<DataSettings>(DataSettings.Key);
-            let settings = dataSettings.getSettings<TAny>(element);
+            let dataSettings = this.resolve(DataSettings.Key);
+            let settings = dataSettings.parseRaw<TAny>(element);
 
             return settings;
         }
@@ -582,11 +589,12 @@ namespace Attv {
         }
     
         function registerBuiltinAttributes() {
-            Attv.register(() => new DataSettings());
+            registrations.push(new AttributeRegistration(Attv.DataSettings.Key, { wildcard: "<json>" }));
         }
     
         function registerAllAttributes() {
-            for (let i = registrations.length - 1; i >= 0; i--) {
+            //for (let i = registrations.length - 1; i >= 0; i--) {
+            for (let i = 0; i < registrations.length; i++) {
                 let attribute = registrations[i].register();
     
                 if (attributes.indexOf(attribute) < 0) {
@@ -620,7 +628,7 @@ namespace Attv {
     
         class AttributeRegistration {
     
-            constructor (public attributeKey: StringOrCreateAttributeFn, public options: AttributeRegistrationOptions, public valuesFn?: CreatedAttributeFn) {
+            constructor (public attributeKey: StringOrCreateAttributeFn, public options: AttributeRegistrationOptions = {}, public valuesFn?: CreatedAttributeFn) {
             }
     
             register(): Attribute {
@@ -1150,23 +1158,8 @@ namespace Attv {
     ///////////////////////// 1st class attributes /////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////
 
-    export class DataSettings extends Attv.Attribute {
-        static readonly Key: string = 'data-settings';
-
-        constructor() {
-            super(DataSettings.Key);
-        }
-            
-        /**
-         * Returns the option object (json)
-         * @param element the element
-         */
-        getSettings<TAny>(element: HTMLElement): TAny {
-            let rawValue = this.raw(element);
-            let settings = Attv.parseJsonOrElse<TAny>(rawValue, {});
-
-            return settings;
-        }
+    export namespace DataSettings {
+        export const Key: string = 'data-settings';
     }
 }
 

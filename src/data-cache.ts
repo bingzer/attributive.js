@@ -1,10 +1,10 @@
-///////////////////// DataMethod ///////////////////////////////////
+
 namespace Attv {
     export class DataCache extends Attv.Attribute {
         static readonly Key: string = 'data-cache';
 
         constructor() {
-            super(Attv.DataData.Key);
+            super(Attv.DataCache.Key);
             this.wildcard = "<boolean>";
         }
         
