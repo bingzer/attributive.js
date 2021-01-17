@@ -367,7 +367,7 @@ namespace Attv {
          * @param orDefault (optional) default settings
          */
         getSettings<TAny>(element: HTMLElement): TAny {
-            let dataSetting = Attv.resolveValue<DataSettings.Value>(DataSettings.Key, element);
+            let dataSetting = Attv.resolveValue<DataSettings.Value>(this, DataSettings.Key, element);
             let setting = dataSetting.getSettings<TAny>(element);
 
             return setting;
@@ -419,7 +419,22 @@ namespace Attv {
             attributeValue.dependencies.requires = this.copyDependencies(this.dependency.requires, attributeValue.dependencies.requires);
             attributeValue.dependencies.uses = this.copyDependencies(this.dependency.uses, attributeValue.dependencies.uses);
             
+            if (this.values.indexOf(attributeValue) > 0 || this.values.filter(v => v.value === attributeValue.value).length > 0) {
+                Attv.log('warning', `${attributeValue} has been registered previously`);
+                return;
+            } 
+
             this.values.push(attributeValue);
+
+            Attv.log('debug', attributeValue.toString());
+        }
+
+        resolve<TAttribute extends Attribute>(attributeKey: string): TAttribute {
+            return Attv.resolveAttribute(this, attributeKey);
+        }
+
+        resolveValue<TAttributeValue extends AttributeValue>(attributeKey: string, element: HTMLElement): TAttributeValue {
+            return Attv.resolveAttributeValue(this, attributeKey, element);
         }
 
         private copyDependencies(source: string[], target: string[]) {
@@ -450,7 +465,7 @@ namespace Attv {
         public validators: Validators.ValidatingType[] = [];
         public attribute: Attribute;
         
-        constructor (public value: string = undefined, private loadElementFn?: LoadElementFn) {
+        constructor (public value: string = Attv.configuration.defaultTag, private loadElementFn?: LoadElementFn) {
         }
     
         /**
@@ -556,7 +571,9 @@ namespace Attv {
             for (var i = 0; i < registrations.length; i++) {
                 let attribute = registrations[i].register();
     
-                attributes.push(attribute);
+                if (attributes.indexOf(attribute) < 0) {
+                    attributes.push(attribute);
+                }
             }
         }
     
@@ -597,12 +614,10 @@ namespace Attv {
             }
     
             register(): Attribute {
-                let shouldOverride = false;
+                let shouldOverride = Attv.isUndefined(this.options.override) ? true : this.options.override;
                 let attribute: Attv.Attribute;
 
                 if (Attv.isString(this.attributeKey)) {
-                    this.options.attributeName = this.options.attributeName || this.attributeKey as string;
-
                     // see if there's an existing attribute
                     attribute = Attv.getAttribute(this.attributeKey as string);
         
@@ -610,21 +625,23 @@ namespace Attv {
                         shouldOverride = true;
                         let fn = (attKey) => new Attribute(attKey);
                         attribute = fn(this.attributeKey);
-                        attribute.name = this.options.attributeName;
                     }
                 } else if (Attv.isType(this.attributeKey, 'function')) {
                     attribute = (this.attributeKey as CreateAttributeFn)();
+                }
+
+                // setup attribute from the options
+                if (shouldOverride) {
+                    attribute.name = this.options.attributeName || attribute.name || attribute.key;
+                    attribute.wildcard =  this.options.wildcard || attribute.wildcard;
+                    attribute.isAutoLoad = Attv.isDefined(this.options.isAutoLoad) ? this.options.isAutoLoad : attribute.isAutoLoad;
                 }
     
                 if (this.valuesFn) {
                     this.valuesFn(attribute);
                 }
     
-                if (attribute.values.length > 0) {
-                    attribute.values.forEach(v => {
-                        Attv.log('debug', v.toString());
-                    })
-                } else {
+                if (attribute.values.length == 0) {
                     // wild card
                     Attv.log('debug', `${attribute.toString()}='${attribute.wildcard}'`);
                 }
@@ -638,8 +655,10 @@ namespace Attv {
                 let attOptions = options as AttributeRegistrationOptions;
                 if (Attv.isType(attOptions, 'function')) {
                     valuesFn = attOptions as CreatedAttributeFn;
-                    attOptions = {} as AttributeRegistrationOptions;
                 }
+
+                attOptions = attOptions || {} as AttributeRegistrationOptions;
+                valuesFn = valuesFn || ((att) => new Attv.AttributeValue());
 
                 let registration = new AttributeRegistration(attributeKeyOrFunction, attOptions, valuesFn);
                 
@@ -1066,8 +1085,8 @@ namespace Attv {
         });
     }
 
-    export function getAttribute(attributeKey: string): Attribute {
-        return Attv.attributes.filter(att => att.key == attributeKey)[0];
+    export function getAttribute<TAttribute extends Attribute>(attributeKey: string): TAttribute {
+        return Attv.attributes.filter(att => att.key == attributeKey)[0] as TAttribute;
     }
 
     export function register(attributeKey: StringOrCreateAttributeFn, options? : Attv.Registrar.AttributeRegistrationOptionsOrCreatedAttributeFn, valuesFn?: CreatedAttributeFn ): void {
@@ -1078,20 +1097,20 @@ namespace Attv {
      * Returns the data attribute
      * @param attributeKey id
      */
-    export function resolve(attributeKey: string): Attribute {
-        let attribute = Attv.getAttribute(attributeKey);
+    export function resolveAttribute<TAttribute extends Attribute>(caller: Attribute, attributeKey: string): TAttribute {
+        let attribute = Attv.getAttribute<TAttribute>(attributeKey);
 
-        if (attribute) {
-            let deps = attribute.dependency.requires?.concat(attribute.dependency.uses).concat(attribute.dependency.internals);
+        if (!attribute) {
+            Attv.log('fatal', `Attribute [${attributeKey}] can not be found. Did you register ${attributeKey}?`);
+        }
+
+        if (caller) {
+            let deps = caller.dependency.requires?.concat(caller.dependency.uses).concat(caller.dependency.internals);
             let isMissingDepedencies = Attv.isDefined(deps) && deps.some(dep => dep === attributeKey)
     
             if (isMissingDepedencies) {
-                Attv.log('warning', `${attribute} should be declared as the dependant in ${attribute}. This is for documentation purposes`);
+                Attv.log('warning', `${attribute} should be declared as the dependant in ${caller}. This is for documentation purposes`);
             }
-        }
-
-        if (!attribute) {
-            throw new Error(`Attribute [${attributeKey}] can not be found. Did you register ${attributeKey}?`);
         }
 
         return attribute;
@@ -1101,8 +1120,8 @@ namespace Attv {
      * Returns the data attribute
      * @param attributeKey id
      */
-    export function resolveValue<TValue extends AttributeValue>(attributeKey: string, element: HTMLElement): TValue {
-        let attribute = resolve(attributeKey);
+    export function resolveAttributeValue<TValue extends AttributeValue>(caller: Attribute, attributeKey: string, element: HTMLElement): TValue {
+        let attribute = resolveAttribute(caller, attributeKey);
 
         return attribute.getValue<TValue>(element);
     }

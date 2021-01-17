@@ -1,21 +1,64 @@
 /// <reference path="attv.ts" />
 
-namespace Attv.DataPartial {
-    export const Key: string = "data-partial";
+namespace Attv {
+    export class DataPartial extends Attv.Attribute {
+        
+        static readonly Key: string = 'data-partial';
 
-    export class Value extends Attv.AttributeValue {
-    }
-
-    export function enderPartial(element: HTMLElement | string, content?: string): void {
-        if (Attv.isString(element)) {
-            element = document.querySelector(element as string) as HTMLElement;
+        constructor() {
+            super(DataPartial.Key);
         }
 
-        let htmlElement = element as HTMLElement;
+        renderPartial(element: HTMLElement | string, content?: string): void {
+            if (Attv.isString(element)) {
+                element = document.querySelector(element as string) as HTMLElement;
+            }
+    
+            let htmlElement = element as HTMLElement;
+    
+            let attribute = Attv.getAttribute(Key);
+            let attributeValue = attribute.getValue(element as HTMLElement);
+    
+            throw new Error('todo');
+        }
+    }
 
-        let attribute = Attv.getAttribute(Key);
-        let attributeValue = attribute.getValue(element as HTMLElement);
+    export namespace DataPartial {
 
-        throw new Error('todo');
+        export class Value extends Attv.AttributeValue {
+            constructor(value?: string) {
+                super(value);
+            }
+        }
+    
+        export class Lazy extends Attv.AttributeValue {
+            constructor() {
+                super('lazy');
+            }
+        }
+    
+        export class Click extends Attv.AttributeValue {
+            constructor() {
+                super('click');
+            }
+        }
+    
+        export class Form extends Attv.AttributeValue {
+            constructor() {
+                super('form');
+            }
+        }
     }
 }
+
+Attv.register(() => new Attv.DataPartial(), att => {
+    att.map(() => new Attv.DataPartial.Value());
+    att.map(() => new Attv.DataPartial.Value('auto'));
+    att.map(() => new Attv.DataPartial.Lazy());
+});
+
+Attv.register(Attv.DataPartial.Key, att => {
+    att.map(() => new Attv.DataPartial.Form());
+    att.map(() => new Attv.DataPartial.Click());
+    att.map(() => new Attv.DataPartial.Lazy());
+});
