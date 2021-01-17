@@ -319,9 +319,20 @@ namespace Attv {
 
         /**
          * Returns raw string 
+         * @param element the element
          */
         raw(element: HTMLElement): string {
-            return element.getAttribute(this.name) || undefined;
+            return element.getAttribute(this.name);
+        }
+
+        /**
+         * Returns the parsed object from raw()
+         * @param element the element
+         */
+        object<TAny>(element: HTMLElement): TAny {
+            let raw = this.raw(element);
+
+            return Attv.parseJsonOrElse(raw);
         }
 
         /**
@@ -377,7 +388,7 @@ namespace Attv {
          * Checks to see if element is loaded
          * @param element element to check
          */
-        isElementLoaded(element: HTMLElement): boolean {
+        isLoaded(element: HTMLElement): boolean {
             let isLoaded = element.attvAttr(this.loadedName());
             return isLoaded === 'true' || !!isLoaded; 
         }
@@ -387,21 +398,14 @@ namespace Attv {
          * @param element the element to mark
          * @param isLoaded is loaded?
          */
-        markElementLoaded(element: HTMLElement, isLoaded: boolean): boolean {
+        markLoaded(element: HTMLElement, isLoaded: boolean): boolean {
             element.attvAttr(this.loadedName(), isLoaded);
 
             return isLoaded;
         }
 
         /**
-         * String representation
-         */
-        toString(): string {
-            return `[${this.name}]`;
-        }
-
-        /**
-         * Sets value
+         * Maps an attribute value
          * @param attributeValue the attribute value
          * @param loadElementFnOrOptions either LoadElementFn or ValueOptions
          */
@@ -415,9 +419,9 @@ namespace Attv {
             }
 
             attributeValue.attribute = this;
-            attributeValue.dependencies.internals = this.copyDependencies(this.dependency.internals, attributeValue.dependencies.internals);
-            attributeValue.dependencies.requires = this.copyDependencies(this.dependency.requires, attributeValue.dependencies.requires);
-            attributeValue.dependencies.uses = this.copyDependencies(this.dependency.uses, attributeValue.dependencies.uses);
+            attributeValue.dependencies.internals = Attribute.copyDependencies(this.dependency.internals, attributeValue.dependencies.internals);
+            attributeValue.dependencies.requires = Attribute.copyDependencies(this.dependency.requires, attributeValue.dependencies.requires);
+            attributeValue.dependencies.uses = Attribute.copyDependencies(this.dependency.uses, attributeValue.dependencies.uses);
             
             if (this.values.indexOf(attributeValue) > 0 || this.values.filter(v => v.value === attributeValue.value).length > 0) {
                 Attv.log('warning', `${attributeValue} has been registered previously`);
@@ -429,15 +433,31 @@ namespace Attv {
             Attv.log('debug', attributeValue.toString());
         }
 
+        /**
+         * Try to resolve an attribute
+         * @param attributeKey the key of the attribute
+         */
         resolve<TAttribute extends Attribute>(attributeKey: string): TAttribute {
             return Attv.resolveAttribute(this, attributeKey);
         }
 
+        /**
+         * Try to resolve an attribute value
+         * @param attributeKey the key of the attribute
+         * @param element the element to inspect with
+         */
         resolveValue<TAttributeValue extends AttributeValue>(attributeKey: string, element: HTMLElement): TAttributeValue {
             return Attv.resolveAttributeValue(this, attributeKey, element);
         }
 
-        private copyDependencies(source: string[], target: string[]) {
+        /**
+         * String representation
+         */
+        toString(): string {
+            return `[${this.name}]`;
+        }
+
+        private static copyDependencies(source: string[], target: string[]) {
             if (source?.length > 0) {
                 if (Attv.isUndefined(target)) {
                     target = [];
@@ -1044,7 +1064,7 @@ namespace Attv {
             elements.forEach((element: HTMLElement, index) => {
                 try {
                     // #1. If it's already loaded return
-                    if (attribute.isElementLoaded(element))
+                    if (attribute.isLoaded(element))
                         return;
 
                     let attributeValue = attribute.getValue(element);
@@ -1065,7 +1085,7 @@ namespace Attv {
                     // #4. Load the stuff!
                     let isLoaded = attributeValue.load(element);
                     if (Attv.isUndefined(isLoaded) || isLoaded) {
-                        attribute.markElementLoaded(element, true);
+                        attribute.markLoaded(element, true);
                     }
                 }
                 catch (error) {

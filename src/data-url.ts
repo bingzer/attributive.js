@@ -32,7 +32,7 @@ namespace Attv {
 
             if (method.equalsIgnoreCase('get')) {
                 // [data-data]
-                let data = this.resolve<DataData>(DataData.Key).getData(element);
+                let data = this.resolve(DataData.Key).object(element);
 
                 url = Attv.Ajax.buildUrl({ url: url, method: method, data: data });
             }
