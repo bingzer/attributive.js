@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var del = require("del");
 var uglify = require('gulp-uglify');
 var concat = require('gulp-concat');
+var rename = require('gulp-rename');
 var pipeline = require('readable-stream').pipeline;
 var sourcemaps = require('gulp-sourcemaps');
 var typescript = require('gulp-typescript');
@@ -45,32 +46,37 @@ function uglifyAttributiveJs(name) {
                 }
             }
         }),
-        gulp.dest(DIST_DIR)
+        rename({ suffix: '.min' }),
+        gulp.dest(BUILD_DIR)
     );
 }
 
-function concatAttributiveJs(name) {
-    const JS_DIR = DIST_DIR;
+function concatAttributiveJs(name, min) {
+    const JS_DIR = BUILD_DIR;
     var suffix = name ? ("." + name + ".") : ".";
-    if (!name) 
-        name = "default";
+
+    name = name || 'default';
+    min = typeof min === 'undefined' ? '.min' : '';
 
     var files = {
         "default": [
-            JS_DIR + '/attv.js'
+            JS_DIR + '/attv' + min + '.js'
         ],
         "core": [
-            JS_DIR + '/attv.js',
-            JS_DIR + '/data-attributes.js',
-            JS_DIR + '/data-template.js',
-            JS_DIR + '/data-partial.js'
+            JS_DIR + '/attv' + min + '.js',
+            JS_DIR + '/data-**' + min + '.js'
+        ],
+        "extras": [
+            JS_DIR + '/attv' + min + '.js',
+            JS_DIR + '/data-**' + min + '.js',
+            JS_DIR + '/extras/data-**' + min + '.js'
         ]
     }
 
     return () => pipeline(
         gulp.src(files[name]),
         sourcemaps.init(),
-        concat('attributive' + suffix + version + '.min.js'),
+        concat('attributive' + suffix + version + min + '.js'),
         sourcemaps.write('.'),
         gulp.dest(DIST_DIR)
     )
@@ -84,7 +90,7 @@ function grabDts() {
     );
 }
 
-const build = gulp.series(distClean, tsClean, tsc, uglifyAttributiveJs, concatAttributiveJs(), grabDts);
+const build = gulp.series(distClean, tsClean, tsc, uglifyAttributiveJs, concatAttributiveJs(), concatAttributiveJs(undefined, false), concatAttributiveJs('core'), concatAttributiveJs('core', false), concatAttributiveJs('extras'), concatAttributiveJs('extras', false), grabDts);
 const watch = gulp.series(build, watchTs);
 
 exports.default = build;

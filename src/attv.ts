@@ -1,3 +1,24 @@
+////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////// tsc --noEmitHelpers ////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b)
+        if (b.hasOwnProperty(p))
+            d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////// Constants ///////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
 const ATTV_DEBUG: boolean = true;
 const ATTV_VERBOSE_LOGGING: boolean = true;
 const ATTV_VERSION: string = '0.0.1';
@@ -322,7 +343,7 @@ namespace Attv {
          * @param element the element
          */
         raw(element: HTMLElement): string {
-            return element.getAttribute(this.name);
+            return element?.getAttribute(this.name);
         }
 
         /**
@@ -333,8 +354,12 @@ namespace Attv {
             let raw = this.raw(element);
 
             switch (this.wildcard) {
-                case "<querySelector>":
+                case "<querySelector>": {
+                    if (raw === 'this') {
+                        return element as any;
+                    }
                     return document.querySelector(raw) as any;
+                }
                 case "<jsExpression>":
                     return Attv.eval$(raw);
                 default:
@@ -352,11 +377,9 @@ namespace Attv {
             // #1. Find an attribute value with the exact match
             let attributeValue = this.values.filter(val => val.value?.equalsIgnoreCase(value))[0] as TValue;
 
-            if (this.allowsWildcard()) {
+            if (this.allowsWildcard() && !attributeValue) {
                 // #2. Find the 'default' value if this attribute allows wildcard
-                if (!attributeValue) {
-                    attributeValue = this.values.filter(val => val.value?.equalsIgnoreCase(Attv.configuration.defaultTag))[0] as TValue
-                }
+                attributeValue = this.values.filter(val => val.value?.equalsIgnoreCase(Attv.configuration.defaultTag))[0] as TValue
 
                 // #2. Find the first 'default' value if this attribute allows wildcard
                 if (!attributeValue) {
@@ -489,7 +512,7 @@ namespace Attv {
         
         public readonly dependencies: Dependency = {};
 
-        public validators: Validators.ValidatingType[] = [];
+        public validators: Validators.ValidatingType[];
         public attribute: Attribute;
         
         constructor (public value: string = Attv.configuration.defaultTag, private loadElementFn?: LoadElementFn) {
@@ -693,13 +716,17 @@ namespace Attv {
         export type ValidatingFn = (value: AttributeValue, element: HTMLElement, options?: any) => boolean;
         export type ValidatingType = ValidatingObj | ValidatingFn;
 
+        export const RequiringAttributeKeys = "RequiringAttributeKeys";
+        export const RequiringAttributeWithValue = "RequiringAttributeWithValue";
+        export const RequiringElements = "RequiringElements";
+
         let builtIns: { name: string, fn: ValidatingFn}[] = [
             {
-                name: "RequiringAttributeKeys",
+                name: Validators.RequiringAttributeKeys,
                 fn: (value, element, options) => {
                     let isValidated = true;
             
-                    let attributes: Attribute[] = options.keys.map(key => Attv.getAttribute(key));
+                    let attributes: Attribute[] = options.map(key => Attv.getAttribute(key));
             
                     // check for other require attributes
                     for (let i = 0; i < attributes.length; i++) {
@@ -716,13 +743,13 @@ namespace Attv {
                     return isValidated;
                 }
             }, {
-                name: "RequiringAttributeWithValue",
+                name: Validators.RequiringAttributeWithValue,
                 fn: (value, element, options) => {
                     let isValidated = true;
             
                     // check for other require attributes
-                    for (let i = 0; i < options.requiredAttributes.length; i++) {
-                        let attribute = options.requiredAttributes[i];
+                    for (let i = 0; i < options.length; i++) {
+                        let attribute = options[i];
                         let requiredAttribute = element.attvAttr(attribute.name);
                         if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
                             Attv.log('error', `${value} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
@@ -734,13 +761,13 @@ namespace Attv {
                     return isValidated;
                 }
             }, {
-                name: "RequiringElements",
+                name: Validators.RequiringElements,
                 fn: (value, element, options) => {
                     let isValidated = false;
 
                     // check for element that this attribute belongs to
-                    for (let i = 0; i < options.elementTagNames.length; i++) {
-                        let elementName = options.elementTagNames[i];
+                    for (let i = 0; i < options.length; i++) {
+                        let elementName = options[i];
                         if (element.tagName.equalsIgnoreCase(elementName)) {
                             isValidated = true;
                             break;
