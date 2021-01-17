@@ -8,5 +8,10 @@ describe('Attv constants and global vars', () => {
 
         expect(Attv).toBeDefined();
         expect(Attv.version).toBeDefined();
-    })
+
+    });
+
+    it('Should do nothing (test usage)', () => {
+        Attv.register('register')
+    });
 });

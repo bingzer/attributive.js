@@ -1,13 +1,13 @@
 ///////////////////// DataMethod ///////////////////////////////////
 namespace Attv {
     export class DataMethod extends Attv.Attribute {
-        // static readonly Key: string = 'data-method';
+        static readonly Key: string = 'data-method';
         // static getMethod(element: HTMLElement): Ajax.AjaxMethod {
         //     return Attv.resolve(this.Key).raw(element) as Ajax.AjaxMethod;
         // }
 
-        constructor(key: string) {
-            super(key);
+        constructor() {
+            super(Attv.DataMethod.Key);
         }
 
         raw(element: HTMLElement): string {
@@ -20,9 +20,9 @@ namespace Attv {
 
             return rawValue || 'get';
         }
-    }
+    } 
 }
 
-Attv.register('data-method', { create: (key) => new Attv.DataMethod(key) }, att => {
+Attv.register(() => new Attv.DataMethod(), att => {
     att.map(() => new Attv.AttributeValue('default'));
 });

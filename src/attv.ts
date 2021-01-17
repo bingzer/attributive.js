@@ -218,6 +218,9 @@ namespace Attv {
     export const version = ATTV_VERSION;
 
     export type BooleanOrVoid = boolean | void;
+    export type CreateAttributeFn = (() => Attv.Attribute);
+    export type CreatedAttributeFn = (attribute: Attribute) => void;
+    export type StringOrCreateAttributeFn = string | CreateAttributeFn;
     export type ValueFnOrString = string | ValueFn;
     export type ValueFnOrLoadElementFn = LoadElementFn | ValueFn;
     export type LoadElementFn = (value: Attv.AttributeValue, element: HTMLElement) => BooleanOrVoid;
@@ -504,12 +507,28 @@ namespace Attv {
 
     export namespace Registrar {
 
+        export type AttributeRegistrationOptionsOrCreatedAttributeFn = AttributeRegistrationOptions | CreatedAttributeFn;
+
         export interface AttributeRegistrationOptions {
+            /**
+             * The attribute name
+             */
             attributeName?: string;
+
+            /**
+             * Auto load?
+             */
             isAutoLoad?: boolean;
+
+            /**
+             * Wildcard type
+             */
             wildcard?: Attv.WildcardType;
+
+            /**
+             * Overide existing value
+             */
             override?: boolean;
-            create?: (attributeKey: string) => Attribute;
         }
     
         let registrations: AttributeRegistration[] = [];
@@ -574,26 +593,27 @@ namespace Attv {
     
         class AttributeRegistration {
     
-            constructor (public attributeKey: string, public options: AttributeRegistrationOptions, public valuesFn?: (attribute: Attribute) => void) {
-                options.create = options.create || ((key) => new Attribute(key));
+            constructor (public attributeKey: StringOrCreateAttributeFn, public options: AttributeRegistrationOptions, public valuesFn?: CreatedAttributeFn) {
             }
     
             register(): Attribute {
                 let shouldOverride = false;
-    
-                // see if there's an existing attribute
-                let attribute = Attv.getAttribute(this.attributeKey);
-    
-                if (!attribute) {
-                    shouldOverride = true;
-                    let fn = this.options.create || ((key) => new Attribute(key));
-                    attribute = fn(this.attributeKey);
-                }
-    
-                if (shouldOverride) {
-                    attribute.isAutoLoad = Attv.isDefined(this.options.isAutoLoad) ? this.options.isAutoLoad : false;
-                    attribute.name = this.options.attributeName || this.attributeKey;
-                    attribute.wildcard = this.options.wildcard || '*';
+                let attribute: Attv.Attribute;
+
+                if (Attv.isString(this.attributeKey)) {
+                    this.options.attributeName = this.options.attributeName || this.attributeKey as string;
+
+                    // see if there's an existing attribute
+                    attribute = Attv.getAttribute(this.attributeKey as string);
+        
+                    if (!attribute) {
+                        shouldOverride = true;
+                        let fn = (attKey) => new Attribute(attKey);
+                        attribute = fn(this.attributeKey);
+                        attribute.name = this.options.attributeName;
+                    }
+                } else if (Attv.isType(this.attributeKey, 'function')) {
+                    attribute = (this.attributeKey as CreateAttributeFn)();
                 }
     
                 if (this.valuesFn) {
@@ -613,12 +633,15 @@ namespace Attv {
             }
         }
     
-        export function registerAttribute(attributeKey: string, options? : AttributeRegistrationOptions, valuesFn?: (attribute: Attribute) => void ): void {
+        export function registerAttribute(attributeKeyOrFunction: StringOrCreateAttributeFn, options? : AttributeRegistrationOptionsOrCreatedAttributeFn, valuesFn?: CreatedAttributeFn ): void {
             pre.push(() => {
-                if (!options.attributeName)
-                    options.attributeName = attributeKey;
-                
-                let registration = new AttributeRegistration(attributeKey, options, valuesFn);
+                let attOptions = options as AttributeRegistrationOptions;
+                if (Attv.isType(attOptions, 'function')) {
+                    valuesFn = attOptions as CreatedAttributeFn;
+                    attOptions = {} as AttributeRegistrationOptions;
+                }
+
+                let registration = new AttributeRegistration(attributeKeyOrFunction, attOptions, valuesFn);
                 
                 registrations.push(registration);
             });
@@ -1047,7 +1070,7 @@ namespace Attv {
         return Attv.attributes.filter(att => att.key == attributeKey)[0];
     }
 
-    export function register(attributeKey: string, options? : Attv.Registrar.AttributeRegistrationOptions, valuesFn?: (attribute: Attribute) => void ): void {
+    export function register(attributeKey: StringOrCreateAttributeFn, options? : Attv.Registrar.AttributeRegistrationOptionsOrCreatedAttributeFn, valuesFn?: CreatedAttributeFn ): void {
         Attv.Registrar.registerAttribute(attributeKey, options, valuesFn);
     }
     
