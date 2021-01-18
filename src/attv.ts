@@ -21,7 +21,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 
 const ATTV_DEBUG: boolean = true;
 const ATTV_VERBOSE_LOGGING: boolean = true;
-const ATTV_VERSION: string = '0.0.1';
+const ATTV_VERSION: string = '0.0.15';
 
 ////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////// Element.Prototypes ////////////////////////////////////
