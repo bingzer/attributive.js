@@ -9,6 +9,7 @@ var typescript = require('gulp-typescript');
 var tsProject = typescript.createProject('tsconfig.json');
 var packageJson = require('./package.json');
 var flatten = require('gulp-flatten');
+const { escapeLeadingUnderscores } = require('typescript');
 var version = packageJson.version;
 
 const DIST_DIR = 'dist';
@@ -63,12 +64,12 @@ function concatAttributiveJs(name, uglify) {
         ],
         "core": [
             JS_DIR + '/attv' + min + '.js',
-            JS_DIR + '/data-**' + min + '.js'
+            JS_DIR + '/data-*' + min + '.js'
         ],
         "extras": [
             JS_DIR + '/attv' + min + '.js',
-            JS_DIR + '/data-**' + min + '.js',
-            JS_DIR + '/extras/data-**' + min + '.js'
+            JS_DIR + '/data-*' + min + '.js',
+            JS_DIR + '/extras/data-*' + min + '.js'
         ]
     }
 
@@ -94,13 +95,13 @@ function concatJs(uglify) {
     return gulp.series(
         concatAttributiveJs('default', uglify),
         concatAttributiveJs('core', uglify),
-        concatAttributiveJs('extras', uglify),
+        concatAttributiveJs('extras', uglify)
     );
 }
 
 function watchTs() {
     return gulp.watch('src/**/*.ts', 
-        gulp.series(tsc, concatJs())
+        gulp.series(tsc, concatAttributiveJs('extras'))
     );
 }
 

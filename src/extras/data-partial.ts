@@ -37,6 +37,8 @@ namespace Attv {
             load(element: HTMLElement): boolean {
                 this.render(element);
 
+                console.log('renderPartial() was called');
+
                 return true;
             }
 
