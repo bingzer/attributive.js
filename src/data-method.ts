@@ -5,6 +5,7 @@ namespace Attv {
 
         constructor() {
             super(Attv.DataMethod.Key);
+            this.isAutoLoad = false;
         }
 
         raw(element: HTMLElement): string {

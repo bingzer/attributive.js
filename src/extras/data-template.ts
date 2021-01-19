@@ -7,6 +7,7 @@ namespace Attv {
             super(Attv.DataTemplate.Key);
 
             this.wildcard = "none";
+            this.isAutoLoad = false;
             this.dependency.uses = [ Attv.DataRenderer.Key ];
             this.dependency.internals = [ Attv.DataTemplateHtml.Key ];
         }

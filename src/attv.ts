@@ -581,7 +581,7 @@ namespace Attv {
             attributeName?: string;
 
             /**
-             * Auto load?
+             * Auto load? Default is true
              */
             isAutoLoad?: boolean;
 
@@ -675,7 +675,7 @@ namespace Attv {
                 if (shouldOverride) {
                     attribute.name = this.options.attributeName || attribute.name || attribute.key;
                     attribute.wildcard =  this.options.wildcard || attribute.wildcard;
-                    attribute.isAutoLoad = Attv.isDefined(this.options.isAutoLoad) ? this.options.isAutoLoad : attribute.isAutoLoad;
+                    attribute.isAutoLoad = Attv.isUndefined(this.options.isAutoLoad) ? (Attv.isUndefined(attribute.isAutoLoad) ? true : attribute.isAutoLoad) : this.options.isAutoLoad;
                 }
     
                 if (this.valuesFn) {

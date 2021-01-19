@@ -5,6 +5,7 @@ namespace Attv {
 
         constructor() {
             super(Attv.DataRoute.Key);
+            this.isAutoLoad = false;
         } 
         
         getRoute(element: HTMLElement) {

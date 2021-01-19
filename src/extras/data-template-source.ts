@@ -7,6 +7,7 @@ namespace Attv {
             super(Attv.DataTemplateSource.Key);
 
             this.wildcard = "<querySelector>";
+            this.isAutoLoad = false;
         }
 
         renderTemplate(element: HTMLElement, model: any): string {

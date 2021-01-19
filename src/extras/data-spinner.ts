@@ -7,6 +7,7 @@ namespace Attv {
             super(Attv.DataSpinner.Key);
 
             this.wildcard = "none";
+            this.isAutoLoad = false;
         }
 
         bind(element: HTMLElement, any: any) {

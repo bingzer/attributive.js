@@ -6,6 +6,7 @@ namespace Attv {
         constructor() {
             super(Attv.DataCallback.Key);
             this.wildcard = "<jsExpression>";
+            this.isAutoLoad = false;
         }
 
         callback(element: HTMLElement): any {

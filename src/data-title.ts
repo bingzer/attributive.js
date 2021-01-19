@@ -2,4 +2,4 @@ namespace Attv.DataTitle {
     export const Key: string = "data-title";
 }
 
-Attv.register(Attv.DataTitle.Key);
+Attv.register(Attv.DataTitle.Key, { isAutoLoad: false });

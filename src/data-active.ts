@@ -6,6 +6,7 @@ namespace Attv {
         constructor() {
             super(Attv.DataActive.Key);
             this.wildcard = "<boolean>";
+            this.isAutoLoad = false;
         }
         
         isActive(element: HTMLElement) {

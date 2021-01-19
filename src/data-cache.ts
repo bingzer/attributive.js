@@ -6,6 +6,7 @@ namespace Attv {
         constructor() {
             super(Attv.DataCache.Key);
             this.wildcard = "<boolean>";
+            this.isAutoLoad = false;
         }
         
         useCache(element: HTMLElement) {

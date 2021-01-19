@@ -6,6 +6,7 @@ namespace Attv {
         constructor() {
             super(Attv.DataBind.Key);
             this.wildcard = "<jsExpression>";
+            this.isAutoLoad = false;
         }
 
         bind(element: HTMLElement, any: any) {

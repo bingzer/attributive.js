@@ -6,6 +6,7 @@ namespace Attv {
         constructor() {
             super(Attv.DataInterval.Key);
             this.wildcard = "<number>";
+            this.isAutoLoad = false;
         }
 
         interval(element: HTMLElement, fn: () => void) {

@@ -6,6 +6,7 @@ namespace Attv {
         constructor() {
             super(Attv.DataTarget.Key);
             this.wildcard = "<querySelector>";
+            this.isAutoLoad = false;
         }
 
         getTargetElement(element: HTMLElement): HTMLElement {

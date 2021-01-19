@@ -6,6 +6,7 @@ namespace Attv {
         constructor() {
             super(Attv.DataTimeout.Key);
             this.wildcard = "<number>";
+            this.isAutoLoad = false;
         }
 
         timeout(element: HTMLElement, fn: () => void) {
