@@ -1151,7 +1151,7 @@ namespace Attv {
 
         if (caller) {
             let deps = caller.dependency.requires?.concat(caller.dependency.uses).concat(caller.dependency.internals);
-            let isMissingDepedencies = Attv.isDefined(deps) && deps.some(dep => dep === attributeKey)
+            let isMissingDepedencies = Attv.isDefined(deps) && !deps.some(dep => dep === attributeKey)
     
             if (isMissingDepedencies) {
                 Attv.log('warning', `${attribute} should be declared as the dependant in ${caller}. This is for documentation purposes`);

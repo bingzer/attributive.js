@@ -10,6 +10,14 @@ namespace Attv {
 
             this.isAutoLoad = true;
             this.dependency.requires = [Attv.DataUrl.Key];
+            this.dependency.uses = [
+                Attv.DataCallback.Key, 
+                Attv.DataTemplateSource.Key, 
+                Attv.DataTarget.Key, 
+                Attv.DataMethod.Key, 
+                Attv.DataTimeout.Key, 
+                Attv.DataInterval.Key
+            ];
         }
 
         renderPartial(element: HTMLElement | string, content?: string): void {
@@ -36,8 +44,6 @@ namespace Attv {
             
             load(element: HTMLElement): boolean {
                 this.render(element);
-
-                console.log('renderPartial() was called');
 
                 return true;
             }
