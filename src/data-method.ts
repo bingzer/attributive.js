@@ -9,7 +9,7 @@ namespace Attv {
         }
 
         raw(element: HTMLElement): string {
-            let rawValue = ''; // super.raw(element);
+            let rawValue = super.raw(element);
 
             if (!rawValue && element?.tagName?.equalsIgnoreCase('form')) {
                 // get from method attribute

@@ -8,6 +8,7 @@ namespace Attv {
         constructor() {
             super(DataPartial.Key);
 
+            this.wildcard = "none";
             this.isAutoLoad = true;
             this.dependency.requires = [Attv.DataUrl.Key];
             this.dependency.uses = [

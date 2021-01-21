@@ -372,31 +372,35 @@ namespace Attv {
          * @param element the element
          */
         getValue<TValue extends AttributeValue>(element: HTMLElement): TValue {
+            let hasThisAttribute = element?.hasAttribute(this.name);
             let value = element?.attvAttr(this.name);
+            let allowsWildcard = this.allowsWildcard();
+
+            // has to be in this order:
 
             // #1. Find an attribute value with the exact match
-            let attributeValue = this.values.filter(val => val.value?.equalsIgnoreCase(value))[0] as TValue;
+            let attributeValue = this.values.filter(val => Attv.isDefined(val) && val.value?.equalsIgnoreCase(value))[0] as TValue;
 
-            if (this.allowsWildcard() && !attributeValue) {
-                // #2. Find the 'default' value if this attribute allows wildcard
+            // #2. Find the 'default' value if this attribute
+            if ((allowsWildcard || !hasThisAttribute) && !attributeValue) {
                 attributeValue = this.values.filter(val => val.value?.equalsIgnoreCase(Attv.configuration.defaultTag))[0] as TValue
-
-                // #2. Find the first 'default' value if this attribute allows wildcard
-                if (!attributeValue) {
-                    attributeValue = this.values.filter(val => Attv.isUndefined(val.value))[0] as TValue
-                }
-                
-                // #3. find the first if this attribute allows wildcard
-                if (!attributeValue) {
-                    attributeValue = new AttributeValue() as TValue;
-                    attributeValue.attribute = this;
-                    this.values.push(attributeValue);
-                }
             }
 
-            // #3. generic attribute
-            if (!attributeValue) {
-                Attv.log('fatal', `${this}='${value || ''}' is not valid`, element);
+            // #4. Find the first 'any' value if this attribute allows wildcard
+            if ((allowsWildcard || !hasThisAttribute) && !attributeValue) {
+                attributeValue = this.values.filter(val => Attv.isUndefined(val.value))[0] as TValue
+            }
+
+            // #3. if this attribute does not allow wildcard throws an error
+            if (!allowsWildcard && !attributeValue) {
+                Attv.log('fatal', `${this}='${value || ''}' is not valid.`, element);
+            }
+                
+            // #5. find the first if this attribute allows wildcard
+            if (allowsWildcard && !attributeValue) {
+                attributeValue = new AttributeValue() as TValue;
+                attributeValue.attribute = this;
+                this.values.push(attributeValue);
             }
 
             return attributeValue;
