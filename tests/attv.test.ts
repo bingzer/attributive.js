@@ -13,5 +13,7 @@ describe('Attv constants and global vars', () => {
 
     it('Should do nothing (test usage)', () => {
         Attv.register('register')
+        Attv.register('data-app', (att) => {
+        });
     });
 });

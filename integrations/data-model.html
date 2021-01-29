@@ -1,0 +1,34 @@
+<html>
+<head>
+	<title>[data-model] Test Usages</title>
+</head>
+<body>
+	<div>
+        <h3>
+            [data-model]
+		</h3>
+		
+		<div data-model="employee">
+			<input type="text" data-bind="firstName"/>
+			<input type="text" data-bind="lastName"/>
+			<input type="text" data-bind="data.asset"/>
+		</div>
+
+
+	</div>
+	
+	<script type="text/javascript">
+		var employee = {
+			firstName: "ricky",
+			lastName: "tobing",
+			data: {
+				asset: 'none',
+				key: 'pad'
+			}
+		};
+	</script>
+    
+	<script type="text/javascript" src="/build/attributive.core.js"></script>
+	<script type="text/javascript" src="/build/extras/data-model.js"></script>
+</body>
+</html>

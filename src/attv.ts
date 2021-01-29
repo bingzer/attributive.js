@@ -1090,7 +1090,7 @@ namespace Attv {
         }
     }
 
-    export function loadElements(root?: HTMLElement): void {
+    export function loadElements(root?: HTMLElement, forceReload?: boolean): void {
         if (isUndefined(root)) {
             root = document.querySelector('html');
         }
@@ -1103,7 +1103,7 @@ namespace Attv {
             elements.forEach((element: HTMLElement, index) => {
                 try {
                     // #1. If it's already loaded return
-                    if (attribute.isLoaded(element))
+                    if (!forceReload && attribute.isLoaded(element))
                         return;
 
                     let attributeValue = attribute.getValue(element);
@@ -1134,12 +1134,22 @@ namespace Attv {
         });
     }
 
+    /**
+     * Returns an attribute by its attribute key
+     * @param attributeKey An attribute key
+     */
     export function getAttribute<TAttribute extends Attribute>(attributeKey: string): TAttribute {
         return Attv.attributes.filter(att => att.key == attributeKey)[0] as TAttribute;
     }
 
-    export function register(attributeKey: StringOrCreateAttributeFn, options? : Attv.Registrar.AttributeRegistrationOptionsOrCreatedAttributeFn, valuesFn?: CreatedAttributeFn ): void {
-        Attv.Registrar.registerAttribute(attributeKey, options, valuesFn);
+    /**
+     * Registers an attribute
+     * @param attributeKey An attribute key or a function that returns an attribute
+     * @param options The options or a callback function to setup an attribute
+     * @param callback A callback function to setup an attribute
+     */
+    export function register(attributeKey: StringOrCreateAttributeFn, options? : Attv.Registrar.AttributeRegistrationOptionsOrCreatedAttributeFn, callback?: CreatedAttributeFn ): void {
+        Attv.Registrar.registerAttribute(attributeKey, options, callback);
     }
     
     /**
