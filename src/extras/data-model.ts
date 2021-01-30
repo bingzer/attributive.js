@@ -13,24 +13,35 @@ namespace Attv {
                 Attv.DataBind.Key
             ];
         }
+
+        bindTo(element: HTMLElement, model?: any): BooleanOrVoid {
+            let propertyName = this.raw(element);
+            let propertyValue = Attv.DataModel.getProperty(propertyName, model);
+
+            // TODO: refactor code
+            if (element instanceof HTMLInputElement) {
+                (element as HTMLInputElement).value = propertyValue;
+            } else {
+                element.innerHTML = propertyValue;
+            }
+
+            return true;
+        }
+
+        bindAll(element: HTMLElement, model?: any) {
+            let models = element.querySelectorAll(this.query());
+            models.forEach(elem => {
+                this.bindTo(elem as HTMLElement, model);
+            });
+        }
     }
 
     export namespace DataModel {
         
         export class Value extends Attv.AttributeValue {
             
-            load(element: HTMLElement): boolean {
-                let propertyName = this.attribute.raw(element);
-                let propertyValue = getProperty(propertyName);
-
-                // TODO: refactor code
-                if (element instanceof HTMLInputElement) {
-                    (element as HTMLInputElement).value = getProperty(propertyName)
-                } else {
-                    element.innerHTML = propertyValue;
-                }
-
-                return true;
+            load(element: HTMLElement): BooleanOrVoid {
+                return (this.attribute as DataModel).bindTo(element);
             }
         }
 

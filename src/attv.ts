@@ -500,6 +500,10 @@ namespace Attv {
             return `[${this.name}]`;
         }
 
+        query(): string {
+            return this.toString();
+        }
+
         private static copyDependencies(source: string[], target: string[]) {
             if (source?.length > 0) {
                 if (Attv.isUndefined(target)) {

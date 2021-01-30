@@ -6,22 +6,36 @@ namespace Attv.DataForEach {
 
         constructor() {
             super();
-            this.dependencies.internals = [Attv.DataContent.Key];
+            this.dependencies.internals = [Attv.DataContent.Key, Attv.DataModel.Key];
         }
         
         load(element: HTMLElement): BooleanOrVoid {
             let html = element.attvHtml();
-            let expression = this.parseExpression(element);
 
             Attv.addAttribute(DataContent.Key, element, html);
 
             // remove the content
             element.attvHtml('');
 
+            let expression = this.parseExpression(element);
+            let dataModel = this.attribute.resolve<DataModel>(Attv.DataModel.Key);
+            expression.array.forEach(item => {
+                let context = {};
+                context[expression.name] = item;
+                
+                let template = expression.createTemplate();
+                
+                // datamodel bind all
+                dataModel.bindAll(template, context);
+
+                element.append(template);
+            });
+
+
             return true;
         }
 
-        private parseExpression(element: HTMLElement): { name: string, array: [] } {
+        private parseExpression(element: HTMLElement): { name: string, array: [], createTemplate: () => HTMLElement } {
             let expression = this.attribute.raw(element);
             let split = expression.split('in');
             let varName = split[0].trim();
@@ -29,7 +43,8 @@ namespace Attv.DataForEach {
 
             return {
                 name: varName,
-                array: Attv.DataModel.getProperty(varsName)
+                array: Attv.DataModel.getProperty(varsName) || [],
+                createTemplate: () => Attv.Dom.createHTMLElement(element.tagName, element.attvAttr('data-content'))
             };
         }
     }
