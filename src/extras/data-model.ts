@@ -24,10 +24,14 @@ namespace Attv {
                 
                 DataBind.bindElement(element, element, model, (bindElement, propertyName, propertyValue) => {
                     if (bindElement.tagName.equalsIgnoreCase('input')) {
-                        bindElement.addEventListener('input', (e) => {
-                            let newValue = (e.target as any).value;
-                            Attv.DataBind.setProperty(model, propertyName, newValue);
-                        });
+                        if (bindElement.getAttribute('data-input-listener-added') !== 'true') {
+                            bindElement.addEventListener('input', (e) => {
+                                let newValue = (e.target as any).value;
+                                Attv.DataBind.setProperty(model, propertyName, newValue);
+                                Attv.loadElements(element.parentElement, true);
+                            });
+                            bindElement.setAttribute('data-input-listener-added', 'true');
+                        }
                     }
                 });
 

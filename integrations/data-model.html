@@ -9,11 +9,23 @@
 		</h3>
 		
 		<div data-model="employee">
-			<input type="text" data-bind="firstName"/>
+			<input type="text" data-bind="firstName" title="your name is {{firstName}}"/>
 			<input type="text" data-bind="lastName"/>
 			<input type="text" data-bind="data.asset"/>
 		</div>
 
+		<h3 data-model="employee">
+			<span data-bind="firstName"></span>
+			<span data-bind="lastName"></span>
+		</h3>
+
+		<div>
+			<input type="text" data-model="employee.firstName" data-atts="{title: 'your first name is ' + firstName }"/>
+			<span data-model="employee.lastName"></span>
+		</div>
+
+		<div data-foreach="employees" data-model="employee" data-model-index="employeeIndex">
+		</div>
 
 	</div>
 	

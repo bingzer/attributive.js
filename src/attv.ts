@@ -178,6 +178,7 @@ interface String {
     equalsIgnoreCase: (other: string) => boolean;
     camelCaseToDash: () => string;
     dashToCamelCase: () => string;
+    underscoreToDash: () => string;
 }
 
 if (typeof String.prototype.contains !== 'function') {
@@ -219,6 +220,14 @@ if (typeof String.prototype.dashToCamelCase !== 'function') {
         return text.toLowerCase().replace(/-(.)/g, function(match, group1) {
             return group1.toUpperCase();
         });
+    }
+}
+
+if (typeof String.prototype.underscoreToDash !== 'function') {
+    String.prototype.underscoreToDash = function (): string {
+        let text: String = this as String;
+
+        return text.replace( /_/g, '-' ).toLowerCase();
     }
 }
 
@@ -373,7 +382,7 @@ namespace Attv {
          */
         getValue<TValue extends AttributeValue>(element: HTMLElement): TValue {
             let hasThisAttribute = element?.hasAttribute(this.name);
-            let value = element?.attvAttr(this.name);
+            let value = element?.getAttribute(this.name);
             let allowsWildcard = this.allowsWildcard();
 
             // has to be in this order:
