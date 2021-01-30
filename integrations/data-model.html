@@ -8,12 +8,13 @@
             [data-model]
 		</h3>
 		
-		<div data-model="employee">
-			<input type="text" data-bind="firstName" title="your name is {{firstName}}"/>
-			<input type="text" data-bind="lastName"/>
-			<input type="text" data-bind="data.asset"/>
+		<div style="border: 1px solid gray; padding: 8px; margin: 8px;">
+			<p>Simple stuffs</p>
+			<input type="text" data-model="employee.firstName" title="your name is {{firstName}}"/>
+			<input type="text" data-model="employee.lastName"/>
+			<input type="text" data-model="employee.data.asset"/>
 		</div>
-
+<!-- 
 		<h3 data-model="employee">
 			<span data-bind="firstName"></span>
 			<span data-bind="lastName"></span>
@@ -25,7 +26,7 @@
 		</div>
 
 		<div data-foreach="employees" data-model="employee" data-model-index="employeeIndex">
-		</div>
+		</div> -->
 
 	</div>
 	

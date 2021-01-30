@@ -1,0 +1,23 @@
+<html>
+<head>
+	<title>[data-foreach] Test Usages</title>
+</head>
+<body>
+	<div>
+        <h3>
+            [data-foreach]
+		</h3>
+        
+        <div>
+            [data-foreach] auto loads and create a global var of emp
+            <div data-foreach="emp in employees">
+                <h3 data-model="emp.firstName"></h3>
+                <h3 data-model="emp.lastName"></h3>
+            </div>
+        </div>
+
+    </div>
+    
+	<script type="text/javascript" src="/build/attributive.core.js"></script>
+</body>
+</html>

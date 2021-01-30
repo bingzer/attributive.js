@@ -1017,6 +1017,10 @@ namespace Attv {
         return window.eval(any);
     }
 
+    export function globalThis$() {
+        return globalThis || window || document;
+    }
+
     export function navigate(url: any, target?: string) {
         if (target) {
             window.open(url, target);
@@ -1200,7 +1204,7 @@ namespace Attv {
      * @param value the value
      */
     export function addAttribute(attributeKey: string, element: HTMLElement, any: string) {
-        let attribute = this.resolve(attributeKey);
+        let attribute = Attv.getAttribute(attributeKey);
         element.attvAttr(attribute.name, any);
     }
 
