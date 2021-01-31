@@ -245,6 +245,22 @@ if (typeof String.prototype.equalsIgnoreCase !== 'function') {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////// IE polyfill ///////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+if (typeof NodeList.prototype.forEach !== 'function') {
+    (NodeList as any).prototype.forEach = Array.prototype.forEach
+}
+
+if (!Element.prototype.matches) {
+    Element.prototype.matches = (<any>Element.prototype).msMatchesSelector || Element.prototype.webkitMatchesSelector;
+}
+
+if (!Element.prototype.append) {
+    Element.prototype.append = Element.prototype.appendChild || Element.prototype.insertBefore;
+}
+
+////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Attv ////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -1074,7 +1090,11 @@ namespace Attv {
     }
 
     export function globalThis$() {
-        return globalThis || window || document;
+        if (typeof globalThis !== 'undefined') {
+            return globalThis;
+        }
+
+        return window || document;
     }
 
     export function navigate(url: any, target?: string) {
