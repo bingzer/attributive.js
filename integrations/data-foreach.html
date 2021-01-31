@@ -11,9 +11,14 @@
         <div>
             [data-foreach] auto loads and create a global var of emp
             <div data-foreach="emp in employees" style="border: 1px solid black; padding: 10px">
-                <h3 data-attrs="{title: 'hello ' + emp.firstName}">
+                <h3 data-attrs="{title: 'hello ' + emp.firstName + ' ' + emp.lastName}">
                     <span data-model="emp.firstName"></span>
                     <span data-model="emp.lastName"></span>
+                    <br/>
+                    Email:
+                    <a data-attrs="{ href: 'mailto: ' + emp.email}">
+                        <span data-model="emp.email"></span>
+                    </a>
                 </h3>
             </div>
         </div>
@@ -30,11 +35,30 @@
             {
                 firstName: "ricky",
                 lastName: "tobing",
+                email: 'ricky@example.com',
                 data: {
                     asset: 'none',
                     key: 'pad'
                 }
-            }
+            },
+            {
+                firstName: "no2",
+                lastName: "employee",
+                email: 'employee2@example.com',
+                data: {
+                    asset: 'currency',
+                    key: 'xbox'
+                }
+            },
+            {
+                firstName: "no2",
+                lastName: "employee",
+                email: 'employee3@example.com',
+                data: {
+                    asset: 'keyboard',
+                    key: 'mouse'
+                }
+            },
         ]
     </script>
     

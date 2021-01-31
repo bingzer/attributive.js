@@ -265,12 +265,22 @@ namespace Attv {
      * undefined is always last
      */
     export type PriorityType =  0 | 1 | 2 | 3 | undefined;
-    export type EvalWithContextFn = (any: string) => void;
 
     export interface LoadElementOptions {
+        /**
+         * Force reload
+         */
         forceReload?: boolean;
+
+        /**
+         * Include self when querying against attribute's selector
+         */
         includeSelf?: boolean;
-        evalFn?: EvalWithContextFn;
+        
+        /**
+         * A context/scope object
+         */
+        context?: any;
     }
 
     export interface Dependency {
@@ -381,7 +391,7 @@ namespace Attv {
          * Returns the parsed object from raw()
          * @param element the element
          */
-        parseRaw<TAny>(element: HTMLElement, evalFn: EvalWithContextFn = any => Attv.eval$(any)): TAny {
+        parseRaw<TAny>(element: HTMLElement, context?: any): TAny {
             let raw = this.raw(element);
 
             switch (this.wildcard) {
@@ -392,9 +402,9 @@ namespace Attv {
                     return document.querySelector(raw) as any;
                 }
                 case "<jsExpression>":
-                    return evalFn(raw) as any;
+                    return Attv.eval$(raw, context) as any;
                 default:
-                    return Attv.parseJsonOrElse(raw, undefined, evalFn) as TAny;
+                    return Attv.parseJsonOrElse(raw, undefined, context) as TAny;
             }
         }
 
@@ -573,7 +583,7 @@ namespace Attv {
          */
         load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
             if (this.loadElementFn) {
-                return this.loadElementFn(this, element) || true;
+                return this.loadElementFn(this, element, options) || true;
             }
 
             return true;
@@ -1055,8 +1065,12 @@ namespace Attv {
         return any?.startsWith('(') && any?.endsWith(')');
     }
 
-    export function eval$(any: string) {
-        return window.eval(any);
+    export function eval$(any: string, context?: any) {
+        let evalInContext = (js: string, ctx: any) => {
+            return ((str: string) => eval(str)).call(ctx, ` with(this) { ${js} } `);
+        }
+
+        return evalInContext(any, context || Attv.globalThis$());
     }
 
     export function globalThis$() {
@@ -1075,7 +1089,7 @@ namespace Attv {
         return Attv.Dom.parseDom(any);
     }
 
-    export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any, evalFn: EvalWithContextFn = any => Attv.eval$(any)): TAny {  
+    export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any, context?: any): TAny {  
         // Fixed boolean attribute names
         if (any === 'false' || any === 'true') {
             return (any === 'true') as any;
@@ -1092,7 +1106,7 @@ namespace Attv {
             // json ex: ({ name: 'value' }). so we just 
             if (Attv.isEvaluatable(text)) {
                 //do eval
-                any = evalFn(text);
+                any = Attv.eval$(text, context);
             } else {
                 try {
                     any = JSON.parse(text);
@@ -1146,8 +1160,6 @@ namespace Attv {
     }
 
     export function loadElements(root?: HTMLElement, options: LoadElementOptions = {}): void {
-        options.evalFn = options.evalFn || Attv.eval$;
-
         if (isUndefined(root)) {
             root = document.querySelector('html');
         }
