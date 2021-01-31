@@ -1188,8 +1188,13 @@ namespace Attv {
     export function loadElements(root?: HTMLElement | string, options: LoadElementOptions = {}): void {
         let rootElement: HTMLElement;
 
+        if (Attv.isUndefined(options.includeSelf)) {
+            options.includeSelf = true;
+        }
+
         if (isUndefined(root)) {
             rootElement = document.querySelector('html');
+            options.includeSelf = false;
         } else if (Attv.isString(root)) {
             rootElement = document.querySelector(root as string);
         } else if (root instanceof HTMLElement) {
