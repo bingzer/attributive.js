@@ -102,7 +102,12 @@ HTMLElement.prototype.attvHide = function () {
     element.style.display = 'none'
 }
 
-HTMLElement.prototype.attvAttr = function (name: string, value?: any): HTMLElement | any {
+HTMLElement.prototype.attvAttr = function (name: string | Attv.Attribute, value?: any): HTMLElement | any {
+    if (name instanceof Attv.Attribute) {
+        let att = name as Attv.Attribute;
+        return this.attvAttr(att.name, value);
+    }
+
     name = name?.toString()?.replace('[', '')?.replace(']', '');
 
     let element = this as HTMLElement;
@@ -121,7 +126,7 @@ HTMLElement.prototype.attvAttr = function (name: string, value?: any): HTMLEleme
         return atts;
     }
     // SETTER: element.attr('data-xxx', 'value')
-    if (name === 'data') {
+    else if (name === 'data') {
         if (Attv.isUndefined(value)) {
             // get all data 
             let keys = Object.keys(element.dataset);
@@ -500,7 +505,10 @@ namespace Attv {
             return `[${this.name}]`;
         }
 
-        query(): string {
+        /**
+         * Selector
+         */
+        selector(): string {
             return this.toString();
         }
 

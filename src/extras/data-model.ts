@@ -29,7 +29,7 @@ namespace Attv {
         }
 
         bindAll(element: HTMLElement, model?: any) {
-            let models = element.querySelectorAll(this.query());
+            let models = element.querySelectorAll(this.selector());
             models.forEach(elem => {
                 this.bindTo(elem as HTMLElement, model);
             });
