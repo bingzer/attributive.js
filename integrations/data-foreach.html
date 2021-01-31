@@ -9,8 +9,18 @@
 		</h3>
         
         <div>
+
+            <div id="new-employee" style="margin-top: 32px; margin-bottom: 32px;">
+                <input type="text" data-model="newEmployee.firstName" placeholder="First Name">
+                <input type="text" data-model="newEmployee.lastName" placeholder="Last Name">
+                <input type="email" data-model="newEmployee.email" placeholder="email">
+
+                <button type="button" onclick="addEmployee()">Add new employee</button>
+            </div>
+
+
             [data-foreach] auto loads and create a global var of emp
-            <div data-foreach="emp in employees" style="border: 1px solid black; padding: 10px">
+            <div id="employee-list" data-foreach="emp in employees" style="border: 1px solid black; padding: 10px">
                 <h3 data-attrs="{title: 'hello ' + emp.firstName + ' ' + emp.lastName}">
                     <span data-model="emp.firstName"></span>
                     <span data-model="emp.lastName"></span>
@@ -30,7 +40,7 @@
     <script type="text/javascript" src="/build/extras/data-foreach.js"></script>
     
 	<script type="text/javascript">
-        
+        var newEmployee = {};
         var employees = [
             {
                 firstName: "ricky",
@@ -60,6 +70,15 @@
                 }
             },
         ]
+
+        function addEmployee() {
+            employees.push(newEmployee);
+
+            newEmployee = {};
+
+            Attv.loadElements('#employee-list', { forceReload: true, includeSelf: true });
+            Attv.loadElements('#new-employee', { forceReload: true, includeSelf: true });
+        }
     </script>
     
 </body>

@@ -260,6 +260,12 @@ if (!Element.prototype.append) {
     Element.prototype.append = Element.prototype.appendChild || Element.prototype.insertBefore;
 }
 
+if (!Element.prototype.remove) {
+    Element.prototype.remove = function () {
+        this.parentNode.removeChild(this);
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////// Attv ////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1179,18 +1185,24 @@ namespace Attv {
         }
     }
 
-    export function loadElements(root?: HTMLElement, options: LoadElementOptions = {}): void {
+    export function loadElements(root?: HTMLElement | string, options: LoadElementOptions = {}): void {
+        let rootElement: HTMLElement;
+
         if (isUndefined(root)) {
-            root = document.querySelector('html');
+            rootElement = document.querySelector('html');
+        } else if (Attv.isString(root)) {
+            rootElement = document.querySelector(root as string);
+        } else if (root instanceof HTMLElement) {
+            rootElement = root as HTMLElement;
         }
 
         Attv.log('debug', 'Loading element', root);
         
         // auto load all attvs that are marked auto load
         attributes.filter(attribute => attribute.isAutoLoad).sort(Attv.Attribute.compareFn).forEach((attribute, index) => {
-            let elements = [].slice.call(root.querySelectorAll(attribute.selector()));
-            if (options.includeSelf && root.matches(attribute.selector())) {
-                elements.push(root);
+            let elements = [].slice.call(rootElement.querySelectorAll(attribute.selector()));
+            if (options.includeSelf && rootElement.matches(attribute.selector())) {
+                elements.push(rootElement);
             }
 
             elements.forEach((element: HTMLElement, index) => {

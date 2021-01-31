@@ -21,7 +21,14 @@ namespace Attv {
 
             // TODO: refactor code
             if (element instanceof HTMLInputElement) {
-                (element as HTMLInputElement).value = propertyValue;
+                let input = element as HTMLInputElement;
+                input.value = propertyValue || '';
+                if (!this.isLoaded(element)) {
+                    input.addEventListener('input', e => {
+                        let value = (e.target as any).value;
+                        Attv.DataModel.setProperty(propertyName, value, model);
+                    });
+                }
             } else {
                 element.innerHTML = propertyValue;
             }
@@ -98,7 +105,13 @@ namespace Attv {
             
             let len = propertyChilds.length;
             for (let j = 0; j < len - 1; j++) {
-                property = property[propertyChilds[j]];
+                let childProperty = propertyChilds[j];
+                property = property[childProperty];
+
+                // throw warning
+                if (Attv.isUndefined(property)) {
+                    Attv.log('warning', `No property ${childProperty}`, property);
+                }
             }
 
             property[propertyChilds[len-1]] = propertyValue;

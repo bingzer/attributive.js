@@ -14,11 +14,21 @@ namespace Attv.DataForEach {
             let html = element.attvHtml();
             let dataContent = this.attribute.resolve(Attv.DataContent.Key);
             let dataId = this.attribute.resolve(Attv.DataId.Key);
+            let dataRef = this.attribute.resolve(Attv.DataRef.Key);
 
-            // add custom attributes
-            element.attvAttr(dataContent, html);
-            element.attvAttr(dataId, Attv.generateElementId('foreach'));
-            element.attvHtml('');
+            if (!this.attribute.isLoaded(element)) {
+                // if it's not leaded
+                // add custom attributes
+                element.attvAttr(dataContent, html);
+                element.attvAttr(dataId, Attv.generateElementId('foreach'));
+                element.attvHtml('');
+            } else {
+                // already been loaded
+                let refId = element.attvAttr(dataId);
+                element.parentElement.querySelectorAll(`[${dataRef.name}='${refId}']`).forEach(child => {
+                    child.remove();
+                });
+            }
 
             let expression = this.parseExpression(element);
             let dataModel = this.attribute.resolve<DataModel>(Attv.DataModel.Key);
@@ -42,10 +52,10 @@ namespace Attv.DataForEach {
 
             // remove all unnecessary contents
             // except for [data-foreach] and [data-content]
-            const selectors = [dataContent.name, dataId.name, this.attribute.name];
+            const attributesToKeep = [dataContent.name, dataId.name, this.attribute.name, 'id'];
             for(let i = 0; i < element.attributes.length; i++) {
                 let att = element.attributes[i];
-                if (!selectors.some(selector => att.name.equalsIgnoreCase(selector))) {
+                if (!attributesToKeep.some(attributeName => att.name.equalsIgnoreCase(attributeName))) {
                     element.removeAttribute(att.name);
                 }
             }
@@ -76,6 +86,7 @@ namespace Attv.DataForEach {
                     }
                     
                     // remove unnecessary attributes
+                    child.removeAttribute('id'); // [id]
                     child.removeAttribute(this.attribute.name); // [data-foreach]
                     child.removeAttribute(this.attribute.loadedName()); // [data-foreach-loadedName]
                     child.removeAttribute(dataContent.name); // [data-foreach]
