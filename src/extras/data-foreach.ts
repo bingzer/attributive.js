@@ -11,16 +11,17 @@ namespace Attv.DataForEach {
         }
         
         load(element: HTMLElement): BooleanOrVoid {
-            let html = element.attvHtml();
+            let html = element.outerHTML;
             let dataContent = this.attribute.resolve(Attv.DataContent.Key);
             let dataId = this.attribute.resolve(Attv.DataId.Key);
             let dataRef = this.attribute.resolve(Attv.DataRef.Key);
+            let id = element.attvAttr('id') || Attv.generateElementId('foreach');
 
             if (!this.attribute.isLoaded(element)) {
                 // if it's not leaded
                 // add custom attributes
                 element.attvAttr(dataContent, html);
-                element.attvAttr(dataId, Attv.generateElementId('foreach'));
+                element.attvAttr(dataId, id);
                 element.attvHtml('');
             } else {
                 // already been loaded
@@ -77,15 +78,11 @@ namespace Attv.DataForEach {
                 name: varName,
                 array: Attv.DataModel.getProperty(varsName) || [],
                 createTemplate: () => {
-                    let child = Attv.Dom.createHTMLElement(element.tagName, element.attvAttr('data-content'))
-                    child.attvAttr(dataRef, element.getAttribute(dataId.name));
+                    let child = Attv.Dom.createHTMLElement(element.tagName, element.attvAttr(dataContent)).firstElementChild as HTMLElement;
 
-                    for(let i = 0; i < element.attributes.length; i++) {
-                        let att = element.attributes[i];
-                        child.setAttribute(att.name, att.value);
-                    }
+                    child.attvAttr(dataRef, element.getAttribute(dataId.name));
                     
-                    // remove unnecessary attributes
+                    // IT IS important to remove unnecessary attributes otherwise we stuck in the for-each loops
                     child.removeAttribute('id'); // [id]
                     child.removeAttribute(this.attribute.name); // [data-foreach]
                     child.removeAttribute(this.attribute.loadedName()); // [data-foreach-loadedName]

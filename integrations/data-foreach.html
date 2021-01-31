@@ -20,7 +20,8 @@
 
 
             [data-foreach] auto loads and create a global var of emp
-            <div id="employee-list" data-foreach="emp in employees" style="border: 1px solid black; padding: 10px">
+            
+            <div id="employee-list" data-foreach="emp in employees" style="border: 1px solid black; padding: 10px" class="b">
                 <h3 data-attrs="{title: 'hello ' + emp.firstName + ' ' + emp.lastName}">
                     <span data-model="emp.firstName"></span>
                     <span data-model="emp.lastName"></span>
@@ -31,6 +32,7 @@
                     </a>
                 </h3>
             </div>
+
         </div>
 
     </div>
