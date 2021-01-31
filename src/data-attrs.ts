@@ -5,14 +5,16 @@ namespace Attv.DataAttrs {
     export class Default extends Attv.AttributeValue {
         
         load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
-            let json = this.attribute.parseRaw<any>(element);
+            let json = this.attribute.parseRaw<any>(element, options.evalFn);
 
-            Object.keys(json).forEach((key: string) => {
-                let attributename = key.underscoreToDash();
-                let attributeValue = json[key];
-                
-                element.attvAttr(attributename, attributeValue);
-            });
+            if (json) {
+                Object.keys(json).forEach((key: string) => {
+                    let attributeName = key.underscoreToDash();
+                    let attributeValue = json[key];
+                    
+                    element.attvAttr(attributeName, attributeValue);
+                });
+            }
 
             return true;
         }

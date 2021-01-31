@@ -265,10 +265,12 @@ namespace Attv {
      * undefined is always last
      */
     export type PriorityType =  0 | 1 | 2 | 3 | undefined;
+    export type EvalWithContextFn = (any: string) => void;
 
     export interface LoadElementOptions {
         forceReload?: boolean;
-        evalFn?: (any: string) => void;
+        includeSelf?: boolean;
+        evalFn?: EvalWithContextFn;
     }
 
     export interface Dependency {
@@ -379,7 +381,7 @@ namespace Attv {
          * Returns the parsed object from raw()
          * @param element the element
          */
-        parseRaw<TAny>(element: HTMLElement): TAny {
+        parseRaw<TAny>(element: HTMLElement, evalFn: EvalWithContextFn = any => Attv.eval$(any)): TAny {
             let raw = this.raw(element);
 
             switch (this.wildcard) {
@@ -390,9 +392,9 @@ namespace Attv {
                     return document.querySelector(raw) as any;
                 }
                 case "<jsExpression>":
-                    return Attv.eval$(raw);
+                    return evalFn(raw) as any;
                 default:
-                    return Attv.parseJsonOrElse(raw) as TAny;
+                    return Attv.parseJsonOrElse(raw, undefined, evalFn) as TAny;
             }
         }
 
@@ -1073,7 +1075,7 @@ namespace Attv {
         return Attv.Dom.parseDom(any);
     }
 
-    export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any): TAny {  
+    export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any, evalFn: EvalWithContextFn = any => Attv.eval$(any)): TAny {  
         // Fixed boolean attribute names
         if (any === 'false' || any === 'true') {
             return (any === 'true') as any;
@@ -1090,7 +1092,7 @@ namespace Attv {
             // json ex: ({ name: 'value' }). so we just 
             if (Attv.isEvaluatable(text)) {
                 //do eval
-                any = Attv.eval$(text);
+                any = evalFn(text);
             } else {
                 try {
                     any = JSON.parse(text);
@@ -1154,7 +1156,11 @@ namespace Attv {
         
         // auto load all attvs that are marked auto load
         attributes.filter(attribute => attribute.isAutoLoad).sort(Attv.Attribute.compareFn).forEach((attribute, index) => {
-            let elements = root.querySelectorAll(`${attribute}`);
+            let elements = Array.from(root.querySelectorAll(attribute.selector()));
+            if (options.includeSelf && root.matches(attribute.selector())) {
+                elements.push(root);
+            }
+
             elements.forEach((element: HTMLElement, index) => {
                 Attv.log('debug', 'Attribute: ' + attribute.name);
 

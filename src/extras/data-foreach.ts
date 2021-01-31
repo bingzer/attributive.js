@@ -30,9 +30,21 @@ namespace Attv.DataForEach {
                 
                 // datamodel bind all
                 dataModel.bindAll(template, context);
+                var emp = { firstName: 'hello'};
 
                 // load the elemen in the template
-                Attv.loadElements(template);
+                Attv.loadElements(template, {
+                    includeSelf: true,
+                    evalFn: (any) => {
+                        function evalInContext(js, context) {
+                            return function(str){
+                                return eval(str);
+                            }.call(context, ' with(this) { ' + js + ' } ');
+                        }
+
+                        return evalInContext(any, emp);
+                    }
+                });
 
                 element.parentElement.append(template);
             });
@@ -77,6 +89,8 @@ namespace Attv.DataForEach {
                     child.removeAttribute(this.attribute.loadedName()); // [data-foreach-loadedName]
                     child.removeAttribute(dataContent.name); // [data-foreach]
                     child.removeAttribute(dataContent.loadedName()); // [data-foreach-loadedName]
+                    child.removeAttribute(dataId.name); // [data-foreach-loadedName]
+                    child.removeAttribute(dataId.loadedName()); // [data-foreach-loadedName]
 
                     return child;
                 }
