@@ -8,6 +8,7 @@ namespace Attv {
             super(DataModel.Key);
 
             this.wildcard = "<jsExpression>";
+            this.priority = 3;
             this.isAutoLoad = true;
             this.dependency.uses = [
                 Attv.DataBind.Key

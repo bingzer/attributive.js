@@ -11,7 +11,7 @@
         <div>
             [data-foreach] auto loads and create a global var of emp
             <div data-foreach="emp in employees" style="border: 1px solid black; padding: 10px">
-                <h3>
+                <h3 data-attrs="{title: 'hello ' + context}">
                     <span data-model="emp.firstName"></span>
                     <span data-model="emp.lastName"></span>
                 </h3>
@@ -45,6 +45,16 @@
                 }
             }
         ]
-	</script>
+    </script>
+    
+    <script type="text/javascript">
+        var context = {
+            a: 1,
+            b: 2
+        };
+
+        
+
+    </script>
 </body>
 </html>

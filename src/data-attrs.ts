@@ -4,7 +4,7 @@ namespace Attv.DataAttrs {
 
     export class Default extends Attv.AttributeValue {
         
-        load(element: HTMLElement): BooleanOrVoid {
+        load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
             let json = this.attribute.parseRaw<any>(element);
 
             Object.keys(json).forEach((key: string) => {

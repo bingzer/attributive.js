@@ -258,8 +258,18 @@ namespace Attv {
     export type StringOrCreateAttributeFn = string | CreateAttributeFn;
     export type ValueFnOrString = string | ValueFn;
     export type ValueFnOrLoadElementFn = LoadElementFn | ValueFn;
-    export type LoadElementFn = (value: Attv.AttributeValue, element: HTMLElement) => BooleanOrVoid;
+    export type LoadElementFn = (value: Attv.AttributeValue, element: HTMLElement, option?: LoadElementOptions) => BooleanOrVoid;
     export type WildcardType = "*" | "<number>" | "<boolean>" | "<querySelector>" | "<jsExpression>" | "<json>" | "none";
+    /**
+     * Priority: [0, 1, 2, 3, undefined] 0 is high.
+     * undefined is always last
+     */
+    export type PriorityType =  0 | 1 | 2 | 3 | undefined;
+
+    export interface LoadElementOptions {
+        forceReload?: boolean;
+        evalFn?: (any: string) => void;
+    }
 
     export interface Dependency {
 
@@ -318,6 +328,11 @@ namespace Attv {
          * Is Auto load? (default is false)
          */
         public isAutoLoad: boolean = false;
+        
+        /**
+         * Priority Type by default is undefined
+         */
+        public priority: PriorityType = undefined;
 
         /**
          * 
@@ -523,6 +538,13 @@ namespace Attv {
 
             return target;
         }
+
+        public static compareFn = (a: Attribute, b: Attribute) => {
+            let priorityA = Attv.isUndefined(a.priority) ? 100 : a.priority;
+            let priorityB = Attv.isUndefined(b.priority) ? 100 : b.priority;
+            
+            return priorityA < priorityB ? -1 : 0;
+        }
     }
 
     
@@ -547,7 +569,7 @@ namespace Attv {
          * Load element
          * @param element the Element
          */
-        load(element: HTMLElement): BooleanOrVoid {
+        load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
             if (this.loadElementFn) {
                 return this.loadElementFn(this, element) || true;
             }
@@ -614,6 +636,11 @@ namespace Attv {
              * Wildcard type
              */
             wildcard?: Attv.WildcardType;
+
+            /**
+             * Priority
+             */
+            priority?: PriorityType;
 
             /**
              * Overide existing value
@@ -700,6 +727,7 @@ namespace Attv {
                 if (shouldOverride) {
                     attribute.name = this.options.attributeName || attribute.name || attribute.key;
                     attribute.wildcard =  this.options.wildcard || attribute.wildcard;
+                    attribute.priority = this.options.priority || attribute.priority;
                     attribute.isAutoLoad = Attv.isUndefined(this.options.isAutoLoad) ? (Attv.isUndefined(attribute.isAutoLoad) ? true : attribute.isAutoLoad) : this.options.isAutoLoad;
                 }
     
@@ -1115,7 +1143,9 @@ namespace Attv {
         }
     }
 
-    export function loadElements(root?: HTMLElement, forceReload?: boolean): void {
+    export function loadElements(root?: HTMLElement, options: LoadElementOptions = {}): void {
+        options.evalFn = options.evalFn || Attv.eval$;
+
         if (isUndefined(root)) {
             root = document.querySelector('html');
         }
@@ -1123,12 +1153,14 @@ namespace Attv {
         Attv.log('debug', 'Loading element', root);
         
         // auto load all attvs that are marked auto load
-        attributes.filter(attribute => attribute.isAutoLoad).forEach((attribute, index) => {
+        attributes.filter(attribute => attribute.isAutoLoad).sort(Attv.Attribute.compareFn).forEach((attribute, index) => {
             let elements = root.querySelectorAll(`${attribute}`);
             elements.forEach((element: HTMLElement, index) => {
+                Attv.log('debug', 'Attribute: ' + attribute.name);
+
                 try {
                     // #1. If it's already loaded return
-                    if (!forceReload && attribute.isLoaded(element))
+                    if (!options.forceReload && attribute.isLoaded(element))
                         return;
 
                     let attributeValue = attribute.getValue(element);
@@ -1147,7 +1179,7 @@ namespace Attv {
                     }
 
                     // #4. Load the stuff!
-                    let isLoaded = attributeValue.load(element);
+                    let isLoaded = attributeValue.load(element, options);
                     if (Attv.isUndefined(isLoaded) || isLoaded) {
                         attribute.markLoaded(element, true);
                     }

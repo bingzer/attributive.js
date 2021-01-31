@@ -31,6 +31,9 @@ namespace Attv.DataForEach {
                 // datamodel bind all
                 dataModel.bindAll(template, context);
 
+                // load the elemen in the template
+                Attv.loadElements(template);
+
                 element.parentElement.append(template);
             });
 
@@ -43,8 +46,7 @@ namespace Attv.DataForEach {
                     element.removeAttribute(att.name);
                 }
             }
-
-
+            
             return true;
         }
 
@@ -83,6 +85,6 @@ namespace Attv.DataForEach {
     }
 }
 
-Attv.register(Attv.DataForEach.Key, { wildcard: "*", isAutoLoad: true }, att => {
+Attv.register(Attv.DataForEach.Key, { wildcard: "*", isAutoLoad: true, priority: 3 }, att => {
     att.map(() => new Attv.DataForEach.Default());
 });
