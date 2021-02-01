@@ -8,8 +8,6 @@ var sourcemaps = require('gulp-sourcemaps');
 var typescript = require('gulp-typescript');
 var tsProject = typescript.createProject('tsconfig.json');
 var packageJson = require('./package.json');
-var flatten = require('gulp-flatten');
-const { escapeLeadingUnderscores } = require('typescript');
 var version = packageJson.version;
 
 const DIST_DIR = 'dist';
@@ -30,7 +28,6 @@ function tsc() {
         .pipe(sourcemaps.write('.', { sourceRoot: './', includeContent: false }))
         .pipe(gulp.dest(BUILD_DIR));
 }
-
 
 function minifyJs() {
     return pipeline(
