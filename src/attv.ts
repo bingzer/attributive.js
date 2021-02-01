@@ -1185,6 +1185,14 @@ namespace Attv {
         }
     }
 
+    export function reloadElements(root?: HTMLElement | string, options: LoadElementOptions = {}) {
+        if (Attv.isUndefined(options.forceReload)) {
+            options.forceReload = true;
+        }
+
+        return Attv.loadElements(root, options)
+    }
+
     export function loadElements(root?: HTMLElement | string, options: LoadElementOptions = {}): void {
         let rootElement: HTMLElement;
 

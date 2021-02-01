@@ -10,9 +10,13 @@
 		
 		<div style="border: 1px solid gray; padding: 8px; margin: 8px;">
 			<p>Simple stuffs</p>
-			<input type="text" data-model="employee.firstName" title="your name is {{firstName}}"/>
-			<input type="text" data-model="employee.lastName"/>
-			<input type="text" data-model="employee.data.asset"/>
+			<input type="text" data-model="employee.firstName" title="your name is {{firstName}}" onkeyup="Attv.reloadElements('#p')"/>
+			<input type="text" data-model="employee.lastName" onkeyup="Attv.reloadElements('#p')"/>
+			<input type="text" data-model="employee.data.asset" onkeyup="Attv.reloadElements('#p')"/>
+			
+			<p id="p" style="margin-top: 10px;">
+				<span data-model="employee.firstName"></span> <span data-model="employee.lastName"></span>
+			</p>
 		</div>
 		
 
@@ -29,7 +33,9 @@
 		};
 	</script>
     
-	<script type="text/javascript" src="/build/attributive.core.js"></script>
-	<script type="text/javascript" src="/build/extras/data-model.js"></script>
+    
+	<script type="text/javascript" src="/build/attv.js"></script>
+	<script type="text/javascript" src="/build/data-attributes.js"></script>
+	<script type="text/javascript" src="/build/data-model/data-model.js"></script>
 </body>
 </html>
