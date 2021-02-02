@@ -1,5 +1,3 @@
-/// <reference path="../attv.ts" />
-
 namespace Attv {
     export class DataModel extends Attv.Attribute {
         static readonly Key: string = 'data-model';

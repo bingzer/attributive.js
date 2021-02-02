@@ -1,3 +1,4 @@
+
 namespace Attv.DataContent {
     export const Key: string = "data-content";
 }

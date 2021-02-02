@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "sourceMap": true,
+    "outDir": "build",
+    "declarationDir": "build",
+    "declaration": true,
+    "noEmitHelpers": true
+  }
+}

@@ -1,3 +1,4 @@
+
 namespace Attv.DataData {
     export const Key: string = "data-data";
 }

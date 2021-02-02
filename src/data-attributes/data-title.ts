@@ -1,3 +1,4 @@
+
 namespace Attv.DataTitle {
     export const Key: string = "data-title";
 }

@@ -6,7 +6,7 @@ var rename = require('gulp-rename');
 var pipeline = require('readable-stream').pipeline;
 var sourcemaps = require('gulp-sourcemaps');
 var typescript = require('gulp-typescript');
-var tsProject = typescript.createProject('tsconfig.json');
+//var tsProject = typescript.createProject('tsconfig.json');
 var packageJson = require('./package.json');
 var version = packageJson.version;
 
@@ -22,9 +22,20 @@ function distClean() {
 }
 
 function tsc() {
-    return gulp.src(['src/**/*.ts'])
+    return gulp.series(
+        makeTsc({ tsconfig: 'src/tsconfig.json', files: ['src/*.ts'] }),
+        makeTsc({ tsconfig: 'src/data-attributes/tsconfig.json', files: ['build/attv.d.ts', 'src/data-attributes/*.ts', '!src/data-attributes/_refs.ts'] }),
+        makeTsc({ tsconfig: 'src/data-models/tsconfig.json', files: ['build/attv.d.ts', 'build/data-attributes.d.ts', 'src/data-models/*.ts', '!src/data-models/_refs.ts'] }),
+        //makeTsc({ tsconfig: 'src/data-models/tsconfig.json', files: ['src/data-models/*.ts'] }),
+    )
+}
+
+function makeTsc(options) {
+    let tsConfigProject = typescript.createProject(options.tsconfig);
+    
+    return () => gulp.src(options.files)
         .pipe(sourcemaps.init())
-        .pipe(tsProject())
+        .pipe(tsConfigProject())
         .pipe(sourcemaps.write('.', { sourceRoot: './', includeContent: false }))
         .pipe(gulp.dest(BUILD_DIR));
 }
@@ -48,9 +59,12 @@ function minifyJs() {
 
 function packageJs() {
     return gulp.series(
-        makePackage('bare', true),
-        makePackage('core', true),
-        makePackage('default', true)
+        // makePackage('bare', true),
+        // makePackage('core', true),
+        // makePackage('default', true),
+        // components
+        makePackage('data-attributes', true),
+        makePackage('data-model', true)
     );
 }
 
@@ -75,6 +89,14 @@ function makePackage(name, uglify) {
             JS_DIR + '/attv' + min + '.js',
             JS_DIR + '/data-attributes' + min + '.js',
             JS_DIR + '/extras/data-*' + min + '.js'
+        ],
+
+        // per component
+        "data-attributes": [
+            JS_DIR + '/data-attributes' + min + '.js'
+        ],
+        "data-model": [
+            JS_DIR + '/data-model/*' + min + '.js'
         ]
     }
 
@@ -129,7 +151,7 @@ function watchTs() {
     );
 }
 
-const build = gulp.series(distClean, tsClean, tsc, makeDataAttributesJs, minifyJs, packageJs(), distribute());
+const build = gulp.series(distClean, tsClean, tsc() /*, makeDataAttributesJs, minifyJs, packageJs(), distribute() */);
 const watch = gulp.series(build, watchTs);
 
 exports.default = build;
