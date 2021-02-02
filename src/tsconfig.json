@@ -6,5 +6,12 @@
     "declarationDir": "build",
     "declaration": true,
     "noEmitHelpers": true
-  }
+  },
+  "include": [
+    "*.ts"
+  ],
+  "exclude": [
+    "build/",
+    "dist/"
+  ]
 }
