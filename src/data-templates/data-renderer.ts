@@ -50,7 +50,7 @@ namespace Attv {
                 let templateElement = Attv.createHTMLElement(templatedContent);
                 let rootElement = Attv.createHTMLElement('');
     
-                Attv.DataBind.bindElement(rootElement, templateElement, model);
+                //Attv.DataBind.bind(rootElement, templateElement, model);
     
                 return rootElement.attvHtml();
             }

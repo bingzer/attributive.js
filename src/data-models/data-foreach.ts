@@ -10,7 +10,7 @@ namespace Attv.DataForEach {
             this.dependencies.uses = [Attv.DataId.Key, Attv.DataRef.Key];
         }
         
-        load(element: HTMLElement): BooleanOrVoid {
+        load(element: HTMLElement, options: LoadElementOptions): BooleanOrVoid {
             let html = element.outerHTML;
             let dataContent = this.attribute.resolve(Attv.DataContent.Key);
             let dataId = this.attribute.resolve(Attv.DataId.Key);
