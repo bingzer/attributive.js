@@ -7,7 +7,7 @@ namespace Attv {
             super(Attv.DataRenderer.Key);
 
             this.wildcard = "none";
-            this.isAutoLoad = false;
+            this.isAutoLoad = false; 
         }
 
         render(content: string, model: any, element?: HTMLElement, attributeValue?: DataRenderer.Default): string {       

@@ -9,10 +9,48 @@ var typescript = require('gulp-typescript');
 //var tsProject = typescript.createProject('tsconfig.json');
 var packageJson = require('./package.json');
 const flatten = require('gulp-flatten');
+const { task } = require('gulp');
 var version = packageJson.version;
 
 const DIST_DIR = 'dist';
 const BUILD_DIR = 'build';
+
+const components = [ { 
+        name: 'attv', 
+        tsconfig: 'src/tsconfig.json',
+        files: [
+            'src/prototypes.ts', 
+            'src/helpers.ts', 
+            'src/attv.ts',  
+        ]
+    }, { 
+        name: 'data-attributes', 
+        tsconfig: 'src/data-attributes/tsconfig.json', 
+        files: [
+            'build/attv.d.ts', 
+            'src/data-attributes/*.ts', 
+            '!src/data-attributes/_refs.ts'
+        ] 
+    }, { 
+        name: 'data-models', 
+        tsconfig: 'src/data-models/tsconfig.json', 
+        files: [
+            'build/attv.d.ts', 
+            'build/data-attributes.d.ts', 
+            'src/data-models/*.ts', 
+            '!src/data-models/_refs.ts'
+        ] 
+    }, { 
+        name: 'data-templates', 
+        tsconfig: 'src/data-templates/tsconfig.json', 
+        files: [
+            'build/attv.d.ts', 
+            'build/data-attributes.d.ts', 
+            'src/data-templates/*.ts', 
+            '!src/data-models/_refs.ts'
+        ]
+    }
+];
 
 function tsClean() {
     return del(BUILD_DIR);
@@ -23,22 +61,19 @@ function distClean() {
 }
 
 function tsc() {
-    return gulp.series(
-        makeTsc({ name: 'attv', tsconfig: 'src/tsconfig.json', files: ['src/*.ts'] }),
-        makeTsc({ name: 'data-attributes', tsconfig: 'src/data-attributes/tsconfig.json', files: ['build/attv.d.ts', 'src/data-attributes/*.ts', '!src/data-attributes/_refs.ts'] }),
-        makeTsc({ name: 'data-models', tsconfig: 'src/data-models/tsconfig.json', files: ['build/attv.d.ts', 'build/data-attributes.d.ts', 'src/data-models/*.ts', '!src/data-models/_refs.ts'] })
-    );
+    let tasks = components.map(comp => makeTsc(comp));
+    return gulp.series(tasks);
 }
 
-function makeTsc(options) {
-    let tsConfigProject = typescript.createProject(options.tsconfig);
+function makeTsc(component) {
+    let tsConfigProject = typescript.createProject(component.tsconfig);
     
-    return () => gulp.src(options.files)
+    return () => gulp.src(component.files)
         .pipe(sourcemaps.init())
         .pipe(tsConfigProject())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(BUILD_DIR))
-        .on('end', () => console.log('\ttsc: ' + options.name + ' [OK]'));
+        .on('end', () => console.log('\t makeTsc: ' + component.name + ' [OK]'));
 }
 
 function minifyJs() {
@@ -71,9 +106,15 @@ function distribute() {
 }
 
 function watchTs() {
-    return gulp.watch('src/**/*.ts', 
-        gulp.series(tsc())
-    );
+    //var tasks = components.map(comp => gulp.watch(comp.files, makeTsc(comp)) );
+
+    components.forEach(comp => {
+        gulp.watch(comp.files, makeTsc(comp))
+    });
+
+    // return gulp.watch('src/**/*.ts', 
+    //     gulp.series(tsc())
+    // );
 }
 
 const build = gulp.series(distClean, tsClean, tsc(), minifyJs, distribute);
