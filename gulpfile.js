@@ -47,7 +47,25 @@ const components = [ {
             'build/attv.d.ts', 
             'build/data-attributes.d.ts', 
             'src/data-templates/*.ts', 
-            '!src/data-models/_refs.ts'
+            '!src/data-templates/_refs.ts'
+        ]
+    }, { 
+        name: 'data-spinners', 
+        tsconfig: 'src/data-spinners/tsconfig.json', 
+        files: [
+            'build/attv.d.ts', 
+            'src/data-spinners/*.ts', 
+            '!src/data-spinners/_refs.ts'
+        ]
+    }, { 
+        name: 'data-partials', 
+        tsconfig: 'src/data-partials/tsconfig.json', 
+        files: [
+            'build/attv.d.ts', 
+            'build/data-attributes.d.ts', 
+            'build/data-templates.d.ts', 
+            'src/data-partials/*.ts', 
+            '!src/data-partials/_refs.ts'
         ]
     }
 ];

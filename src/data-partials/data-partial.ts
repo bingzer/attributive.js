@@ -1,5 +1,3 @@
-/// <reference path="../attv.ts" />
-
 namespace Attv {
     export class DataPartial extends Attv.Attribute {
         
