@@ -24,10 +24,10 @@ function distClean() {
 
 function tsc() {
     return gulp.series(
-        makeTsc({ tsconfig: 'src/tsconfig.json', files: ['src/*.ts'] }),
-        makeTsc({ tsconfig: 'src/data-attributes/tsconfig.json', files: ['build/attv.d.ts', 'src/data-attributes/*.ts', '!src/data-attributes/_refs.ts'] }),
-        makeTsc({ tsconfig: 'src/data-models/tsconfig.json', files: ['build/attv.d.ts', 'build/data-attributes.d.ts', 'src/data-models/*.ts', '!src/data-models/_refs.ts'] }),
-    )
+        makeTsc({ name: 'attv', tsconfig: 'src/tsconfig.json', files: ['src/*.ts'] }),
+        makeTsc({ name: 'data-attributes', tsconfig: 'src/data-attributes/tsconfig.json', files: ['build/attv.d.ts', 'src/data-attributes/*.ts', '!src/data-attributes/_refs.ts'] }),
+        makeTsc({ name: 'data-models', tsconfig: 'src/data-models/tsconfig.json', files: ['build/attv.d.ts', 'build/data-attributes.d.ts', 'src/data-models/*.ts', '!src/data-models/_refs.ts'] })
+    );
 }
 
 function makeTsc(options) {
@@ -37,7 +37,8 @@ function makeTsc(options) {
         .pipe(sourcemaps.init())
         .pipe(tsConfigProject())
         .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(BUILD_DIR));
+        .pipe(gulp.dest(BUILD_DIR))
+        .on('end', () => console.log('\ttsc: ' + options.name + ' [OK]'));
 }
 
 function minifyJs() {
@@ -71,7 +72,7 @@ function distribute() {
 
 function watchTs() {
     return gulp.watch('src/**/*.ts', 
-        gulp.series(tsc)
+        gulp.series(tsc())
     );
 }
 

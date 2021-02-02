@@ -32,21 +32,17 @@ namespace Attv.DataForEach {
             }
 
             let expression = this.parseExpression(element);
-            let dataModel = this.attribute.resolve<DataModel>(Attv.DataModel.Key);
             expression.array.forEach(item => {
                 let context = {};
                 context[expression.name] = item;
                 
                 let template = expression.createTemplate();
-                
-                // datamodel bind all
-                dataModel.bindAll(template, context);
 
                 // load the elemen in the template
                 Attv.loadElements(template, {
                     includeSelf: true,
                     context: context
-                });
+                }); 
 
                 element.parentElement.append(template);
             });

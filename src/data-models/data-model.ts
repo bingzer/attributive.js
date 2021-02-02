@@ -38,6 +38,7 @@ namespace Attv {
             let models = element.querySelectorAll(this.selector());
             models.forEach(elem => {
                 this.bindTo(elem as HTMLElement, model);
+                this.markLoaded(elem as HTMLElement, true);
             });
         }
     }
@@ -46,8 +47,8 @@ namespace Attv {
         
         export class Value extends Attv.AttributeValue {
             
-            load(element: HTMLElement): BooleanOrVoid {
-                return (this.attribute as DataModel).bindTo(element);
+            load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
+                return (this.attribute as DataModel).bindTo(element, options.context);
             }
         }
 
