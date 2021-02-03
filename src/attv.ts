@@ -655,6 +655,7 @@ namespace Attv {
             { tag: 'tr', parentTag: 'tbody' },
             { tag: 'th', parentTag: 'thead' },
             { tag: 'td', parentTag: 'tr' },
+            { tag: 'option', parentTag: 'select'}
         ];
 
         export function getParentTag(elementOrTag: HTMLElement | string) {
@@ -875,6 +876,10 @@ namespace Attv {
         // Fixed boolean attribute names
         if (any === 'false' || any === 'true') {
             return (any === 'true') as any;
+        }
+        // Fixed boolean actual type
+        if (any === false || any === true) {
+            return (any === true) as any;
         }
 
         // if string

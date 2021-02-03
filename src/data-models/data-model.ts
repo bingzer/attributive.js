@@ -24,14 +24,12 @@ namespace Attv {
             // TODO: refactor code
             if (element instanceof HTMLInputElement) {
                 let input = element as HTMLInputElement;
-                input.value = propertyValue || '';
-                if (!this.isLoaded(element)) {
-                    input.addEventListener('input', e => {
-                        let value = (e.target as any).value;
-                        Attv.DataModel.setProperty(propertyName, value, model);
-                    });
-                }
-            } else {
+                this.bindInput(input, propertyName, propertyValue, model);
+            } else if (element instanceof HTMLSelectElement) {
+                let select = element as HTMLSelectElement;
+                this.bindSelect(select, propertyName, propertyValue, model);
+            }
+            else {
                 element.innerHTML = propertyValue;
             }
 
@@ -51,7 +49,55 @@ namespace Attv {
                 this.markLoaded(elem as HTMLElement, true);
             });
         }
-       
+
+        private bindSelect(select: HTMLSelectElement, propertyName: string, propertyValue: any, model?: any): BooleanOrVoid {
+            Attv.toArray(select.options).forEach((opt: HTMLOptionElement) => {
+                // check if proeprtyValue is an array
+                if (opt.value?.equalsIgnoreCase(propertyValue)) {
+                    opt.selected = true;
+                }
+            });
+
+            if (!this.isLoaded(select)) {
+                select.addEventListener("input", e => {
+                    let selectedOptions = (e.target as HTMLSelectElement).selectedOptions;
+                    if (selectedOptions.length === 1) {
+                        Attv.DataModel.setProperty(propertyName, selectedOptions[0].value, model);
+                    }
+                    else {
+                        throw new Error('Not supported yet');
+                    }
+                });
+            }
+        }
+        
+        private bindInput(input: HTMLInputElement, propertyName: string, propertyValue: any, model?: any): BooleanOrVoid {
+            if (input.type?.equalsIgnoreCase('text')) {
+                return this.bindInputText(input, propertyName, propertyValue, model);
+            } else if (input.type?.equalsIgnoreCase('checkbox')) {
+                return this.bindInputCheckbox(input, propertyName, propertyValue, model);
+            }
+        }
+        
+        private bindInputText(input: HTMLInputElement, propertyName: string, propertyValue: any, model?: any): BooleanOrVoid {
+            input.value = propertyValue || '';
+            if (!this.isLoaded(input)) {
+                input.addEventListener('input', e => {
+                    let value = (e.target as HTMLInputElement).value;
+                    Attv.DataModel.setProperty(propertyName, value, model);
+                });
+            }
+        }
+
+        private bindInputCheckbox(input: HTMLInputElement, propertyName: string, propertyValue: any, model?: any): BooleanOrVoid {
+            input.checked = !!(propertyValue || '');
+            if (!this.isLoaded(input)) {
+                input.addEventListener('input', e => {
+                    let value = (e.target as HTMLInputElement).checked;
+                    Attv.DataModel.setProperty(propertyName, value, model);
+                });
+            }
+        }
     }
 
     export namespace DataModel {
