@@ -66,10 +66,11 @@ const components = [ {
     }, { 
         name: 'data-partials', 
         tsconfig: 'src/data-partials/tsconfig.json', 
-        enabled: false,
+        enabled: true,
         files: [
             'build/attv.d.ts', 
             'build/data-attributes.d.ts', 
+            'build/data-models.d.ts', 
             'build/data-templates.d.ts', 
             'src/data-partials/*.ts', 
             '!src/data-partials/_refs.ts'
