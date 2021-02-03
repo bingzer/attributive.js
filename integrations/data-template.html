@@ -5,6 +5,27 @@
 <body>
 	<div>
         <h3>
+            [data-template] using &lt;script&gt; (Simple html template no [data-model])
+		</h3>
+            
+        <script type="text/html" id="simple-templated-script" data-template="script">
+            <div>
+                <h2>This h2 (from scripts)</h2>
+                <h3 style="background-color: orange;">This is h3</h3>
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ac ullamcorper leo. 
+                    Mauris feugiat dolor vitae dui pellentesque eleifend. Nam sem nisl, posuere at orci ut, 
+                    eleifend eleifend lacus. Phasellus in nisl pellentesque tortor ultrices imperdiet ut vel urna. 
+                    Integer vitae lacinia lectus.
+                </p>
+            </div>
+        </script>
+
+        <button type="button" onclick="loadTemplateFrom('#simple-templated-script')">Load Template</button>
+
+    </div>
+	<div>
+        <h3>
             [data-template] using &lt;script&gt;
 		</h3>
             
