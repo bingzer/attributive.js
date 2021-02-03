@@ -5,9 +5,23 @@
 <body>
 	<div>
         <h3>
-            [data-partial]
+            [data-partial]. Referesh every 1 seconds
         </h3>
-        <div data-partial="auto" data-url="samples/datetime.html" data-data="{name: 'timer'}" data-interval="1000">uses [data-partial]</div>
+		<div data-partial="auto" 
+			data-url="data/datetime.html" 
+			data-data="{name: 'timer'}" 
+			data-interval="1000">uses [data-partial]</div>
+
+    </div>
+	<div>
+        <h3>
+            [data-partial]. with templates and model. From <a href="data/employees.json">data/employees.json</a>
+        </h3>
+		<div data-partial="auto" 
+			data-url="data/employees.json" 
+			data-source="#employee-list-templated-script">
+			<p>...</p>
+		</div>
 
     </div>
     
@@ -17,5 +31,19 @@
 	<script type="text/javascript" src="/build/data-models.js"></script>
 	<script type="text/javascript" src="/build/data-templates.js"></script>
 	<script type="text/javascript" src="/build/data-partials.js"></script>
+
+	<script type="text/html" id="employee-list-templated-script" data-template="script">
+		<div data-foreach="emp in this" style="border: 1px solid black" class="b">
+			<h5 data-attrs="{title: 'hello ' + emp.firstName + ' ' + emp.lastName}" style="background-color: lightgray;">
+				<span data-model="emp.firstName"></span>
+				<span data-model="emp.lastName"></span>
+				<br/>
+				Email:
+				<a data-attrs="{ href: 'mailto: ' + emp.email}">
+					<span data-model="emp.email"></span>
+				</a>
+			</h3>
+		</div>
+	</script>
 </body>
 </html>

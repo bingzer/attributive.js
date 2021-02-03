@@ -31,7 +31,7 @@ namespace Attv.DataForEach {
                 });
             }
 
-            let expression = this.parseExpression(element);
+            let expression = this.parseExpression(element, options.context);
             expression.array.forEach(item => {
                 let context = {};
                 context[expression.name] = item;
@@ -60,7 +60,7 @@ namespace Attv.DataForEach {
             return true;
         }
 
-        private parseExpression(element: HTMLElement): { name: string, array: [], createTemplate: () => HTMLElement } {
+        private parseExpression(element: HTMLElement, context: any): { name: string, array: [], createTemplate: () => HTMLElement } {
             let expression = this.attribute.raw(element);
             let split = expression.split('in');
             let varName = split[0].trim();
@@ -72,7 +72,7 @@ namespace Attv.DataForEach {
 
             return {
                 name: varName,
-                array: Attv.DataModel.getProperty(varsName) || [],
+                array: Attv.DataModel.getProperty(varsName, context) || [],
                 createTemplate: () => {
                     let child = Attv.Dom.createHTMLElement(element.tagName, element.attvAttr(dataContent)).firstElementChild as HTMLElement;
 

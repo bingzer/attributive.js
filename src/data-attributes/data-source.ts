@@ -1,15 +1,15 @@
 
 namespace Attv {
-    export class DataTarget extends Attv.Attribute {
-        static readonly Key: string = 'data-target';
+    export class DataSource extends Attv.Attribute {
+        static readonly Key: string = 'data-source';
 
         constructor() {
-            super(Attv.DataTarget.Key);
+            super(Attv.DataSource.Key);
             this.wildcard = "<querySelector>";
             this.isAutoLoad = false;
         }
 
-        getTargetElement(element: HTMLElement): HTMLElement {
+        getSourceElement(element: HTMLElement): HTMLElement | undefined {
             let querySelector = this.raw(element);
             try {
                 return document.querySelector(querySelector);
@@ -20,4 +20,4 @@ namespace Attv {
     } 
 }
 
-Attv.register(() => new Attv.DataTarget());
+Attv.register(() => new Attv.DataSource());

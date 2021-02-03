@@ -854,6 +854,15 @@ namespace Attv {
         }
     }
 
+    export function select(elementOrSelector: HTMLElement | string): HTMLElement {
+        let element = elementOrSelector as HTMLElement;
+        if (Attv.isString(elementOrSelector)) {
+            element = document.querySelector(elementOrSelector as string) as HTMLElement;
+        }
+
+        return element;
+    }
+
     export function toArray<TAny>(any: any): TAny[] {
         return [].slice.call(any) as TAny[];
     }
@@ -871,8 +880,12 @@ namespace Attv {
         // if string
         if (Attv.isString(any)) {
             let text = any as string;
-            // does it look like json?
+            // does it look like json object?
             if (text?.startsWith('{') && text?.endsWith('}')) {
+                text = `(${text})`;
+            }
+            // does it look like json array?
+            if (text?.startsWith('[') && text?.endsWith(']')) {
                 text = `(${text})`;
             }
     

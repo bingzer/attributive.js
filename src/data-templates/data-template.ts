@@ -21,10 +21,7 @@ namespace Attv {
          * @param model the model
          */
         render(elementOrSelector: HTMLElement | string, model: any): HTMLElement {
-            let sourceElement = elementOrSelector as HTMLElement;
-            if (Attv.isString(elementOrSelector)) {
-                sourceElement = document.querySelector(elementOrSelector as string) as HTMLElement;
-            }
+            let sourceElement = Attv.select(elementOrSelector);
 
             let attributeValue: DataTemplate.Default = this.getValue<DataTemplate.Default>(sourceElement);
 
