@@ -32,6 +32,10 @@ namespace Attv {
     }
 
     export namespace DataPartial {
+        
+        /**
+         * Default and Laxy load
+         */
         export class Default extends Attv.AttributeValue {
 
             constructor (attributeValue?: string) {
@@ -106,6 +110,9 @@ namespace Attv {
             }
         }
 
+        /**
+         * Auto load onDocumentReady()
+         */
         export class Auto extends Default {
             constructor () {
                 super('auto');
