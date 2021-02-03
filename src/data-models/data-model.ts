@@ -9,8 +9,16 @@ namespace Attv {
             this.isAutoLoad = true;
         }
 
+        /**
+         * Bind model into this element
+         * @param element the element to bind
+         * @param model the model
+         */
         bindTo(element: HTMLElement, model?: any): BooleanOrVoid {
             let propertyName = this.raw(element);
+            if (!propertyName)
+                return false;
+
             let propertyValue = Attv.DataModel.getProperty(propertyName, model);
 
             // TODO: refactor code
@@ -30,8 +38,14 @@ namespace Attv {
             return true;
         }
 
-        bindAll(element: HTMLElement, model?: any) {
-            let models = element.querySelectorAll(this.selector());
+        /**
+         * Bind all elements under the parent. 
+         * The parent will not get bounded. 
+         * @param parent the root or the parent
+         * @param model the model
+         */
+        bindAll(parent: HTMLElement, model?: any) {
+            let models = parent.querySelectorAll(this.selector());
             models.forEach(elem => {
                 this.bindTo(elem as HTMLElement, model);
                 this.markLoaded(elem as HTMLElement, true);

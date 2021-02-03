@@ -9,24 +9,18 @@ namespace Attv {
             this.wildcard = "none"; 
             this.isAutoLoad = true;
             this.deps.internals = [ Attv.DataModel.Key ];
-            this.priority = Attv.getAttribute(Attv.DataModel.Key).priority + 1;
+            this.priority = Attv.getAttribute(Attv.DataForEach.Key).priority + 1;
         }
 
-        renderTemplate(elementOrSelector: HTMLElement | string, modelOrContent: any): string {
+        render(elementOrSelector: HTMLElement | string, model: any): HTMLElement {
             let sourceElement = elementOrSelector as HTMLElement;
             if (Attv.isString(elementOrSelector)) {
                 sourceElement = document.querySelector(elementOrSelector as string) as HTMLElement;
             }
 
-            // find the 'default'
-            // getValue() doesn't like when sourceElement is null
-            let attributeValue = this.values.filter(val => val.value === Attv.configuration.defaultTag)[0] as DataTemplate.Default;
-            if (sourceElement) {
-                attributeValue = this.getValue<DataTemplate.Default>(sourceElement);
-            }
+            let attributeValue: DataTemplate.Default = this.getValue<DataTemplate.Default>(sourceElement);
 
-            //return attributeValue.render(sourceElement, modelOrContent);
-            return '';
+            return attributeValue.render(sourceElement, model);
         }
     }
 
@@ -39,7 +33,7 @@ namespace Attv {
                 this.deps.internals = [Attv.DataContent.Key];
             }
     
-            loadElement(element: HTMLElement): boolean {
+            load(element: HTMLElement, options: LoadElementOptions): boolean {
                 let templateHtml = element.attvHtml();
                 let dataContent = this.attribute.resolve(Attv.DataContent.Key);
 
@@ -48,20 +42,31 @@ namespace Attv {
                 
                 return true;
             }
-            
+
             getTemplate(element: HTMLElement): string {
                 let dataContent = this.attribute.resolve(Attv.DataContent.Key);
                 let html = dataContent.raw(element);
-    
+
                 return html;
             }
+            
+            getTemplateElement(element: HTMLElement): HTMLElement {
+                let html = this.getTemplate(element);
+
+                let dom = Attv.Dom.parseDom(html);
+                return dom as HTMLElement;
+            }
     
-            // render(element: HTMLElement, modelOrContent: string): string {
-            //     let content = this.getTemplate(element) || modelOrContent;
-            //     let dataRenderer = this.attribute.resolve<DataRenderer>(DataRenderer.Key);
-    
-            //     return dataRenderer.render(content, modelOrContent, element);
-            // }
+            render(element: HTMLElement, model?: any): HTMLElement {
+                let template = this.getTemplateElement(element).cloneNode(true) as HTMLElement;
+                
+                Attv.loadElements(template, {
+                    includeSelf: true,
+                    context: model
+                });
+
+                return template;
+            }
         }
         /**
          * [data-template]='script'
@@ -76,8 +81,7 @@ namespace Attv {
                 ];
             }
     
-            loadElement(element: HTMLElement): boolean {
-                // we don't need to do anything
+            load(element: HTMLElement, options: LoadElementOptions): boolean {
                 return true;
             }
             

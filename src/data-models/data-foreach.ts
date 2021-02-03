@@ -94,6 +94,6 @@ namespace Attv.DataForEach {
     }
 }
 
-Attv.register(Attv.DataForEach.Key, { wildcard: "*", isAutoLoad: true, priority: 3 }, att => {
+Attv.register(Attv.DataForEach.Key, { wildcard: "*", isAutoLoad: true, priority: 1 }, att => {
     att.map(() => new Attv.DataForEach.Default());
 });
