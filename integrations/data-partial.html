@@ -36,8 +36,15 @@
 				data-url="data/employees.json" 
 				data-source="#employee-list-templated-script"
 				data-target="#target-load-from-button">
-				Click to load
+				Click to load (from button)
 			</button>
+			<a data-partial="click" 
+				data-url="data/employees.json" 
+				data-source="#employee-list-templated-script"
+				data-target="#target-load-from-button"
+				href="#">
+				Click to load (from an 'a')
+			</a>
 			<button onclick="document.querySelector('#target-load-from-button').innerHTML = '...'">Clear</button>
 		</div>
 		<div>
