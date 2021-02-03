@@ -7,9 +7,9 @@ namespace Attv {
             super(Attv.DataTemplate.Key);
 
             this.wildcard = "none"; 
-            this.isAutoLoad = false;
-            this.dependency.uses = [ Attv.DataRenderer.Key ];
-            this.dependency.internals = [ Attv.DataTemplateHtml.Key ];
+            this.isAutoLoad = true;
+            this.deps.internals = [ Attv.DataModel.Key ];
+            this.priority = Attv.getAttribute(Attv.DataModel.Key).priority + 1;
         }
 
         renderTemplate(elementOrSelector: HTMLElement | string, modelOrContent: any): string {
@@ -25,7 +25,8 @@ namespace Attv {
                 attributeValue = this.getValue<DataTemplate.Default>(sourceElement);
             }
 
-            return attributeValue.render(sourceElement, modelOrContent);
+            //return attributeValue.render(sourceElement, modelOrContent);
+            return '';
         }
     }
 
@@ -35,32 +36,32 @@ namespace Attv {
             constructor (attributeValue?: string) {
                 super(attributeValue);
     
-                this.dependencies.uses = [Attv.DataRenderer.Key];
-                this.dependencies.internals = [Attv.DataTemplateHtml.Key];
+                this.deps.internals = [Attv.DataContent.Key];
             }
     
             loadElement(element: HTMLElement): boolean {
                 let templateHtml = element.attvHtml();
-    
-                Attv.addAttribute(DataTemplateHtml.Key, element, templateHtml);
-    
+                let dataContent = this.attribute.resolve(Attv.DataContent.Key);
+
+                element.attvAttr(dataContent, templateHtml);
                 element.attvHtml('');
                 
                 return true;
             }
             
             getTemplate(element: HTMLElement): string {
-                let html = this.attribute.resolve(DataTemplateHtml.Key).raw(element);
+                let dataContent = this.attribute.resolve(Attv.DataContent.Key);
+                let html = dataContent.raw(element);
     
                 return html;
             }
     
-            render(element: HTMLElement, modelOrContent: string): string {
-                let content = this.getTemplate(element) || modelOrContent;
-                let dataRenderer = this.attribute.resolve<DataRenderer>(DataRenderer.Key);
+            // render(element: HTMLElement, modelOrContent: string): string {
+            //     let content = this.getTemplate(element) || modelOrContent;
+            //     let dataRenderer = this.attribute.resolve<DataRenderer>(DataRenderer.Key);
     
-                return dataRenderer.render(content, modelOrContent, element);
-            }
+            //     return dataRenderer.render(content, modelOrContent, element);
+            // }
         }
         /**
          * [data-template]='script'

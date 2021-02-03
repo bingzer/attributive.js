@@ -6,8 +6,8 @@ namespace Attv.DataForEach {
 
         constructor() {
             super();
-            this.dependencies.internals = [Attv.DataContent.Key, Attv.DataModel.Key];
-            this.dependencies.uses = [Attv.DataId.Key, Attv.DataRef.Key];
+            this.deps.internals = [Attv.DataContent.Key, Attv.DataModel.Key];
+            this.deps.uses = [Attv.DataId.Key, Attv.DataRef.Key];
         }
         
         load(element: HTMLElement, options: LoadElementOptions): BooleanOrVoid {

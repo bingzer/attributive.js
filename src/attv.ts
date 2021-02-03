@@ -23,11 +23,13 @@ namespace Attv {
     export type ValueFnOrLoadElementFn = LoadElementFn | ValueFn;
     export type LoadElementFn = (value: Attv.AttributeValue, element: HTMLElement, option?: LoadElementOptions) => BooleanOrVoid;
     export type WildcardType = "*" | "<number>" | "<boolean>" | "<querySelector>" | "<jsExpression>" | "<json>" | "none";
+
     /**
-     * Priority: [0, 1, 2, 3, undefined] 0 is high.
-     * undefined is always last
+     * Priority: [0, 1, 2, 3, undefined]. The higher is the more priority.
+     * undefined is always last. Undefined is less of a priority than 0.
+     * By default it's always undefined.
      */
-    export type PriorityType =  0 | 1 | 2 | 3 | undefined;
+    export type PriorityType =  undefined | 0 | 1 | 2 | 3 | number;
 
     export interface LoadElementOptions {
         /**
@@ -85,7 +87,7 @@ namespace Attv {
         /**
          * The dependencies
          */
-        public readonly dependency: Dependency = {};
+        public readonly deps: Dependency = {};
 
         /**
          * This attribute name. Most of the time,
@@ -116,7 +118,7 @@ namespace Attv {
          */
         constructor (public key: string) {
             this.name = key;
-            this.dependency.internals = [DataSettings.Key];
+            this.deps.internals = [DataSettings.Key];
         }
 
         loadedName() {
@@ -257,9 +259,9 @@ namespace Attv {
             }
 
             attributeValue.attribute = this;
-            attributeValue.dependencies.internals = Attribute.copyDependencies(this.dependency.internals, attributeValue.dependencies.internals);
-            attributeValue.dependencies.requires = Attribute.copyDependencies(this.dependency.requires, attributeValue.dependencies.requires);
-            attributeValue.dependencies.uses = Attribute.copyDependencies(this.dependency.uses, attributeValue.dependencies.uses);
+            attributeValue.deps.internals = Attribute.copyDependencies(this.deps.internals, attributeValue.deps.internals);
+            attributeValue.deps.requires = Attribute.copyDependencies(this.deps.requires, attributeValue.deps.requires);
+            attributeValue.deps.uses = Attribute.copyDependencies(this.deps.uses, attributeValue.deps.uses);
             
             if (this.values.indexOf(attributeValue) > 0 || this.values.filter(v => v.value === attributeValue.value).length > 0) {
                 Attv.log('warning', `${attributeValue} has been registered previously`);
@@ -315,10 +317,10 @@ namespace Attv {
         }
 
         public static compareFn = (a: Attribute, b: Attribute) => {
-            let priorityA = Attv.isUndefined(a.priority) ? 100 : a.priority;
-            let priorityB = Attv.isUndefined(b.priority) ? 100 : b.priority;
+            let priorityA = Attv.isUndefined(a.priority) ? -1 : a.priority;
+            let priorityB = Attv.isUndefined(b.priority) ? -1 : b.priority;
             
-            return priorityA < priorityB ? -1 : 0;
+            return priorityA > priorityB ? -1 : 0;
         }
     }
 
@@ -332,7 +334,7 @@ namespace Attv {
      */
     export class AttributeValue {
         
-        public readonly dependencies: Dependency = {};
+        public readonly deps: Dependency = {};
 
         public validators: Validators.ValidatingType[];
         public attribute: Attribute;
@@ -1025,7 +1027,7 @@ namespace Attv {
         }
 
         if (caller) {
-            let deps = caller.dependency.requires?.concat(caller.dependency.uses).concat(caller.dependency.internals);
+            let deps = caller.deps.requires?.concat(caller.deps.uses).concat(caller.deps.internals);
             let isMissingDepedencies = Attv.isDefined(deps) && !deps.some(dep => dep === attributeKey)
     
             if (isMissingDepedencies) {

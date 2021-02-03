@@ -18,6 +18,7 @@ const BUILD_DIR = 'build';
 const components = [ { 
         name: 'attv', 
         tsconfig: 'src/tsconfig.json',
+        enabled: true,
         files: [
             'src/prototypes.ts', 
             'src/helpers.ts', 
@@ -26,6 +27,7 @@ const components = [ {
     }, { 
         name: 'data-attributes', 
         tsconfig: 'src/data-attributes/tsconfig.json', 
+        enabled: true,
         files: [
             'build/attv.d.ts', 
             'src/data-attributes/*.ts', 
@@ -34,6 +36,7 @@ const components = [ {
     }, { 
         name: 'data-models', 
         tsconfig: 'src/data-models/tsconfig.json', 
+        enabled: true,
         files: [
             'build/attv.d.ts', 
             'build/data-attributes.d.ts', 
@@ -43,15 +46,18 @@ const components = [ {
     }, { 
         name: 'data-templates', 
         tsconfig: 'src/data-templates/tsconfig.json', 
+        enabled: true,
         files: [
             'build/attv.d.ts', 
             'build/data-attributes.d.ts', 
+            'build/data-models.d.ts', 
             'src/data-templates/*.ts', 
             '!src/data-templates/_refs.ts'
         ]
     }, { 
         name: 'data-spinners', 
         tsconfig: 'src/data-spinners/tsconfig.json', 
+        enabled: false,
         files: [
             'build/attv.d.ts', 
             'src/data-spinners/*.ts', 
@@ -60,6 +66,7 @@ const components = [ {
     }, { 
         name: 'data-partials', 
         tsconfig: 'src/data-partials/tsconfig.json', 
+        enabled: false,
         files: [
             'build/attv.d.ts', 
             'build/data-attributes.d.ts', 
@@ -79,7 +86,7 @@ function distClean() {
 }
 
 function tsc() {
-    let tasks = components.map(comp => makeTsc(comp));
+    let tasks = components.filter(comp => comp.enabled).map(comp => makeTsc(comp));
     return gulp.series(tasks);
 }
 
@@ -126,7 +133,7 @@ function distribute() {
 function watchTs() {
     //var tasks = components.map(comp => gulp.watch(comp.files, makeTsc(comp)) );
 
-    components.forEach(comp => {
+    components.filter(comp => comp.enabled).forEach(comp => {
         gulp.watch(comp.files, makeTsc(comp))
     });
 
