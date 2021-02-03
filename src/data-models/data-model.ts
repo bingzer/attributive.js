@@ -68,31 +68,27 @@ namespace Attv {
          * @param model the object
          * @param propertyName the property name
          */
-        export function getProperty(propertyName: string, model?: any) {
+        export function getProperty(propertyName: string, model?: any): any {
             if (!model) {
                 model = Attv.globalThis$();
             }
 
             let propertyValue = model;
-
-            if (propertyName === '$' || propertyName === '$root') {
-                return propertyValue;
-            } 
-            else if (propertyName === '$json') {
-                return JSON.stringify(propertyValue);
-            } 
-            else {
-                let propertyChilds = propertyName.split('.');
-                
-                for (var j = 0; j < propertyChilds.length; j++) {
-                    try
-                    {
-                        propertyValue = propertyValue[propertyChilds[j]];
+            let propertyChilds = propertyName.split('.');
+            
+            for (let j = 0; j < propertyChilds.length; j++) {
+                try
+                {
+                    let child = propertyChilds[j];
+                    if (child === 'this') {
+                        propertyValue = propertyValue;
+                    } else {
+                        propertyValue = propertyValue[child];
                     }
-                    catch (e) {
-                        propertyValue = undefined;
-                        break;
-                    }
+                }
+                catch (e) {
+                    propertyValue = undefined;
+                    break;
                 }
             }
     

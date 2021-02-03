@@ -1,5 +1,8 @@
 
 namespace Attv {
+    /**
+     * [data-template] is used to stored an HTML template
+     */
     export class DataTemplate extends Attv.Attribute {
         static readonly Key: string = 'data-template';
 
@@ -12,6 +15,11 @@ namespace Attv {
             this.priority = Attv.getAttribute(Attv.DataForEach.Key).priority + 1;
         }
 
+        /**
+         * Render element
+         * @param elementOrSelector element or a selector
+         * @param model the model
+         */
         render(elementOrSelector: HTMLElement | string, model: any): HTMLElement {
             let sourceElement = elementOrSelector as HTMLElement;
             if (Attv.isString(elementOrSelector)) {

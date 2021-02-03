@@ -23,7 +23,7 @@
             </div>
         </script>
 
-        <button type="button" onclick="loadTemplateFrom('#employee-list-templated-script')">Load Template</button>
+        <button type="button" onclick="loadTemplateFrom('#employee-list-templated-script', employees)">Load Template</button>
 
     </div>
 
@@ -45,9 +45,24 @@
                     </a>
                 </h3>
             </div>
+        </div> 
+        <div type="text/html" id="employee-templated-div" data-template="default">
+            <h2>employee.data = <span data-model="this.data.asset"></span></h2>
+            <h3 data-attrs="{title: 'hello ' + this.firstName + ' ' + this.lastName}" style="background-color: beige;">
+                <span data-model="this.firstName"></span>
+                <span data-model="this.lastName"></span>
+                <br/>
+                Email:
+                <a data-attrs="{ href: 'mailto: ' + this.email}">
+                    <span data-model="this.email"></span>
+                </a>
+            </h3>
         </div>
 
-        <button type="button" onclick="loadTemplateFrom('#employee-list-templated-div')">Load Template</button>
+        <button type="button" onclick="loadTemplateFrom('#employee-list-templated-div', employees)">Load Template</button>
+        <button type="button" onclick="loadTemplateFrom('#employee-templated-div', employees[0])">Load Template (Single Employee) employees[0]</button>
+        <button type="button" onclick="loadTemplateFrom('#employee-templated-div', employees[1])">Load Template (Single Employee) employees[1]</button>
+        <button type="button" onclick="loadTemplateFrom('#employee-templated-div', employees[2])">Load Template (Single Employee) employees[2]</button>
 
     </div>
 
@@ -92,10 +107,10 @@
             },
         ];
 
-        function loadTemplateFrom(templateId) {
+        function loadTemplateFrom(templateId, model) {
             document.querySelector('#template-loader').innerHTML = '';
 
-            let element = Attv.getAttribute('data-template').render(templateId, employees);
+            let element = Attv.getAttribute('data-template').render(templateId, model);
             document.querySelector('#template-loader').appendChild(element);
         }
     </script>
