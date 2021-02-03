@@ -32,9 +32,9 @@ namespace Attv {
     }
 
     export namespace DataPartial {
-        
+
         /**
-         * Default and Laxy load
+         * [data-partial='default|lazy']. Default and Laxy load
          */
         export class Default extends Attv.AttributeValue {
 
@@ -111,7 +111,7 @@ namespace Attv {
         }
 
         /**
-         * Auto load onDocumentReady()
+         * [data-partial='auto']. Auto load onDocumentReady()
          */
         export class Auto extends Default {
             constructor () {
@@ -124,6 +124,30 @@ namespace Attv {
                 return true;
             }
         }
+
+        /**
+         * [data-partial='click']
+         */
+        export class Click extends Default {
+            constructor () {
+                super('click');
+
+                this.deps.requires = [ Attv.DataTarget.Key ];
+                this.validators = [
+                    { name: Attv.Validators.RequiringAttributeKeys, options: [Attv.DataTarget.Key] }
+                ];
+            }
+
+            load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
+                if (!this.attribute.isLoaded(element)) {
+                    element.onclick = (ev: Event) => {
+                        this.render(element);
+                    }
+                }
+
+                return true;
+            }
+        }
     }
 }
 
@@ -132,4 +156,5 @@ Attv.register(() => new Attv.DataPartial(), att => {
     att.map(() => new Attv.DataPartial.Default());
     att.map(() => new Attv.DataPartial.Default('lazy'));
     att.map(() => new Attv.DataPartial.Auto());
+    att.map(() => new Attv.DataPartial.Click());
 });

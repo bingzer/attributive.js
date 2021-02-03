@@ -24,6 +24,30 @@
 		</div>
 
     </div>
+	<div>
+        <h3>
+            [data-partial]. on a button
+		</h3>
+		<div>
+			<p>
+				Data is retrieved from <a href="data/employees.json">data/employees.json</a>
+			</p>
+			<button data-partial="click" 
+				data-url="data/employees.json" 
+				data-source="#employee-list-templated-script"
+				data-target="#target-load-from-button">
+				Click to load
+			</button>
+			<button onclick="document.querySelector('#target-load-from-button').innerHTML = '...'">Clear</button>
+		</div>
+		<div>
+			<p>Will be loaded here</p>
+			<div id="target-load-from-button" style="border: 1px solid black; padding: 8px; width: 350px">
+				...
+			</div>
+		</div>
+
+    </div>
     
     
 	<script type="text/javascript" src="/build/attv.js"></script>
