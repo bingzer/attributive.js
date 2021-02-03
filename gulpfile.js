@@ -76,6 +76,15 @@ const components = [ {
             'src/data-partials/*.ts', 
             '!src/data-partials/_refs.ts'
         ]
+    }, { 
+        name: 'data-spinners', 
+        tsconfig: 'src/data-spinners/tsconfig.json', 
+        enabled: true,
+        files: [
+            'build/attv.d.ts', 
+            'src/data-spinners/*.ts', 
+            '!src/data-spinners/_refs.ts'
+        ]
     }
 ];
 

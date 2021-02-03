@@ -163,7 +163,7 @@ interface String {
 
 if (typeof String.prototype.contains !== 'function') {
     String.prototype.contains = function (text: string): boolean {
-        let obj: String = this as String;
+        let obj: string = this as string;
     
         return obj.indexOf(text) >= 0;
     }
@@ -171,7 +171,7 @@ if (typeof String.prototype.contains !== 'function') {
 
 if (typeof String.prototype.startsWith !== 'function') {
     String.prototype.startsWith = function (text: string): boolean {
-        let obj: String = this as String;
+        let obj: string = this as string;
 
         return obj.indexOf(text) == 0;
     }
@@ -179,7 +179,7 @@ if (typeof String.prototype.startsWith !== 'function') {
 
 if (typeof String.prototype.endsWith !== 'function') {
     String.prototype.endsWith = function (text: string): boolean {
-        let obj: String = this as String;
+        let obj: string = this as string;
 
         return obj.indexOf(text, this.length - text.length) !== -1;
     }
@@ -187,7 +187,11 @@ if (typeof String.prototype.endsWith !== 'function') {
 
 if (typeof String.prototype.camelCaseToDash !== 'function') {
     String.prototype.camelCaseToDash = function (): string {
-        let text: String = this as String;
+        let text: string = this as string;
+
+        if (/^[A-Z]/.test(text as string)) {
+            text = '-' + text;
+        }
 
         return text.replace( /([a-z])([A-Z])/g, '$1-$2' ).toLowerCase();
     }
@@ -195,7 +199,7 @@ if (typeof String.prototype.camelCaseToDash !== 'function') {
 
 if (typeof String.prototype.dashToCamelCase !== 'function') {
     String.prototype.dashToCamelCase = function (): string {
-        let text: String = this as String;
+        let text: string = this as string;
 
         return text.toLowerCase().replace(/-(.)/g, function(match, group1) {
             return group1.toUpperCase();
@@ -205,7 +209,7 @@ if (typeof String.prototype.dashToCamelCase !== 'function') {
 
 if (typeof String.prototype.underscoreToDash !== 'function') {
     String.prototype.underscoreToDash = function (): string {
-        let text: String = this as String;
+        let text: string = this as string;
 
         return text.replace( /_/g, '-' ).toLowerCase();
     }
@@ -213,7 +217,7 @@ if (typeof String.prototype.underscoreToDash !== 'function') {
 
 if (typeof String.prototype.equalsIgnoreCase !== 'function') {
     String.prototype.equalsIgnoreCase = function (other: string): boolean {
-        let text: String = this as String;
+        let text: string = this as string;
 
         return text?.toLowerCase() === other?.toLowerCase();
     }
