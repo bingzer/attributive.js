@@ -55,13 +55,14 @@ const components = [ {
             '!src/data-templates/_refs.ts'
         ]
     }, { 
-        name: 'data-spinners', 
-        tsconfig: 'src/data-spinners/tsconfig.json', 
-        enabled: false,
+        name: 'data-walls', 
+        tsconfig: 'src/data-walls/tsconfig.json', 
+        enabled: true,
         files: [
             'build/attv.d.ts', 
-            'src/data-spinners/*.ts', 
-            '!src/data-spinners/_refs.ts'
+            'build/data-attributes.d.ts', 
+            'src/data-walls/*.ts', 
+            '!src/data-walls/_refs.ts'
         ]
     }, { 
         name: 'data-partials', 
