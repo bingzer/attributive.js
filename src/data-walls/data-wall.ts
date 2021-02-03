@@ -29,7 +29,6 @@ namespace Attv {
                 if (!this.attribute.isLoaded(element)) {
                     let onclick = element.attvAttr('onclick');
                     if (onclick) {
-
                         let dataCallback = this.attribute.resolve<DataCallback>(Attv.DataCallback.Key);
                         element.attvAttr(dataCallback, onclick);
                         element.removeAttribute('onclick');
