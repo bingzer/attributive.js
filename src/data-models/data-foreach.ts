@@ -50,7 +50,7 @@ namespace Attv.DataForEach {
             // remove all unnecessary contents
             // except for [data-foreach] and [data-content]
             const attributesToKeep = [dataContent.name, dataId.name, this.attribute.name, 'id'];
-            let existingAttributes = [].slice.call(element.attributes).map(att => att.name);
+            let existingAttributes = Attv.toArray<{ name: string }>(element.attributes).map(att => att.name);
             existingAttributes.forEach(name => {
                 if (name && !attributesToKeep.some(attributeName => name.equalsIgnoreCase(attributeName))) {
                     element.removeAttribute(name);

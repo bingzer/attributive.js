@@ -854,6 +854,10 @@ namespace Attv {
         }
     }
 
+    export function toArray<TAny>(any: any): TAny[] {
+        return [].slice.call(any) as TAny[];
+    }
+
     export function createHTMLElement(any: string | HTMLElement): HTMLElement {
         return Attv.Dom.parseDom(any);
     }
@@ -956,7 +960,7 @@ namespace Attv {
         
         // auto load all attvs that are marked auto load
         attributes.filter(attribute => attribute.isAutoLoad).sort(Attv.Attribute.compareFn).forEach((attribute, index) => {
-            let elements = [].slice.call(rootElement.querySelectorAll(attribute.selector()));
+            let elements = Attv.toArray(rootElement.querySelectorAll(attribute.selector()));
             if (options.includeSelf && rootElement.matches(attribute.selector())) {
                 elements.push(rootElement);
             }
