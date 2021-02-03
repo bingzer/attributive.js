@@ -49,27 +49,6 @@ namespace Attv {
                 this.markLoaded(elem as HTMLElement, true);
             });
         }
-
-        private bindSelect(select: HTMLSelectElement, propertyName: string, propertyValue: any, model?: any): BooleanOrVoid {
-            Attv.toArray(select.options).forEach((opt: HTMLOptionElement) => {
-                // check if proeprtyValue is an array
-                if (opt.value?.equalsIgnoreCase(propertyValue)) {
-                    opt.selected = true;
-                }
-            });
-
-            if (!this.isLoaded(select)) {
-                select.addEventListener("input", e => {
-                    let selectedOptions = (e.target as HTMLSelectElement).selectedOptions;
-                    if (selectedOptions.length === 1) {
-                        Attv.DataModel.setProperty(propertyName, selectedOptions[0].value, model);
-                    }
-                    else {
-                        throw new Error('Not supported yet');
-                    }
-                });
-            }
-        }
         
         private bindInput(input: HTMLInputElement, propertyName: string, propertyValue: any, model?: any): BooleanOrVoid {
             if (input.type?.equalsIgnoreCase('text')) {
@@ -83,8 +62,14 @@ namespace Attv {
             input.value = propertyValue || '';
             if (!this.isLoaded(input)) {
                 input.addEventListener('input', e => {
+                    if (this.isBroadcastEvent(e)) {
+                        return;
+                    }
+
                     let value = (e.target as HTMLInputElement).value;
                     Attv.DataModel.setProperty(propertyName, value, model);
+                        
+                    this.broadcastChange(input);
                 });
             }
         }
@@ -92,11 +77,55 @@ namespace Attv {
         private bindInputCheckbox(input: HTMLInputElement, propertyName: string, propertyValue: any, model?: any): BooleanOrVoid {
             input.checked = !!(propertyValue || '');
             if (!this.isLoaded(input)) {
-                input.addEventListener('input', e => {
+                input.addEventListener('change', e => {
+                    if (this.isBroadcastEvent(e)) {
+                        return;
+                    }
+
                     let value = (e.target as HTMLInputElement).checked;
                     Attv.DataModel.setProperty(propertyName, value, model);
+                        
+                    this.broadcastChange(input);
                 });
             }
+        }
+
+        private bindSelect(select: HTMLSelectElement, propertyName: string, propertyValue: any, model?: any): BooleanOrVoid {
+            Attv.toArray(select.options).forEach((opt: HTMLOptionElement) => {
+                // check if proeprtyValue is an array
+                if (opt.value?.equalsIgnoreCase(propertyValue)) {
+                    opt.selected = true;
+                }
+            });
+
+            if (!this.isLoaded(select)) {
+                select.addEventListener("change", e => {
+                    if (this.isBroadcastEvent(e)) {
+                        return;
+                    }
+
+                    let selectedOptions = (e.target as HTMLSelectElement).selectedOptions;
+                    if (selectedOptions.length === 1) {
+                        Attv.DataModel.setProperty(propertyName, selectedOptions[0].value, model);
+                        
+                        this.broadcastChange(select);
+                    }
+                    else {
+                        throw new Error('Not supported yet');
+                    }
+                });
+            }
+        }
+
+        private isBroadcastEvent(e: Event) {
+            return (e instanceof CustomEvent && (e as CustomEvent).detail?.dataModel);
+        }
+
+        private broadcastChange(element: HTMLElement, eventName: string = "change") {
+            let event = new CustomEvent("change", { detail: { dataModel: true } });
+            event.initEvent("change", false, true); 
+
+            element.dispatchEvent(event);
         }
     }
 
