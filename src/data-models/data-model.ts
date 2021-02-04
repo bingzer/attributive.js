@@ -11,7 +11,9 @@ namespace Attv {
             this.isAutoLoad = true;
             this.handlers = [
                 new Attv.Binders.Text(),
+                new Attv.Binders.TextArea(),
                 new Attv.Binders.Select(),
+                new Attv.Binders.MultiSelect(),
                 new Attv.Binders.Checkbox(),
                 new Attv.Binders.RadioButton(),
                 new Attv.Binders.Default()
@@ -34,9 +36,11 @@ namespace Attv {
 
             let propertyValue = Attv.DataModel.getProperty(propertyName, model);
 
-            let handler = this.handlers.filter(handler => handler.accept(this, element))[0];
-            handler.bind(this, element, propertyName, propertyValue, model);
-            handler.stamp(this, element, refId);
+            let handler = this.handlers.filter(h => h.accept(this, element))[0];
+            if (handler) {
+                handler.bind(this, element, propertyName, propertyValue, model);
+                handler.stamp(this, element, refId);
+            }
 
             return true;
         }

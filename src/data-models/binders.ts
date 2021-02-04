@@ -16,11 +16,11 @@ namespace Attv.Binders {
         }
 
         bind(dataModel: DataModel, element: TElement, propertyName: string, propertyValue: any, model?: any) {
-            this.setValue(element, propertyValue);
+            this.bindValueToElement(element, propertyValue);
 
             if (!dataModel.isLoaded(element)) {
                 element.addEventListener(this.eventName, e => {
-                    let value = this.getValue(element);
+                    let value = this.getValueFromElement(element);
                     Attv.DataModel.setProperty(propertyName, value, model);
 
                     // data load
@@ -35,13 +35,12 @@ namespace Attv.Binders {
                 element.attvAttr(dataModelContext, refId);
             }
         }
-        
 
         protected abstract canBind(element: TElement): boolean;
-        protected abstract setValue(element: TElement, propertyValue: any): void;
-        protected abstract getValue(element: TElement): any;
+        protected abstract bindValueToElement(element: TElement, propertyValue: any): void;
+        protected abstract getValueFromElement(element: TElement): any;
 
-        protected broadcast(dataModel: DataModel, element: HTMLElement, options: LoadElementOptions) {
+        protected broadcast(dataModel: DataModel, element: TElement, options: LoadElementOptions) {
             let dataLoad = dataModel.resolve(Attv.DataLoad.Key);
             let selectors = dataLoad.raw(element);
 
@@ -56,37 +55,59 @@ namespace Attv.Binders {
         }
         
         bind(dataModel: DataModel, element: HTMLElement, propertyName: string, propertyValue: any, model?: any) {
-            this.setValue(element, propertyValue);
+            this.bindValueToElement(element, propertyValue);
         }
 
         protected canBind(element: HTMLElement): boolean {
             return true;
         }
 
-        protected setValue(element: HTMLElement, propertyValue: any): void {
-            element.innerHTML = propertyValue;
+        protected bindValueToElement(element: HTMLElement, propertyValue: any): void {
+            element.innerHTML = propertyValue || '';
         }
 
-        protected getValue(element: HTMLElement): any {
+        protected getValueFromElement(element: HTMLElement): any {
             return undefined;
         }
     }
 
     export class Text extends ElementBinder<HTMLInputElement> {
 
+        readonly types: string[] = [ "text", "password", "email", "number", "tel", "color", "date", "datetime-local", "file", "hidden", "image", "month", "range", "url", "week" ];
+
         constructor() {
             super("input");
         }
 
         protected canBind(element: HTMLInputElement): boolean {
-            return(element instanceof HTMLInputElement && element.type?.equalsIgnoreCase("text"));
+            return element instanceof HTMLInputElement && this.types.some(t => t.equalsIgnoreCase(element.type));
         }
 
-        protected setValue(element: HTMLInputElement, propertyValue: any): void {
+        protected bindValueToElement(element: HTMLInputElement, propertyValue: any): void {
             element.value = propertyValue || '';
         }
 
-        protected getValue(element: HTMLInputElement): any {
+        protected getValueFromElement(element: HTMLInputElement): any {
+            let value = element.value;
+            return value;
+        }
+    }
+
+    export class TextArea extends ElementBinder<HTMLTextAreaElement> {
+
+        constructor() {
+            super("keyup");
+        }
+
+        protected canBind(element: HTMLTextAreaElement): boolean {
+            return element instanceof HTMLTextAreaElement;
+        }
+
+        protected bindValueToElement(element: HTMLTextAreaElement, propertyValue: any): void {
+            element.value = propertyValue || '';
+        }
+
+        protected getValueFromElement(element: HTMLTextAreaElement): any {
             let value = element.value;
             return value;
         }
@@ -102,11 +123,11 @@ namespace Attv.Binders {
             return(element instanceof HTMLInputElement && element.type?.equalsIgnoreCase("checkbox"));
         }
 
-        protected setValue(element: HTMLInputElement, propertyValue: any): void {
+        protected bindValueToElement(element: HTMLInputElement, propertyValue: any): void {
             element.checked = !!(propertyValue || '');
         }
 
-        protected getValue(element: HTMLInputElement): any {
+        protected getValueFromElement(element: HTMLInputElement): any {
             let value = element.checked;
             return value;
         }
@@ -122,7 +143,7 @@ namespace Attv.Binders {
         bind(dataModel: DataModel, element: HTMLSelectElement, propertyName: string, propertyValue: any, model?: any) {
             if (dataModel.isLoaded(element)) {
                 Attv.reloadElements(element.querySelector('option'));
-                this.setValue(element, propertyValue);
+                this.bindValueToElement(element, propertyValue);
             }
             else {
                 super.bind(dataModel, element, propertyName, propertyValue, model);
@@ -130,24 +151,45 @@ namespace Attv.Binders {
         }
 
         protected canBind(element: HTMLSelectElement): boolean {
-            return element instanceof HTMLSelectElement;
+            return element instanceof HTMLSelectElement && !element.hasAttribute('multiple');
         }
 
-        protected setValue(element: HTMLSelectElement, propertyValue: any): void {
+        protected bindValueToElement(element: HTMLSelectElement, propertyValue: any): void {
             Attv.toArray(element.options).forEach((opt: HTMLOptionElement) => {
-                // check if proeprtyValue is an array
-                if (opt.value?.equalsIgnoreCase(propertyValue)) {
-                    opt.selected = true;
-                }
+                opt.selected = opt.value?.equalsIgnoreCase(propertyValue);
             });
         }
 
-        protected getValue(element: HTMLSelectElement): any {
-            let selectedOptions = element.selectedOptions;
+        protected getValueFromElement(element: HTMLSelectElement): any {
+            let selectedOption = element.selectedOptions[0];
 
-            return selectedOptions[0].value;
+            return selectedOption.value;
         }
 
+    }
+
+    export class MultiSelect extends Select {
+
+        protected canBind(element: HTMLSelectElement): boolean {
+            return element instanceof HTMLSelectElement && element.hasAttribute('multiple');
+        }
+
+        protected bindValueToElement(element: HTMLSelectElement, propertyValue: any): void {
+            if (Array.isArray(propertyValue)) {
+                let array = propertyValue as [];
+                Attv.toArray<HTMLOptionElement>(element.options).forEach((opt: HTMLOptionElement) => {
+                    opt.selected = array.some(item => item === opt.value);
+                });
+            } else {
+                super.bindValueToElement(element, propertyValue);
+            }
+        }
+
+        protected getValueFromElement(element: HTMLSelectElement): any {
+            let values = Attv.toArray<HTMLOptionElement>(element.selectedOptions).map(opt => opt.value);
+
+            return values;
+        }
     }
 
     export class RadioButton extends ElementBinder<HTMLInputElement> {
@@ -164,7 +206,7 @@ namespace Attv.Binders {
                 if (!valueAttributeMutation)
                     return;
                     
-                this.setValue(element, propertyValue);
+                this.bindValueToElement(element, propertyValue);
             });
 
             observer.observe(element, { attributes: true });
@@ -174,11 +216,11 @@ namespace Attv.Binders {
             return(element instanceof HTMLInputElement && element.type?.equalsIgnoreCase("radio"));
         }
 
-        protected setValue(element: HTMLInputElement, propertyValue: any): void {
+        protected bindValueToElement(element: HTMLInputElement, propertyValue: any): void {
             element.checked = element.value === (propertyValue || '');
         }
 
-        protected getValue(element: HTMLInputElement): any {
+        protected getValueFromElement(element: HTMLInputElement): any {
             let value = element.value;
             return value;
         }
