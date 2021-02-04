@@ -16,6 +16,10 @@ namespace Attv {
                 new Attv.Binders.RadioButton(),
                 new Attv.Binders.Default()
             ];
+            this.deps.uses = [ 
+                Attv.DataLoad.Key,
+                Attv.DataModelContext.Key
+            ];
         }
 
         /**
@@ -23,15 +27,16 @@ namespace Attv {
          * @param element the element to bind
          * @param model the model
          */
-        bindTo(element: HTMLElement, model?: any): BooleanOrVoid {
+        bindTo(element: HTMLElement, model?: any, refId?: string): BooleanOrVoid {
             let propertyName = this.raw(element);
             if (!propertyName)
                 return false;
 
             let propertyValue = Attv.DataModel.getProperty(propertyName, model);
 
-            let handler = this.handlers.filter(handler => handler.accept(element))[0];
+            let handler = this.handlers.filter(handler => handler.accept(this, element))[0];
             handler.bind(this, element, propertyName, propertyValue, model);
+            handler.stamp(this, element, refId);
 
             return true;
         }
@@ -56,7 +61,8 @@ namespace Attv {
         export class Value extends Attv.AttributeValue {
             
             load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
-                return (this.attribute as DataModel).bindTo(element, options.context);
+                let dataModel = this.attribute as DataModel;
+                return dataModel.bindTo(element, options.context, options.contextRefId);
             }
         }
         
@@ -98,10 +104,6 @@ namespace Attv {
             return parseJsonOrElse(propertyValue);
         }
 
-        function isGlobalVariable(variableName: string, scoped?: any) {
-            return !scoped?.hasOwnProperty(variableName) && Attv.globalThis$().hasOwnProperty(variableName);
-        }
-
         /**
          * Sets a property in an object
          * @param model the object
@@ -133,6 +135,10 @@ namespace Attv {
             }
 
             property[propertyChilds[len-1]] = propertyValue;
+        }
+
+        function isGlobalVariable(variableName: string, scoped?: any) {
+            return !scoped?.hasOwnProperty(variableName) && Attv.globalThis$().hasOwnProperty(variableName);
         }
     }
 }

@@ -7,32 +7,50 @@
         <h3>
             [data-model]
 		</h3>
-		
-		<div style="border: 1px solid gray; padding: 8px; margin: 8px;">
-			<p>input type=text</p>
-			<input type="text" data-model="employee.firstName" title="your name is {{firstName}}" onkeyup="Attv.reloadElements('#p1, #p2, #p3, #p4')"/>
-			<input type="text" data-model="employee.lastName" onkeyup="Attv.reloadElements('#p1, #p2, #p3, #p4')"/>
+		<h2>Two way binding</h2>
+
+		<div style="border: 1px solid gray; padding: 8px; margin: 8px;" id="summary-form">
+			<h3>Summary</h3>
+
+			<div>
+				Name <span data-model="employee.firstName"></span> <span data-model="employee.lastName"></span>
+			</div>
+			<div>
+				Wants Candy? <span data-model="employee.wantCandy">
+			</div>
+			<div>
+				Type of candy that <span data-model="employee.firstName"></span> want is <span data-model="employee.candyType"></span>
+			</div>
+			
+		</div>
+
+		<div style="border: 1px solid gray; padding: 8px; margin: 8px;" id="name-form">
+			<h4>input type=text</h4>
+
+			<div>
+				First Name <input type="text" data-model="employee.firstName" title="your name is {{firstName}}"/>
+			</div>
+			<div>
+				Last Name <input type="text" data-model="employee.lastName"/>
+			</div>
 			
 			<p id="p1" style="margin-top: 10px;">
-				<span data-model="employee.firstName"></span> <span data-model="employee.lastName"></span>
+				Name: <span data-model="employee.firstName"></span> <span data-model="employee.lastName"></span>
 			</p>
 		</div>
 
-		<div style="border: 1px solid gray; padding: 8px; margin: 8px;">
-			<p>input type=checkbox</p>
+		<div style="border: 1px solid gray; padding: 8px; margin: 8px;" id="want-candy-form">
+			<h4>input type=checkbox</h4>
+
 			<label>
-				Check if you want candy
-				<input type="checkbox" data-model="employee.wantCandy" onchange="Attv.reloadElements('#p2')"/>
+				Does <span style="font-weight: 700" data-model="employee.firstName"></span> want candy? <span data-model="employee.wantCandy"></span>
+				<input type="checkbox" data-model="employee.wantCandy"/>
 			</label>
-			
-			<p id="p2" style="margin-top: 10px;">
-				Does <span data-model="employee.firstName"></span> want candy? <span data-model="employee.wantCandy"></span>
-			</p>
 		</div>
 
 		<div style="border: 1px solid gray; padding: 8px; margin: 8px;">
-			<p>select</p>
-			<select id="i3" data-model="employee.candyType" onchange="Attv.reloadElements('#p3, #p4, #i4')">
+			<h4>select</h4>
+			<select data-model="employee.candyType" data-attrs="{disabled: !employee.wantCandy}">
 				<option data-foreach="candy in candyTypes" data-attrs="{value: candy}" data-model="candy"></option>
 			</select>
 			
@@ -44,8 +62,8 @@
 		<div style="border: 1px solid gray; padding: 8px; margin: 8px;">
 			<p>radio button</p>
 
-			<label id="i4" data-foreach="candy in candyTypes" style="border: 1px solid gray">
-				<input data-model="employee.candyType" type="radio" data-attrs="{id: candy, name: 'candy', value: candy, checked: employee.candyType == candy}" onchange="Attv.reloadElements('#p3, #p4, #i3')">
+			<label data-foreach="candy in candyTypes" style="border: 1px solid gray">
+				<input data-model="employee.candyType" type="radio" data-attrs="{id: candy, name: 'candy', value: candy, checked: employee.candyType == candy, disabled: !employee.wantCandy}">
 				<span data-model="candy"></span>
 			</label>
 			
@@ -53,7 +71,6 @@
 				Type of candy that <span data-model="employee.firstName"></span> want? <span data-model="employee.candyType"></span>
 			</p>
 		</div>
-		
 
 	</div>
 	

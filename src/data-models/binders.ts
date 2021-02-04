@@ -6,37 +6,46 @@ namespace Attv.Binders {
             // nothing
         }
 
-        abstract accept(element: TElement): boolean;
+        accept(dataModel: DataModel, element: TElement, refId?: string): boolean {
+            if (!this.canBind(element))
+                return false;
+
+            // compare context
+            let dataModelContext = dataModel.resolve(Attv.DataModelContext.Key);
+            return element.attvAttr(dataModelContext) === refId;
+        }
 
         bind(dataModel: DataModel, element: TElement, propertyName: string, propertyValue: any, model?: any) {
             this.setValue(element, propertyValue);
 
             if (!dataModel.isLoaded(element)) {
                 element.addEventListener(this.eventName, e => {
-                    if (this.isBroadcastEvent(e)) {
-                        return;
-                    }
-
                     let value = this.getValue(element);
                     Attv.DataModel.setProperty(propertyName, value, model);
 
-                    this.broadcastChange(element);
+                    // data load
+                    this.broadcast(dataModel, element, { forceReload: true });
                 });
             };
         }
+
+        stamp(dataModel: DataModel, element: TElement, refId: string) {
+            if (refId) {
+                let dataModelContext = dataModel.resolve(Attv.DataModelContext.Key);
+                element.attvAttr(dataModelContext, refId);
+            }
+        }
         
+
+        protected abstract canBind(element: TElement): boolean;
         protected abstract setValue(element: TElement, propertyValue: any): void;
         protected abstract getValue(element: TElement): any;
 
-        protected isBroadcastEvent(e: Event) {
-            return (e instanceof CustomEvent && (e as CustomEvent).detail?.dataModel);
-        }
+        protected broadcast(dataModel: DataModel, element: HTMLElement, options: LoadElementOptions) {
+            let dataLoad = dataModel.resolve(Attv.DataLoad.Key);
+            let selectors = dataLoad.raw(element);
 
-        protected broadcastChange(element: TElement) {
-            let event = new CustomEvent(this.broadcastEvent, { detail: { dataModel: true } });
-            event.initEvent(this.broadcastEvent, false, true); 
-
-            element.dispatchEvent(event);
+            Attv.loadElements(selectors, options);
         }
 
     }
@@ -50,7 +59,7 @@ namespace Attv.Binders {
             this.setValue(element, propertyValue);
         }
 
-        accept(element: HTMLElement): boolean {
+        protected canBind(element: HTMLElement): boolean {
             return true;
         }
 
@@ -69,7 +78,7 @@ namespace Attv.Binders {
             super("input");
         }
 
-        accept(element: HTMLInputElement): boolean {
+        protected canBind(element: HTMLInputElement): boolean {
             return(element instanceof HTMLInputElement && element.type?.equalsIgnoreCase("text"));
         }
 
@@ -89,7 +98,7 @@ namespace Attv.Binders {
             super("change");
         }
 
-        accept(element: HTMLInputElement): boolean {
+        protected canBind(element: HTMLInputElement): boolean {
             return(element instanceof HTMLInputElement && element.type?.equalsIgnoreCase("checkbox"));
         }
 
@@ -109,18 +118,19 @@ namespace Attv.Binders {
         constructor() {
             super("change");
         }
-
-        accept(element: HTMLSelectElement): boolean {
-            return element instanceof HTMLSelectElement;
-        }
         
         bind(dataModel: DataModel, element: HTMLSelectElement, propertyName: string, propertyValue: any, model?: any) {
             if (dataModel.isLoaded(element)) {
-                element.querySelectorAll('option[data-model]').forEach(element => element.remove());
                 Attv.reloadElements(element.querySelector('option'));
+                this.setValue(element, propertyValue);
             }
+            else {
+                super.bind(dataModel, element, propertyName, propertyValue, model);
+            }
+        }
 
-            super.bind(dataModel, element, propertyName, propertyValue, model);
+        protected canBind(element: HTMLSelectElement): boolean {
+            return element instanceof HTMLSelectElement;
         }
 
         protected setValue(element: HTMLSelectElement, propertyValue: any): void {
@@ -145,10 +155,6 @@ namespace Attv.Binders {
         constructor() {
             super("change");
         }
-
-        accept(element: HTMLInputElement): boolean {
-            return(element instanceof HTMLInputElement && element.type?.equalsIgnoreCase("radio"));
-        }
         
         bind(dataModel: DataModel, element: HTMLInputElement, propertyName: string, propertyValue: any, model?: any) {
             super.bind(dataModel, element, propertyName, propertyValue, model);
@@ -162,6 +168,10 @@ namespace Attv.Binders {
             });
 
             observer.observe(element, { attributes: true });
+        }
+
+        protected canBind(element: HTMLInputElement): boolean {
+            return(element instanceof HTMLInputElement && element.type?.equalsIgnoreCase("radio"));
         }
 
         protected setValue(element: HTMLInputElement, propertyValue: any): void {

@@ -47,6 +47,12 @@ namespace Attv {
          * A context/scope object
          */
         context?: any;
+
+        /**
+         * Context reference id.
+         * IF null is a global context
+         */
+        contextRefId?: string;
     }
 
     export interface Dependency {
@@ -150,7 +156,7 @@ namespace Attv {
          * @param element the element
          */
         raw(element: HTMLElement): string {
-            return element?.getAttribute(this.name);
+            return element?.getAttribute(this.name) || undefined;
         }
 
         /**
@@ -981,6 +987,8 @@ namespace Attv {
     export function loadElements(root?: HTMLElementOrString, options: LoadElementOptions = {}): void {
         let rootElements: HTMLElement[];
 
+        Attv.log('debug', `loadElements()`);
+
         if (Attv.isUndefined(options.includeSelf)) {
             options.includeSelf = true;
         }
@@ -993,16 +1001,12 @@ namespace Attv {
         } else if (root instanceof HTMLElement) {
             rootElements = [root as HTMLElement];
         }
-
-        Attv.log('debug', 'Loading element', root);
         
         // auto load all attvs that are marked auto load
         attributes.filter(attribute => attribute.isAutoLoad).sort(Attv.Attribute.compareFn).forEach((attribute, index) => {
             let elements = Attv.selectMany(rootElements, attribute.selector(), options.includeSelf);
 
             elements.forEach((element: HTMLElement, index) => {
-                Attv.log('debug', 'Attribute: ' + attribute.name);
-
                 try {
                     // #1. If it's already loaded return
                     if (!options.forceReload && attribute.isLoaded(element))

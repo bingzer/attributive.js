@@ -15,7 +15,7 @@ namespace Attv.DataForEach {
             let dataContent = this.attribute.resolve(Attv.DataContent.Key);
             let dataId = this.attribute.resolve(Attv.DataId.Key);
             let dataRef = this.attribute.resolve(Attv.DataRef.Key);
-            let id = element.attvAttr('id') || Attv.generateElementId('foreach');
+            let id = element.attvAttr('id') || dataId.raw(element) || Attv.generateElementId('foreach');
 
             if (!this.attribute.isLoaded(element)) {
                 // if it's not leaded
@@ -41,7 +41,8 @@ namespace Attv.DataForEach {
                 // load the elemen in the template
                 Attv.loadElements(template, {
                     includeSelf: true,
-                    context: context
+                    context: context,
+                    contextRefId: id
                 }); 
 
                 element.parentElement.append(template);
