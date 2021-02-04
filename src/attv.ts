@@ -23,6 +23,7 @@ namespace Attv {
     export type ValueFnOrLoadElementFn = LoadElementFn | ValueFn;
     export type LoadElementFn = (value: Attv.AttributeValue, element: HTMLElement, option?: LoadElementOptions) => BooleanOrVoid;
     export type WildcardType = "*" | "<number>" | "<boolean>" | "<querySelector>" | "<jsExpression>" | "<json>" | "none";
+    export type HTMLElementOrString = HTMLElement | string;
 
     /**
      * Priority: [0, 1, 2, 3, undefined]. The higher is the more priority.
@@ -864,6 +865,25 @@ namespace Attv {
         return element;
     }
 
+    export function selectAll(selector: string): HTMLElement[] {
+        return Attv.toArray<HTMLElement>(document.querySelectorAll(selector as string));
+    }
+
+    export function selectMany(rootElements: HTMLElement[], selector: string, includeSelf?: boolean): HTMLElement[] {
+        let elements: HTMLElement[] = [];
+        
+        rootElements.forEach(rootElement => {
+            let elems = Attv.toArray<HTMLElement>(rootElement.querySelectorAll(selector));
+            elements.push(...elems);
+
+            if (includeSelf && rootElement.matches(selector)) {
+                elements.push(rootElement);
+            }
+        });
+
+        return elements;
+    }
+
     export function toArray<TAny>(any: any): TAny[] {
         return [].slice.call(any) as TAny[];
     }
@@ -950,7 +970,7 @@ namespace Attv {
         }
     }
 
-    export function reloadElements(root?: HTMLElement | string, options: LoadElementOptions = {}) {
+    export function reloadElements(root?: HTMLElementOrString, options: LoadElementOptions = {}) {
         if (Attv.isUndefined(options.forceReload)) {
             options.forceReload = true;
         }
@@ -958,30 +978,27 @@ namespace Attv {
         return Attv.loadElements(root, options)
     }
 
-    export function loadElements(root?: HTMLElement | string, options: LoadElementOptions = {}): void {
-        let rootElement: HTMLElement;
+    export function loadElements(root?: HTMLElementOrString, options: LoadElementOptions = {}): void {
+        let rootElements: HTMLElement[];
 
         if (Attv.isUndefined(options.includeSelf)) {
             options.includeSelf = true;
         }
 
         if (isUndefined(root)) {
-            rootElement = document.querySelector('html');
+            rootElements = [document.querySelector('html')];
             options.includeSelf = false;
         } else if (Attv.isString(root)) {
-            rootElement = document.querySelector(root as string);
+            rootElements = Attv.toArray<HTMLElement>(document.querySelectorAll(root as string));
         } else if (root instanceof HTMLElement) {
-            rootElement = root as HTMLElement;
+            rootElements = [root as HTMLElement];
         }
 
         Attv.log('debug', 'Loading element', root);
         
         // auto load all attvs that are marked auto load
         attributes.filter(attribute => attribute.isAutoLoad).sort(Attv.Attribute.compareFn).forEach((attribute, index) => {
-            let elements = Attv.toArray(rootElement.querySelectorAll(attribute.selector()));
-            if (options.includeSelf && rootElement.matches(attribute.selector())) {
-                elements.push(rootElement);
-            }
+            let elements = Attv.selectMany(rootElements, attribute.selector(), options.includeSelf);
 
             elements.forEach((element: HTMLElement, index) => {
                 Attv.log('debug', 'Attribute: ' + attribute.name);

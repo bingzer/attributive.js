@@ -10,8 +10,8 @@
 		
 		<div style="border: 1px solid gray; padding: 8px; margin: 8px;">
 			<p>input type=text</p>
-			<input type="text" data-model="employee.firstName" title="your name is {{firstName}}" onkeyup="Attv.reloadElements('#p1')"/>
-			<input type="text" data-model="employee.lastName" onkeyup="Attv.reloadElements('#p1')"/>
+			<input type="text" data-model="employee.firstName" title="your name is {{firstName}}" onkeyup="Attv.reloadElements('#p1, #p2, #p3, #p4')"/>
+			<input type="text" data-model="employee.lastName" onkeyup="Attv.reloadElements('#p1, #p2, #p3, #p4')"/>
 			
 			<p id="p1" style="margin-top: 10px;">
 				<span data-model="employee.firstName"></span> <span data-model="employee.lastName"></span>
@@ -32,11 +32,24 @@
 
 		<div style="border: 1px solid gray; padding: 8px; margin: 8px;">
 			<p>select</p>
-			<select data-model="employee.candyType" onchange="Attv.reloadElements('#p3')">
+			<select id="i3" data-model="employee.candyType" onchange="Attv.reloadElements('#p3, #p4, #i4')">
 				<option data-foreach="candy in candyTypes" data-attrs="{value: candy}" data-model="candy"></option>
 			</select>
 			
 			<p id="p3" style="margin-top: 10px;">
+				Type of candy that <span data-model="employee.firstName"></span> want? <span data-model="employee.candyType"></span>
+			</p>
+		</div>
+
+		<div style="border: 1px solid gray; padding: 8px; margin: 8px;">
+			<p>radio button</p>
+
+			<label id="i4" data-foreach="candy in candyTypes" style="border: 1px solid gray">
+				<input data-model="employee.candyType" type="radio" data-attrs="{id: candy, name: 'candy', value: candy, checked: employee.candyType == candy}" onchange="Attv.reloadElements('#p3, #p4, #i3')">
+				<span data-model="candy"></span>
+			</label>
+			
+			<p id="p4" style="margin-top: 10px;">
 				Type of candy that <span data-model="employee.firstName"></span> want? <span data-model="employee.candyType"></span>
 			</p>
 		</div>

@@ -2,11 +2,20 @@ namespace Attv {
     export class DataModel extends Attv.Attribute {
         static readonly Key: string = 'data-model';
 
+        readonly handlers: Attv.Binders.ElementBinder<HTMLElement>[];
+
         constructor() {
             super(DataModel.Key);
             this.wildcard = "<jsExpression>";
             this.priority = 0;
             this.isAutoLoad = true;
+            this.handlers = [
+                new Attv.Binders.Text(),
+                new Attv.Binders.Select(),
+                new Attv.Binders.Checkbox(),
+                new Attv.Binders.RadioButton(),
+                new Attv.Binders.Default()
+            ];
         }
 
         /**
@@ -21,17 +30,8 @@ namespace Attv {
 
             let propertyValue = Attv.DataModel.getProperty(propertyName, model);
 
-            // TODO: refactor code
-            if (element instanceof HTMLInputElement) {
-                let input = element as HTMLInputElement;
-                this.bindInput(input, propertyName, propertyValue, model);
-            } else if (element instanceof HTMLSelectElement) {
-                let select = element as HTMLSelectElement;
-                this.bindSelect(select, propertyName, propertyValue, model);
-            }
-            else {
-                element.innerHTML = propertyValue;
-            }
+            let handler = this.handlers.filter(handler => handler.accept(element))[0];
+            handler.bind(this, element, propertyName, propertyValue, model);
 
             return true;
         }
@@ -48,84 +48,6 @@ namespace Attv {
                 this.bindTo(elem as HTMLElement, model);
                 this.markLoaded(elem as HTMLElement, true);
             });
-        }
-        
-        private bindInput(input: HTMLInputElement, propertyName: string, propertyValue: any, model?: any): BooleanOrVoid {
-            if (input.type?.equalsIgnoreCase('text')) {
-                return this.bindInputText(input, propertyName, propertyValue, model);
-            } else if (input.type?.equalsIgnoreCase('checkbox')) {
-                return this.bindInputCheckbox(input, propertyName, propertyValue, model);
-            }
-        }
-        
-        private bindInputText(input: HTMLInputElement, propertyName: string, propertyValue: any, model?: any): BooleanOrVoid {
-            input.value = propertyValue || '';
-            if (!this.isLoaded(input)) {
-                input.addEventListener('input', e => {
-                    if (this.isBroadcastEvent(e)) {
-                        return;
-                    }
-
-                    let value = (e.target as HTMLInputElement).value;
-                    Attv.DataModel.setProperty(propertyName, value, model);
-                        
-                    this.broadcastChange(input);
-                });
-            }
-        }
-
-        private bindInputCheckbox(input: HTMLInputElement, propertyName: string, propertyValue: any, model?: any): BooleanOrVoid {
-            input.checked = !!(propertyValue || '');
-            if (!this.isLoaded(input)) {
-                input.addEventListener('change', e => {
-                    if (this.isBroadcastEvent(e)) {
-                        return;
-                    }
-
-                    let value = (e.target as HTMLInputElement).checked;
-                    Attv.DataModel.setProperty(propertyName, value, model);
-                        
-                    this.broadcastChange(input);
-                });
-            }
-        }
-
-        private bindSelect(select: HTMLSelectElement, propertyName: string, propertyValue: any, model?: any): BooleanOrVoid {
-            Attv.toArray(select.options).forEach((opt: HTMLOptionElement) => {
-                // check if proeprtyValue is an array
-                if (opt.value?.equalsIgnoreCase(propertyValue)) {
-                    opt.selected = true;
-                }
-            });
-
-            if (!this.isLoaded(select)) {
-                select.addEventListener("change", e => {
-                    if (this.isBroadcastEvent(e)) {
-                        return;
-                    }
-
-                    let selectedOptions = (e.target as HTMLSelectElement).selectedOptions;
-                    if (selectedOptions.length === 1) {
-                        Attv.DataModel.setProperty(propertyName, selectedOptions[0].value, model);
-                        
-                        this.broadcastChange(select);
-                    }
-                    else {
-                        throw new Error('Not supported yet');
-                    }
-                });
-            }
-        }
-
-        private isBroadcastEvent(e: Event) {
-            return (e instanceof CustomEvent && (e as CustomEvent).detail?.dataModel);
-        }
-
-        private broadcastChange(element: HTMLElement, eventName: string = "change") {
-            let event = new CustomEvent("change", { detail: { dataModel: true } });
-            event.initEvent("change", false, true); 
-
-            element.dispatchEvent(event);
         }
     }
 
@@ -158,7 +80,13 @@ namespace Attv {
                     if (child === 'this') {
                         propertyValue = propertyValue;
                     } else {
-                        propertyValue = propertyValue[child];
+                        // see if the propertyName is a global variable
+                        if (j == 0 && isGlobalVariable(child, propertyValue)) {
+                            propertyValue = Attv.globalThis$()[child];
+                        }
+                        else {
+                            propertyValue = propertyValue[child];
+                        }
                     }
                 }
                 catch (e) {
@@ -168,6 +96,10 @@ namespace Attv {
             }
     
             return parseJsonOrElse(propertyValue);
+        }
+
+        function isGlobalVariable(variableName: string, scoped?: any) {
+            return !scoped?.hasOwnProperty(variableName) && Attv.globalThis$().hasOwnProperty(variableName);
         }
 
         /**
@@ -191,7 +123,12 @@ namespace Attv {
 
                 // throw warning
                 if (Attv.isUndefined(property)) {
-                    Attv.log('warning', `No property ${childProperty}`, property);
+                    if (isGlobalVariable(property)) {
+                        return setProperty(propertyName, propertyValue, undefined);
+                    }
+                    else {
+                        Attv.log('warning', `No property ${childProperty}`, property);
+                    }
                 }
             }
 
