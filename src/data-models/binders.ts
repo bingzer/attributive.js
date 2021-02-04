@@ -113,6 +113,15 @@ namespace Attv.Binders {
         accept(element: HTMLSelectElement): boolean {
             return element instanceof HTMLSelectElement;
         }
+        
+        bind(dataModel: DataModel, element: HTMLSelectElement, propertyName: string, propertyValue: any, model?: any) {
+            if (dataModel.isLoaded(element)) {
+                element.querySelectorAll('option[data-model]').forEach(element => element.remove());
+                Attv.reloadElements(element.querySelector('option'));
+            }
+
+            super.bind(dataModel, element, propertyName, propertyValue, model);
+        }
 
         protected setValue(element: HTMLSelectElement, propertyValue: any): void {
             Attv.toArray(element.options).forEach((opt: HTMLOptionElement) => {
