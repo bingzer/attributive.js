@@ -201,15 +201,17 @@ namespace Attv.Binders {
         bind(dataModel: DataModel, element: HTMLInputElement, propertyName: string, propertyValue: any, model?: any) {
             super.bind(dataModel, element, propertyName, propertyValue, model);
 
-            let observer = new MutationObserver((mutations) => {
-                let valueAttributeMutation = mutations.filter(m => m.type === 'attributes' && m.attributeName.equalsIgnoreCase('value'))[0];
-                if (!valueAttributeMutation)
-                    return;
-                    
-                this.bindValueToElement(element, propertyValue);
-            });
-
-            observer.observe(element, { attributes: true });
+            if (!dataModel.isLoaded(element)) {
+                let observer = new MutationObserver((mutations) => {
+                    let valueAttributeMutation = mutations.filter(m => m.type === 'attributes' && m.attributeName.equalsIgnoreCase('value'))[0];
+                    if (!valueAttributeMutation)
+                        return;
+                        
+                    this.bindValueToElement(element, propertyValue);
+                });
+    
+                observer.observe(element, { attributes: true });
+            }
         }
 
         protected canBind(element: HTMLInputElement): boolean {
