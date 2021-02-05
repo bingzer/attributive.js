@@ -45,7 +45,7 @@ namespace Attv.DataForEach {
                     contextRefId: id
                 }); 
 
-                element.parentElement.append(template);
+                element.parentElement.appendChild(template);
             });
 
             // remove all unnecessary contents

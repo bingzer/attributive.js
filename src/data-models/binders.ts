@@ -161,7 +161,7 @@ namespace Attv.Binders {
         }
 
         protected getValueFromElement(element: HTMLSelectElement): any {
-            let selectedOption = element.selectedOptions[0];
+            let selectedOption = element.options[element.selectedIndex];
 
             return selectedOption.value;
         }

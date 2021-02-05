@@ -125,12 +125,13 @@
 			</p>
 		</div>
 
+		
 		<div class="panel panel-50">
 			<p>radio button</p>
 
-			<label data-foreach="candy in candyTypes" style="border: 1px solid gray">
-				<input data-model="employee.candyType" type="radio" data-attrs="{id: candy, name: 'candy', value: candy, checked: employee.candyType == candy, disabled: !employee.wantCandy}">
-				<span data-model="candy"></span>
+			<label data-foreach="candy2 in candyTypes" style="border: 1px solid gray">
+				<input data-model="employee.candyType" type="radio" data-attrs="{name: 'candy-input', value: candy2, checked: employee.candyType == candy2, disabled: !employee.wantCandy}">
+				<span data-model="candy2"></span>
 			</label>
 			
 			<p style="margin-top: 10px;">
@@ -162,9 +163,9 @@
 		var candyTypes = [
 			'snickers',
 			'milky way',
-			'm&m',
-			'kitkat',
-			'twix'
+			// 'm&m',
+			// 'kitkat',
+			// 'twix'
 		];
 		var candyFlavors = [
 			{ name: 'Coco Flavor', value: 'chocolate' },
