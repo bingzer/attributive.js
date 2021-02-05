@@ -156,25 +156,81 @@ describe('Attv functions', () => {
 
     });
 
-    // describe('Attv.createHTMLElement()', () => {
+    describe('Attv.parseJsonOrElse()', () => {
         
-    //     it('Should returns an HTMLDivElement', () => {
-    //         let element = Attv.createHTMLElement('<div></div>');
-
-    //         expect(element.firstElementChild).toBeInstanceOf(HTMLDivElement);
-    //     });
+        it('Should return true/false', () => {
+            expect(Attv.parseJsonOrElse(true)).toEqual(true);
+            expect(Attv.parseJsonOrElse(false)).toEqual(false);
+        });
         
-    //     it('Should returns an HTMLUListElement', () => {
-    //         let element = Attv.createHTMLElement('<ul></ul>');
-
-    //         expect(element.firstElementChild).toBeInstanceOf(HTMLUListElement);
-    //     });
+        it('Should return true/false (string)', () => {
+            expect(Attv.parseJsonOrElse('true')).toEqual(true);
+            expect(Attv.parseJsonOrElse('false')).toEqual(false);
+        });
         
-    //     it('Should returns an HTMLLIElement', () => {
-    //         let element = Attv.createHTMLElement('<li></li>');
+        it('Should return an object', () => {
+            expect(typeof Attv.parseJsonOrElse('{}')).toBe('object');
+        });
+        
+        it('Should return an array', () => {
+            let array = Attv.parseJsonOrElse('[]');
+            expect(Array.isArray(array)).toBeTrue();
+        });
 
-    //         expect(element.firstElementChild).toBeInstanceOf(HTMLLIElement);
-    //     });
+    });
 
-    // });
+    describe('Attv.generateElementId()', () => {
+
+        it('Should generate unique ids', () => {
+            let id1 = Attv.generateElementId('attv');
+            let id2 = Attv.generateElementId('attv');
+    
+            expect(id1 !== id2).toBeTrue();
+        });
+
+    });
+
+    describe('Attv.log()', () => {
+
+        it('Should log', () => {
+            Attv.log('');
+            Attv.log('info', 'This is info');
+            Attv.log('debug', 'This is debug');
+            Attv.log('warn', 'This is warn');
+
+            try
+            {
+                Attv.log('fatal', 'This is fatal');
+                throw new Error();
+
+            } catch (e) {
+                expect(e.message).toBe('This is fatal');
+                // ok
+            }
+        });
+
+    });
+
+    describe('Attv.whenReady()', () => {
+        
+        it('Should run the function', () => {
+            let ran = false;
+            Attv.whenReady(() => {
+                ran = true;
+            });
+            
+            expect(ran).toBeTrue();
+        });
+
+    });
+
+
+    describe('Attv.loadElements()', () => {
+
+        it('Should load elements', () => {
+            Attv.loadElements();
+        });
+
+    });
+    
 })

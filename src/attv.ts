@@ -152,7 +152,7 @@ namespace Attv {
         }
 
         /**
-         * Returns raw string 
+         * Returns raw string. If empty it will return 'undefined'
          * @param element the element
          */
         raw(element: HTMLElement): string {
@@ -220,9 +220,10 @@ namespace Attv {
         }
 
         /**
-         * 
+         * Returns undefined if settings attribute does not exists
          * @param element the element
          * @param orDefault (optional) default settings
+         * @see Attv.Attribute.settingsName()
          */
         getSettings<TAny>(element: HTMLElement): TAny {
             let dataSettings = this.resolve(DataSettings.Key);
@@ -474,7 +475,7 @@ namespace Attv {
     
             post.push(registerAllAttributes, cleanup, loadElements);
     
-            Attv.onDocumentReady(() => {
+            Attv.whenReady(() => {
                 init.forEach(run => run());
                 pre.forEach(run => run());
                 post.forEach(run => run());
@@ -959,7 +960,7 @@ namespace Attv {
         }
     }
 
-    export function onDocumentReady(fn: () => void): void {
+    export function whenReady(fn: () => void): void {
         if (document.readyState == 'loading') {
             // without jQuery (doesn't work in older IEs)
             document.addEventListener('DOMContentLoaded', fn, false);
