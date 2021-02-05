@@ -1,3 +1,4 @@
+/// <reference path="../src/attv.ts" />
 // ------------------------------------------------- //
 
 describe('Attv constants and global vars', () => {

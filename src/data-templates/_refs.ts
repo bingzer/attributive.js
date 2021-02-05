@@ -1,5 +1,8 @@
-/// <reference path="../../build/attv.d.ts" />
-/// <reference path="../../build/data-attributes.d.ts" />
-/// <reference path="../../build/data-models.d.ts" />
+/// <reference path="../helpers.ts" />
+/// <reference path="../prototypes.ts" />
+/// <reference path="../attv.ts" />
+/// <reference path="../data-attributes/data-content.ts" />
+/// <reference path="../data-models/data-model.ts" />
+/// <reference path="../data-models/data-foreach.ts" />
 namespace Attv {
 }
