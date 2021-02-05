@@ -1,0 +1,38 @@
+<html>
+<head>
+	<title>[data-attrs] Test Usages</title>
+</head>
+<body>
+	<div>
+        <h3>
+            [data-attrs]. Alert
+		</h3>
+		
+        <div>
+
+            <a href="#" data-wall="alert" data-content="HI">Click for alert</a>
+            
+            <button onclick="alert('ola')" data-wall="alert" data-content="before ola">Click me for alert</button>
+
+        </div>
+
+    </div>
+	<div>
+        <h3>
+            [data-attrs]. Confirm
+        </h3>
+        
+        <div>
+    
+            <a href="#" onclick="alert('ola')" data-wall="confirm" data-content="before ola. are you sure?">Click for confirm</a>
+            
+            <button onclick="alert('ola')" data-wall="confirm" data-content="before ola. are you sure?">Click me for confirm</button>
+        </div>
+
+    </div>
+    
+	<script type="text/javascript" src="/build/attv.js"></script>
+	<script type="text/javascript" src="/build/data-attributes.js"></script>
+	<script type="text/javascript" src="/build/data-walls.js"></script>
+</body>
+</html>

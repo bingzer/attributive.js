@@ -1,205 +1,257 @@
-beforeEach(() => {
-    expect(global.Attv).toBeFalsy();
-
-    global.Attv = require('../src/attv').Attv;
-});
-
-afterEach(() => {
-    global.Attv = undefined;
-});
-
+/// <reference path="../src/attv.ts" />
 // ------------------------------------------------- //
 
 describe('Attv.Attribute', () => {
-    it('Should have Attv.Attribute type', () => {
+    
+    it('Should exist', () => {
         expect(Attv.Attribute).toBeDefined();
     });
 
-    it('Should create Attv.Attribute', () => {
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
-
-        expect(att).toBeTruthy();
-        expect(att.name).toBe('data-attribute');
-        expect(att.uniqueId).toBe('uniqueId');
-        expect(att.isAutoLoad).toBeTruthy();
+    it('Should create an instance Attv.Attribute', () => {
+        let attribute = new Attv.Attribute('data-attr');
+        expect(attribute).toBeInstanceOf(Attv.Attribute);
     });
 
-    it('Should create Attv.Attribute (isAutoLoad = false)', () => {
-        let att = new Attv.Attribute('uniqueId', false);
-        att.name = 'data-attribute';
+    it('Should assign all variables properly', () => {
+        let attribute = new Attv.Attribute('data-attr');
 
-        expect(att).toBeTruthy();
-        expect(att.name).toBe('data-attribute');
-        expect(att.uniqueId).toBe('uniqueId');
-        expect(att.isAutoLoad).toBeFalsy();
+        expect(attribute.key).toBe('data-attr');
+        expect(attribute.name).toBe('data-attr');
+        expect(attribute.deps).toHaveSize(1);
+        expect(attribute.loadedName()).toBe('data-attr-loaded');
+        expect(attribute.settingsName()).toBe('data-attr-settings');
+        expect(attribute.allowsWildcard()).toBe(true);
     });
 
-    it('Should assign default properties', () => {
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
+    it('Should assign not allow wildcard', () => {
+        let attribute = new Attv.Attribute('data-attr');
+        attribute.wildcard = "none";
 
-        expect(att.priority).toBe(1);
-        expect(att.values.length).toBe(0);
-        expect(att.loadedName).toBe('data-attribute-loaded');
-        expect(att.settingsName).toBe('data-attribute-settings');
-        expect(att.wildcard).toBe('*');
-        expect(att.isStrict).toBeFalsy();
-        expect(att.dependency.internals.indexOf(Attv.DataSettings.UniqueId) > -1).toBeTruthy();
+        expect(attribute.allowsWildcard()).toBe(false);
     });
 
-    it('Should not be strict', () => {
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
+    it('Should return false when it doesn\'t exist in the element', () => {
+        let element = document.createElement('div');
 
-        expect(att.isStrict);
+        let attribute = new Attv.Attribute('data-attr');
+
+        expect(attribute.exists(element)).toBeFalse();
     });
 
-    it('Should be strict', () => {
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
-        att.wildcard = 'none';
+    it('Should return true when it exists in the element', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', 'default');
 
-        expect(att.isStrict);
+        let attribute = new Attv.Attribute('data-attr');
+
+        expect(attribute.exists(element)).toBeTrue();
     });
 
-    it('Should register an attribute value', () => {
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
+    it('raw() should return the raw value', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', 'default');
 
-        let val = new Attv.Attribute.Value('value');
-        val.attribute = att;
+        let attribute = new Attv.Attribute('data-attr');
 
-        att.registerAttributeValues([val]);
-
-        expect(att.values.length).toBe(1);
-        expect(att.values.indexOf(val)).toBeGreaterThan(-1);
+        expect(attribute.raw(element)).toBe('default');
     });
 
-    it('Should register an attribute value and add the attribute dependencies to its resolver', () => {
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
+    it('raw() should return the undefined when it\'s an empty string', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', '');
+
+        let attribute = new Attv.Attribute('data-attr');
+
+        expect(attribute.raw(element)).toBeUndefined();
+    });
+
+    it('raw() should return the undefined when it doesn\'t exist', () => {
+        let element = document.createElement('div');
+
+        let attribute = new Attv.Attribute('data-attr');
+
+        expect(attribute.raw(element)).toBeUndefined();
+    });
+
+    it('parseRaw() should return an object', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', '{}');
+
+        let attribute = new Attv.Attribute('data-attr');
+
+        let obj = attribute.parseRaw(element);
+        expect(typeof obj).toBe('object');
+    });
+
+    it('parseRaw() should return an element <querySelector>', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', 'body');
+
+        let attribute = new Attv.Attribute('data-attr');
+        attribute.wildcard = "<querySelector>";
+
+        let obj = attribute.parseRaw<HTMLElement>(element);
+        expect(obj).toBeInstanceOf(HTMLBodyElement);
+    });
+
+    it('parseRaw() should return an object <jsExpression>', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', 'this');
+
+        let attribute = new Attv.Attribute('data-attr');
+        attribute.wildcard = "<jsExpression>";
+
+        let obj = attribute.parseRaw<object>(element);
+        expect(typeof obj).toBe('object');
+    });
+
+    it('getValue() should return AttributeValue', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', 'default');
+
+        let attribute = new Attv.Attribute('data-attr');
+        let value = attribute.getValue(element);
+
+        expect(value).toBeInstanceOf(Attv.AttributeValue);
+    });
+
+    it('getValue() should not return AttributeValue', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', 'default');
+
+        let attribute = new Attv.Attribute('data-attr');
+        attribute.wildcard = "none";
+
+        try
+        {
+            let value = attribute.getValue(element);
+            fail();
+        }
+        catch (e) {
+            // -- good
+        }
+    });
+
+    it('getSettings() should return AttributeValue', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', 'default');
+
+        let attribute = new Attv.Attribute('data-attr');
+        let settings = attribute.getSettings(element);
+
+        expect(settings).toBeUndefined();
+    });
+
+    it('getSettings() should return AttributeValue', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', 'default');
+        element.setAttribute('data-settings', '{}');
+
+        let attribute = new Attv.Attribute('data-attr');
+        let settings = attribute.getSettings(element);
+
+        expect(settings).toBeDefined();
+    });
+
+    it('isLoaded() should return true', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', 'default');
+        element.setAttribute('data-attr-loaded', '{}');
+
+        let attribute = new Attv.Attribute('data-attr');
+        let expected = attribute.isLoaded(element);
+
+        expect(expected).toBeTrue();
+    });
+
+    it('isLoaded() should return false', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', 'default');
+
+        let attribute = new Attv.Attribute('data-attr');
+        let expected = attribute.isLoaded(element);
+
+        expect(expected).toBeFalse();
+    });
+
+    it('markLoaded() should return true', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', 'default');
+
+        let attribute = new Attv.Attribute('data-attr');
+        let expected = attribute.markLoaded(element, true);
+
+        expect(expected).toBeTrue();
+    });
+
+    it('markLoaded() should return false', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', 'default');
+
+        let attribute = new Attv.Attribute('data-attr');
+        let expected = attribute.markLoaded(element, false);
+
+        expect(expected).toBeFalse();
+    });
+
+    it('map() an attribute value', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', 'strawberry');
+
+        let attribute = new Attv.Attribute('data-attr');
+        attribute.wildcard = "none";
+
+        attribute.map('strawberry');
         
-        att.dependency.internals.push('internal-dep');
-        att.dependency.uses.push('use-dep');
-        att.dependency.requires.push('require-dep');
-
-        let val = new Attv.Attribute.Value('value');
-        val.attribute = att;
-
-        att.registerAttributeValues([val]);
-
-        expect(att.values.length).toBe(1);
-        expect(att.values.indexOf(val)).toBe(0);
-
-        expect(val.resolver.internals.indexOf('internal-dep')).toBeGreaterThan(-1);
-        expect(val.resolver.uses.indexOf('use-dep')).toBeGreaterThan(-1);
-        expect(val.resolver.requires.indexOf('require-dep')).toBeGreaterThan(-1);
+        let value = attribute.getValue(element);
+        expect(value.value).toEqual('strawberry');
     });
 
-    it('Should return true when an element has this attribute', () => {
-        let elem = document.createElement('div');
-        elem.setAttribute('data-attribute', 'some-value');
-
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
-
-        expect(att.exists(elem)).toBeTruthy();
+    it('resolve() an attribute value', () => {
+        let attribute = new Attv.Attribute('data-attr');
+        
+        expect(attribute.resolve(Attv.DataSettings.Key)).toBeDefined();
     });
 
-    it('Should return false when an element does not have this attribute', () => {
-        let elem = document.createElement('div');
+    it('resolve() fails because no dependencies defined', () => {
+        let attribute = new Attv.Attribute('data-attr');
 
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
-
-        expect(att.exists(elem)).toBeFalsy();
+        let attribute2 = new Attv.Attribute('data-attr2');
+        
+        try {
+            attribute.resolve(attribute2.key);
+            fail();
+        } catch {
+            // -- good
+        }
     });
 
-    it('Should return the attribute value (default attribute value)', () => {
-        let elem = document.createElement('div');
-        elem.setAttribute('data-attribute', 'some-value');
+    it('resolveValue() fails because no dependencies defined', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attr', 'default');
 
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
+        let attribute = new Attv.Attribute('data-attr');
 
-        let val = att.getValue(elem);
+        Attv.register(() => attribute);
+        Attv.Registrar.run();
 
-        expect(val).toBeTruthy();
-        expect(val.getRaw(elem)).toBe('some-value');
+        let value = attribute.resolveValue(attribute.key, element);
+
+        expect(value).toBeDefined();
+
+        let index = Attv.attributes.indexOf(attribute);
+        Attv.attributes.splice(index, 1);
     });
 
-    it('Should return the first registered attribute value', () => {
-        Attv.configuration = new Attv.DefaultConfiguration();
-
-        let elem = document.createElement('div');
-
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
-
-        let val = new Attv.Attribute.Value('some-value');
-        val.attribute = att;
-
-        att.registerAttributeValues([val]);
-
-        let expected = att.getValue(elem);
-
-        expect(expected).toBe(val);
+    it('toString() an attribute value', () => {
+        let attribute = new Attv.Attribute('data-attr');
+        
+        expect(attribute.toString()).toEqual('[data-attr]');
     });
 
-    it('Should throw error when a strict attribute do not have default attribute value', () => {
-        let elem = document.createElement('div');
-
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
-        att.wildcard = 'none';
-
-        expect(() => att.getValue(elem)).toThrowError();
-    });
-
-    it('Should return true when the element is already loaded', () => {
-        let elem = document.createElement('div');
-        elem.setAttribute('data-attribute-loaded', 'true');
-
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
-
-        expect(att.isElementLoaded(elem)).toBeTruthy();
-    });
-
-    it('Should return true when the element is not loaded', () => {
-        let elem = document.createElement('div');
-
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
-
-        expect(att.isElementLoaded(elem)).toBeFalsy();
-    });
-
-    it('Should mark element loaded to true', () => {
-        let elem = document.createElement('div');
-
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
-        att.markElementLoaded(elem, true);
-
-        expect(att.isElementLoaded(elem)).toBeTruthy();
-    });
-
-    it('Should mark element loaded to false', () => {
-        let elem = document.createElement('div');
-
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
-        att.markElementLoaded(elem, false);
-
-        expect(att.isElementLoaded(elem)).toBeFalsy();
-    });
-
-    it('Should print toString()', () => {
-        let att = new Attv.Attribute('uniqueId', true);
-        att.name = 'data-attribute';
-
-        expect(att.toString()).toBe('[data-attribute]');
+    it('selector() an attribute value', () => {
+        let attribute = new Attv.Attribute('data-attr');
+        
+        expect(attribute.selector()).toEqual('[data-attr]');
     });
 });

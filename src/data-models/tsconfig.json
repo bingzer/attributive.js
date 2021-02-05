@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "sourceMap": true,
+        "outDir": "build",
+        "outFile": "data-models.js",
+        "declaration": true,
+        "noEmitHelpers": true
+    }
+  }

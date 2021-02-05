@@ -1,0 +1,156 @@
+<html>
+<head>
+	<title>[data-template] Test Usages</title>
+</head>
+<body>
+	<div>
+        <h3>
+            [data-template] using &lt;script&gt; (Simple html template no [data-model])
+		</h3>
+            
+        <script type="text/html" id="simple-templated-script" data-template="script">
+            <div>
+                <h2>This h2 (from scripts)</h2>
+                <h3 style="background-color: orange;">This is h3</h3>
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ac ullamcorper leo. 
+                    Mauris feugiat dolor vitae dui pellentesque eleifend. Nam sem nisl, posuere at orci ut, 
+                    eleifend eleifend lacus. Phasellus in nisl pellentesque tortor ultrices imperdiet ut vel urna. 
+                    Integer vitae lacinia lectus.
+                </p>
+            </div>
+        </script>
+
+        <button type="button" onclick="loadTemplateFrom('#simple-templated-script', employees)">Load Template</button>
+
+    </div>
+	<div>
+        <h3>
+            [data-template] using &lt;script&gt;
+		</h3>
+            
+        <script type="text/html" id="employee-list-templated-script" data-template="script">
+            <div data-foreach="emp in this" style="border: 1px solid black; padding: 10px" class="b">
+                <h2>This is from scripts</h2>
+                <h3 data-attrs="{title: 'hello ' + emp.firstName + ' ' + emp.lastName}" style="background-color: orange;">
+                    <span data-model="emp.firstName"></span>
+                    <span data-model="emp.lastName"></span>
+                    <br/>
+                    Email:
+                    <a data-attrs="{ href: 'mailto: ' + emp.email}">
+                        <span data-model="emp.email"></span>
+                    </a>
+                </h3>
+            </div>
+        </script>
+            
+        <script type="text/html" id="employee-list-templated-script-global-vars" data-template="script">
+            <div data-foreach="emp in employees" style="border: 1px solid black; padding: 10px" class="b">
+                <h2>This is from scripts</h2>
+                <h3 data-attrs="{title: 'hello ' + emp.firstName + ' ' + emp.lastName}" style="background-color: orange;">
+                    <span data-model="emp.firstName"></span>
+                    <span data-model="emp.lastName"></span>
+                    <br/>
+                    Email:
+                    <a data-attrs="{ href: 'mailto: ' + emp.email}">
+                        <span data-model="emp.email"></span>
+                    </a>
+                </h3>
+            </div>
+        </script>
+
+        <button type="button" onclick="loadTemplateFrom('#employee-list-templated-script', employees)">Load Template</button>
+        <button type="button" onclick="loadTemplateFrom('#employee-list-templated-script-global-vars')">Load Template (using gloval variables)</button>
+
+    </div>
+
+	<div>
+        <h3>
+            [data-template] using &lt;div&gt;
+		</h3>
+            
+        <div type="text/html" id="employee-list-templated-div" data-template="default">
+            <div data-foreach="emp in this" style="border: 1px solid black; padding: 10px" class="b">
+                <h2>This is from div</h2>
+                <h3 data-attrs="{title: 'hello ' + emp.firstName + ' ' + emp.lastName}" style="background-color: beige;">
+                    <span data-model="emp.firstName"></span>
+                    <span data-model="emp.lastName"></span>
+                    <br/>
+                    Email:
+                    <a data-attrs="{ href: 'mailto: ' + emp.email}">
+                        <span data-model="emp.email"></span>
+                    </a>
+                </h3>
+            </div>
+        </div> 
+        <div type="text/html" id="employee-templated-div" data-template="default">
+            <h2>employee.data = <span data-model="this.data.asset"></span></h2>
+            <h3 data-attrs="{title: 'hello ' + this.firstName + ' ' + this.lastName}" style="background-color: beige;">
+                <span data-model="this.firstName"></span>
+                <span data-model="this.lastName"></span>
+                <br/>
+                Email:
+                <a data-attrs="{ href: 'mailto: ' + this.email}">
+                    <span data-model="this.email"></span>
+                </a>
+            </h3>
+        </div>
+
+        <button type="button" onclick="loadTemplateFrom('#employee-list-templated-div', employees)">Load Template</button>
+        <button type="button" onclick="loadTemplateFrom('#employee-templated-div', employees[0])">Load Template (Single Employee) employees[0]</button>
+        <button type="button" onclick="loadTemplateFrom('#employee-templated-div', employees[1])">Load Template (Single Employee) employees[1]</button>
+        <button type="button" onclick="loadTemplateFrom('#employee-templated-div', employees[2])">Load Template (Single Employee) employees[2]</button>
+
+    </div>
+
+    <div style="border: 1px solid gray; margin: 8px;">
+        <p>Template will be loaded here</p>
+        <div style="margin: 8px" id="template-loader"></div>
+    </div>
+    
+	<script type="text/javascript" src="/build/attv.js"></script>
+	<script type="text/javascript" src="/build/data-attributes.js"></script>
+	<script type="text/javascript" src="/build/data-models.js"></script>
+	<script type="text/javascript" src="/build/data-templates.js"></script>
+    
+	<script type="text/javascript">
+        var employees = [
+            {
+                firstName: "ricky",
+                lastName: "tobing",
+                email: 'ricky@example.com',
+                data: {
+                    asset: 'none',
+                    key: 'pad'
+                }
+            },
+            {
+                firstName: "no2",
+                lastName: "employee",
+                email: 'employee2@example.com',
+                data: {
+                    asset: 'currency',
+                    key: 'xbox'
+                }
+            },
+            {
+                firstName: "no2",
+                lastName: "employee",
+                email: 'employee3@example.com',
+                data: {
+                    asset: 'keyboard',
+                    key: 'mouse'
+                }
+            },
+        ];
+
+        function loadTemplateFrom(templateId, model) {
+            document.querySelector('#template-loader').innerHTML = '';
+
+            let element = Attv.getAttribute('data-template').render(templateId, model);
+            document.querySelector('#template-loader').appendChild(element);
+        }
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,187 @@
+<html>
+<head>
+	<title>[data-model] Test Usages</title>
+	<style>
+		.container {
+			width: 100%;
+		}
+		.panel {
+			width: 95%;
+			border: 1px solid gray;
+			padding: 8px;
+			margin-top: 8px;
+			margin-bottom: 8px;
+			float: left;
+		}
+		.panel-50 {
+			width: 45%;
+			height: 150px;
+		}
+		h4, h3 {
+			margin-top: 4px;
+			margin-bottom: 8px;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+        <h3>
+            [data-model]
+		</h3>
+		<h2>Two way binding</h2>
+		<p>
+			Provides two way binding by default. It can target the element for changes by specifying: [data-load="queryselector"]
+		</p>
+
+		<div class="panel">
+			<h3>Summary</h3>
+
+			<div>
+				Name <span data-model="employee.firstName"></span> <span data-model="employee.lastName"></span>
+			</div>
+			<div>
+				Password <span data-model="employee.password"></span>
+			</div>
+			<div>
+				Wants Candy? <span data-model="employee.wantCandy">
+			</div>
+			<div>
+				Type of candy that <span data-model="employee.firstName"></span> want is <span data-model="employee.candyType"></span>
+			</div>
+			<div>
+				Flavor of candy <span data-model="employee.firstName"></span> want is:
+				<ul>
+					<li data-foreach="flavor in employee.candyFlavors" data-model="flavor"></li>
+				</ul> 
+			</div>
+			<div>
+				Employee comment:
+				<p data-model="employee.comments"></p>
+				<p data-model="employee.comment"></p>
+			</div>
+			
+		</div>
+
+		<div class="panel panel-50">
+			<h4>input type=text</h4>
+
+			<div>
+				First Name <input type="text" data-model="employee.firstName" title="your name is {{firstName}}"/>
+			</div>
+			<div>
+				Last Name <input type="text" data-model="employee.lastName"/>
+			</div>
+			<div>
+				Password <input type="password" data-model="employee.password"/>
+			</div>
+			
+			<p style="margin-top: 10px;">
+				Name: <span data-model="employee.firstName"></span> <span data-model="employee.lastName"></span>
+			</p>
+		</div>
+
+		<div class="panel panel-50" id="with-data-load">
+			<h4>input type=text. With [data-load] target</h4>
+
+			<div>
+				First Name <input type="text" data-model="employee.firstName" title="your name is {{firstName}}" data-load="#with-data-load"/>
+			</div>
+			<div>
+				Last Name <input type="text" data-model="employee.lastName" data-load="#with-data-load"/>
+			</div>
+			
+			<p style="margin-top: 10px;">
+				Only this model will be affected
+				Name: <span data-model="employee.firstName"></span> <span data-model="employee.lastName"></span>
+			</p>
+		</div>
+
+		<div class="panel panel-50">
+			<h4>input type=checkbox</h4>
+
+			<label>
+				Does <span style="font-weight: 700" data-model="employee.firstName"></span> want candy? <span data-model="employee.wantCandy"></span>
+				<input type="checkbox" data-model="employee.wantCandy"/>
+				<checkbox>hello</checkbox>
+			</label>
+		</div>
+
+		<div class="panel panel-50">
+			<h4>select</h4>
+			<select data-model="employee.candyType" data-attrs="{disabled: !employee.wantCandy}">
+				<option data-foreach="candy in candyTypes" data-attrs="{value: candy}" data-model="candy"></option>
+			</select>
+			
+			<p style="margin-top: 10px;">
+				Type of candy that <span data-model="employee.firstName"></span> want? <span data-model="employee.candyType"></span>
+			</p>
+		</div>
+
+		<div class="panel panel-50">
+			<h4>multi-select</h4>
+			<select data-model="employee.candyFlavors" data-attrs="{disabled: !employee.wantCandy}" multiple style="width: 250px">
+				<option data-foreach="candyFlavor in candyFlavors" data-attrs="{value: candyFlavor.value}" data-model="candyFlavor.name"></option>
+			</select>
+			
+			<p style="margin-top: 10px;">
+				Flavors of candy that <span data-model="employee.firstName"></span> want? <span data-model="employee.candyFlavors"></span>
+			</p>
+		</div>
+
+		
+		<div class="panel panel-50">
+			<p>radio button</p>
+
+			<label data-foreach="candy2 in candyTypes" style="border: 1px solid gray">
+				<input data-model="employee.candyType" type="radio" data-attrs="{name: 'candy-input', value: candy2, checked: employee.candyType == candy2, disabled: !employee.wantCandy}">
+				<span data-model="candy2"></span>
+			</label>
+			
+			<p style="margin-top: 10px;">
+				Type of candy that <span data-model="employee.firstName"></span> want? <span data-model="employee.candyType"></span>
+			</p>
+		</div>
+
+		<div class="panel panel-50">
+			<p>textarea</p>
+
+			<p>Put any comment you may have here</p>
+			<textarea data-model="employee.comments" style="width: 300px" rows="5" data-attrs="{placeholder: employee.firstName + ', put your comments here!'}"></textarea>
+		</div>
+
+	</div>
+	
+	<script type="text/javascript">
+		var employee = {
+			firstName: "ricky",
+			lastName: "tobing",
+			wantCandy: true,
+			candyType: 'snickers',
+			candyFlavors: [
+				'chocolate',
+				'vanilla'
+			]
+		};
+
+		var candyTypes = [
+			'snickers',
+			'milky way',
+			'm&m',
+			'kitkat',
+			'twix'
+		];
+		var candyFlavors = [
+			{ name: 'Coco Flavor', value: 'chocolate' },
+			{ name: 'Vanilla Flavor', value: 'vanilla' },
+			{ name: 'Strawberry and Plum', value: 'strawberry' },
+			{ name: 'Melon and Watermelon', value: 'watermelon' },
+			{ name: 'Rainbox', value: 'all' },
+		];
+	</script>
+    
+    
+	<script type="text/javascript" src="/build/attv.js"></script>
+	<script type="text/javascript" src="/build/data-attributes.js"></script>
+	<script type="text/javascript" src="/build/data-models.js"></script>
+</body>
+</html>

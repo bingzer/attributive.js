@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "sourceMap": true,
+    "outDir": "build",
+    "outFile": "attv.js",
+    "declaration": true,
+    "noEmitHelpers": true
+  },
+  "files": [
+    "prototypes.ts",
+    "helpers.ts",
+    "attv.ts"
+  ],
+  "exclude": [
+    "build/",
+    "dist/"
+  ]
+}

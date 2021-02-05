@@ -1,0 +1,87 @@
+<html>
+<head>
+	<title>[data-foreach] Test Usages</title>
+</head>
+<body>
+	<div>
+        <h3>
+            [data-foreach]
+		</h3>
+        
+        <div>
+
+            <div id="new-employee" style="margin-top: 32px; margin-bottom: 32px;">
+                <input type="text" data-model="newEmployee.firstName" placeholder="First Name">
+                <input type="text" data-model="newEmployee.lastName" placeholder="Last Name">
+                <input type="email" data-model="newEmployee.email" placeholder="email">
+
+                <button type="button" onclick="addEmployee()">Add new employee</button>
+            </div>
+
+
+            [data-foreach] auto loads and create a global var of emp
+            
+            <div id="employee-list" data-foreach="emp in employees" style="border: 1px solid black; padding: 10px" class="b">
+                <h3 data-attrs="{title: 'hello ' + emp.firstName + ' ' + emp.lastName}">
+                    <span data-model="emp.firstName"></span>
+                    <span data-model="emp.lastName"></span>
+                    <br/>
+                    Email:
+                    <a data-attrs="{ href: 'mailto: ' + emp.email}">
+                        <span data-model="emp.email"></span>
+                    </a>
+                </h3>
+            </div>
+
+        </div>
+
+    </div>
+    
+	<script type="text/javascript" src="/build/attv.js"></script>
+	<script type="text/javascript" src="/build/data-attributes.js"></script>
+	<script type="text/javascript" src="/build/data-models.js"></script>
+    
+	<script type="text/javascript">
+        var newEmployee = {};
+        var employees = [
+            {
+                firstName: "ricky",
+                lastName: "tobing",
+                email: 'ricky@example.com',
+                data: {
+                    asset: 'none',
+                    key: 'pad'
+                }
+            },
+            {
+                firstName: "no2",
+                lastName: "employee",
+                email: 'employee2@example.com',
+                data: {
+                    asset: 'currency',
+                    key: 'xbox'
+                }
+            },
+            {
+                firstName: "no2",
+                lastName: "employee",
+                email: 'employee3@example.com',
+                data: {
+                    asset: 'keyboard',
+                    key: 'mouse'
+                }
+            },
+        ]
+
+        function addEmployee() {
+            employees.push(newEmployee);
+
+            newEmployee = {};
+
+            Attv.loadElements('#employee-list', { forceReload: true });
+            Attv.loadElements('#new-employee', { forceReload: true });
+        }
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,80 @@
+<html>
+<head>
+	<title>[data-partial] Test Usages</title>
+</head>
+<body>
+	<div>
+        <h3>
+            [data-partial]. Referesh every 1 seconds
+        </h3>
+		<div data-partial="auto" 
+			data-url="data/datetime.html" 
+			data-data="{name: 'timer'}" 
+			data-interval="1000">uses [data-partial]</div>
+
+    </div>
+	<div>
+        <h3>
+            [data-partial]. with templates and model. From <a href="data/employees.json">data/employees.json</a>
+        </h3>
+		<div data-partial="auto" 
+			data-url="data/employees.json" 
+			data-source="#employee-list-templated-script">
+			<p>...</p>
+		</div>
+
+    </div>
+	<div>
+        <h3>
+            [data-partial]. on a button
+		</h3>
+		<div>
+			<p>
+				Data is retrieved from <a href="data/employees.json">data/employees.json</a>
+			</p>
+			<button data-partial="click" 
+				data-url="data/employees.json" 
+				data-source="#employee-list-templated-script"
+				data-target="#target-load-from-button">
+				Click to load (from button)
+			</button>
+			<a data-partial="click" 
+				data-url="data/employees.json" 
+				data-source="#employee-list-templated-script"
+				data-target="#target-load-from-button"
+				href="#">
+				Click to load (from an 'a')
+			</a>
+			<button onclick="document.querySelector('#target-load-from-button').innerHTML = '...'">Clear</button>
+		</div>
+		<div>
+			<p>Will be loaded here</p>
+			<div id="target-load-from-button" style="border: 1px solid black; padding: 8px; width: 350px">
+				...
+			</div>
+		</div>
+
+    </div>
+    
+    
+	<script type="text/javascript" src="/build/attv.js"></script>
+	<script type="text/javascript" src="/build/data-attributes.js"></script>
+	<script type="text/javascript" src="/build/data-models.js"></script>
+	<script type="text/javascript" src="/build/data-templates.js"></script>
+	<script type="text/javascript" src="/build/data-partials.js"></script>
+
+	<script type="text/html" id="employee-list-templated-script" data-template="script">
+		<div data-foreach="emp in this" style="border: 1px solid black" class="b">
+			<h5 data-attrs="{title: 'hello ' + emp.firstName + ' ' + emp.lastName}" style="background-color: lightgray;">
+				<span data-model="emp.firstName"></span>
+				<span data-model="emp.lastName"></span>
+				<br/>
+				Email:
+				<a data-attrs="{ href: 'mailto: ' + emp.email}">
+					<span data-model="emp.email"></span>
+				</a>
+			</h3>
+		</div>
+	</script>
+</body>
+</html>
