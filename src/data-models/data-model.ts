@@ -16,6 +16,7 @@ namespace Attv {
                 new Attv.Binders.MultiSelect(),
                 new Attv.Binders.Checkbox(),
                 new Attv.Binders.RadioButton(),
+                new Attv.Binders.Table(),
                 new Attv.Binders.Default()
             ];
             this.deps.uses = [ 

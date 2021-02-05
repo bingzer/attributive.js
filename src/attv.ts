@@ -125,7 +125,6 @@ namespace Attv {
          */
         constructor (public key: string) {
             this.name = key;
-            this.deps.internals = [DataSettings.Key];
         }
 
         loadedName() {
@@ -226,10 +225,10 @@ namespace Attv {
          * @see Attv.Attribute.settingsName()
          */
         getSettings<TAny>(element: HTMLElement): TAny {
-            let dataSettings = this.resolve(DataSettings.Key);
-            let settings = dataSettings.parseRaw<TAny>(element);
+            let attribute = element?.getAttribute(this.settingsName()) || undefined;
+            let setting = Attv.parseJsonOrElse<TAny>(attribute);
 
-            return settings;
+            return setting || undefined;
         }
 
         /**
@@ -448,10 +447,6 @@ namespace Attv {
             isInitialized = true;
         }
     
-        function registerBuiltinAttributes() {
-            registrations.push(new AttributeRegistration(Attv.DataSettings.Key, { wildcard: "<json>" }));
-        }
-    
         function registerAllAttributes() {
             //for (let i = registrations.length - 1; i >= 0; i--) {
             for (let i = 0; i < registrations.length; i++) {
@@ -470,7 +465,6 @@ namespace Attv {
         export function run() {
             if (!isInitialized) {
                 init.push(initialize);
-                pre.push(registerBuiltinAttributes);
             }
     
             post.push(registerAllAttributes, cleanup, loadElements);
@@ -1092,14 +1086,6 @@ namespace Attv {
     export function addAttribute(attributeKey: string, element: HTMLElement, any: string) {
         let attribute = Attv.getAttribute(attributeKey);
         element.attvAttr(attribute.name, any);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////// 1st class attributes /////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////
-
-    export namespace DataSettings {
-        export const Key: string = 'data-settings';
     }
 }
 

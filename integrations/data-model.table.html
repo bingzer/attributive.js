@@ -1,0 +1,59 @@
+<html>
+<head>
+	<title>[data-model] on table Test Usages</title>
+</head>
+<body>
+	<div>
+        <h3>
+            [data-model]
+		</h3>
+        
+        <table data-model="employees"></table>
+
+    </div>
+
+	<div>
+        <h3>
+            [data-model] table with settings.headers
+		</h3>
+        
+        <table data-model="employees" data-model-settings="{ headers: ['firstName', 'lastName'] }"></table>
+
+    </div>
+    
+<script type="text/javascript" src="/build/attv.js"></script>
+<script type="text/javascript" src="/build/data-attributes.js"></script>
+<script type="text/javascript" src="/build/data-models.js"></script>
+
+<script type="text/javascript">
+    var employees = [{
+        "firstName": "ricky",
+        "lastName": "tobing",
+        "email": "ricky@example.com",
+        "data": {
+            "asset": "none",
+            "key": "pad"
+        }
+    },
+    {
+        "firstName": "no2",
+        "lastName": "employee",
+        "email": "employee2@example.com",
+        "data": {
+            "asset": "currency",
+            "key": "xbox"
+        }
+    },
+    {
+        "firstName": "no2",
+        "lastName": "employee",
+        "email": "employee3@example.com",
+        "data": {
+            "asset": "keyboard",
+            "key": "mouse"
+        }
+    }];
+</script>
+
+</body>
+</html>
