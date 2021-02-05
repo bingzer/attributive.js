@@ -32,6 +32,7 @@ Using **attributive.js**, you can simply put `[data-partial]` to load the html:
 The purpose of **attributive.js** is to eliminate a boilerplate and repetitive javascript code by using html attributes.
 
 ### Build
+First
 
 ```
 npm install
@@ -41,6 +42,11 @@ gulp
 When developing
 ```
 gulp watch
+```
+
+Running testing
+```
+npm test
 ```
 
 ### Demo
