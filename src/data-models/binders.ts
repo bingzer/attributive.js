@@ -302,7 +302,7 @@ namespace Attv.Binders {
                 headers.forEach(head => {
                     let td = document.createElement('td');
 
-                    td.innerHTML = item[head];
+                    td.innerHTML = item[head] || '';
 
                     tr.append(td);
                 });
