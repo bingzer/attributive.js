@@ -1,19 +1,21 @@
 // karma.conf.js
 module.exports = config => {
-    config.set({
-      frameworks: ["jasmine"],
+  config.set({
+    frameworks: ["jasmine"],
 
-      files: [
-          "src/**/*.ts",
-          "tests/**/*.ts"
-      ],
+    files: [
+      "src/**/*.ts",
+      "tests/**/*.ts"
+    ],
 
-      preprocessors: {
-        '**/*.ts': ['typescript']
-      },
+    preprocessors: {
+      '**/*.ts': ['typescript']
+    },
 
-      typescriptPreprocessor: {
-        project: './tsconfig.json'
-      }
-    })
-  }
+    typescriptPreprocessor: {
+      project: './tsconfig.json'
+    },
+
+    browsers: ['ChromeHeadless']
+  })
+}
