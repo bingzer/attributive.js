@@ -57,7 +57,7 @@ namespace Attv {
                     dataCallback.callback(element);
                 } else if (element?.tagName?.equalsIgnoreCase('a')) {
                     let target = element.attvAttr('target');
-                    Attv.navigate(url || '', target);
+                    Attv.DataWall.navigate(url || '', target);
                 }
 
                 return false;
@@ -83,6 +83,19 @@ namespace Attv {
 
                 return false;
             }
+        }
+        
+        /**
+         * Navigate to an URL
+         * @param url the url to navigate
+         * @param target target if any
+         */
+        export function navigate(url: any, target?: string) {	
+            if (target) {	
+                window.open(url, target);	
+            } else {	
+                window.location.href = url;	
+            }	
         }
 
     }

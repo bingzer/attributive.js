@@ -21,7 +21,7 @@ Element.prototype.attvHtml = function (html?: string): string | any {
 
         if (html) { 
             // look for scripts
-            let innerHtmlElement = Attv.createHTMLElement(html);
+            let innerHtmlElement = Attv.Dom.parseDom(html);
             let scripts = innerHtmlElement.querySelectorAll('script');
             for (let i = 0; i < scripts.length; i++) {
                 if(scripts[i].type?.toLowerCase()?.contains('javascript')) {

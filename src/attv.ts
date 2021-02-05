@@ -675,7 +675,7 @@ namespace Attv {
             return parentTag;
         }
 
-        export function createHTMLElement(tagName: string, innerHtml: string): HTMLElement {
+        function createHTMLElement(tagName: string, innerHtml: string): HTMLElement {
             let parentTag = getParentTag(tagName);
             
             let htmlElement = document.createElement(parentTag);
@@ -684,6 +684,10 @@ namespace Attv {
             return htmlElement;
         }
 
+        /**
+         * Returns the PARENT of element. This is by design
+         * @param any any string
+         */
         export function parseDom(any: string | HTMLElement): HTMLElement {
             if (isString(any)) {
                 let text = any as string;
@@ -714,7 +718,7 @@ namespace Attv {
                         // ignore
                     }
 
-                    htmlElement = Attv.Dom.createHTMLElement(tag, text);
+                    htmlElement = createHTMLElement(tag, text);
                 }
 
                 any = htmlElement;
