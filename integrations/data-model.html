@@ -49,7 +49,10 @@
 				Type of candy that <span data-model="employee.firstName"></span> want is <span data-model="employee.candyType"></span>
 			</div>
 			<div>
-				Flavor of candy <span data-model="employee.firstName"></span> want is <span data-model="employee.candyFlavors"></span>
+				Flavor of candy <span data-model="employee.firstName"></span> want is:
+				<ul>
+					<li data-foreach="flavor in employee.candyFlavors" data-model="flavor"></li>
+				</ul> 
 			</div>
 			<div>
 				Employee comment:
@@ -163,9 +166,9 @@
 		var candyTypes = [
 			'snickers',
 			'milky way',
-			// 'm&m',
-			// 'kitkat',
-			// 'twix'
+			'm&m',
+			'kitkat',
+			'twix'
 		];
 		var candyFlavors = [
 			{ name: 'Coco Flavor', value: 'chocolate' },

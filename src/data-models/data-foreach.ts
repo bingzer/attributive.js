@@ -57,6 +57,7 @@ namespace Attv.DataForEach {
                     element.removeAttribute(name);
                 }
             });
+            element.attvAttr('style', 'display:none !important;');
             
             return true;
         }
