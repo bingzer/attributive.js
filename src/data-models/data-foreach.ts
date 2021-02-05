@@ -57,7 +57,7 @@ namespace Attv.DataForEach {
                     element.removeAttribute(name);
                 }
             });
-            element.attvAttr('style', 'display:none !important;');
+            element.attvAttr('style', 'display:none !important');
             
             return true;
         }
@@ -76,7 +76,7 @@ namespace Attv.DataForEach {
                 name: varName,
                 array: Attv.DataModel.getProperty(varsName, context) || [],
                 createTemplate: () => {
-                    let child = Attv.Dom.createHTMLElement(element.tagName, element.attvAttr(dataContent)).firstElementChild as HTMLElement;
+                    let child = Attv.Dom.parseDom(element.attvAttr(dataContent)).firstElementChild as HTMLElement;
 
                     child.attvAttr(dataRef, element.getAttribute(dataId.name));
                     

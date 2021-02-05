@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "sourceMap": true,
+    "declaration": true,
+    "noEmitHelpers": true
+  },
+  "files": [
+    "prototypes.ts",
+    "helpers.ts",
+    "attv.ts"
+  ],
+  "exclude": [
+    "build/",
+    "dist/"
+  ]
+}

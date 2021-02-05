@@ -1,7 +1,6 @@
 var gulp = require('gulp');
 var del = require("del");
 var uglify = require('gulp-uglify');
-var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var pipeline = require('readable-stream').pipeline;
 var sourcemaps = require('gulp-sourcemaps');
@@ -9,7 +8,6 @@ var typescript = require('gulp-typescript');
 //var tsProject = typescript.createProject('tsconfig.json');
 var packageJson = require('./package.json');
 const flatten = require('gulp-flatten');
-const { task } = require('gulp');
 var version = packageJson.version;
 
 const DIST_DIR = 'dist';
@@ -142,16 +140,12 @@ function distribute() {
 }
 
 function watchTs() {
-    //var tasks = components.map(comp => gulp.watch(comp.files, makeTsc(comp)) );
-
     components.filter(comp => comp.enabled).forEach(comp => {
         gulp.watch(comp.files, makeTsc(comp))
     });
-
-    // return gulp.watch('src/**/*.ts', 
-    //     gulp.series(tsc())
-    // );
 }
+
+// -------------------------------------------------------------------------------- //
 
 const build = gulp.series(distClean, tsClean, tsc(), minifyJs, distribute);
 const watch = gulp.series(build, watchTs);

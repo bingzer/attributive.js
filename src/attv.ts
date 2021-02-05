@@ -854,14 +854,6 @@ namespace Attv {
         return window || document;
     }
 
-    export function navigate(url: any, target?: string) {
-        if (target) {
-            window.open(url, target);
-        } else {
-            window.location.href = url;
-        }
-    }
-
     export function select(elementOrSelector: HTMLElement | string): HTMLElement {
         let element = elementOrSelector as HTMLElement;
         if (Attv.isString(elementOrSelector)) {
@@ -892,10 +884,6 @@ namespace Attv {
 
     export function toArray<TAny>(any: any): TAny[] {
         return [].slice.call(any) as TAny[];
-    }
-
-    export function createHTMLElement(any: string | HTMLElement): HTMLElement {
-        return Attv.Dom.parseDom(any);
     }
 
     export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any, context?: any): TAny {  
