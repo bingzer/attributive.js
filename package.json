@@ -4,6 +4,11 @@
   "dependencies": {
     "typescript": "4.0.2"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bingzer/attributive.js"
+  },
+  "license": "Apache-2.0",
   "scripts": {
     "install": "gulp",
     "test": "karma start --single-run --browsers ChromeHeadless"
