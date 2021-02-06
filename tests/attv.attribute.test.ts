@@ -17,7 +17,7 @@ describe('Attv.Attribute', () => {
 
         expect(attribute.key).toBe('data-attr');
         expect(attribute.name).toBe('data-attr');
-        expect(attribute.deps).toHaveSize(1);
+        expect(attribute.deps).toHaveSize(0);
         expect(attribute.loadedName()).toBe('data-attr-loaded');
         expect(attribute.settingsName()).toBe('data-attr-settings');
         expect(attribute.allowsWildcard()).toBe(true);
@@ -145,7 +145,7 @@ describe('Attv.Attribute', () => {
     it('getSettings() should return AttributeValue', () => {
         let element = document.createElement('div');
         element.setAttribute('data-attr', 'default');
-        element.setAttribute('data-settings', '{}');
+        element.setAttribute('data-attr-settings', '{}');
 
         let attribute = new Attv.Attribute('data-attr');
         let settings = attribute.getSettings(element);
@@ -209,8 +209,14 @@ describe('Attv.Attribute', () => {
 
     it('resolve() an attribute value', () => {
         let attribute = new Attv.Attribute('data-attr');
+
+        Attv.register(() => attribute);
+        Attv.Registrar.run();
         
-        expect(attribute.resolve(Attv.DataSettings.Key)).toBeDefined();
+        expect(attribute.resolve(attribute.key)).toBeDefined();
+
+        let index = Attv.attributes.indexOf(attribute);
+        Attv.attributes.splice(index, 1);
     });
 
     it('resolve() fails because no dependencies defined', () => {

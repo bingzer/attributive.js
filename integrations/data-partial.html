@@ -40,7 +40,7 @@
 			</button>
 			<a data-partial="click" 
 				data-url="data/employees.json" 
-				data-source="#employee-list-templated-script"
+				data-source="#employee-list-templated-table"
 				data-target="#target-load-from-button"
 				href="#">
 				Click to load (from an 'a')
@@ -49,7 +49,7 @@
 		</div>
 		<div>
 			<p>Will be loaded here</p>
-			<div id="target-load-from-button" style="border: 1px solid black; padding: 8px; width: 350px">
+			<div id="target-load-from-button" style="border: 1px solid black; padding: 8px; width: 550px">
 				...
 			</div>
 		</div>
@@ -75,6 +75,9 @@
 				</a>
 			</h3>
 		</div>
+	</script>
+	<script type="text/html" id="employee-list-templated-table" data-template="script">
+		<table data-model="this" style="width: 100%"></table>
 	</script>
 </body>
 </html>

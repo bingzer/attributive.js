@@ -24,8 +24,7 @@ namespace Attv {
             load(element: HTMLElement, options?: LoadElementOptions) {
                 this.injectStyleIfNeeded();
                 if (!this.attribute.isLoaded(element)) {
-                    let dataSettings = this.attribute.resolve(Attv.DataSettings.Key);
-                    let settings = dataSettings.parseRaw(element, options.context) || {} as any;
+                    let settings = this.attribute.getSettings(element) || {} as any;
     
                     settings.innerColor = settings.innerColor || '#c0c0c0';
                     settings.outerColor = settings.outerColor || '#555';
