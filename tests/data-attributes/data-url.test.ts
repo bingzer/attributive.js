@@ -1,6 +1,5 @@
 /// <reference path="../../src/attv.ts" />
 /// <reference path="../../src/data-attributes/data-url.ts" />
-/// <reference path="../../src/data-attributes/data-method.ts" />
 // ------------------------------------------------- //
 
 describe("Attv.DataUrl", () => {
