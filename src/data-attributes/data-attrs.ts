@@ -6,7 +6,7 @@ namespace Attv.DataAttrs {
         
         load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
             try {
-                let json = this.attribute.parseRaw<any>(element, options.context);
+                let json = this.attribute.parseRaw<any>(element, options?.context);
     
                 if (json) {
                     Object.keys(json).forEach((key: string) => {
@@ -25,7 +25,7 @@ namespace Attv.DataAttrs {
                     });
                 }
             } catch (e) {
-                if (!options.forceReload)
+                if (!options?.forceReload)
                     throw e;
             }
 
