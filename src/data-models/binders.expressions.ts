@@ -27,26 +27,41 @@ namespace Attv.Binders {
      */
     export class AliasExpression {
         readonly title: string;
+        readonly filterFn: (value?: any, context?: any) => string;
 
         constructor(private propertyName: string) {
             let split = propertyName.split(" as ");
-            this.propertyName = (split[0])?.trim();
-            this.title = this.cleanTitle((split[1] || this.propertyName)?.trim());
+            let prop = this.parsePropertyName((split[0])?.trim());
+            this.propertyName = prop.propertyName;
+            this.title = this.parseTitle((split[1] || this.propertyName)?.trim());
+
+            this.filterFn = (value?: any, context?: any) => {
+                if (prop.filterName) {
+                    try {
+                        return Attv.eval$(prop.filterName)(value, context);
+                    } catch {
+                        // ignore
+                    }
+                }
+                    
+                return value;
+            }
         }
 
         /**
          * Evaluate propertyName against context
          * @param context the context object
          */
-        evaluate(context: any): string {
-            return Attv.DataModel.getProperty(this.propertyName, context) || '';
+        evaluate(context?: any): string {
+            let value = Attv.DataModel.getProperty(this.propertyName, context) || '';
+            return this.filterFn(value, context);
         }
 
         /**
          * Remove (',"") from the title
          * @param title title to clean
          */
-        private cleanTitle(title: string) {
+        private parseTitle(title: string) {
             if (title.startsWith('(') && title.endsWith(')'))
                 title = title.substring(1, title.length - 1);
             if (title.startsWith('\'') && title.endsWith('\''))
@@ -55,6 +70,14 @@ namespace Attv.Binders {
                 title = title.substring(1, title.length - 1);
 
             return title;
+        }
+
+        private parsePropertyName(name: string): { propertyName: string, filterName: string } {
+            let split = name.split('|');
+            return {
+                propertyName: split[0]?.trim(),
+                filterName: (split[1] || '')?.trim()
+            }
         }
     }
 }
