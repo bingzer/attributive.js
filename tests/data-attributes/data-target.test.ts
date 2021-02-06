@@ -8,7 +8,7 @@ describe("Attv.DataTarget", () => {
         expect(Attv.DataTarget.Key).toBeDefined();
     });
 
-    it('Attv should have [data-source] registered', () => {
+    it('Attv should have [data-target] registered', () => {
         let attribute = Attv.getAttribute(Attv.DataTarget.Key);
 
         expect(attribute).toBeInstanceOf(Attv.Attribute);
@@ -22,7 +22,7 @@ describe("Attv.DataTarget", () => {
         expect(dataTarget).toBeInstanceOf(Attv.Attribute);
     });
 
-    it('getSourceElement() should return an element', () => {
+    it('getTargetElement() should return an element', () => {
         let element = document.createElement('div');
         element.setAttribute('data-target', 'body');
 
