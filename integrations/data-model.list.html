@@ -1,0 +1,52 @@
+<html>
+<head>
+    <title>[data-model] on list Test Usages</title>
+    <style>
+        
+        table, th, td {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+	<div>
+        <h3>
+            [data-model] with list (ul)
+		</h3>
+        
+        <ul data-model="candyTypes"></ul>
+
+    </div>
+	<div>
+        <h3>
+            [data-model] with list (ol)
+		</h3>
+        
+        <ol data-model="candyTypes"></ol>
+
+    </div>
+	<div>
+        <h3>
+            [data-model] with list (dt)
+		</h3>
+        
+        <dl data-model="candyTypes"></dl>
+
+    </div>
+    
+<script type="text/javascript" src="/build/attv.js"></script>
+<script type="text/javascript" src="/build/data-attributes.js"></script>
+<script type="text/javascript" src="/build/data-models.js"></script>
+
+<script type="text/javascript">
+    var candyTypes = [
+        'snickers',
+        'milky way',
+        'm&m',
+        'kitkat',
+        'twix'
+    ];
+</script>
+
+</body>
+</html>

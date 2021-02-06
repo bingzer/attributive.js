@@ -2,14 +2,14 @@ namespace Attv {
     export class DataModel extends Attv.Attribute {
         static readonly Key: string = 'data-model';
 
-        readonly handlers: Attv.Binders.ElementBinder<HTMLElement>[];
+        readonly binder: Attv.Binders.Binder<HTMLElement>[];
 
         constructor() {
             super(DataModel.Key);
             this.wildcard = "<jsExpression>";
             this.priority = 0;
             this.isAutoLoad = true;
-            this.handlers = [
+            this.binder = [
                 new Attv.Binders.Text(),
                 new Attv.Binders.TextArea(),
                 new Attv.Binders.Select(),
@@ -17,6 +17,7 @@ namespace Attv {
                 new Attv.Binders.Checkbox(),
                 new Attv.Binders.RadioButton(),
                 new Attv.Binders.Table(),
+                new Attv.Binders.List(),
                 new Attv.Binders.Default()
             ];
             this.deps.uses = [ 
@@ -37,10 +38,10 @@ namespace Attv {
                 
             let expression = new Attv.Binders.AliasExpression(rawValue);
 
-            let handler = this.handlers.filter(h => h.accept(this, element))[0];
-            if (handler) {
-                handler.bind(this, element, expression, model);
-                handler.stamp(this, element, refId);
+            let binder = this.binder.filter(b => b.accept(this, element))[0];
+            if (binder) {
+                binder.bind(this, element, expression, model);
+                binder.stamp(this, element, refId);
             }
 
             return true;

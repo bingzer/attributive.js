@@ -1,10 +1,11 @@
 namespace Attv.Binders {
-        
-    export abstract class ElementBinder<TElement extends HTMLElement> {
 
-        constructor(private eventName?: string, private broadcastEvent: string = "change") {
-            // nothing
-        }
+    export type HTMLListELement = HTMLUListElement | HTMLOListElement | HTMLDListElement;
+        
+    /**
+     * Base class for binder
+     */
+    export abstract class Binder<TElement extends HTMLElement> {
 
         accept(dataModel: DataModel, element: TElement, refId?: string): boolean {
             if (!this.canBind(element))
@@ -15,7 +16,39 @@ namespace Attv.Binders {
             return element.attvAttr(dataModelContext) === refId;
         }
 
+        stamp(dataModel: DataModel, element: TElement, refId: string) {
+            if (refId) {
+                let dataModelContext = dataModel.resolve(Attv.DataModelContext.Key);
+                element.attvAttr(dataModelContext, refId);
+            }
+        }
+
+        abstract bind(dataModel: DataModel, element: TElement, expression: AliasExpression, model?: any): void;
+
+        protected abstract canBind(element: TElement): boolean;
+        protected abstract bindValueToElement(dataModel: DataModel, element: TElement, expression: AliasExpression, model?: any): void;
+
+    }
+
+    /**
+     * One-way binder
+     */
+    export abstract class OneWayBinder<TElement extends HTMLElement> extends Binder<TElement> {
         bind(dataModel: DataModel, element: TElement, expression: AliasExpression, model?: any) {
+            this.bindValueToElement(dataModel, element, expression, model);
+        }
+    }
+
+    /**
+     * Two-way binder
+     */
+    export abstract class TwoWayBinder<TElement extends HTMLElement> extends Binder<TElement> {
+
+        constructor(private eventName?: string) {
+            super();
+        }
+
+        bind(dataModel: DataModel, element: TElement, expression: AliasExpression, model?: any): void {
             this.bindValueToElement(dataModel, element, expression, model);
 
             if (!dataModel.isLoaded(element) && !!this.eventName) {
@@ -29,17 +62,8 @@ namespace Attv.Binders {
             };
         }
 
-        stamp(dataModel: DataModel, element: TElement, refId: string) {
-            if (refId) {
-                let dataModelContext = dataModel.resolve(Attv.DataModelContext.Key);
-                element.attvAttr(dataModelContext, refId);
-            }
-        }
-
-        protected abstract canBind(element: TElement): boolean;
-        protected abstract bindValueToElement(dataModel: DataModel, element: TElement, expression: AliasExpression, model?: any): void;
         protected abstract getValueFromElement(element: TElement): any;
-
+        
         protected broadcast(dataModel: DataModel, element: TElement, options: LoadElementOptions) {
             let dataLoad = dataModel.resolve(Attv.DataLoad.Key);
             let selectors = dataLoad.raw(element);
@@ -49,32 +73,12 @@ namespace Attv.Binders {
 
     }
 
-    /**
-     * Any element
-     */
-    export class Default extends ElementBinder<HTMLElement> {
-        
-        bind(dataModel: DataModel, element: HTMLElement, expression: AliasExpression, model?: any) {
-            this.bindValueToElement(dataModel, element, expression, model);
-        }
-
-        protected canBind(element: HTMLElement): boolean {
-            return true;
-        }
-
-        protected bindValueToElement(dataModel: DataModel, element: HTMLElement, expression: AliasExpression, model?: any): void {
-            element.innerHTML = expression.evaluate(model).filteredValue;
-        }
-
-        protected getValueFromElement(element: HTMLElement): any {
-            return undefined;
-        }
-    }
+    // ---------------------------------- two-way binder -------------------------------------------------//
 
     /**
      * <input type="text">
      */
-    export class Text extends ElementBinder<HTMLInputElement> {
+    export class Text extends TwoWayBinder<HTMLInputElement> {
 
         readonly types: string[] = [ "text", "password", "email", "number", "tel", "color", "date", "datetime-local", "file", "hidden", "image", "month", "range", "url", "week" ];
 
@@ -99,7 +103,7 @@ namespace Attv.Binders {
     /**
      * <textarea>
      */
-    export class TextArea extends ElementBinder<HTMLTextAreaElement> {
+    export class TextArea extends TwoWayBinder<HTMLTextAreaElement> {
 
         constructor() {
             super("keyup");
@@ -122,7 +126,7 @@ namespace Attv.Binders {
     /**
      * <input type="checkbox">
      */
-    export class Checkbox extends ElementBinder<HTMLInputElement> {
+    export class Checkbox extends TwoWayBinder<HTMLInputElement> {
 
         constructor() {
             super("change");
@@ -146,13 +150,13 @@ namespace Attv.Binders {
     /**
      * <select>
      */
-    export class Select extends ElementBinder<HTMLSelectElement> {
+    export class Select extends TwoWayBinder<HTMLSelectElement> {
 
         constructor() {
             super("change");
         }
         
-        bind(dataModel: DataModel, element: HTMLSelectElement, expression: AliasExpression, model?: any) {
+        bind(dataModel: DataModel, element: HTMLSelectElement, expression: AliasExpression, model?: any): void {
             if (dataModel.isLoaded(element)) {
                 Attv.reloadElements(element.querySelector('option'));
                 this.bindValueToElement(dataModel, element, expression, model);
@@ -214,13 +218,13 @@ namespace Attv.Binders {
     /**
      * <input type="radio">
      */
-    export class RadioButton extends ElementBinder<HTMLInputElement> {
+    export class RadioButton extends TwoWayBinder<HTMLInputElement> {
 
         constructor() {
             super("change");
         }
         
-        bind(dataModel: DataModel, element: HTMLInputElement, expression: AliasExpression, model?: any) {
+        bind(dataModel: DataModel, element: HTMLInputElement, expression: AliasExpression, model?: any): void {
             super.bind(dataModel, element, expression, model);
 
             if (!dataModel.isLoaded(element)) {
@@ -250,12 +254,32 @@ namespace Attv.Binders {
         }
     }
 
+    // ---------------------------------- one-way binder -------------------------------------------------//
+
+    /**
+     * Any element
+     */
+    export class Default extends OneWayBinder<HTMLElement> {
+        
+        bind(dataModel: DataModel, element: HTMLElement, expression: AliasExpression, model?: any): void {
+            this.bindValueToElement(dataModel, element, expression, model);
+        }
+
+        protected canBind(element: HTMLElement): boolean {
+            return true;
+        }
+
+        protected bindValueToElement(dataModel: DataModel, element: HTMLElement, expression: AliasExpression, model?: any): void {
+            element.innerHTML = expression.evaluate(model).filteredValue;
+        }
+    }
+
     /**
      * <table>
      */
-    export class Table extends ElementBinder<HTMLTableElement> {
+    export class Table extends OneWayBinder<HTMLTableElement> {
         
-        bind(dataModel: DataModel, element: HTMLTableElement, expression: AliasExpression, model?: any) {
+        bind(dataModel: DataModel, element: HTMLTableElement, expression: AliasExpression, model?: any): void {
             this.bindValueToElement(dataModel, element, expression, model);
         }
 
@@ -267,17 +291,13 @@ namespace Attv.Binders {
             let result = expression.evaluate(model);
 
             if (Array.isArray(result.value)) {
-                let array = result.value as any[];
+                let array = result.filteredValue as any[];
                 let headers = this.parseHeaders(dataModel, table, array[0]);
                 
                 this.bindArrayToElement(table, headers, array);
             } else {
                 throw new Error();
             }
-        }
-
-        protected getValueFromElement(element: HTMLTableElement): any {
-            return undefined;
         }
 
         // ------------------------------------------------------------ //
@@ -318,6 +338,32 @@ namespace Attv.Binders {
 
             table.append(thead);
             table.append(tbody);
+        }
+    }
+
+    /**
+     * <ul>/<ol>
+     */
+    export class List extends OneWayBinder<HTMLListELement> {
+
+        protected canBind(element: HTMLListELement): boolean {
+            return element instanceof HTMLOListElement || element instanceof HTMLUListElement || element instanceof HTMLDListElement;
+        }
+
+        protected bindValueToElement(dataModel: DataModel, element: HTMLListELement, expression: AliasExpression, model?: any): void {
+            let result = expression.evaluate(model);
+
+            if (Array.isArray(result.value)) {
+                let array = result.filteredValue as any[];
+                array.forEach(item => {
+                    let li = element instanceof HTMLDListElement ? document.createElement('dt') : document.createElement('li');
+                    li.innerHTML = item;
+
+                    element.append(li);
+                });
+            } else {
+                throw new Error();
+            }
         }
     }
 }
