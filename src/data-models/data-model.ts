@@ -2,14 +2,14 @@ namespace Attv {
     export class DataModel extends Attv.Attribute {
         static readonly Key: string = 'data-model';
 
-        readonly binder: Attv.Binders.Binder<HTMLElement>[];
+        readonly binders: Attv.Binders.Binder<HTMLElement>[];
 
         constructor() {
             super(DataModel.Key);
             this.wildcard = "<jsExpression>";
             this.priority = 0;
             this.isAutoLoad = true;
-            this.binder = [
+            this.binders = [
                 new Attv.Binders.Text(),
                 new Attv.Binders.TextArea(),
                 new Attv.Binders.Select(),
@@ -38,7 +38,7 @@ namespace Attv {
                 
             let expression = new Attv.Binders.AliasExpression(rawValue);
 
-            let binder = this.binder.filter(b => b.accept(this, element))[0];
+            let binder = this.binders.filter(b => b.accept(this, element))[0];
             if (binder) {
                 binder.bind(this, element, expression, model);
                 binder.stamp(this, element, refId);
@@ -47,19 +47,6 @@ namespace Attv {
             return true;
         }
 
-        /**
-         * Bind all elements under the parent. 
-         * The parent will not get bounded. 
-         * @param parent the root or the parent
-         * @param model the model
-         */
-        bindAll(parent: HTMLElement, model?: any) {
-            let models = parent.querySelectorAll(this.selector());
-            models.forEach(elem => {
-                this.bindTo(elem as HTMLElement, model);
-                this.markLoaded(elem as HTMLElement, true);
-            });
-        }
     }
 
     export namespace DataModel {
@@ -107,7 +94,7 @@ namespace Attv {
                 }
             }
     
-            return parseJsonOrElse(propertyValue);
+            return Attv.parseJsonOrElse(propertyValue);
         }
 
         /**
