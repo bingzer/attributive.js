@@ -11,16 +11,14 @@ describe("Attv.DataActive", () => {
     it('Attv should have [data-active] registered', () => {
         let attribute = Attv.getAttribute(Attv.DataActive.Key);
 
-        expect(attribute).toBeInstanceOf(Attv.Attribute);
         expect(attribute.isAutoLoad).toEqual(false);
+        expect(attribute.key).toEqual(Attv.DataActive.Key);
+        expect(attribute.wildcard).toEqual("<boolean>");
     });
 
     it('constructor() should create an instance', () => {
         let dataActive = new Attv.DataActive();
-
-        expect(dataActive.key).toEqual(Attv.DataActive.Key);
-        expect(dataActive.wildcard).toEqual("<boolean>");
-        expect(dataActive.isAutoLoad).toEqual(false);
+        expect(dataActive).toBeInstanceOf(Attv.Attribute);
     });
 
     it('isActive() should return true', () => {
