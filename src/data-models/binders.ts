@@ -276,21 +276,21 @@ namespace Attv.Binders {
 
         // ------------------------------------------------------------ //
 
-        private parseHeaders(dataModel: DataModel, table: HTMLTableElement, any: object): string[] {
+        private parseHeaders(dataModel: DataModel, table: HTMLTableElement, any: object): AliasExpression[] {
             let settings = dataModel.getSettings<any>(table);
             let headers = settings?.headers as string[];
 
-            return headers || Object.keys(any);
+            return (headers || Object.keys(any)).map<AliasExpression>(head => new AliasExpression(head));
         }
 
-        private bindArrayToElement(table: HTMLTableElement, headers: string[], array: any[]) {
+        private bindArrayToElement(table: HTMLTableElement, headers: AliasExpression[], array: any[]) {
             // -- thead
             let thead = table.createTHead();
             let tr = document.createElement('tr');
             thead.append(tr);
             headers.forEach(head => {
                 let th = document.createElement('th');
-                th.innerHTML = head;
+                th.innerHTML = head.title;
 
                 tr.append(th);
             });
@@ -302,7 +302,7 @@ namespace Attv.Binders {
                 headers.forEach(head => {
                     let td = document.createElement('td');
 
-                    td.innerHTML = item[head] || '';
+                    td.innerHTML = head.evaluate(item);
 
                     tr.append(td);
                 });

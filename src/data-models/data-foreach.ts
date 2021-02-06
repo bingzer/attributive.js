@@ -62,19 +62,17 @@ namespace Attv.DataForEach {
             return true;
         }
 
-        private parseExpression(element: HTMLElement, context: any): { name: string, array: [], createTemplate: () => HTMLElement } {
-            let expression = this.attribute.raw(element);
-            let split = expression.split('in');
-            let varName = split[0].trim();
-            let varsName = split[1].trim();
+        private parseExpression(element: HTMLElement, context: any): { name: string, array: any[], createTemplate: () => HTMLElement } {
+            let expressionValue = this.attribute.raw(element);
+            let expression = new Attv.Binders.ArrayExpression(expressionValue);
 
             let dataContent = this.attribute.resolve(Attv.DataContent.Key);
             let dataId = this.attribute.resolve(Attv.DataId.Key);
             let dataRef = this.attribute.resolve(Attv.DataRef.Key);
 
             return {
-                name: varName,
-                array: Attv.DataModel.getProperty(varsName, context) || [],
+                name: expression.propertyName,
+                array: expression.evaluate<any>(context),
                 createTemplate: () => {
                     let child = Attv.Dom.parseDom(element.attvAttr(dataContent)).firstElementChild as HTMLElement;
 
