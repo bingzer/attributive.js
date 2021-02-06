@@ -29,17 +29,17 @@ namespace Attv {
             let url = this.raw(element);
 
             // [data-method]
-            let method = this.resolve<DataMethod>(DataMethod.Key).getMethod(element);
+            let method = this.resolve<DataMethod>(Attv.DataMethod.Key).getMethod(element);
 
             if (method.equalsIgnoreCase('get')) {
                 // [data-data]
-                let data = this.resolve(DataData.Key).parseRaw(element);
+                let data = this.resolve(Attv.DataData.Key).parseRaw(element);
 
                 url = Attv.Ajax.buildUrl({ url: url, method: method, data: data });
             }
 
             // [data-cache]
-            if (!this.resolve<DataCache>(DataCache.Key).useCache(element)) {
+            if (!this.resolve<DataCache>(Attv.DataCache.Key).useCache(element)) {
                 if (url.contains('?')) {
                     url += `&_=${Date.now()}`;
                 } else {
