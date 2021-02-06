@@ -653,16 +653,20 @@ namespace Attv {
     export namespace Dom {
 
         export var domParser: DOMParser;
-        export const htmlTags: { tag: string, parentTag: string }[] = [
-            { tag: 'tr', parentTag: 'tbody' },
-            { tag: 'th', parentTag: 'thead' },
-            { tag: 'td', parentTag: 'tr' },
-            { tag: 'option', parentTag: 'select'}
+        export const tags: { tag: string, parent: string }[] = [
+            { tag: 'tbody', parent: 'table' },
+            { tag: 'thead', parent: 'table' },
+            { tag: 'tr', parent: 'tbody' },
+            { tag: 'th', parent: 'tr' },
+            { tag: 'td', parent: 'tr' },
+            { tag: 'li', parent: 'ul' },
+            { tag: 'option', parent: 'select'}
+            // TODO: more
         ];
 
         export function getParentTag(elementOrTag: HTMLElement | string) {
             let tagName: string = (elementOrTag as HTMLElement)?.tagName || elementOrTag as string;
-            let parentTag = Attv.Dom.htmlTags.filter(tag => tag.tag.equalsIgnoreCase(tagName))[0]?.parentTag;
+            let parentTag = Attv.Dom.tags.filter(tag => tag.tag.equalsIgnoreCase(tagName))[0]?.parent;
             if (!parentTag) {
                 parentTag = 'div';
             }
