@@ -15,13 +15,13 @@ namespace Attv.Binders {
             return element.attvAttr(dataModelContext) === refId;
         }
 
-        bind(dataModel: DataModel, element: TElement, propertyName: string, propertyValue: any, model?: any) {
-            this.bindValueToElement(dataModel, element, propertyValue);
+        bind(dataModel: DataModel, element: TElement, expression: AliasExpression, model?: any) {
+            this.bindValueToElement(dataModel, element, expression, model);
 
             if (!dataModel.isLoaded(element) && !!this.eventName) {
                 element.addEventListener(this.eventName, e => {
                     let value = this.getValueFromElement(element);
-                    Attv.DataModel.setProperty(propertyName, value, model);
+                    Attv.DataModel.setProperty(expression.propertyName, value, model);
 
                     // data load
                     this.broadcast(dataModel, element, { forceReload: true });
@@ -37,7 +37,7 @@ namespace Attv.Binders {
         }
 
         protected abstract canBind(element: TElement): boolean;
-        protected abstract bindValueToElement(dataModel: DataModel, element: TElement, propertyValue: any): void;
+        protected abstract bindValueToElement(dataModel: DataModel, element: TElement, expression: AliasExpression, model?: any): void;
         protected abstract getValueFromElement(element: TElement): any;
 
         protected broadcast(dataModel: DataModel, element: TElement, options: LoadElementOptions) {
@@ -54,16 +54,16 @@ namespace Attv.Binders {
      */
     export class Default extends ElementBinder<HTMLElement> {
         
-        bind(dataModel: DataModel, element: HTMLElement, propertyName: string, propertyValue: any, model?: any) {
-            this.bindValueToElement(dataModel, element, propertyValue);
+        bind(dataModel: DataModel, element: HTMLElement, expression: AliasExpression, model?: any) {
+            this.bindValueToElement(dataModel, element, expression, model);
         }
 
         protected canBind(element: HTMLElement): boolean {
             return true;
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLElement, propertyValue: any): void {
-            element.innerHTML = propertyValue || '';
+        protected bindValueToElement(dataModel: DataModel, element: HTMLElement, expression: AliasExpression, model?: any): void {
+            element.innerHTML = expression.evaluate(model).filteredValue;
         }
 
         protected getValueFromElement(element: HTMLElement): any {
@@ -86,8 +86,8 @@ namespace Attv.Binders {
             return element instanceof HTMLInputElement && this.types.some(t => t.equalsIgnoreCase(element.type));
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLInputElement, propertyValue: any): void {
-            element.value = propertyValue || '';
+        protected bindValueToElement(dataModel: DataModel, element: HTMLInputElement, expression: AliasExpression, model?: any): void {
+            element.value = expression.evaluate(model).filteredValue;
         }
 
         protected getValueFromElement(element: HTMLInputElement): any {
@@ -109,8 +109,8 @@ namespace Attv.Binders {
             return element instanceof HTMLTextAreaElement;
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLTextAreaElement, propertyValue: any): void {
-            element.value = propertyValue || '';
+        protected bindValueToElement(dataModel: DataModel, element: HTMLTextAreaElement, expression: AliasExpression, model?: any): void {
+            element.value = expression.evaluate(model).filteredValue;
         }
 
         protected getValueFromElement(element: HTMLTextAreaElement): any {
@@ -132,8 +132,8 @@ namespace Attv.Binders {
             return(element instanceof HTMLInputElement && element.type?.equalsIgnoreCase("checkbox"));
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLInputElement, propertyValue: any): void {
-            element.checked = !!(propertyValue || '');
+        protected bindValueToElement(dataModel: DataModel, element: HTMLInputElement, expression: AliasExpression, model?: any): void {
+            element.checked = !!(expression.evaluate(model).value);
         }
 
         protected getValueFromElement(element: HTMLInputElement): any {
@@ -152,13 +152,13 @@ namespace Attv.Binders {
             super("change");
         }
         
-        bind(dataModel: DataModel, element: HTMLSelectElement, propertyName: string, propertyValue: any, model?: any) {
+        bind(dataModel: DataModel, element: HTMLSelectElement, expression: AliasExpression, model?: any) {
             if (dataModel.isLoaded(element)) {
                 Attv.reloadElements(element.querySelector('option'));
-                this.bindValueToElement(dataModel, element, propertyValue);
+                this.bindValueToElement(dataModel, element, expression, model);
             }
             else {
-                super.bind(dataModel, element, propertyName, propertyValue, model);
+                super.bind(dataModel, element, expression, model);
             }
         }
 
@@ -166,7 +166,9 @@ namespace Attv.Binders {
             return element instanceof HTMLSelectElement && !element.hasAttribute('multiple');
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLSelectElement, propertyValue: any): void {
+        protected bindValueToElement(dataModel: DataModel, element: HTMLSelectElement, expression: AliasExpression, model?: any): void {
+            let propertyValue = expression.evaluate(model).filteredValue;
+
             Attv.toArray(element.options).forEach((opt: HTMLOptionElement) => {
                 opt.selected = opt.value?.equalsIgnoreCase(propertyValue);
             });
@@ -189,14 +191,16 @@ namespace Attv.Binders {
             return element instanceof HTMLSelectElement && element.hasAttribute('multiple');
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLSelectElement, propertyValue: any): void {
-            if (Array.isArray(propertyValue)) {
-                let array = propertyValue as [];
+        protected bindValueToElement(dataModel: DataModel, element: HTMLSelectElement, expression: AliasExpression, model?: any): void {
+            let result = expression.evaluate(model);
+            
+            if (Array.isArray(result.value)) {
+                let array = result.value as [];
                 Attv.toArray<HTMLOptionElement>(element.options).forEach((opt: HTMLOptionElement) => {
                     opt.selected = array.some(item => item === opt.value);
                 });
             } else {
-                super.bindValueToElement(dataModel, element, propertyValue);
+                super.bindValueToElement(dataModel, element, expression, model);
             }
         }
 
@@ -216,8 +220,8 @@ namespace Attv.Binders {
             super("change");
         }
         
-        bind(dataModel: DataModel, element: HTMLInputElement, propertyName: string, propertyValue: any, model?: any) {
-            super.bind(dataModel, element, propertyName, propertyValue, model);
+        bind(dataModel: DataModel, element: HTMLInputElement, expression: AliasExpression, model?: any) {
+            super.bind(dataModel, element, expression, model);
 
             if (!dataModel.isLoaded(element)) {
                 let observer = new MutationObserver((mutations) => {
@@ -225,7 +229,7 @@ namespace Attv.Binders {
                     if (!valueAttributeMutation)
                         return;
                         
-                    this.bindValueToElement(dataModel, element, propertyValue);
+                    this.bindValueToElement(dataModel, element, expression, model);
                 });
     
                 observer.observe(element, { attributes: true });
@@ -236,8 +240,8 @@ namespace Attv.Binders {
             return(element instanceof HTMLInputElement && element.type?.equalsIgnoreCase("radio"));
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLInputElement, propertyValue: any): void {
-            element.checked = element.value === (propertyValue || '');
+        protected bindValueToElement(dataModel: DataModel, element: HTMLInputElement, expression: AliasExpression, model?: any): void {
+            element.checked = element.value === expression.evaluate(model).value;
         }
 
         protected getValueFromElement(element: HTMLInputElement): any {
@@ -251,17 +255,19 @@ namespace Attv.Binders {
      */
     export class Table extends ElementBinder<HTMLTableElement> {
         
-        bind(dataModel: DataModel, element: HTMLTableElement, propertyName: string, propertyValue: any, model?: any) {
-            this.bindValueToElement(dataModel, element, propertyValue);
+        bind(dataModel: DataModel, element: HTMLTableElement, expression: AliasExpression, model?: any) {
+            this.bindValueToElement(dataModel, element, expression, model);
         }
 
         protected canBind(element: HTMLTableElement): boolean {
             return element instanceof HTMLTableElement;
         }
 
-        protected bindValueToElement(dataModel: DataModel, table: HTMLTableElement, propertyValue: any): void {
-            if (Array.isArray(propertyValue)) {
-                let array = propertyValue as any[];
+        protected bindValueToElement(dataModel: DataModel, table: HTMLTableElement, expression: AliasExpression, model?: any): void {
+            let result = expression.evaluate(model);
+
+            if (Array.isArray(result.value)) {
+                let array = result.value as any[];
                 let headers = this.parseHeaders(dataModel, table, array[0]);
                 
                 this.bindArrayToElement(table, headers, array);
@@ -290,7 +296,7 @@ namespace Attv.Binders {
             thead.append(tr);
             headers.forEach(head => {
                 let th = document.createElement('th');
-                th.innerHTML = head.title;
+                th.innerHTML = head.alias;
 
                 tr.append(th);
             });
@@ -302,7 +308,7 @@ namespace Attv.Binders {
                 headers.forEach(head => {
                     let td = document.createElement('td');
 
-                    td.innerHTML = head.evaluate(item);
+                    td.innerHTML = head.evaluate(item).filteredValue;
 
                     tr.append(td);
                 });

@@ -31,15 +31,15 @@ namespace Attv {
          * @param model the model
          */
         bindTo(element: HTMLElement, model?: any, refId?: string): BooleanOrVoid {
-            let propertyName = this.raw(element);
-            if (!propertyName)
+            let rawValue = this.raw(element);
+            if (!rawValue)
                 return false;
-
-            let propertyValue = Attv.DataModel.getProperty(propertyName, model);
+                
+            let expression = new Attv.Binders.AliasExpression(rawValue);
 
             let handler = this.handlers.filter(h => h.accept(this, element))[0];
             if (handler) {
-                handler.bind(this, element, propertyName, propertyValue, model);
+                handler.bind(this, element, expression, model);
                 handler.stamp(this, element, refId);
             }
 

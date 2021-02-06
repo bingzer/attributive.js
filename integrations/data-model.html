@@ -37,16 +37,16 @@
 			<h3>Summary</h3>
 
 			<div>
-				Name <span data-model="employee.firstName"></span> <span data-model="employee.lastName"></span>
+				Name <span data-model="employee | fullname"></span>
 			</div>
 			<div>
 				Password <span data-model="employee.password"></span>
 			</div>
 			<div>
-				Wants Candy? <span data-model="employee.wantCandy">
+				Wants Candy? <span data-model="employee.wantCandy | yesOrNo">
 			</div>
 			<div>
-				Type of candy that <span data-model="employee.firstName"></span> want is <span data-model="employee.candyType"></span>
+				Type of candy that <span data-model="employee.firstName"></span> want is <span data-model="employee.candyType | uppercase"></span>
 			</div>
 			<div>
 				Flavor of candy <span data-model="employee.firstName"></span> want is:
@@ -105,7 +105,7 @@
 				<checkbox>hello</checkbox>
 			</label>
 
-			<span data-model="employee.wantCandy | yesOrNo"></span>
+			<div data-model="employee.wantCandy | yesOrNo"></div>
 		</div>
 
 		<div class="panel panel-50">
@@ -185,6 +185,14 @@
 				return 'Yes';
 			} 
 			return 'No';
+		}
+
+		function fullname(employee) {
+			return employee.firstName + ' ' + employee.lastName;
+		}
+
+		function uppercase(any) {
+			return any.toUpperCase();
 		}
 	</script>
     
