@@ -684,7 +684,16 @@ namespace Attv {
         }
 
         /**
-         * Returns the PARENT of element. This is by design
+         * Returns the PARENT of element. This is by design so that we can parse multiple elements without a container.
+         * For example:
+         * <div>First</div>
+         * <div>Second</div>
+         * 
+         * Returns 
+         * <div>
+         *  <div>First</div>
+         *  <div>Second</div>
+         * </div>
          * @param any any string
          */
         export function parseDom(any: string | HTMLElement): HTMLElement {
