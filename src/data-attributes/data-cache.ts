@@ -11,7 +11,7 @@ namespace Attv {
         
         useCache(element: HTMLElement) {
             let value = this.raw(element);
-            if (isUndefined(value) || value === null)
+            if (Attv.isUndefined(value) || value === null)
                 return true;
     
             return value?.equalsIgnoreCase('true');
