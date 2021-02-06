@@ -346,7 +346,7 @@ namespace Attv {
         public validators: Validators.ValidatingType[];
         public attribute: Attribute;
         
-        constructor (public value: string = Attv.configuration.defaultTag, private loadElementFn?: LoadElementFn) {
+        constructor (public value: string = Attv.configuration.defaultTag, private fn?: LoadElementFn) {
         }
     
         /**
@@ -354,8 +354,8 @@ namespace Attv {
          * @param element the Element
          */
         load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
-            if (this.loadElementFn) {
-                return this.loadElementFn(this, element, options) || true;
+            if (this.fn) {
+                return this.fn(this, element, options) || true;
             }
 
             return true;
