@@ -548,13 +548,13 @@ namespace Attv {
         export type ValidatingFn = (value: AttributeValue, element: HTMLElement, options?: any) => boolean;
         export type ValidatingType = ValidatingObj | ValidatingFn;
 
-        export const RequiringAttributeKeys = "RequiringAttributeKeys";
-        export const RequiringAttributeWithValue = "RequiringAttributeWithValue";
-        export const RequiringElements = "RequiringElements";
+        export const NeedAttrKeys = "NeedAttrKeys";
+        export const NeedAttrWithValue = "NeedAttrWithValue";
+        export const NeedElements = "NeedElements";
 
         let builtIns: { name: string, fn: ValidatingFn}[] = [
             {
-                name: Validators.RequiringAttributeKeys,
+                name: Validators.NeedAttrKeys,
                 fn: (value, element, options) => {
                     let isValidated = true;
             
@@ -566,7 +566,7 @@ namespace Attv {
                         let exists = attribute.exists(element);
 
                         if (!exists) {
-                            Attv.log('error', `${value} is requiring ${attribute} to be present in DOM`, element)
+                            Attv.log('error', `${value} needs ${attribute}`, element)
                         }
 
                         isValidated = isValidated && exists;
@@ -575,7 +575,7 @@ namespace Attv {
                     return isValidated;
                 }
             }, {
-                name: Validators.RequiringAttributeWithValue,
+                name: Validators.NeedAttrWithValue,
                 fn: (value, element, options) => {
                     let isValidated = true;
             
@@ -584,7 +584,7 @@ namespace Attv {
                         let attribute = options[i];
                         let requiredAttribute = element.attvAttr(attribute.name);
                         if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
-                            Attv.log('error', `${value} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
+                            Attv.log('error', `${value} needs [${attribute.name}]='${attribute.value}'`, element)
                         }
             
                         isValidated = isValidated && !!requiredAttribute;
@@ -593,7 +593,7 @@ namespace Attv {
                     return isValidated;
                 }
             }, {
-                name: Validators.RequiringElements,
+                name: Validators.NeedElements,
                 fn: (value, element, options) => {
                     let isValidated = false;
 
@@ -607,7 +607,7 @@ namespace Attv {
                     }
 
                     if (!isValidated) {
-                        Attv.log('error', `${value} can only be attached to elements [${options.elementTagNames}]`, element)
+                        Attv.log('error', `${value} requires [${options.elementTagNames}]`, element)
                     }
 
                     return isValidated;
@@ -763,15 +763,15 @@ namespace Attv {
             options.headers?.forEach(header => xhr.setRequestHeader(header.name, header.value));
     
             // last check
-            if (isUndefined(options.url))
-                throw new Error('url is empty');
+            if (Attv.isUndefined(options.url))
+                throw new Error('No url');
     
             xhr.open(options.method, options.url, true);
             xhr.send();
         }
     
         export function buildUrl(option: AjaxOptions): string {
-            if (isUndefined(option.url))
+            if (Attv.isUndefined(option.url))
                 return undefined;
     
             let url = option.url;
@@ -1021,7 +1021,7 @@ namespace Attv {
                     }
                 }
                 catch (error) {
-                    Attv.log('error', `Unexpected error occurred when loading ${attribute}`, error, element);
+                    Attv.log('error', `Unexpected error on ${attribute}`, error, element);
                 }
             });
         });
@@ -1053,7 +1053,7 @@ namespace Attv {
         let attribute = Attv.getAttribute<TAttribute>(attributeKey);
 
         if (!attribute) {
-            Attv.log('fatal', `Attribute [${attributeKey}] can not be found. Did you register ${attributeKey}?`);
+            Attv.log('fatal', `No [${attributeKey}]. Did you register ${attributeKey}?`);
         }
 
         if (caller) {
@@ -1061,7 +1061,7 @@ namespace Attv {
             let isMissingDepedencies = Attv.isDefined(deps) && !deps.some(dep => dep === attributeKey)
     
             if (isMissingDepedencies) {
-                Attv.log('warning', `${attribute} should be declared as the dependant in ${caller}. This is for documentation purposes`);
+                Attv.log('warning', `${attribute} is the dependant of ${caller}. (for documentation)`);
             }
         }
 
