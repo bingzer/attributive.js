@@ -46,25 +46,13 @@ namespace Attv {
 
             return true;
         }
-
-    }
-
-    export namespace DataModel {
-        
-        export class Value extends Attv.AttributeValue {
-            
-            load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
-                let dataModel = this.attribute as DataModel;
-                return dataModel.bindTo(element, options.context, options.contextRefId);
-            }
-        }
         
         /**
          * Returns a property of an object
          * @param model the object
          * @param propertyName the property name
          */
-        export function getProperty(propertyName: string, model?: any): any {
+        static getProperty(propertyName: string, model?: any): any {
             if (!model) {
                 model = Attv.globalThis$();
             }
@@ -80,7 +68,7 @@ namespace Attv {
                         propertyValue = propertyValue;
                     } else {
                         // see if the propertyName is a global variable
-                        if (j == 0 && isGlobalVariable(child, propertyValue)) {
+                        if (j == 0 && Attv.DataModel.isGlobalVariable(child, propertyValue)) {
                             propertyValue = Attv.globalThis$()[child];
                         }
                         else {
@@ -103,7 +91,7 @@ namespace Attv {
          * @param propertyName the property name
          * @param propertyValue the property value
          */
-        export function setProperty(propertyName: string, propertyValue: any, model: any) {
+        static setProperty(propertyName: string, propertyValue: any, model: any) {
             if (!model) {
                 model = Attv.globalThis$();
             }
@@ -118,8 +106,8 @@ namespace Attv {
 
                 // throw warning
                 if (Attv.isUndefined(property)) {
-                    if (isGlobalVariable(property)) {
-                        return setProperty(propertyName, propertyValue, undefined);
+                    if (Attv.DataModel.isGlobalVariable(property)) {
+                        return Attv.DataModel.setProperty(propertyName, propertyValue, undefined);
                     }
                     else {
                         Attv.log('warning', `No property ${childProperty}`, property);
@@ -130,8 +118,20 @@ namespace Attv {
             property[propertyChilds[len-1]] = propertyValue;
         }
 
-        function isGlobalVariable(variableName: string, scoped?: any) {
+        private static isGlobalVariable(variableName: string, scoped?: any) {
             return !scoped?.hasOwnProperty(variableName) && Attv.globalThis$().hasOwnProperty(variableName);
+        }
+
+    }
+
+    export namespace DataModel {
+        
+        export class Value extends Attv.AttributeValue {
+            
+            load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
+                let dataModel = this.attribute as DataModel;
+                return dataModel.bindTo(element, options.context, options.contextRefId);
+            }
         }
     }
 }

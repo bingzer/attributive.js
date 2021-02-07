@@ -41,7 +41,7 @@ namespace Attv {
             constructor (attributeValue?: string) {
                 super(attributeValue);
                 this.validators = [
-                    { name: Attv.Validators.RequiringAttributeKeys, options: [Attv.DataUrl.Key] },
+                    { name: Attv.Validators.NeedAttrKeys, options: [Attv.DataUrl.Key] },
                 ];
             }
 
@@ -134,7 +134,7 @@ namespace Attv {
 
                 this.deps.requires = [ Attv.DataTarget.Key ];
                 this.validators = [
-                    { name: Attv.Validators.RequiringAttributeKeys, options: [Attv.DataTarget.Key] }
+                    { name: Attv.Validators.NeedAttrKeys, options: [Attv.DataTarget.Key] }
                 ];
             }
 

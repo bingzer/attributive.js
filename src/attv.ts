@@ -537,6 +537,13 @@ namespace Attv {
                 
                 registrations.push(registration);
             });
+
+            // If it's already initialized
+            // run the this right away
+            if (isInitialized) {
+                // run it right away
+                run();
+            }
         }
     }
 
@@ -548,13 +555,13 @@ namespace Attv {
         export type ValidatingFn = (value: AttributeValue, element: HTMLElement, options?: any) => boolean;
         export type ValidatingType = ValidatingObj | ValidatingFn;
 
-        export const RequiringAttributeKeys = "RequiringAttributeKeys";
-        export const RequiringAttributeWithValue = "RequiringAttributeWithValue";
-        export const RequiringElements = "RequiringElements";
+        export const NeedAttrKeys = "NeedAttrKeys";
+        export const NeedAttrWithValue = "NeedAttrWithValue";
+        export const NeedElements = "NeedElements";
 
         let builtIns: { name: string, fn: ValidatingFn}[] = [
             {
-                name: Validators.RequiringAttributeKeys,
+                name: Validators.NeedAttrKeys,
                 fn: (value, element, options) => {
                     let isValidated = true;
             
@@ -566,7 +573,7 @@ namespace Attv {
                         let exists = attribute.exists(element);
 
                         if (!exists) {
-                            Attv.log('error', `${value} is requiring ${attribute} to be present in DOM`, element)
+                            Attv.log('error', `${value} needs ${attribute}`, element)
                         }
 
                         isValidated = isValidated && exists;
@@ -575,7 +582,7 @@ namespace Attv {
                     return isValidated;
                 }
             }, {
-                name: Validators.RequiringAttributeWithValue,
+                name: Validators.NeedAttrWithValue,
                 fn: (value, element, options) => {
                     let isValidated = true;
             
@@ -584,7 +591,7 @@ namespace Attv {
                         let attribute = options[i];
                         let requiredAttribute = element.attvAttr(attribute.name);
                         if (!requiredAttribute.equalsIgnoreCase(attribute.value)) {
-                            Attv.log('error', `${value} is requiring [${attribute.name}]='${attribute.value}' to be present in DOM`, element)
+                            Attv.log('error', `${value} needs [${attribute.name}]='${attribute.value}'`, element)
                         }
             
                         isValidated = isValidated && !!requiredAttribute;
@@ -593,7 +600,7 @@ namespace Attv {
                     return isValidated;
                 }
             }, {
-                name: Validators.RequiringElements,
+                name: Validators.NeedElements,
                 fn: (value, element, options) => {
                     let isValidated = false;
 
@@ -607,7 +614,7 @@ namespace Attv {
                     }
 
                     if (!isValidated) {
-                        Attv.log('error', `${value} can only be attached to elements [${options.elementTagNames}]`, element)
+                        Attv.log('error', `${value} requires [${options.elementTagNames}]`, element)
                     }
 
                     return isValidated;
@@ -653,16 +660,20 @@ namespace Attv {
     export namespace Dom {
 
         export var domParser: DOMParser;
-        export const htmlTags: { tag: string, parentTag: string }[] = [
-            { tag: 'tr', parentTag: 'tbody' },
-            { tag: 'th', parentTag: 'thead' },
-            { tag: 'td', parentTag: 'tr' },
-            { tag: 'option', parentTag: 'select'}
+        export const tags: { tag: string, parent: string }[] = [
+            { tag: 'tbody', parent: 'table' },
+            { tag: 'thead', parent: 'table' },
+            { tag: 'tr', parent: 'tbody' },
+            { tag: 'th', parent: 'tr' },
+            { tag: 'td', parent: 'tr' },
+            { tag: 'li', parent: 'ul' },
+            { tag: 'option', parent: 'select'}
+            // TODO: more
         ];
 
         export function getParentTag(elementOrTag: HTMLElement | string) {
             let tagName: string = (elementOrTag as HTMLElement)?.tagName || elementOrTag as string;
-            let parentTag = Attv.Dom.htmlTags.filter(tag => tag.tag.equalsIgnoreCase(tagName))[0]?.parentTag;
+            let parentTag = Attv.Dom.tags.filter(tag => tag.tag.equalsIgnoreCase(tagName))[0]?.parent;
             if (!parentTag) {
                 parentTag = 'div';
             }
@@ -680,7 +691,16 @@ namespace Attv {
         }
 
         /**
-         * Returns the PARENT of element. This is by design
+         * Returns the PARENT of element. This is by design so that we can parse multiple elements without a container.
+         * For example:
+         * <div>First</div>
+         * <div>Second</div>
+         * 
+         * Returns 
+         * <div>
+         *  <div>First</div>
+         *  <div>Second</div>
+         * </div>
          * @param any any string
          */
         export function parseDom(any: string | HTMLElement): HTMLElement {
@@ -763,15 +783,15 @@ namespace Attv {
             options.headers?.forEach(header => xhr.setRequestHeader(header.name, header.value));
     
             // last check
-            if (isUndefined(options.url))
-                throw new Error('url is empty');
+            if (Attv.isUndefined(options.url))
+                throw new Error('No url');
     
             xhr.open(options.method, options.url, true);
             xhr.send();
         }
     
         export function buildUrl(option: AjaxOptions): string {
-            if (isUndefined(option.url))
+            if (Attv.isUndefined(option.url))
                 return undefined;
     
             let url = option.url;
@@ -963,14 +983,6 @@ namespace Attv {
         }
     }
 
-    export function reloadElements(root?: HTMLElementOrString, options: LoadElementOptions = {}) {
-        if (Attv.isUndefined(options.forceReload)) {
-            options.forceReload = true;
-        }
-
-        return Attv.loadElements(root, options)
-    }
-
     export function loadElements(root?: HTMLElementOrString, options: LoadElementOptions = {}): void {
         let rootElements: HTMLElement[];
 
@@ -1021,7 +1033,7 @@ namespace Attv {
                     }
                 }
                 catch (error) {
-                    Attv.log('error', `Unexpected error occurred when loading ${attribute}`, error, element);
+                    Attv.log('error', `Unexpected error on ${attribute}`, error, element);
                 }
             });
         });
@@ -1052,16 +1064,16 @@ namespace Attv {
     export function resolveAttribute<TAttribute extends Attribute>(caller: Attribute, attributeKey: string): TAttribute {
         let attribute = Attv.getAttribute<TAttribute>(attributeKey);
 
-        if (!attribute) {
-            Attv.log('fatal', `Attribute [${attributeKey}] can not be found. Did you register ${attributeKey}?`);
+        if (attributeKey && !attribute) {
+            Attv.log('fatal', `No [${attributeKey}]. Did you register ${attributeKey}?`);
         }
 
         if (caller) {
-            let deps = caller.deps.requires?.concat(caller.deps.uses).concat(caller.deps.internals);
+            let deps = caller.deps.requires?.concat(caller.deps.uses).concat(caller.deps.internals) || [];
             let isMissingDepedencies = Attv.isDefined(deps) && !deps.some(dep => dep === attributeKey)
     
             if (isMissingDepedencies) {
-                Attv.log('warning', `${attribute} should be declared as the dependant in ${caller}. This is for documentation purposes`);
+                Attv.log('warning', `${attribute} is the dependant of ${caller}. (for documentation)`);
             }
         }
 
@@ -1076,16 +1088,6 @@ namespace Attv {
         let attribute = resolveAttribute(caller, attributeKey);
 
         return attribute.getValue<TValue>(element);
-    }
-
-    /**
-     * Adds a dependency data attribute to the 'element'
-     * @param element the element
-     * @param value the value
-     */
-    export function addAttribute(attributeKey: string, element: HTMLElement, any: string) {
-        let attribute = Attv.getAttribute(attributeKey);
-        element.attvAttr(attribute.name, any);
     }
 }
 

@@ -8,7 +8,7 @@ describe("Attv.DataTitle", () => {
         expect(Attv.DataTitle.Key).toBeDefined();
     });
 
-    it('Attv should have [data-load] registered', () => {
+    it('Attv should have [data-title] registered', () => {
         let attribute = Attv.getAttribute(Attv.DataTitle.Key);
 
         expect(attribute).toBeInstanceOf(Attv.Attribute);

@@ -81,8 +81,8 @@ namespace Attv {
             constructor () {
                 super('script')
                 this.validators = [
-                    { name: Attv.Validators.RequiringElements, options: ['script'] },
-                    { name: Attv.Validators.RequiringAttributeWithValue, options: [ { name: 'type', value: 'text/html'} ]}
+                    { name: Attv.Validators.NeedElements, options: ['script'] },
+                    { name: Attv.Validators.NeedAttrWithValue, options: [ { name: 'type', value: 'text/html'} ]}
                 ];
             }
     

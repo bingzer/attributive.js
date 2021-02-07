@@ -233,4 +233,134 @@ describe('Attv functions', () => {
 
     });
     
+    describe('Attv.getAttribute()', () => {
+
+        it('Should returns an attribute', () => {
+            expect(Attv.getAttribute(Attv.DataActive.Key)).toBeInstanceOf(Attv.Attribute);
+        });
+
+        it('Should returns an undefined', () => {
+            expect(Attv.getAttribute('data-missing-attribute')).toBeUndefined();
+        });
+
+        it('Should returns an undefined #2', () => {
+            expect(Attv.getAttribute('')).toBeUndefined();
+        });
+
+        it('Should returns an undefined #3', () => {
+            let key = undefined;
+            expect(Attv.getAttribute(key)).toBeUndefined();
+        });
+
+    });
+    
+    describe('Attv.register()', () => {
+
+        it('Should register an attribute', () => {
+            // -- register
+            Attv.register('data-attr', { isAutoLoad: true });
+
+            let attribute = Attv.attributes.filter(att => att.key === 'data-attr')[0];
+
+            expect(attribute).toBeInstanceOf(Attv.Attribute);
+    
+            Attv.attributes.splice(Attv.attributes.indexOf(attribute), 1);
+
+            expect(Attv.attributes.filter(att => att.key === 'data-attr')[0]).toBeUndefined();
+        });
+
+    });
+    
+    describe('Attv.resolveAttribute()', () => {
+
+        it('Should resolve to an attribute that the child depends on', () => {
+            // -- register
+            Attv.register('data-parent', { isAutoLoad: true });
+            Attv.register('data-child', { isAutoLoad: true }, att => {
+                att.deps.uses = ['data-parent'];
+            });
+            
+            let parent = Attv.getAttribute('data-parent');
+            let child = Attv.getAttribute('data-child');
+
+            expect(Attv.resolveAttribute(child, parent.key)).toBe(parent);
+
+            Attv.attributes.splice(Attv.attributes.indexOf(parent), 1);
+            Attv.attributes.splice(Attv.attributes.indexOf(child), 1);
+        });
+
+        it('Should resolve to an attribute that the child depends on (with warning)', () => {
+            // -- register
+            Attv.register('data-parent', { isAutoLoad: true });
+            Attv.register('data-child', { isAutoLoad: true }, att => {
+            });
+            
+            let parent = Attv.getAttribute('data-parent');
+            let child = Attv.getAttribute('data-child');
+
+            expect(Attv.resolveAttribute(child, parent.key)).toBe(parent);
+            
+            Attv.attributes.splice(Attv.attributes.indexOf(parent), 1);
+            Attv.attributes.splice(Attv.attributes.indexOf(child), 1);
+        });
+
+        it('Should not resolve to any attribute', () => {
+            let parent = Attv.getAttribute('data-parent');
+            let child = Attv.getAttribute('data-child');
+
+            expect(Attv.resolveAttribute(child, parent?.key)).toBeUndefined();
+            
+            Attv.attributes.splice(Attv.attributes.indexOf(parent), 1);
+            Attv.attributes.splice(Attv.attributes.indexOf(child), 1);
+        });
+
+    });
+    
+    describe('Attv.resolveAttributeValue()', () => {
+
+        it('Should resolve to an attribute value', () => {
+            let element = document.createElement('div');
+            element.setAttribute('data-parent', 'default');
+            element.setAttribute('data-child', 'default');
+
+            // -- register
+            Attv.register('data-parent', { isAutoLoad: true });
+            Attv.register('data-child', { isAutoLoad: true }, att => {
+                att.deps.uses = ['data-parent'];
+            });
+            
+            let parent = Attv.getAttribute('data-parent');
+            let child = Attv.getAttribute('data-child');
+
+            let expected = Attv.resolveAttributeValue(child, parent.key, element);
+
+            expect(expected).toBeInstanceOf(Attv.AttributeValue);
+            expect(expected).toBeInstanceOf(Attv.AttributeValue);
+
+            Attv.attributes.splice(Attv.attributes.indexOf(parent), 1);
+            Attv.attributes.splice(Attv.attributes.indexOf(child), 1);
+        });
+
+        it('Should resolve to an attribute value (with warning)', () => {
+            let element = document.createElement('div');
+            element.setAttribute('data-parent', 'default');
+            element.setAttribute('data-child', 'default');
+
+            // -- register
+            Attv.register('data-parent', { isAutoLoad: true });
+            Attv.register('data-child', { isAutoLoad: true });
+            
+            let parent = Attv.getAttribute('data-parent');
+            let child = Attv.getAttribute('data-child');
+
+            let expected = Attv.resolveAttributeValue(child, parent.key, element);
+
+            expect(expected).toBeInstanceOf(Attv.AttributeValue);
+
+            Attv.attributes.splice(Attv.attributes.indexOf(parent), 1);
+            Attv.attributes.splice(Attv.attributes.indexOf(child), 1);
+        });
+
+    });
+    
 })

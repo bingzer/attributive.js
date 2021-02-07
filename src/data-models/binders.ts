@@ -158,7 +158,7 @@ namespace Attv.Binders {
         
         bind(dataModel: DataModel, element: HTMLSelectElement, expression: AliasExpression, model?: any): void {
             if (dataModel.isLoaded(element)) {
-                Attv.reloadElements(element.querySelector('option'));
+                Attv.loadElements(element.querySelector('option'), { forceReload: true });
                 this.bindValueToElement(dataModel, element, expression, model);
             }
             else {
