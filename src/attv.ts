@@ -1090,16 +1090,6 @@ namespace Attv {
 
         return attribute.getValue<TValue>(element);
     }
-
-    /**
-     * Adds a dependency data attribute to the 'element'
-     * @param element the element
-     * @param value the value
-     */
-    export function addAttribute(attributeKey: string, element: HTMLElement, any: string) {
-        let attribute = Attv.getAttribute(attributeKey);
-        element.attvAttr(attribute.name, any);
-    }
 }
 
 Attv.Registrar.run();
