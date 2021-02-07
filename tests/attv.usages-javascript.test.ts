@@ -18,8 +18,6 @@ describe('Attv (Test Usages) - js', () => {
             });
         });
 
-        Attv.Registrar.run();
-
         // -- load
         Attv.loadElements(element, { includeSelf: true });
 
@@ -42,8 +40,6 @@ describe('Attv (Test Usages) - js', () => {
                 counter++;
             });
         });
-
-        Attv.Registrar.run();
 
         // -- load
         Attv.loadElements(element, { includeSelf: true });
@@ -69,8 +65,6 @@ describe('Attv (Test Usages) - js', () => {
                 counter++;
             });
         });
-
-        Attv.Registrar.run();
 
         // -- load
         Attv.loadElements(element, { includeSelf: true });
@@ -98,8 +92,6 @@ describe('Attv (Test Usages) - js', () => {
             });
         });
 
-        Attv.Registrar.run();
-
         // -- load
         Attv.loadElements(element, { includeSelf: true });
 
@@ -124,8 +116,6 @@ describe('Attv (Test Usages) - js', () => {
             attribute = att;
             att.map(function () { return attributeValue });
         });
-
-        Attv.Registrar.run();
 
         // -- load
         Attv.loadElements(element, { includeSelf: true });
@@ -153,8 +143,6 @@ describe('Attv (Test Usages) - js', () => {
             });
         });
 
-        Attv.Registrar.run();
-
         // -- load
         Attv.loadElements(element, { includeSelf: true });
 
@@ -178,12 +166,8 @@ describe('Attv (Test Usages) - js', () => {
             });
         });
 
-        Attv.Registrar.run();
-
         // changing the attribute-name after data-attr has been registered
         Attv.register('data-attr', { attributeName: 'data-different' });
-
-        Attv.Registrar.run();
 
         // -- load
         Attv.loadElements(element, { includeSelf: true });

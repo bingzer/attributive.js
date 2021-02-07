@@ -537,6 +537,13 @@ namespace Attv {
                 
                 registrations.push(registration);
             });
+
+            // If it's already initialized
+            // run the this right away
+            if (isInitialized) {
+                // run it right away
+                run();
+            }
         }
     }
 
