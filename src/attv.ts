@@ -983,14 +983,6 @@ namespace Attv {
         }
     }
 
-    export function reloadElements(root?: HTMLElementOrString, options: LoadElementOptions = {}) {
-        if (Attv.isUndefined(options.forceReload)) {
-            options.forceReload = true;
-        }
-
-        return Attv.loadElements(root, options)
-    }
-
     export function loadElements(root?: HTMLElementOrString, options: LoadElementOptions = {}): void {
         let rootElements: HTMLElement[];
 
@@ -1072,12 +1064,12 @@ namespace Attv {
     export function resolveAttribute<TAttribute extends Attribute>(caller: Attribute, attributeKey: string): TAttribute {
         let attribute = Attv.getAttribute<TAttribute>(attributeKey);
 
-        if (!attribute) {
+        if (attributeKey && !attribute) {
             Attv.log('fatal', `No [${attributeKey}]. Did you register ${attributeKey}?`);
         }
 
         if (caller) {
-            let deps = caller.deps.requires?.concat(caller.deps.uses).concat(caller.deps.internals);
+            let deps = caller.deps.requires?.concat(caller.deps.uses).concat(caller.deps.internals) || [];
             let isMissingDepedencies = Attv.isDefined(deps) && !deps.some(dep => dep === attributeKey)
     
             if (isMissingDepedencies) {
