@@ -266,9 +266,9 @@ namespace Attv {
             }
 
             attributeValue.attribute = this;
-            attributeValue.deps.internals = Attv.concatArrays(this.deps.internals, attributeValue.deps.internals);
-            attributeValue.deps.requires = Attv.concatArrays(this.deps.requires, attributeValue.deps.requires);
-            attributeValue.deps.uses = Attv.concatArrays(this.deps.uses, attributeValue.deps.uses);
+            this.deps.internals = Attv.concatArrays(this.deps.internals, attributeValue.deps.internals);
+            this.deps.requires = Attv.concatArrays(this.deps.requires, attributeValue.deps.requires);
+            this.deps.uses = Attv.concatArrays(this.deps.uses, attributeValue.deps.uses);
             
             if (this.values.indexOf(attributeValue) > 0 || this.values.filter(v => v.value === attributeValue.value).length > 0) {
                 Attv.log('warning', `${attributeValue} has been registered previously`);
