@@ -73,7 +73,7 @@ namespace Attv.Binders {
             this.filterFn = (value?: any, context?: any) => {
                 if (prop.filterName) {
                     try {
-                        return Attv.eval$(prop.filterName)(value, context);
+                        return Attv.eval$(prop.filterName, context)(value, context);
                     } catch {
                         // ignore
                     }
