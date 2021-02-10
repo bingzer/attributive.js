@@ -266,9 +266,9 @@ namespace Attv {
             }
 
             attributeValue.attribute = this;
-            attributeValue.deps.internals = Attribute.copyDependencies(this.deps.internals, attributeValue.deps.internals);
-            attributeValue.deps.requires = Attribute.copyDependencies(this.deps.requires, attributeValue.deps.requires);
-            attributeValue.deps.uses = Attribute.copyDependencies(this.deps.uses, attributeValue.deps.uses);
+            attributeValue.deps.internals = Attv.concatArrays(this.deps.internals, attributeValue.deps.internals);
+            attributeValue.deps.requires = Attv.concatArrays(this.deps.requires, attributeValue.deps.requires);
+            attributeValue.deps.uses = Attv.concatArrays(this.deps.uses, attributeValue.deps.uses);
             
             if (this.values.indexOf(attributeValue) > 0 || this.values.filter(v => v.value === attributeValue.value).length > 0) {
                 Attv.log('warning', `${attributeValue} has been registered previously`);
@@ -309,18 +309,6 @@ namespace Attv {
          */
         selector(): string {
             return this.toString();
-        }
-
-        private static copyDependencies(source: string[], target: string[]) {
-            if (source?.length > 0) {
-                if (Attv.isUndefined(target)) {
-                    target = [];
-                }
-
-                target.push(...source);
-            }
-
-            return target;
         }
 
         public static compareFn = (a: Attribute, b: Attribute) => {
@@ -853,6 +841,18 @@ namespace Attv {
         return typeof(any) === expectedType;
     }
 
+    export function concatArrays(...arrays: any[][]): any[] {
+        let target = [];
+        for (let i = 0; i < arrays.length; i++) {
+            let array = arrays[i];
+            if (Attv.isDefined(array) && array.length > 0) {
+                target.push(...array);
+            }
+        }
+
+        return target;
+    }
+
     export function isEvaluatable(any: string) {
         return any?.startsWith('(') && any?.endsWith(')');
     }
@@ -1069,7 +1069,7 @@ namespace Attv {
         }
 
         if (caller) {
-            let deps = caller.deps.requires?.concat(caller.deps.uses).concat(caller.deps.internals) || [];
+            let deps = Attv.concatArrays(caller.deps?.requires, caller.deps?.uses, caller.deps?.internals) || [];
             let isMissingDepedencies = Attv.isDefined(deps) && !deps.some(dep => dep === attributeKey)
     
             if (isMissingDepedencies) {
