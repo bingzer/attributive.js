@@ -30,7 +30,7 @@ describe("Attv.Binders.AliasExpression", () => {
                 firstName: 'John',
                 lastName: 'Doe'
             },
-            toUpperCase: (any: string) {
+            toUpperCase: (any: string) => {
                 return any.toUpperCase();
             }
         };
