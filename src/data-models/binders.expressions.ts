@@ -1,9 +1,43 @@
 namespace Attv.Binders {
+    /**
+     * An expression
+     */
+    export interface Expression {
+
+        /**
+         * The property name
+         */
+        readonly propertyName: string;
+
+        /**
+         * Evalue this expression and returns the 'result'
+         * @param context context object (optional) to evaluate this expression against
+         */
+        evaluate(context?: any): any;
+    }
+
+    /**
+     * A value of an alias of a variable.
+     * Value is the original value, filtered is the applied value
+     * /filtered value if there's any filter
+     */
+    export interface AliasValue {
+        /**
+         * The original value
+         */
+        value: any;
+
+        /**
+         * The filtered value
+         */
+        filtered: any;
+    }
+
 
     /**
      * Array expression with the word 'in'
      */
-    export class ArrayExpression {
+    export class ArrayExpression implements Expression {
         readonly propertyName: string;
         readonly arrayName: string
 
@@ -25,7 +59,7 @@ namespace Attv.Binders {
     /**
      * Alias expression with the word 'as'
      */
-    export class AliasExpression {
+    export class AliasExpression implements Expression {
         readonly alias: string;
         readonly filterFn: (value?: any, context?: any) => string;
 
@@ -53,13 +87,13 @@ namespace Attv.Binders {
          * Evaluate propertyName against context
          * @param context the context object
          */
-        evaluate(context?: any): { value: any, filteredValue: any } {
+        evaluate(context?: any): AliasValue {
             let value = Attv.DataModel.getProperty(this.propertyName, context) || '';
             let filteredValue = this.filterFn(value, context) || value;
 
             return {
                 value: value,
-                filteredValue: filteredValue
+                filtered: filteredValue
             };
         }
 
