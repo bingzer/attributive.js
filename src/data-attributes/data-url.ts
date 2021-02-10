@@ -6,6 +6,11 @@ namespace Attv {
         constructor() {
             super(Attv.DataUrl.Key);
             this.isAutoLoad = false;
+
+            this.deps.uses = [
+                Attv.DataMethod.Key, 
+                Attv.DataCache.Key
+            ];
         }
 
         raw(element: HTMLElement): string {

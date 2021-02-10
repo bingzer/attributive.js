@@ -88,6 +88,56 @@ describe('Attv functions', () => {
 
     });
 
+    describe('Attv.concatArrays()', () => {
+        
+        it('Should concat multiple arrays correctly', () => {
+            let array1 = ["a", "b", "c"];
+            let array2 = ["d"];
+            let array3 = ["e", "f"];
+
+            let expected = Attv.concatArrays(array1, array2, array3);
+
+            expect(expected.length).toEqual(array1.length + array2.length + array3.length);
+            expect(expected[0]).toEqual("a");
+            expect(expected[1]).toEqual("b");
+            expect(expected[2]).toEqual("c");
+            expect(expected[3]).toEqual("d");
+            expect(expected[4]).toEqual("e");
+            expect(expected[5]).toEqual("f");
+        });
+        
+        it('Should concat multiple arrays correctly (with an undefined array)', () => {
+            let array1 = ["a", "b", "c"];
+            let array2 = undefined;
+            let array3 = ["e", "f"];
+
+            let expected = Attv.concatArrays(array1, array2, array3);
+
+            expect(expected.length).toEqual(array1?.length + array3?.length);
+            expect(expected[0]).toEqual("a");
+            expect(expected[1]).toEqual("b");
+            expect(expected[2]).toEqual("c");
+            expect(expected[3]).toEqual("e");
+            expect(expected[4]).toEqual("f");
+        });
+        
+        it('Should concat multiple arrays correctly (with an empty array)', () => {
+            let array1 = ["a", "b", "c"];
+            let array2 = [];
+            let array3 = ["e", "f"];
+
+            let expected = Attv.concatArrays(array1, array2, array3);
+
+            expect(expected.length).toEqual(array1?.length + array2.length + array3?.length);
+            expect(expected[0]).toEqual("a");
+            expect(expected[1]).toEqual("b");
+            expect(expected[2]).toEqual("c");
+            expect(expected[3]).toEqual("e");
+            expect(expected[4]).toEqual("f");
+        });
+
+    });
+
     describe('Attv.isEvaluatable()', () => {
         
         it('Should returns true if starts with ( and ends with )', () => {
