@@ -91,7 +91,7 @@ namespace Attv.Binders {
         }
 
         protected bindValueToElement(dataModel: DataModel, element: HTMLInputElement, expression: AliasExpression, model?: any): void {
-            element.value = expression.evaluate(model).filteredValue;
+            element.value = expression.evaluate(model).filtered;
         }
 
         protected getValueFromElement(element: HTMLInputElement): any {
@@ -114,7 +114,7 @@ namespace Attv.Binders {
         }
 
         protected bindValueToElement(dataModel: DataModel, element: HTMLTextAreaElement, expression: AliasExpression, model?: any): void {
-            element.value = expression.evaluate(model).filteredValue;
+            element.value = expression.evaluate(model).filtered;
         }
 
         protected getValueFromElement(element: HTMLTextAreaElement): any {
@@ -171,7 +171,7 @@ namespace Attv.Binders {
         }
 
         protected bindValueToElement(dataModel: DataModel, element: HTMLSelectElement, expression: AliasExpression, model?: any): void {
-            let propertyValue = expression.evaluate(model).filteredValue;
+            let propertyValue = expression.evaluate(model).filtered;
 
             Attv.toArray(element.options).forEach((opt: HTMLOptionElement) => {
                 opt.selected = opt.value?.equalsIgnoreCase(propertyValue);
@@ -270,7 +270,7 @@ namespace Attv.Binders {
         }
 
         protected bindValueToElement(dataModel: DataModel, element: HTMLElement, expression: AliasExpression, model?: any): void {
-            element.innerHTML = expression.evaluate(model).filteredValue;
+            element.innerHTML = expression.evaluate(model).filtered;
         }
     }
 
@@ -291,7 +291,7 @@ namespace Attv.Binders {
             let result = expression.evaluate(model);
 
             if (Array.isArray(result.value)) {
-                let array = result.filteredValue as any[];
+                let array = result.filtered as any[];
                 let headers = this.parseHeaders(dataModel, table, array[0]);
                 
                 this.bindArrayToElement(table, headers, array);
@@ -328,7 +328,7 @@ namespace Attv.Binders {
                 headers.forEach(head => {
                     let td = document.createElement('td');
 
-                    td.innerHTML = head.evaluate(item).filteredValue;
+                    td.innerHTML = head.evaluate(item).filtered;
 
                     tr.append(td);
                 });
@@ -354,7 +354,7 @@ namespace Attv.Binders {
             let result = expression.evaluate(model);
 
             if (Array.isArray(result.value)) {
-                let array = result.filteredValue as any[];
+                let array = result.filtered as any[];
                 array.forEach(item => {
                     let li = element instanceof HTMLDListElement ? document.createElement('dt') : document.createElement('li');
                     li.innerHTML = item;

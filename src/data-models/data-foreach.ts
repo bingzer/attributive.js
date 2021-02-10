@@ -6,8 +6,11 @@ namespace Attv.DataForEach {
 
         constructor() {
             super();
-            this.deps.internals = [Attv.DataContent.Key, Attv.DataModel.Key];
-            this.deps.uses = [Attv.DataId.Key, Attv.DataRef.Key];
+            this.deps.uses = [
+                Attv.DataContent.Key,
+                Attv.DataId.Key,
+                Attv.DataRef.Key
+            ];
         }
         
         load(element: HTMLElement, options: LoadElementOptions): BooleanOrVoid {
@@ -95,5 +98,8 @@ namespace Attv.DataForEach {
 }
 
 Attv.register(Attv.DataForEach.Key, { wildcard: "*", isAutoLoad: true, priority: 1 }, att => {
+    att.deps.internals = [Attv.DataContent.Key, Attv.DataModel.Key];
+    att.deps.uses = [Attv.DataId.Key, Attv.DataRef.Key];
+
     att.map(() => new Attv.DataForEach.Default());
 });
