@@ -29,7 +29,7 @@ describe("Attv.DataTemplate", () => {
         expect(attribute.priority).toEqual(2);
     });
 
-    it("render() should render the template to element", () => {
+    it("render() should render the template to element (div)", () => {
         let model = { employee: { firstName: "john" } }; 
 
         let html = `
@@ -46,8 +46,35 @@ describe("Attv.DataTemplate", () => {
         value.load(element, { context: model });
 
         let expected = attribute.render(element, model);
+
+        expect(expected).toBeInstanceOf(HTMLDivElement);
         
-        let xx = expected;
+        let dataModel = expected.querySelector('[data-model]');
+        expect(dataModel.innerHTML).toEqual('john');
+    });
+
+    it("render() should render the template to element (script)", () => {
+        let model = { employee: { firstName: "john" } }; 
+
+        let html = `
+        <script data-template="script">
+            <div data-model="employee.firstName"></div>
+        </script>
+        `;
+        let element = Attv.Dom.parseDom(html).firstElementChild as HTMLElement;
+
+        let attribute = new Attv.DataTemplate();
+        let value = new Attv.DataTemplate.Script();
+        attribute.map(() => value);
+
+        value.load(element, { context: model });
+
+        let expected = attribute.render(element, model);
+
+        expect(expected).toBeInstanceOf(HTMLDivElement);
+        
+        let dataModel = expected.querySelector('[data-model]');
+        expect(dataModel.innerHTML).toEqual('john');
     });
 
 });
