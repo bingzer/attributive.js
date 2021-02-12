@@ -30,3 +30,18 @@ describe("Attv.DataPartial", () => {
     });
 
 });
+
+
+describe("Attv.DataPartial.Default", () => {
+    it('Should declared its global variables', () => {
+        expect(Attv.DataPartial.Default).toBeDefined();
+    });
+
+    it("should create an instance of DataPartial.Default", () => {
+        let value = new Attv.DataPartial.Default();
+
+        let valType = value.validators.filter(val => val.name === Attv.Validators.NeedAttrKeys);
+        expect(valType).toBeDefined();
+    });
+
+});
