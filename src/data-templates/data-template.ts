@@ -12,7 +12,7 @@ namespace Attv {
             this.wildcard = "none"; 
             this.isAutoLoad = true;
             this.deps.internals = [ Attv.DataModel.Key ];
-            this.priority = Attv.getAttribute(Attv.DataForEach.Key).priority + 1;
+            this.priority = 2;
         }
 
         /**
@@ -52,6 +52,9 @@ namespace Attv {
                 let dataContent = this.attribute.resolve(Attv.DataContent.Key);
                 let html = dataContent.raw(element);
 
+                if (!html)
+                    Attv.log('fatal', 'No [data-content]');
+
                 return html;
             }
             
@@ -69,6 +72,8 @@ namespace Attv {
                     includeSelf: true,
                     context: model
                 });
+
+                template.attvAttr('data-template-container', 'container');
 
                 return template;
             }
@@ -93,7 +98,6 @@ namespace Attv {
             getTemplate(element: HTMLElement): string {
                 return element.attvHtml();
             }
-            
         }
     }
 }

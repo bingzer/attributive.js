@@ -10,6 +10,7 @@ namespace Attv {
             super(Attv.DataWall.Key);
 
             this.isAutoLoad = true;
+            this.wildcard = "none";
             this.deps.uses = [ Attv.DataContent.Key, Attv.DataCallback.Key ];
         }
     }

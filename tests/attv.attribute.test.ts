@@ -215,8 +215,7 @@ describe('Attv.Attribute', () => {
         
         expect(attribute.resolve(attribute.key)).toBeDefined();
 
-        let index = Attv.attributes.indexOf(attribute);
-        Attv.attributes.splice(index, 1);
+        Attv.unregister(attribute);
     });
 
     it('resolve() fails because no dependencies defined', () => {
@@ -246,7 +245,8 @@ describe('Attv.Attribute', () => {
         expect(value).toBeDefined();
 
         let index = Attv.attributes.indexOf(attribute);
-        Attv.attributes.splice(index, 1);
+        
+        Attv.unregister(attribute);
     });
 
     it('toString() an attribute value', () => {

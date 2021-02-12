@@ -20,8 +20,8 @@ describe('Attv (Test Usages) - js', () => {
 
         // -- load
         Attv.loadElements(element, { includeSelf: true });
-
-        Attv.attributes.splice(Attv.attributes.indexOf(attribute), 1);
+        
+        Attv.unregister(attribute);
 
         expect(counter).toBe(1);
     });
@@ -43,8 +43,8 @@ describe('Attv (Test Usages) - js', () => {
 
         // -- load
         Attv.loadElements(element, { includeSelf: true });
-
-        Attv.attributes.splice(Attv.attributes.indexOf(attribute), 1);
+        
+        Attv.unregister(attribute);
 
         expect(counter).toBe(1);
     });
@@ -68,8 +68,8 @@ describe('Attv (Test Usages) - js', () => {
 
         // -- load
         Attv.loadElements(element, { includeSelf: true });
-
-        Attv.attributes.splice(Attv.attributes.indexOf(attribute), 1);
+        
+        Attv.unregister(attribute);
 
         expect(counter).toBe(1);
     });
@@ -94,8 +94,8 @@ describe('Attv (Test Usages) - js', () => {
 
         // -- load
         Attv.loadElements(element, { includeSelf: true });
-
-        Attv.attributes.splice(Attv.attributes.indexOf(attribute), 1);
+        
+        Attv.unregister(attribute);
 
         expect(counter).toBe(1);
     });
@@ -119,8 +119,8 @@ describe('Attv (Test Usages) - js', () => {
 
         // -- load
         Attv.loadElements(element, { includeSelf: true });
-
-        Attv.attributes.splice(Attv.attributes.indexOf(attribute), 1);
+        
+        Attv.unregister(attribute);
 
         expect(counter).toBe(1);
     });
@@ -145,8 +145,8 @@ describe('Attv (Test Usages) - js', () => {
 
         // -- load
         Attv.loadElements(element, { includeSelf: true });
-
-        Attv.attributes.splice(Attv.attributes.indexOf(attribute), 1);
+        
+        Attv.unregister(attribute);
 
         expect(counter).toBe(1);
     });
@@ -171,8 +171,8 @@ describe('Attv (Test Usages) - js', () => {
 
         // -- load
         Attv.loadElements(element, { includeSelf: true });
-
-        Attv.attributes.splice(Attv.attributes.indexOf(attribute), 1);
+        
+        Attv.unregister(attribute);
 
         expect(counter).toBe(1);
     });

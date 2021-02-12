@@ -6,7 +6,7 @@
 **attributive.js** is a library that uses element attributes to modify DOM behavior.
 It is an unobtrusive vanilla javascript library.
 
-* Not a framework, a library
+* Not a framework but a library
 * Plug N Play
 * Extensible
 * Self Documenting
@@ -31,6 +31,8 @@ Using **attributive.js**, you can simply put `[data-partial]` to load the html:
 
 The purpose of **attributive.js** is to eliminate a boilerplate and repetitive javascript code by using html attributes.
 
+**attributive.js** should minimize the need to write javasript code.
+
 ### Build
 First
 
@@ -44,7 +46,7 @@ When developing
 gulp watch
 ```
 
-Running testing
+Running tests
 ```
 npm test
 ```

@@ -20,8 +20,21 @@
                 </p>
             </div>
         </script>
+        <div id="simple-templated-div" data-template="default">
+            <div>
+                <h2>This h2 (from div)</h2>
+                <h3 style="background-color: orange;">This is h3</h3>
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ac ullamcorper leo. 
+                    Mauris feugiat dolor vitae dui pellentesque eleifend. Nam sem nisl, posuere at orci ut, 
+                    eleifend eleifend lacus. Phasellus in nisl pellentesque tortor ultrices imperdiet ut vel urna. 
+                    Integer vitae lacinia lectus.
+                </p>
+            </div>
+        </div>
 
-        <button type="button" onclick="loadTemplateFrom('#simple-templated-script', employees)">Load Template</button>
+        <button type="button" onclick="loadTemplateFrom('#simple-templated-script', employees)">Load Template (script)</button>
+        <button type="button" onclick="loadTemplateFrom('#simple-templated-div', employees)">Load Template (div)</button>
 
     </div>
 	<div>
@@ -69,7 +82,7 @@
             [data-template] using &lt;div&gt;
 		</h3>
             
-        <div type="text/html" id="employee-list-templated-div" data-template="default">
+        <div id="employee-list-templated-div" data-template="default">
             <div data-foreach="emp in this" style="border: 1px solid black; padding: 10px" class="b">
                 <h2>This is from div</h2>
                 <h3 data-attrs="{title: 'hello ' + emp.firstName + ' ' + emp.lastName}" style="background-color: beige;">
@@ -83,7 +96,7 @@
                 </h3>
             </div>
         </div> 
-        <div type="text/html" id="employee-templated-div" data-template="default">
+        <div id="employee-templated-div" data-template="default">
             <h2>employee.data = <span data-model="this.data.asset"></span></h2>
             <h3 data-attrs="{title: 'hello ' + this.firstName + ' ' + this.lastName}" style="background-color: beige;">
                 <span data-model="this.firstName"></span>
@@ -104,7 +117,8 @@
     </div>
 
     <div style="border: 1px solid gray; margin: 8px;">
-        <p>Template will be loaded here</p>
+        <p style="border-bottom: 1px solid black; padding: 4px;">Template will be loaded here</p>
+
         <div style="margin: 8px" id="template-loader"></div>
     </div>
     
