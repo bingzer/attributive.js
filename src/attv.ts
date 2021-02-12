@@ -1048,13 +1048,33 @@ namespace Attv {
     }
 
     /**
-     * Registers an attribute
+     * Registers an attribute 
      * @param attributeKey An attribute key or a function that returns an attribute
      * @param options The options or a callback function to setup an attribute
      * @param callback A callback function to setup an attribute
      */
     export function register(attributeKey: StringOrCreateAttributeFn, options? : Attv.Registrar.AttributeRegistrationOptionsOrCreatedAttributeFn, callback?: CreatedAttributeFn ): void {
         Attv.Registrar.registerAttribute(attributeKey, options, callback);
+    }
+
+    /**
+     * Unregister an attribute and return the attribute
+     * @param attributeKey the key to remove
+     */
+    export function unregister<TAttribute extends Attv.Attribute>(attributeKeyOrAttribute: string | Attv.Attribute): TAttribute {
+        let attribute: Attv.Attribute;
+
+        if (Attv.isString(attributeKeyOrAttribute)) {
+            attribute = Attv.attributes.filter(att => att.key.equalsIgnoreCase(attributeKeyOrAttribute as string))[0];
+        } else {
+            attribute = attributeKeyOrAttribute as Attv.Attribute;
+        }
+
+        if (attribute) {
+            return Attv.attributes.splice(Attv.attributes.indexOf(attribute), 1)[0] as TAttribute;
+        }
+
+        return undefined;
     }
     
     /**

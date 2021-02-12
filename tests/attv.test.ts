@@ -20,7 +20,11 @@ describe('Attv constants and global vars', () => {
     it('Should do nothing (test usage)', () => {
         Attv.register('register')
         Attv.register('data-app', (att) => {
+            // do nothing
         });
+
+        Attv.unregister('register');
+        Attv.unregister('data-appx');
     });
 });
 
@@ -314,9 +318,25 @@ describe('Attv functions', () => {
 
             expect(attribute).toBeInstanceOf(Attv.Attribute);
     
-            Attv.attributes.splice(Attv.attributes.indexOf(attribute), 1);
+            Attv.unregister(attribute);
 
             expect(Attv.attributes.filter(att => att.key === 'data-attr')[0]).toBeUndefined();
+        });
+
+    });
+    
+    describe('Attv.unregister()', () => {
+
+        it('Should unregister an attribute', () => {
+            // -- register
+            Attv.register('data-attr', { isAutoLoad: true });
+
+            expect(Attv.attributes.filter(att => att.key === 'data-attr')[0]).toBeDefined();
+
+            let removed = Attv.unregister('data-attr');
+
+            expect(Attv.attributes.filter(att => att.key === 'data-attr')[0]).toBeUndefined();
+            expect(removed).toBeInstanceOf(Attv.Attribute);
         });
 
     });
@@ -334,9 +354,9 @@ describe('Attv functions', () => {
             let child = Attv.getAttribute('data-child');
 
             expect(Attv.resolveAttribute(child, parent.key)).toBe(parent);
-
-            Attv.attributes.splice(Attv.attributes.indexOf(parent), 1);
-            Attv.attributes.splice(Attv.attributes.indexOf(child), 1);
+            
+            Attv.unregister(parent);
+            Attv.unregister(child);
         });
 
         it('Should resolve to an attribute that the child depends on (with warning)', () => {
@@ -350,18 +370,19 @@ describe('Attv functions', () => {
 
             expect(Attv.resolveAttribute(child, parent.key)).toBe(parent);
             
-            Attv.attributes.splice(Attv.attributes.indexOf(parent), 1);
-            Attv.attributes.splice(Attv.attributes.indexOf(child), 1);
+            Attv.unregister(parent);
+            Attv.unregister(child);
         });
 
         it('Should not resolve to any attribute', () => {
             let parent = Attv.getAttribute('data-parent');
             let child = Attv.getAttribute('data-child');
 
-            expect(Attv.resolveAttribute(child, parent?.key)).toBeUndefined();
+            let att = (Attv.resolveAttribute(child, parent?.key);
+            expect(att).toBeUndefined();
             
-            Attv.attributes.splice(Attv.attributes.indexOf(parent), 1);
-            Attv.attributes.splice(Attv.attributes.indexOf(child), 1);
+            Attv.unregister(parent);
+            Attv.unregister(child);
         });
 
     });
@@ -386,9 +407,9 @@ describe('Attv functions', () => {
 
             expect(expected).toBeInstanceOf(Attv.AttributeValue);
             expect(expected).toBeInstanceOf(Attv.AttributeValue);
-
-            Attv.attributes.splice(Attv.attributes.indexOf(parent), 1);
-            Attv.attributes.splice(Attv.attributes.indexOf(child), 1);
+            
+            Attv.unregister(parent);
+            Attv.unregister(child);
         });
 
         it('Should resolve to an attribute value (with warning)', () => {
@@ -406,9 +427,9 @@ describe('Attv functions', () => {
             let expected = Attv.resolveAttributeValue(child, parent.key, element);
 
             expect(expected).toBeInstanceOf(Attv.AttributeValue);
-
-            Attv.attributes.splice(Attv.attributes.indexOf(parent), 1);
-            Attv.attributes.splice(Attv.attributes.indexOf(child), 1);
+            
+            Attv.unregister(parent);
+            Attv.unregister(child);
         });
 
     });
