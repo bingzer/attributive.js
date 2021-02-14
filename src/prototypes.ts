@@ -1,42 +1,15 @@
 ////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// Element.Prototypes ////////////////////////////////////
+//////////////////////// HTMLElement.Prototypes ////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
-interface Element {
+interface HTMLElement  {
 
     /**
      * Gets/Sets html.
      * Will execute javascript inside also
      */
     attvHtml: (html?: string) => string | any;
-}
 
-Element.prototype.attvHtml = function (html?: string): string | any {
-    let element = this as HTMLElement;
-
-    if (Attv.isUndefined(html)) {
-        return element.innerHTML;
-    } else {
-        element.innerHTML = html;
-
-        if (html) { 
-            // look for scripts
-            let innerHtmlElement = Attv.Dom.parseDom(html);
-            let scripts = innerHtmlElement.querySelectorAll('script');
-            for (let i = 0; i < scripts.length; i++) {
-                if(scripts[i].type?.toLowerCase()?.contains('javascript')) {
-                    Attv.eval$(scripts[i].text);
-                }
-            }
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-//////////////////////// HTMLElement.Prototypes ////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////
-
-interface HTMLElement  {
     /**
      * Attribute helper.
      * value can be an object
@@ -54,27 +27,30 @@ interface HTMLElement  {
     attvHide: () => any;
 }
 
+HTMLElement.prototype.attvHtml = function (html?: string): string | any {
+    let element = this as HTMLElement;
+
+    if (Attv.isUndefined(html)) {
+        return element.innerHTML;
+    } else {
+        element.innerHTML = html;
+    }
+}
+
 HTMLElement.prototype.attvShow = function () {
     let element = this as HTMLElement;
     
-    let dataStyle = Attv.parseJsonOrElse<any>(element.attvAttr('data-style'), {});
-    if (dataStyle.display) {
-        element.style.display = dataStyle?.display;
-    } else {
-        element.style.display = 'block';
+    // just remove display:none if any
+    let display = element.style.display;
+    if (display.equalsIgnoreCase("none")) {
+        element.style.removeProperty("display");
     }
 }
 
 HTMLElement.prototype.attvHide = function () {
     let element = this as HTMLElement;
     
-    let dataStyle = Attv.parseJsonOrElse<any>(element.attvAttr('data-style'), {});
-    if (element.style.display !== 'none') {
-        dataStyle.display = element.style.display;
-        element.attvAttr('data-style', dataStyle);
-    }
-    
-    element.style.display = 'none'
+    element.style.display = "none";
 }
 
 HTMLElement.prototype.attvAttr = function (name: string | Attv.Attribute, value?: any): HTMLElement | any {
