@@ -47,7 +47,7 @@ namespace Attv {
 
             render(element: HTMLElement, model?: any, options?: Ajax.AjaxOptions): void {
                 if (!options) {
-                    options = { } as Ajax.AjaxOptions;
+                    options = this.attribute.getSettings<Ajax.AjaxOptions>(element) || { } as Ajax.AjaxOptions;
                 }
 
                 if (model) {

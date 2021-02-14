@@ -26,6 +26,19 @@
     </div>
 	<div>
         <h3>
+			[data-partial]. with header (check the network tab)
+        </h3>
+		<div data-partial="auto" 
+			data-url="data/employees.json" 
+			data-source="#employee-list-templated-script"
+			data-partial-settings="{ headers: [ { name: 'Authorization', value: 'Bearer 123456789' } ] }"
+			data-data="{ withAuth: true }">
+			<p>...</p>
+		</div>
+
+    </div>
+	<div>
+        <h3>
             [data-partial]. on a button
 		</h3>
 		<div>
