@@ -1,0 +1,52 @@
+<html>
+
+<body>
+  <div data-hello="world"></div>
+  <div data-hello="mars"></div>
+</body>
+
+<script type="text/javascript" src="/build/attv.js"></script>
+
+<!-- <script>
+
+// Create an attribute called [data-hello-world]
+Attv.register("data-hello", attr => {
+
+  // Map "world" value to the attribute
+  attr.map("world", (value, element) => {
+      
+    // insert the text Hello World to the element
+    element.innerHTML = "Hello World";
+  });
+
+  // Map "mars" value to the attribute
+  attr.map("mars", (value, element) => {
+
+    // insert the text Hello Mars to the element
+    element.innerHTML = "Hello Mars";
+  });
+
+});
+
+</script> -->
+<script>
+
+// Create an attribute called [data-hello-world]
+Attv.register("data-hello", function (attr) {
+
+    // Map "world" value to the attribute
+    attr.map("world", function (value, element) {
+        // insert the text Hello World to the element
+        element.innerHTML = "Hello World 🌎";
+    });
+
+    // Map "world" value to the attribute
+    attr.map("mars", function (value, element) {        
+        // insert the text Hello World to the element
+        element.innerHTML = "Hello Mars 👽";
+    });
+
+});
+    
+</script>
+</html>

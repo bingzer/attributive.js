@@ -2,54 +2,133 @@
 
 # attributive.js
 
-### What is it?
-**attributive.js** is a library that uses element attributes to modify DOM behavior.
-It is an unobtrusive vanilla javascript library.
+### What is this?
+**attributive.js** is a library that uses HTML attributes to modify DOM elements.
+It is an unobtrusive vanilla javascript library written in Typescript. It has no dependencies on other libraries.
 
-* Not a framework but a library
+It is:
+* A library (Not a framework)
 * Plug N Play
 * Extensible
 * Self Documenting
-* Complements other js library
+* Complements other js libraries
 
 ### Concept
-Let's say you have a 'partial.html' somewhere.
-And you want to display it in a `<div>`.
-Usually you would have to do (in jQuery sample or other similar Ajax code):
+Let's say you have a 'partial.html', that you want to display in a `div#container`.
+
+Typically, you would write:
 ```
-$.get('partial.html', function (data) {
-  $('#container').html(data);
-});
+<script>
+  // using fetch API
+  fetch('partial.html')
+    .then(response => response.text())
+    .then(data => {
+      document.querySelector('#container').innerHTML = data;
+    });
+    
+  // or jquery
+  $.get('partial.html', function (data) {
+    $('#container').html(data);
+  });
+</script>
 ```
-Using **attributive.js**, you can simply put `[data-partial]` to load the html:
+With **attributive.js**, you would add `[data-partial]` to the `div#container` to load the content without needing to write any javascript code:
 ```
-<div data-partial="auto" data-url="partial.html">
+<div id="container" data-partial="auto" data-url="partial.html">
   <!-- Content will be here after it's done loading -->
 </div>
 ```
-`[data-partial]` is a built-in attribute in attributive.js that does Ajax functionality.
+> Note that `[data-partial]` is a built-in attribute that handles Ajax.
 
-The purpose of **attributive.js** is to eliminate a boilerplate and repetitive javascript code by using html attributes.
 
-**attributive.js** should minimize the need to write javasript code.
+### Example
+
+This is an example code on how to create your own attribute using **attributive.js** that prints out `Hello World` or `Hello Mars` depending on the value of the attribute. In this example, we are creating `[data-hello]` attributes.
+
+```
+<html>
+
+<body>
+  <div data-hello="world"></div>
+  <div data-hello="mars"></div>
+</body>
+
+
+<script src="attv.js"></script>
+
+<script>
+
+// Create an attribute called [data-hello]
+Attv.register("data-hello", function (attr) {
+
+    // Map "world" value to the attribute
+    attr.map("world", function (value, element) {
+
+        // insert the text Hello World to the element
+        element.innerHTML = "Hello World 🌎";
+
+    });
+
+    // Map "mars" value to the attribute
+    attr.map("mars", function (value, element) {        
+
+        // insert the text Hello World to the element
+        element.innerHTML = "Hello Mars 👽";
+        
+    });
+
+});
+
+</script>
+</html>
+```
+
+During runtime you would have 
+
+```
+<html>
+<body>
+  <div data-hello="world">Hello World 🌎</div>
+  <div data-hello="mars">Hello Mars 👽</div>
+</body>
+</html>
+```
+
+### Browser Supports
+
+Should work with all modern browsers since it is a vanilla javascript code. Last time I tested this, it works with IE 11 (it will be dropped as soon as the world is ready to).
 
 ### Build
-First
+It is a Typescript project because I **like** having types in Javascript and arrow functions :). However, you can still develop your own code using Javascript code. In `tsconfig.json`, we are targeting `es5`.
+
+I use Visual Studio Code to develop this but you can use your own IDE.
+
+#### First load, clone the repository then
 
 ```
 npm install
 gulp
 ```
 
-When developing
+#### During coding/development
 ```
 gulp watch
 ```
+`gulp watch` watches all the typescript (\*.ts) files and transpile them into javascript (\*.js) files.
 
-Running tests
+
+#### Running tests
 ```
 npm test
 ```
+This project uses Karma/Jasmine to run the tests
 
-### Demo
-Coming soon
+#### Building/Minify the JS
+```
+gulp
+```
+You should see `dist` directory will all the minified versions, js.map and d.ts files to distribute.
+
+
+### Demo + Wiki
+Soon
