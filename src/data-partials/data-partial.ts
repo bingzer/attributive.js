@@ -134,7 +134,7 @@ namespace Attv {
 
                 this.deps.requires = [ Attv.DataTarget.Key ];
                 this.validators = [
-                    { name: Attv.Validators.NeedAttrKeys, options: [Attv.DataTarget.Key] }
+                    { name: Attv.Validators.NeedAttrKeys, options: [Attv.DataUrl.Key, Attv.DataTarget.Key] }
                 ];
             }
 

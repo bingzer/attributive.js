@@ -1,4 +1,6 @@
 /// <reference path="../../src/attv.ts" />
+/// <reference path="../../src/data-attributes/data-url.ts" />
+/// <reference path="../../src/data-attributes/data-target.ts" />
 /// <reference path="../../src/data-partials/data-partial.ts" />
 // ------------------------------------------------- //
 
@@ -40,8 +42,38 @@ describe("Attv.DataPartial.Default", () => {
     it("should create an instance of DataPartial.Default", () => {
         let value = new Attv.DataPartial.Default();
 
-        let valType = value.validators.filter(val => val.name === Attv.Validators.NeedAttrKeys);
+        let valType = value.validators.filter(val => val.name === Attv.Validators.NeedAttrKeys)[0] as Attv.Validators.ValidatingObj;
         expect(valType).toBeDefined();
+        expect(valType.options.indexOf(Attv.DataUrl.Key)).toBeGreaterThanOrEqual(0);
     });
 
+});
+
+describe("Attv.DataPartial.Auto", () => {
+    it('Should declared its global variables', () => {
+        expect(Attv.DataPartial.Auto).toBeDefined();
+    });
+
+    it("should create an instance of DataPartial.Auto", () => {
+        let value = new Attv.DataPartial.Auto();
+
+        let valType = value.validators.filter(val => val.name === Attv.Validators.NeedAttrKeys)[0] as Attv.Validators.ValidatingObj;
+        expect(valType).toBeDefined();
+        expect(valType.options.indexOf(Attv.DataUrl.Key)).toBeGreaterThanOrEqual(0);
+    });
+});
+
+describe("Attv.DataPartial.Click", () => {
+    it('Should declared its global variables', () => {
+        expect(Attv.DataPartial.Click).toBeDefined();
+    });
+
+    it("should create an instance of DataPartial.Click", () => {
+        let value = new Attv.DataPartial.Click();
+
+        let valType = value.validators.filter(val => val.name === Attv.Validators.NeedAttrKeys)[0] as Attv.Validators.ValidatingObj;
+        expect(valType).toBeDefined();
+        expect(valType.options.indexOf(Attv.DataUrl.Key)).toBeGreaterThanOrEqual(0);
+        expect(valType.options.indexOf(Attv.DataTarget.Key)).toBeGreaterThanOrEqual(0);
+    });
 });
