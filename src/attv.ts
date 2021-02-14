@@ -109,9 +109,9 @@ namespace Attv {
         public wildcard: Attv.WildcardType = "*";
 
         /**
-         * Is Auto load? (default is false)
+         * Is Auto load? (default is true)
          */
-        public isAutoLoad: boolean = false;
+        public isAutoLoad: boolean = true;
         
         /**
          * Priority Type by default is undefined
@@ -495,7 +495,11 @@ namespace Attv {
                     attribute.name = this.options.attributeName || attribute.name || attribute.key;
                     attribute.wildcard =  this.options.wildcard || attribute.wildcard;
                     attribute.priority = this.options.priority || attribute.priority;
-                    attribute.isAutoLoad = Attv.isUndefined(this.options.isAutoLoad) ? (Attv.isUndefined(attribute.isAutoLoad) ? true : attribute.isAutoLoad) : this.options.isAutoLoad;
+                    if (Attv.isDefined(this.options.isAutoLoad)) {
+                        attribute.isAutoLoad = this.options.isAutoLoad;
+                    } else {
+                        attribute.isAutoLoad = Attv.isUndefined(attribute.isAutoLoad) ? true : attribute.isAutoLoad;
+                    }
                 }
     
                 if (this.valuesFn) {

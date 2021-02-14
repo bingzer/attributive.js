@@ -3,10 +3,10 @@
 # attributive.js
 
 ### What is it?
-**attributive.js** is a library that uses element attributes to modify DOM behavior.
-It is an unobtrusive vanilla javascript library.
+**attributive.js** is a library that uses element attributes to modify DOM elements.
+It is an unobtrusive vanilla javascript library written in Typescript.
 
-* Not a framework but a library
+* A library (Not a framework)
 * Plug N Play
 * Extensible
 * Self Documenting
@@ -21,17 +21,65 @@ $.get('partial.html', function (data) {
   $('#container').html(data);
 });
 ```
-Using **attributive.js**, you can simply put `[data-partial]` to load the html:
+Using **attributive.js**, you would put `[data-partial]` to load the html:
 ```
 <div data-partial="auto" data-url="partial.html">
   <!-- Content will be here after it's done loading -->
 </div>
 ```
-`[data-partial]` is a built-in attribute in attributive.js that does Ajax functionality.
+> `[data-partial]` is a built-in attribute in attributive.js that does Ajax functionality.
 
-The purpose of **attributive.js** is to eliminate a boilerplate and repetitive javascript code by using html attributes.
 
-**attributive.js** should minimize the need to write javasript code.
+### Example
+
+This is an example code how to create your own attribute that simply prints out `Hello World` or `Hello Mars` depending on the value of the attribute.
+```
+<html>
+
+<body>
+  <div data-hello="world"></div>
+  <div data-hello="mars"></div>
+</body>
+
+<script src="attv.js"></script>
+
+<script>
+
+// Create an attribute called [data-hello-world]
+Attv.register("data-hello", function (attr) {
+
+    // Map "world" value to the attribute
+    attr.map("world", function (value, element) {
+
+        // insert the text Hello World to the element
+        element.innerHTML = "Hello World";
+
+    });
+
+    // Map "world" value to the attribute
+    attr.map("mars", function (value, element) {        
+
+        // insert the text Hello World to the element
+        element.innerHTML = "Hello Mars";
+        
+    });
+
+});
+
+</script>
+</html>
+```
+
+During runtime you would have 
+
+```
+<html>
+<body>
+  <div data-hello="world">Hello World</div>
+  <div data-hello="mars">Hello Mars</div>
+</body>
+</html>
+```
 
 ### Build
 First

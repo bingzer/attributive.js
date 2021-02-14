@@ -310,12 +310,41 @@ describe('Attv functions', () => {
     
     describe('Attv.register()', () => {
 
-        it('Should register an attribute', () => {
+        it('Should register an autoLoad attribute', () => {
             // -- register
             Attv.register('data-attr', { isAutoLoad: true });
 
             let attribute = Attv.attributes.filter(att => att.key === 'data-attr')[0];
 
+            expect(attribute.isAutoLoad).toBeTrue();
+            expect(attribute).toBeInstanceOf(Attv.Attribute);
+    
+            Attv.unregister(attribute);
+
+            expect(Attv.attributes.filter(att => att.key === 'data-attr')[0]).toBeUndefined();
+        });
+
+        it('Should register a NOT autoload attribute', () => {
+            // -- register
+            Attv.register('data-attr', { isAutoLoad: false });
+
+            let attribute = Attv.attributes.filter(att => att.key === 'data-attr')[0];
+
+            expect(attribute.isAutoLoad).toBeFalse();
+            expect(attribute).toBeInstanceOf(Attv.Attribute);
+    
+            Attv.unregister(attribute);
+
+            expect(Attv.attributes.filter(att => att.key === 'data-attr')[0]).toBeUndefined();
+        });
+
+        it('Should register autoLoad by default', () => {
+            // -- register
+            Attv.register('data-attr');
+
+            let attribute = Attv.attributes.filter(att => att.key === 'data-attr')[0];
+
+            expect(attribute.isAutoLoad).toBeTrue();
             expect(attribute).toBeInstanceOf(Attv.Attribute);
     
             Attv.unregister(attribute);
@@ -378,7 +407,7 @@ describe('Attv functions', () => {
             let parent = Attv.getAttribute('data-parent');
             let child = Attv.getAttribute('data-child');
 
-            let att = (Attv.resolveAttribute(child, parent?.key);
+            let att = Attv.resolveAttribute(child, parent?.key);
             expect(att).toBeUndefined();
             
             Attv.unregister(parent);
