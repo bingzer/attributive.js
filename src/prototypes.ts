@@ -51,30 +51,23 @@ interface HTMLElement  {
     /**
      * HIde
      */
-    attvHide: () => any;
+    attvHide: (important?: boolean) => any;
 }
 
 HTMLElement.prototype.attvShow = function () {
     let element = this as HTMLElement;
     
-    let dataStyle = Attv.parseJsonOrElse<any>(element.attvAttr('data-style'), {});
-    if (dataStyle.display) {
-        element.style.display = dataStyle?.display;
-    } else {
-        element.style.display = 'block';
+    // just remove display:none if any
+    let display = element.style.display;
+    if (display.equalsIgnoreCase("none")) {
+        element.style.removeProperty("display");
     }
 }
 
-HTMLElement.prototype.attvHide = function () {
+HTMLElement.prototype.attvHide = function (important?: boolean) {
     let element = this as HTMLElement;
     
-    let dataStyle = Attv.parseJsonOrElse<any>(element.attvAttr('data-style'), {});
-    if (element.style.display !== 'none') {
-        dataStyle.display = element.style.display;
-        element.attvAttr('data-style', dataStyle);
-    }
-    
-    element.style.display = 'none'
+    element.style.display = "none" + (important ? " !important" : "");
 }
 
 HTMLElement.prototype.attvAttr = function (name: string | Attv.Attribute, value?: any): HTMLElement | any {

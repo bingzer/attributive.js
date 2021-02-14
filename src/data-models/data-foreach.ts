@@ -60,7 +60,8 @@ namespace Attv.DataForEach {
                     element.removeAttribute(name);
                 }
             });
-            element.attvAttr('style', 'display:none !important');
+
+            element.attvHide(true);
             
             return true;
         }
