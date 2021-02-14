@@ -61,7 +61,7 @@ namespace Attv.DataForEach {
                 }
             });
 
-            element.attvHide(true);
+            element.attvHide();
             
             return true;
         }
