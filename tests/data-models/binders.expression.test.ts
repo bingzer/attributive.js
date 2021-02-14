@@ -24,6 +24,14 @@ describe("Attv.Binders.AliasExpression", () => {
         expect(expression.filterFn).toBeDefined();
     });
 
+    it('Should create an AliasExpression (not an expression)', () => {
+        let expression = new Attv.Binders.AliasExpression("employee");
+
+        expect(expression.alias).toEqual('employee');
+        expect(expression.propertyName).toEqual('employee');
+        expect(expression.filterFn).toBeDefined();
+    });
+
     it('Should create an AliasExpression', () => {
         let context = {
             employee: {

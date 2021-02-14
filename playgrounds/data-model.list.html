@@ -33,6 +33,18 @@
         <dl data-model="candyTypes"></dl>
 
     </div>
+	<div>
+        <h3>
+            [data-model] with list (ul) with settings
+		</h3>
+        
+        <p>type.value</p>
+        <ul data-model="candyTypeNames" data-model-settings="{ item: 'type.value' }"></ul>
+
+        <p>type.name with uppercase filter</p>
+        <ul data-model="candyTypeNames" data-model-settings="{ item: 'type.name | uppercase' }"></ul>
+
+    </div>
     
 <script type="text/javascript" src="/build/attv.js"></script>
 <script type="text/javascript" src="/build/data-attributes.js"></script>
@@ -46,6 +58,17 @@
         'kitkat',
         'twix'
     ];
+    var candyTypeNames = [
+        { type: { name: 'snickers', value: 'snk' } },
+        { type: { name: 'milky way', value: 'mkw' } },
+        { type: { name: 'm&m', value: 'mm' } },
+        { type: { name: 'kitkat', value: 'kkt' } },
+        { type: { name: 'twix', value: 'twx' } }
+    ];
+
+    function uppercase(text) {
+        return text.toUpperCase();
+    }
 </script>
 
 </body>

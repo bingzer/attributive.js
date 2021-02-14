@@ -64,7 +64,7 @@ namespace Attv.Binders {
         readonly filterFn: (value?: any, context?: any) => string;
 
         constructor(public propertyName: string) {
-            let split = propertyName.split(" as ");
+            let split = propertyName?.split(" as ");
             let prop = this.parsePropertyName((split[0])?.trim());
 
             this.propertyName = prop.propertyName;
@@ -88,8 +88,17 @@ namespace Attv.Binders {
          * @param context the context object
          */
         evaluate(context?: any): AliasValue {
-            let value = Attv.DataModel.getProperty(this.propertyName, context) || '';
-            let filteredValue = this.filterFn(value, context) || value;
+            let value: any;
+            let filteredValue: any;
+            
+            if (!this.propertyName) {
+                value = context;
+                filteredValue = context;
+            }
+            else {
+                value = Attv.DataModel.getProperty(this.propertyName, context) || '';
+                filteredValue = this.filterFn(value, context) || value;
+            }
 
             return {
                 value: value,
