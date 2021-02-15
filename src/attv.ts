@@ -717,7 +717,7 @@ namespace Attv {
                         }
         
                         let domDocument = Attv.Dom.domParser.parseFromString(text, 'text/xml');
-                        tag = domDocument.firstElementChild.tagName;
+                        tag = (domDocument.firstChild as Element).tagName;
                         if (domDocument.querySelector('parsererror')) {
                             tag = 'div';
                         }
@@ -863,11 +863,25 @@ namespace Attv {
     }
 
     export function eval$(any: string, context?: any) {
-        let evalInContext = (js: string, ctx: any) => {
-            return ((str: string) => eval(str)).call(ctx, ` with(this) { ${js} } `);
-        }
+        context = context || {};
 
-        return evalInContext(any, context || Attv.globalThis$());
+        // credit to: https://gist.github.com/softwarespot/76252a838efdcace2df1f9c724e37351
+        // Call is used to define where "this" within the evaluated code should reference.
+        // eval does not accept the likes of eval.call(...) or eval.apply(...) and cannot
+        // be an arrow function
+        return function evaluateEval() {
+            try {
+                // Create an args definition list e.g. "arg1 = this.arg1, arg2 = this.arg2"
+                const argsStr = Object.keys(context)
+                    .map(key => `${key} = this.${key}`)
+                    .join(',');
+                const argsDef = argsStr ? `let ${argsStr};` : '';
+    
+                return eval(`${argsDef}${any}`);   
+            } catch {
+                return undefined;  // return undefined whatever happened
+            }
+        }.call(context);
     }
 
     export function globalThis$() {

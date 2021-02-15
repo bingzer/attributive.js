@@ -64,7 +64,7 @@ Attv.register("data-hello", function (attr) {
     // Map "world" value to the attribute
     attr.map("world", function (value, element) {
 
-        // insert the text Hello World to the element
+        // set 'Hello World' to the element
         element.innerHTML = "Hello World 🌎";
 
     });
@@ -72,7 +72,7 @@ Attv.register("data-hello", function (attr) {
     // Map "mars" value to the attribute
     attr.map("mars", function (value, element) {        
 
-        // insert the text Hello World to the element
+        // set 'Hello Mars' to the element
         element.innerHTML = "Hello Mars 👽";
         
     });
@@ -87,10 +87,12 @@ During runtime you would have
 
 ```
 <html>
+...
 <body>
   <div data-hello="world">Hello World 🌎</div>
   <div data-hello="mars">Hello Mars 👽</div>
 </body>
+...
 </html>
 ```
 
