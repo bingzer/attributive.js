@@ -357,13 +357,21 @@ namespace Attv.Binders {
                 let array = result.filtered as any[];
                 array.forEach(item => {
                     let li = element instanceof HTMLDListElement ? document.createElement('dt') : document.createElement('li');
-                    li.innerHTML = item;
+                    let expression = this.parseItemExpression(dataModel, element, model);
+                    li.innerHTML = expression.evaluate(item).filtered;
 
                     element.append(li);
                 });
             } else {
                 throw new Error();
             }
+        }
+
+        private parseItemExpression(dataModel: DataModel, element: HTMLListELement, any: object): AliasExpression {
+            let settings = dataModel.getSettings<any>(element);
+            let itemExpression = settings?.item as string || "";
+
+            return new AliasExpression(itemExpression);
         }
     }
 }

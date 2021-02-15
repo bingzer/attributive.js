@@ -34,6 +34,17 @@ HTMLElement.prototype.attvHtml = function (html?: string): string | any {
         return element.innerHTML;
     } else {
         element.innerHTML = html;
+        
+        if (html) { 	
+            // look for scripts	
+            let innerHtmlElement = Attv.Dom.parseDom(html);	
+            let scripts = innerHtmlElement.querySelectorAll('script');	
+            for (let i = 0; i < scripts.length; i++) {	
+                if(scripts[i].type?.toLowerCase()?.contains('javascript')) {	
+                    Attv.eval$(scripts[i].text);	
+                }	
+            }	
+        }
     }
 }
 

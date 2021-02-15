@@ -771,14 +771,15 @@ namespace Attv {
                 }
             }
     
-            // header
-            options.headers?.forEach(header => xhr.setRequestHeader(header.name, header.value));
-    
             // last check
             if (Attv.isUndefined(options.url))
                 throw new Error('No url');
     
             xhr.open(options.method, options.url, true);
+
+            // headers must be set after open()
+            options.headers?.forEach(header => xhr.setRequestHeader(header.name, header.value));
+
             xhr.send();
         }
     

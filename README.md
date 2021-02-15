@@ -1,4 +1,4 @@
-![Build Main Branch](https://github.com/bingzer/attributive.js/workflows/Build%20Main%20Branch/badge.svg)
+[![Main Branch](https://github.com/bingzer/attributive.js/workflows/Build%20Main%20Branch/badge.svg)](https://github.com/bingzer/attributive.js/actions)
 
 # attributive.js
 
@@ -122,6 +122,15 @@ gulp watch
 npm test
 ```
 This project uses Karma/Jasmine to run the tests
+
+#### Playgrounds
+This project has a playground sample area to showcase all the attributes. To run it, use [`http-server`](https://github.com/http-party/http-server#readme)
+```
+npm install -g http-server
+http-server
+```
+Navigate to http://localhost:8080/playgrounds
+> By default [http-server](https://github.com/http-party/http-server#readme) will run on port 8080. 
 
 #### Building/Minify the JS
 ```

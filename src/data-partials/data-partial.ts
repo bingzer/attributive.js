@@ -47,7 +47,7 @@ namespace Attv {
 
             render(element: HTMLElement, model?: any, options?: Ajax.AjaxOptions): void {
                 if (!options) {
-                    options = { } as Ajax.AjaxOptions;
+                    options = this.attribute.getSettings<Ajax.AjaxOptions>(element) || { } as Ajax.AjaxOptions;
                 }
 
                 if (model) {
@@ -134,7 +134,7 @@ namespace Attv {
 
                 this.deps.requires = [ Attv.DataTarget.Key ];
                 this.validators = [
-                    { name: Attv.Validators.NeedAttrKeys, options: [Attv.DataTarget.Key] }
+                    { name: Attv.Validators.NeedAttrKeys, options: [Attv.DataUrl.Key, Attv.DataTarget.Key] }
                 ];
             }
 
