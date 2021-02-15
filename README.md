@@ -87,10 +87,12 @@ During runtime you would have
 
 ```
 <html>
+...
 <body>
   <div data-hello="world">Hello World 🌎</div>
   <div data-hello="mars">Hello Mars 👽</div>
 </body>
+...
 </html>
 ```
 
