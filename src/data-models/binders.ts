@@ -7,19 +7,19 @@ namespace Attv.Binders {
      */
     export abstract class Binder<TElement extends HTMLElement> {
 
-        accept(dataModel: DataModel, element: TElement, refId?: string): boolean {
+        accept(dataModel: DataModel, element: TElement, binderId?: string): boolean {
             if (!this.canBind(element))
                 return false;
 
             // compare context
-            let dataModelContext = dataModel.resolve(Attv.DataModelContext.Key);
-            return element.attvAttr(dataModelContext) === refId;
+            let dataBinder = dataModel.resolve(Attv.DataBinder.Key);
+            return element.attvAttr(dataBinder) === binderId;
         }
 
-        stamp(dataModel: DataModel, element: TElement, refId: string) {
-            if (refId) {
-                let dataModelContext = dataModel.resolve(Attv.DataModelContext.Key);
-                element.attvAttr(dataModelContext, refId);
+        stamp(dataModel: DataModel, element: TElement, binderId: string) {
+            if (binderId) {
+                let dataBinder = dataModel.resolve(Attv.DataBinder.Key);
+                element.attvAttr(dataBinder, binderId);
             }
         }
 
@@ -29,15 +29,140 @@ namespace Attv.Binders {
         protected abstract bindValueToElement(dataModel: DataModel, element: TElement, expression: AliasExpression, model?: any): void;
 
     }
+    
+    // ---------------------------------- one-way binder -------------------------------------------------//
 
     /**
      * One-way binder
      */
     export abstract class OneWayBinder<TElement extends HTMLElement> extends Binder<TElement> {
+
         bind(dataModel: DataModel, element: TElement, expression: AliasExpression, model?: any) {
             this.bindValueToElement(dataModel, element, expression, model);
         }
+        
+    } 
+
+    /**
+     * Any element
+     */
+    export class Default extends OneWayBinder<HTMLElement> {
+        
+        bind(dataModel: DataModel, element: HTMLElement, expression: AliasExpression, model?: any): void {
+            this.bindValueToElement(dataModel, element, expression, model);
+        }
+
+        protected canBind(element: HTMLElement): boolean {
+            return true;
+        }
+
+        protected bindValueToElement(dataModel: DataModel, element: HTMLElement, expression: AliasExpression, model?: any): void {
+            element.innerHTML = expression.evaluate(model).filtered || '';
+        }
     }
+
+    /**
+     * <table>
+     */
+    export class Table extends OneWayBinder<HTMLTableElement> {
+        
+        bind(dataModel: DataModel, element: HTMLTableElement, expression: AliasExpression, model?: any): void {
+            this.bindValueToElement(dataModel, element, expression, model);
+        }
+
+        protected canBind(element: HTMLTableElement): boolean {
+            return element instanceof HTMLTableElement;
+        }
+
+        protected bindValueToElement(dataModel: DataModel, table: HTMLTableElement, expression: AliasExpression, model?: any): void {
+            let result = expression.evaluate(model);
+
+            if (Array.isArray(result.value)) {
+                let array = result.filtered as any[];
+                let headers = this.parseHeaders(dataModel, table, array[0]);
+                
+                this.bindArrayToElement(table, headers, array);
+            } else {
+                throw new Error();
+            }
+        }
+
+        // ------------------------------------------------------------ //
+
+        private parseHeaders(dataModel: DataModel, table: HTMLTableElement, any: object): AliasExpression[] {
+            let settings = dataModel.getSettings<any>(table);
+            let headers = settings?.headers as string[];
+
+            return (headers || Object.keys(any)).map<AliasExpression>(head => new AliasExpression(head));
+        }
+
+        private bindArrayToElement(table: HTMLTableElement, headers: AliasExpression[], array: any[]) {
+            // -- thead
+            let thead = table.createTHead();
+            let tr = document.createElement('tr');
+            thead.append(tr);
+            headers.forEach(head => {
+                let th = document.createElement('th');
+                th.innerHTML = head.alias;
+
+                tr.append(th);
+            });
+
+            // -- tbody
+            let tbody = table.createTBody();
+            array.forEach(item => {
+                let tr = document.createElement('tr');
+                headers.forEach(head => {
+                    let td = document.createElement('td');
+
+                    td.innerHTML = head.evaluate(item).filtered;
+
+                    tr.append(td);
+                });
+
+                tbody.append(tr);
+            });
+
+            table.append(thead);
+            table.append(tbody);
+        }
+    }
+
+    /**
+     * <ul>/<ol>
+     */
+    export class List extends OneWayBinder<HTMLListELement> {
+
+        protected canBind(element: HTMLListELement): boolean {
+            return element instanceof HTMLOListElement || element instanceof HTMLUListElement || element instanceof HTMLDListElement;
+        }
+
+        protected bindValueToElement(dataModel: DataModel, element: HTMLListELement, expression: AliasExpression, model?: any): void {
+            let result = expression.evaluate(model);
+
+            if (Array.isArray(result.value)) {
+                let array = result.filtered as any[];
+                array.forEach(item => {
+                    let li = element instanceof HTMLDListElement ? document.createElement('dt') : document.createElement('li');
+                    let expression = this.parseItemExpression(dataModel, element, model);
+                    li.innerHTML = expression.evaluate(item).filtered;
+
+                    element.append(li);
+                });
+            } else {
+                throw new Error();
+            }
+        }
+
+        private parseItemExpression(dataModel: DataModel, element: HTMLListELement, any: object): AliasExpression {
+            let settings = dataModel.getSettings<any>(element);
+            let itemExpression = settings?.item as string || "";
+
+            return new AliasExpression(itemExpression);
+        }
+    }
+
+    // ---------------------------------- two-way binder -------------------------------------------------//
 
     /**
      * Two-way binder
@@ -73,8 +198,6 @@ namespace Attv.Binders {
 
     }
 
-    // ---------------------------------- two-way binder -------------------------------------------------//
-
     /**
      * <input type="text">
      */
@@ -91,7 +214,7 @@ namespace Attv.Binders {
         }
 
         protected bindValueToElement(dataModel: DataModel, element: HTMLInputElement, expression: AliasExpression, model?: any): void {
-            element.value = expression.evaluate(model).filtered;
+            element.value = expression.evaluate(model).filtered || '';
         }
 
         protected getValueFromElement(element: HTMLInputElement): any {
@@ -114,7 +237,7 @@ namespace Attv.Binders {
         }
 
         protected bindValueToElement(dataModel: DataModel, element: HTMLTextAreaElement, expression: AliasExpression, model?: any): void {
-            element.value = expression.evaluate(model).filtered;
+            element.value = expression.evaluate(model).filtered || '';
         }
 
         protected getValueFromElement(element: HTMLTextAreaElement): any {
@@ -254,124 +377,5 @@ namespace Attv.Binders {
         }
     }
 
-    // ---------------------------------- one-way binder -------------------------------------------------//
-
-    /**
-     * Any element
-     */
-    export class Default extends OneWayBinder<HTMLElement> {
-        
-        bind(dataModel: DataModel, element: HTMLElement, expression: AliasExpression, model?: any): void {
-            this.bindValueToElement(dataModel, element, expression, model);
-        }
-
-        protected canBind(element: HTMLElement): boolean {
-            return true;
-        }
-
-        protected bindValueToElement(dataModel: DataModel, element: HTMLElement, expression: AliasExpression, model?: any): void {
-            element.innerHTML = expression.evaluate(model).filtered;
-        }
-    }
-
-    /**
-     * <table>
-     */
-    export class Table extends OneWayBinder<HTMLTableElement> {
-        
-        bind(dataModel: DataModel, element: HTMLTableElement, expression: AliasExpression, model?: any): void {
-            this.bindValueToElement(dataModel, element, expression, model);
-        }
-
-        protected canBind(element: HTMLTableElement): boolean {
-            return element instanceof HTMLTableElement;
-        }
-
-        protected bindValueToElement(dataModel: DataModel, table: HTMLTableElement, expression: AliasExpression, model?: any): void {
-            let result = expression.evaluate(model);
-
-            if (Array.isArray(result.value)) {
-                let array = result.filtered as any[];
-                let headers = this.parseHeaders(dataModel, table, array[0]);
-                
-                this.bindArrayToElement(table, headers, array);
-            } else {
-                throw new Error();
-            }
-        }
-
-        // ------------------------------------------------------------ //
-
-        private parseHeaders(dataModel: DataModel, table: HTMLTableElement, any: object): AliasExpression[] {
-            let settings = dataModel.getSettings<any>(table);
-            let headers = settings?.headers as string[];
-
-            return (headers || Object.keys(any)).map<AliasExpression>(head => new AliasExpression(head));
-        }
-
-        private bindArrayToElement(table: HTMLTableElement, headers: AliasExpression[], array: any[]) {
-            // -- thead
-            let thead = table.createTHead();
-            let tr = document.createElement('tr');
-            thead.append(tr);
-            headers.forEach(head => {
-                let th = document.createElement('th');
-                th.innerHTML = head.alias;
-
-                tr.append(th);
-            });
-
-            // -- tbody
-            let tbody = table.createTBody();
-            array.forEach(item => {
-                let tr = document.createElement('tr');
-                headers.forEach(head => {
-                    let td = document.createElement('td');
-
-                    td.innerHTML = head.evaluate(item).filtered;
-
-                    tr.append(td);
-                });
-
-                tbody.append(tr);
-            });
-
-            table.append(thead);
-            table.append(tbody);
-        }
-    }
-
-    /**
-     * <ul>/<ol>
-     */
-    export class List extends OneWayBinder<HTMLListELement> {
-
-        protected canBind(element: HTMLListELement): boolean {
-            return element instanceof HTMLOListElement || element instanceof HTMLUListElement || element instanceof HTMLDListElement;
-        }
-
-        protected bindValueToElement(dataModel: DataModel, element: HTMLListELement, expression: AliasExpression, model?: any): void {
-            let result = expression.evaluate(model);
-
-            if (Array.isArray(result.value)) {
-                let array = result.filtered as any[];
-                array.forEach(item => {
-                    let li = element instanceof HTMLDListElement ? document.createElement('dt') : document.createElement('li');
-                    let expression = this.parseItemExpression(dataModel, element, model);
-                    li.innerHTML = expression.evaluate(item).filtered;
-
-                    element.append(li);
-                });
-            } else {
-                throw new Error();
-            }
-        }
-
-        private parseItemExpression(dataModel: DataModel, element: HTMLListELement, any: object): AliasExpression {
-            let settings = dataModel.getSettings<any>(element);
-            let itemExpression = settings?.item as string || "";
-
-            return new AliasExpression(itemExpression);
-        }
-    }
+   
 }

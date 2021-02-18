@@ -21,6 +21,7 @@ describe("Attv.Binders.AliasExpression", () => {
 
         expect(expression.alias).toEqual('emp');
         expect(expression.propertyName).toEqual('employee');
+        expect(expression.expression).toEqual("employee as emp");
         expect(expression.filterFn).toBeDefined();
     });
 
@@ -29,6 +30,7 @@ describe("Attv.Binders.AliasExpression", () => {
 
         expect(expression.alias).toEqual('employee');
         expect(expression.propertyName).toEqual('employee');
+        expect(expression.expression).toEqual("employee");
         expect(expression.filterFn).toBeDefined();
     });
 
@@ -64,8 +66,8 @@ describe("Attv.Binders.ArrayExpression", () => {
     it('Should create an ArrayExpression', () => {
         let expression = new Attv.Binders.ArrayExpression("emp in employees");
 
-        expect(expression.propertyName).toEqual('emp');
-        expect(expression.arrayName).toEqual('employees');
+        expect(expression.itemName).toEqual('emp');
+        expect(expression.propertyName).toEqual('employees');
         expect(expression.expression).toEqual('emp in employees');
     });
 
@@ -82,8 +84,8 @@ describe("Attv.Binders.ArrayExpression", () => {
         };
         let expression = new Attv.Binders.ArrayExpression("emp in employees");
 
-        expect(expression.propertyName).toEqual('emp');
-        expect(expression.arrayName).toEqual('employees');
+        expect(expression.itemName).toEqual('emp');
+        expect(expression.propertyName).toEqual('employees');
         expect(expression.expression).toEqual('emp in employees');
 
         let expected = expression.evaluate(context);
