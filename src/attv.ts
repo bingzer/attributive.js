@@ -774,18 +774,19 @@ namespace Attv {
     
             let xhr = options.createHttpRequest ? options.createHttpRequest() : new XMLHttpRequest();
             xhr.onreadystatechange = (e: Event) => {
-                let xhr = this as XMLHttpRequest;
-                if (xhr.readyState == 4) {
-                    let wasSuccessful = this.status >= 200 && this.status < 400;
+                let request = e.target as XMLHttpRequest;
+                if (request.readyState == 4) {
+                    let wasSuccessful = request.status >= 200 && request.status < 400;
     
                     if (options?.callback) {
-                        options?.callback(options, wasSuccessful, xhr);
+                        options?.callback(options, wasSuccessful, request);
                     }
                 }
             };
             xhr.onerror = (e: ProgressEvent<EventTarget>) => {
+                let request = e.target as XMLHttpRequest;
                 if (options?.callback) {
-                    options?.callback(options, false, xhr);
+                    options?.callback(options, false, request);
                 }
             }
     
