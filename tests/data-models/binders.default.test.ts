@@ -31,7 +31,7 @@ describe('Attv.Binders.Default', () => {
         expect(binder).toBeInstanceOf(Attv.Binders.OneWayBinder);
     });
 
-    it('accept() should always return true', () => {
+    it('accept() should always return true as long as the contextId is not specified', () => {
         let dataModel = new Attv.DataModel();
 
         let element = document.createElement('div');
@@ -41,6 +41,32 @@ describe('Attv.Binders.Default', () => {
         let expected = binder.accept(dataModel, element);
 
         expect(expected).toEqual(true);
+    });
+
+    it('accept() should return true (same context id)', () => {
+        let dataModel = new Attv.DataModel();
+
+        let element = document.createElement('div');
+        element.setAttribute('data-binder', 'binder-1');
+
+        let binder = new Attv.Binders.Default();
+
+        let expected = binder.accept(dataModel, element, 'binder-1');
+
+        expect(expected).toEqual(true);
+    });
+
+    it('accept() should return false (different context id)', () => {
+        let dataModel = new Attv.DataModel();
+
+        let element = document.createElement('div');
+        element.setAttribute('data-binder', 'binder-1');
+
+        let binder = new Attv.Binders.Default();
+
+        let expected = binder.accept(dataModel, element, 'binder-2');
+
+        expect(expected).toEqual(false);
     });
 
     it('bind() should bind model to div innerHtml', () => {
@@ -77,6 +103,26 @@ describe('Attv.Binders.Default', () => {
         binder.bind(dataModel, element, expression, context);
 
         expect(element.innerHTML).toEqual('');
+    });
+
+    it('stamp() should stamp the binder id', () => {
+        let context = {
+            employee: { firstName: 'Ricky' }
+        };
+
+        let dataModel = new Attv.DataModel();
+
+        let element = document.createElement('div');
+
+        let binder = new Attv.Binders.Default();
+
+        let expression = new Attv.Binders.AliasExpression("employee.firstName");
+
+        binder.bind(dataModel, element, expression, context);
+        binder.stamp(dataModel, element, 'binder-1');
+
+        expect(element.innerHTML).toEqual('Ricky');
+        expect(element.getAttribute('data-binder')).toEqual('binder-1');
     });
     
 });
