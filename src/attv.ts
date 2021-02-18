@@ -722,7 +722,7 @@ namespace Attv {
                 if (tag.startsWith('<') && tag.endsWith('>')) {
                     let tempTag = tag.substring(1, tag.length - 1);
                     try {
-                        htmlElement = window.document.createElement(tempTag);
+                        htmlElement = document.createElement(tempTag);
                     } catch (e) {
                         // ignore
                     }
@@ -773,7 +773,7 @@ namespace Attv {
             options.method = options.method || 'get';
     
             let xhr = options.createHttpRequest ? options.createHttpRequest() : new XMLHttpRequest();
-            xhr.onreadystatechange = function (e: Event) {
+            xhr.onreadystatechange = (e: Event) => {
                 let xhr = this as XMLHttpRequest;
                 if (xhr.readyState == 4) {
                     let wasSuccessful = this.status >= 200 && this.status < 400;
@@ -783,7 +783,7 @@ namespace Attv {
                     }
                 }
             };
-            xhr.onerror = function (e: ProgressEvent<EventTarget>) {
+            xhr.onerror = (e: ProgressEvent<EventTarget>) => {
                 if (options?.callback) {
                     options?.callback(options, false, xhr);
                 }
@@ -887,7 +887,7 @@ namespace Attv {
         // Call is used to define where "this" within the evaluated code should reference.
         // eval does not accept the likes of eval.call(...) or eval.apply(...) and cannot
         // be an arrow function
-        return function evaluateEval() {
+        let evaluateEval = () => {
             try {
                 // Create an args definition list e.g. "arg1 = this.arg1, arg2 = this.arg2"
                 const argsStr = Object.keys(context)
@@ -899,7 +899,9 @@ namespace Attv {
             } catch {
                 return undefined;  // return undefined whatever happened
             }
-        }.call(context);
+        };
+        
+        return evaluateEval.call(context);
     }
 
     export function globalThis$() {
