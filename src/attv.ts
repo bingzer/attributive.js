@@ -950,16 +950,13 @@ namespace Attv {
             if (Attv.isEvaluatable(text)) {
                 //do eval
                 any = Attv.eval$(text, context);
-            } else {
-                try {
-                    any = JSON.parse(text);
-                } catch {
-                    // nothing
-                }
             }
         }
 
-        return (any || orDefault) as TAny;
+        if (Attv.isUndefined(any))
+            return orDefault;
+
+        return any as TAny;
     }
 
     export function generateElementId(attributeId: string) {

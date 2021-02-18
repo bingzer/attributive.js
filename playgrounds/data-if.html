@@ -1,0 +1,35 @@
+<html>
+<head>
+	<title>[data-if] Test Usages</title>
+</head>
+<body>
+	<!-- <div>
+        <h3>
+            [data-if]
+		</h3>
+		
+		<div data-if="true">This has true</div>
+		<div data-if="false">This has false</div>
+	</div> -->
+	
+	<div>
+        <h3>
+            [data-if] Runtime update
+		</h3>
+		
+		<label>
+			<input type="checkbox" placeholder="Expression" data-model="isExpression">
+
+			This statement is <span data-if="isExpression">truthy</span><span data-if="!isExpression">falsy</span>
+		</label>
+    </div>
+    
+	<script type="text/javascript" src="/build/attv.js"></script>
+	<script type="text/javascript" src="/build/data-attributes.js"></script>
+	<script type="text/javascript" src="/build/data-models.js"></script>
+
+	<script>
+		var isExpression = false;
+	</script>
+</body>
+</html>

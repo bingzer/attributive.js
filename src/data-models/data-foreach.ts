@@ -3,15 +3,6 @@ namespace Attv.DataForEach {
     export const Key = "data-foreach";
 
     export class Default extends Attv.AttributeValue {
-
-        constructor() {
-            super();
-            this.deps.uses = [
-                Attv.DataContent.Key,
-                Attv.DataId.Key,
-                Attv.DataRef.Key
-            ];
-        }
         
         load(element: HTMLElement, options: LoadElementOptions): BooleanOrVoid {
             let html = element.outerHTML;

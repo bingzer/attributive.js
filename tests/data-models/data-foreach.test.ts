@@ -19,7 +19,7 @@ describe("Attv.DataForEach", () => {
 });
 
 
-describe("Attv.DataForEach.ValuDefaulte", () => {
+describe("Attv.DataForEach.Default", () => {
     it('Should declared its global variables', () => {
         expect(Attv.DataForEach.Default).toBeDefined();
     });
