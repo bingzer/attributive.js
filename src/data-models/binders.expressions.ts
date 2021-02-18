@@ -142,6 +142,11 @@ namespace Attv.Binders {
         }
     }
 
+    /**
+     * Evaluate any expression
+     * @param expression expression to evalue
+     * @param context context
+     */
     export function evaluateExpression(expression: Expression, context?: any): any {
         // first check if it's a property statement
         let evaluatedValue = Attv.DataModel.getProperty(expression.propertyName, context);
