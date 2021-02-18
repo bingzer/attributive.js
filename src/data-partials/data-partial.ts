@@ -1,4 +1,6 @@
 namespace Attv {
+
+    export type PartialOptions = Attv.Ajax.AjaxOptions | LoadElementOptions;
     
     /**
      * [data-partial]
@@ -45,7 +47,7 @@ namespace Attv {
                 ];
             }
 
-            render(element: HTMLElement, model?: any, options?: Ajax.AjaxOptions): void {
+            render(element: HTMLElement, model?: any, options?: PartialOptions): void {
                 if (!options) {
                     options = this.attribute.getSettings<Ajax.AjaxOptions>(element) || { } as Ajax.AjaxOptions;
                 }
@@ -57,10 +59,11 @@ namespace Attv {
                 }
             }
 
-            private renderAjax(element: HTMLElement, options: Ajax.AjaxOptions): void {
-                options.url = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key).getUrl(element);
-                options.method = this.attribute.resolve<DataMethod>(Attv.DataMethod.Key).getMethod(element);
-                options.callback = (ajaxOptions: Attv.Ajax.AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
+            private renderAjax(element: HTMLElement, options: PartialOptions): void {
+                let ajaxOptions = options as Attv.Ajax.AjaxOptions;
+                ajaxOptions.url = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key).getUrl(element);
+                ajaxOptions.method = this.attribute.resolve<DataMethod>(Attv.DataMethod.Key).getMethod(element);
+                ajaxOptions.callback = (ajaxOptions: Attv.Ajax.AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
                     if (!wasSuccessful) {
                         return;
                     }
@@ -73,10 +76,10 @@ namespace Attv {
                     dataCallback.callback(element);
                 };
 
-                this.sendAjax(element, options);
+                this.sendAjax(element, ajaxOptions);
             }
 
-            private renderModel(element: HTMLElement, model: any, options: Ajax.AjaxOptions): void {
+            private renderModel(element: HTMLElement, model: any, options: PartialOptions): void {
                 let dataTemplate = this.attribute.resolve<DataTemplate>(Attv.DataTemplate.Key);
                 let dataSource = this.attribute.resolve<DataSource>(Attv.DataSource.Key);
                 let dataTarget = this.attribute.resolve<DataTarget>(Attv.DataTarget.Key);
@@ -96,6 +99,8 @@ namespace Attv {
                 } else {
                     targetElement.attvHtml(model);
                 }
+
+                Attv.loadElements(targetElement, options);
             }
             
             private sendAjax(element: HTMLElement, options: Attv.Ajax.AjaxOptions) {
@@ -118,7 +123,7 @@ namespace Attv {
                 super('auto');
             }
 
-            load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
+            load(element: HTMLElement, options?: PartialOptions): BooleanOrVoid {
                 this.render(element, options.context);
 
                 return true;
@@ -138,10 +143,10 @@ namespace Attv {
                 ];
             }
 
-            load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
+            load(element: HTMLElement, options?: PartialOptions): BooleanOrVoid {
                 if (!this.attribute.isLoaded(element)) {
                     element.onclick = (ev: Event) => {
-                        this.render(element);
+                        this.render(element, undefined, options);
                     }
                 }
 

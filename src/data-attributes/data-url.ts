@@ -9,7 +9,8 @@ namespace Attv {
 
             this.deps.uses = [
                 Attv.DataMethod.Key, 
-                Attv.DataCache.Key
+                Attv.DataCache.Key,
+                Attv.DataData.Key
             ];
         }
 
