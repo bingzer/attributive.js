@@ -12,7 +12,7 @@ namespace Attv {
         getSourceElement(element: HTMLElement): HTMLElement | undefined {
             let querySelector = this.raw(element);
             try {
-                return document.querySelector(querySelector);
+                return Attv.select(querySelector);
             } catch (e) {
                 return undefined;
             }

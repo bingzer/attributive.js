@@ -190,10 +190,10 @@ namespace Attv.Binders {
         protected abstract getValueFromElement(element: TElement): any;
         
         protected broadcast(dataModel: DataModel, element: TElement, options: LoadElementOptions) {
-            let dataLoad = dataModel.resolve(Attv.DataLoad.Key);
-            let selectors = dataLoad.raw(element);
+            let settings = dataModel.getSettings<Attv.DataModel.Settings>(element);
+            let selector = settings?.refresh;
 
-            Attv.loadElements(selectors, options);
+            Attv.loadElements(selector, options);
         }
 
     }

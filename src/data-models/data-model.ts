@@ -21,7 +21,6 @@ namespace Attv {
                 new Attv.Binders.Default()
             ];
             this.deps.uses = [ 
-                Attv.DataLoad.Key,
                 Attv.DataBinder.Key
             ];
         }
@@ -125,6 +124,15 @@ namespace Attv {
     }
 
     export namespace DataModel {
+
+        export interface Settings {
+
+            /**
+             * Refresh
+             */
+            refresh: string;
+            
+        }
         
         export class Value extends Attv.AttributeValue {
             

@@ -61,7 +61,7 @@ HTMLElement.prototype.attvShow = function () {
 HTMLElement.prototype.attvHide = function () {
     let element = this as HTMLElement;
     
-    element.style.display = "none";
+    element.style.setProperty('display', 'none', 'important');
 }
 
 HTMLElement.prototype.attvAttr = function (name: string | Attv.Attribute, value?: any): HTMLElement | any {

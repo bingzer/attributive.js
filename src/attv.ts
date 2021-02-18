@@ -722,7 +722,7 @@ namespace Attv {
                 if (tag.startsWith('<') && tag.endsWith('>')) {
                     let tempTag = tag.substring(1, tag.length - 1);
                     try {
-                        htmlElement = window.document.createElement(tempTag);
+                        htmlElement = document.createElement(tempTag);
                     } catch (e) {
                         // ignore
                     }
@@ -760,7 +760,7 @@ namespace Attv {
     export namespace Ajax {
         export type AjaxMethod = 'post' | 'put' | 'delete' | 'patch' | 'get' | 'option';
 
-        export interface AjaxOptions {
+        export interface AjaxOptions extends LoadElementOptions {
             url: string;
             method?: AjaxMethod;
             data?: any;
@@ -773,19 +773,20 @@ namespace Attv {
             options.method = options.method || 'get';
     
             let xhr = options.createHttpRequest ? options.createHttpRequest() : new XMLHttpRequest();
-            xhr.onreadystatechange = function (e: Event) {
-                let xhr = this as XMLHttpRequest;
-                if (xhr.readyState == 4) {
-                    let wasSuccessful = this.status >= 200 && this.status < 400;
+            xhr.onreadystatechange = (e: Event) => {
+                let request = e.target as XMLHttpRequest;
+                if (request.readyState == 4) {
+                    let wasSuccessful = request.status >= 200 && request.status < 400;
     
                     if (options?.callback) {
-                        options?.callback(options, wasSuccessful, xhr);
+                        options?.callback(options, wasSuccessful, request);
                     }
                 }
             };
-            xhr.onerror = function (e: ProgressEvent<EventTarget>) {
+            xhr.onerror = (e: ProgressEvent<EventTarget>) => {
+                let request = e.target as XMLHttpRequest;
                 if (options?.callback) {
-                    options?.callback(options, false, xhr);
+                    options?.callback(options, false, request);
                 }
             }
     
@@ -887,7 +888,7 @@ namespace Attv {
         // Call is used to define where "this" within the evaluated code should reference.
         // eval does not accept the likes of eval.call(...) or eval.apply(...) and cannot
         // be an arrow function
-        return function evaluateEval() {
+        let evaluateEval = () => {
             try {
                 // Create an args definition list e.g. "arg1 = this.arg1, arg2 = this.arg2"
                 const argsStr = Object.keys(context)
@@ -899,7 +900,9 @@ namespace Attv {
             } catch {
                 return undefined;  // return undefined whatever happened
             }
-        }.call(context);
+        };
+        
+        return evaluateEval.call(context);
     }
 
     export function globalThis$() {

@@ -30,7 +30,7 @@
 		</h3>
 		<h2>Two way binding</h2>
 		<p>
-			Provides two way binding by default. It can target the element for changes by specifying: [data-load="queryselector"]
+			Provides two way binding by default. It can target the element for changes by specifying: data-model-settings="{refresh: '#with-data-load'}"
 		</p>
 
 		<div class="panel">
@@ -81,13 +81,13 @@
 		</div>
 
 		<div class="panel panel-50" id="with-data-load">
-			<h4>input type=text. With [data-load] target</h4>
+			<h4>input type=text. With [data-model-settings="{refresh: '#with-data-load'}"]</h4>
 
 			<div>
-				First Name <input type="text" data-model="employee.firstName" title="your name is {{firstName}}" data-load="#with-data-load"/>
+				First Name <input type="text" data-model="employee.firstName" title="your name is {{firstName}}" data-model-settings="{refresh: '#with-data-load'}"/>
 			</div>
 			<div>
-				Last Name <input type="text" data-model="employee.lastName" data-load="#with-data-load"/>
+				Last Name <input type="text" data-model="employee.lastName" data-model-settings="{refresh: '#with-data-load'}"/>
 			</div>
 			
 			<p style="margin-top: 10px;">
