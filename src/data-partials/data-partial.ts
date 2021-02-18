@@ -145,12 +145,14 @@ namespace Attv {
 
             load(element: HTMLElement, options?: PartialOptions): BooleanOrVoid {
                 if (!this.attribute.isLoaded(element)) {
-                    element.onclick = (ev: Event) => {
-                        this.render(element, undefined, options);
-                    }
+                    element.onclick = (ev: Event) => this.click(ev, element, options);
                 }
 
                 return true;
+            }
+
+            protected click(ev: Event, element: HTMLElement, options?: PartialOptions) {
+                this.render(element, undefined, options);
             }
         }
 

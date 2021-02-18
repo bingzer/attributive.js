@@ -19,6 +19,12 @@ var app = {
             password: '456'
         }
     ],
+    newTodo: {
+        title: '',
+        content: '',
+        dateTime: '',
+        tags: []
+    },
     todos: [
 
     ],
@@ -31,17 +37,34 @@ var app = {
                 app.user.isAuthorized = true;
 
                 Attv.loadElements(undefined, { forceReload: true });
-                return true;
+                break;
             }
         }
 
+        window.location.href = '#/';
+
         return false;
     },
+    
     logout: function () {
         app.user = {
             isAuthorized: false
         };
         
         Attv.loadElements(undefined, { forceReload: true });
+
+        window.location.href = '#/login';
+    },
+    
+    addTodo: function () {
+        this.newTodo.dateTime = Date.now();
+
+        app.todos.push(this.newTodo);
+        app.newTodo = {
+            title: '',
+            content: '',
+            dateTime: undefined,
+            tags: []
+        };
     }
 };

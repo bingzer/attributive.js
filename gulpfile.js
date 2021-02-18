@@ -80,6 +80,8 @@ const components = [ {
         enabled: true,
         files: [
             'build/attv.d.ts', 
+            'build/data-models.d.ts', 
+            'build/data-partials.d.ts', 
             'src/data-apps/*.ts', 
             '!src/data-apps/_refs.ts'
         ]
