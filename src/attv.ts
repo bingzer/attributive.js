@@ -32,6 +32,9 @@ namespace Attv {
      */
     export type PriorityType =  undefined | 0 | 1 | 2 | 3 | number;
 
+    /**
+     * Options when loading an element
+     */
     export interface LoadElementOptions {
         /**
          * Force reload
@@ -58,6 +61,9 @@ namespace Attv {
         contextId?: string;
     }
 
+    /**
+     * Dependency object used by Attv.Attribute and Attv.AttributeValue
+     */
     export interface Dependency {
 
         /**
@@ -76,8 +82,16 @@ namespace Attv {
         internals?: string[];
     }
 
+    /**
+     * A callback function to create an AttributeValue given by its Attribute
+     */
     export interface ValueFn {
+
+        /**
+         * Attribute In, AttributeValue out
+         */
         (attribute: Attv.Attribute): Attv.AttributeValue;
+
     }
     
     
@@ -173,7 +187,8 @@ namespace Attv {
                     if (raw === 'this') {
                         return element as any;
                     }
-                    return document.querySelector(raw) as any;
+                    
+                    return Attv.select(raw) as any;
                 }
                 case "<jsExpression>":
                     return Attv.eval$(raw, context) as any;
@@ -1012,10 +1027,10 @@ namespace Attv {
         }
 
         if (isUndefined(root)) {
-            rootElements = [document.querySelector('html')];
+            rootElements = [Attv.select('html')];
             options.includeSelf = false;
         } else if (Attv.isString(root)) {
-            rootElements = Attv.toArray<HTMLElement>(document.querySelectorAll(root as string));
+            rootElements = Attv.selectAll(root as string);
         } else if (root instanceof HTMLElement) {
             rootElements = [root as HTMLElement];
         }
