@@ -153,6 +153,24 @@ namespace Attv {
                 return true;
             }
         }
+
+        /**
+         * [data-partial='nonce']
+         */
+        export class Nonce extends Default {
+            constructor () {
+                super('nonce');
+            }
+
+            load(element: HTMLElement, options?: PartialOptions): BooleanOrVoid {
+                this.render(element, options.context);
+
+                // remove data partial
+                element.removeAttribute(this.attribute.name);
+
+                return true;
+            }
+        }
     }
 }
 
@@ -162,4 +180,5 @@ Attv.register(() => new Attv.DataPartial(), att => {
     att.map(() => new Attv.DataPartial.Default('lazy'));
     att.map(() => new Attv.DataPartial.Auto());
     att.map(() => new Attv.DataPartial.Click());
+    att.map(() => new Attv.DataPartial.Nonce());
 });
