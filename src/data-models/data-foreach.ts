@@ -36,7 +36,7 @@ namespace Attv.DataForEach {
                 Attv.loadElements(template, {
                     includeSelf: true,
                     context: context,
-                    contextRefId: id
+                    contextId: id
                 }); 
 
                 element.parentElement.appendChild(template);
@@ -66,7 +66,7 @@ namespace Attv.DataForEach {
             let dataRef = this.attribute.resolve(Attv.DataRef.Key);
 
             return {
-                name: expression.propertyName,
+                name: expression.itemName,
                 array: expression.evaluate<any>(context),
                 createTemplate: () => {
                     let child = Attv.Dom.parseDom(element.attvAttr(dataContent)).firstElementChild as HTMLElement;

@@ -159,7 +159,7 @@ namespace Attv.Binders {
             }
 
             // try parse
-            let parsed = Attv.parseJsonOrElse(parsedExpression, context);
+            let parsed = Attv.parseJsonOrElse(parsedExpression, undefined, context);
 
             // if it's not a string then it is an expression
             if (!Attv.isString(parsed) && Attv.isDefined(parsed)) {

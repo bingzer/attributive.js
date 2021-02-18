@@ -44,15 +44,18 @@ namespace Attv {
         includeSelf?: boolean;
         
         /**
-         * A context/scope object
+         * A context/scope object (optional).
+         * If specified, you need to also generate a contextId
          */
         context?: any;
 
         /**
          * Context reference id.
-         * IF null is a global context
+         * IF null is a global context.
+         * 
+         * This property is used by other attribute to compare context when loading elements.
          */
-        contextRefId?: string;
+        contextId?: string;
     }
 
     export interface Dependency {
@@ -800,7 +803,7 @@ namespace Attv {
                 return '';
     
             if (isString(any)) {
-                any = parseJsonOrElse(any);
+                any = Attv.parseJsonOrElse(any);
                 if (isString(any)) {
                     return any;
                 }

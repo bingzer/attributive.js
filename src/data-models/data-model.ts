@@ -22,7 +22,7 @@ namespace Attv {
             ];
             this.deps.uses = [ 
                 Attv.DataLoad.Key,
-                Attv.DataModelContext.Key
+                Attv.DataBinder.Key
             ];
         }
 
@@ -31,7 +31,7 @@ namespace Attv {
          * @param element the element to bind
          * @param model the model
          */
-        bindTo(element: HTMLElement, model?: any, refId?: string): BooleanOrVoid {
+        bindTo(element: HTMLElement, model?: any, binderId?: string): BooleanOrVoid {
             let rawValue = this.raw(element);
             if (!rawValue)
                 return false;
@@ -41,7 +41,7 @@ namespace Attv {
             let binder = this.binders.filter(b => b.accept(this, element))[0];
             if (binder) {
                 binder.bind(this, element, expression, model);
-                binder.stamp(this, element, refId);
+                binder.stamp(this, element, binderId);
             }
 
             return true;
@@ -130,7 +130,8 @@ namespace Attv {
             
             load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
                 let dataModel = this.attribute as DataModel;
-                return dataModel.bindTo(element, options.context, options.contextRefId);
+                let binderId = options.contextId;
+                return dataModel.bindTo(element, options.context, binderId);
             }
         }
     }

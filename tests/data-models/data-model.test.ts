@@ -35,7 +35,7 @@ describe("Attv.DataModel", () => {
         expect(element.innerHTML).toBe('ricky');
     });
 
-    it("bindTo() should bind to an element (with context ref id)", () => {
+    it("bindTo() should bind to an element (with context id)", () => {
         let element = document.createElement('div');
         element.setAttribute('data-model', 'employee.firstName');
 
@@ -47,7 +47,7 @@ describe("Attv.DataModel", () => {
         let expected = dataModel.bindTo(element, context, refId);
 
         expect(expected).toEqual(true);
-        expect(element.getAttribute('data-model-context')).toEqual(refId);
+        expect(element.getAttribute('data-binder')).toEqual(refId);
         expect(element.innerHTML).toBe('ricky');
     });
 
