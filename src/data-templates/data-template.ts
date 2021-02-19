@@ -30,6 +30,12 @@ namespace Attv {
     }
 
     export namespace DataTemplate {
+
+        export function renderTemplate(elementOrSelector: HTMLElement | string, model: any): HTMLElement {
+            let dataTemplate = Attv.getAttribute<Attv.DataTemplate>(Attv.DataTemplate.Key);
+            return dataTemplate.render(elementOrSelector, model);
+        }
+
         export class Default extends Attv.AttributeValue {
         
             constructor (attributeValue?: string) {

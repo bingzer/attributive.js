@@ -33,7 +33,7 @@ namespace Attv {
                         let dataCallback = this.attribute.resolve<DataCallback>(Attv.DataCallback.Key);
                         element.attvAttr(dataCallback, onclick);
                         element.removeAttribute('onclick');
-                        element.onclick = null;
+                        element.onclick = undefined;
                     }
     
                     element.onclick = (ev: Event) => this.click(element, ev);

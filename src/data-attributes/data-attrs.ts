@@ -13,6 +13,10 @@ namespace Attv.DataAttrs {
                         let attributeName = key.underscoreToDash();
                         let attributeValue = json[key];
 
+                        // ignore recursive
+                        if (attributeName.equalsIgnoreCase(this.attribute.name))
+                            return;
+
                         // special attribute
                         // that requires special handling
                         if (attributeName?.equalsIgnoreCase('disabled') && !attributeValue) {

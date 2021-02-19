@@ -47,6 +47,34 @@ describe("Attv.DataAttrs.Default", () => {
         expect(element.getAttribute('title')).toEqual("hello this is the title");
     });
 
+    it('load() change underscore with dash', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attrs', '{ data_name: "hello this is from data_name" }');
+
+        let attribute = Attv.getAttribute(Attv.DataAttrs.Key);
+
+        let value = new Attv.DataAttrs.Default();
+        value.attribute = attribute;
+        
+        value.load(element);
+
+        expect(element.getAttribute('data-name')).toEqual("hello this is from data_name");
+    });
+
+    it('load() should ignore data_attrs (to prevent recursive)', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-attrs', '{ data_attrs: "{ name: \"\" }" }');
+
+        let attribute = Attv.getAttribute(Attv.DataAttrs.Key);
+
+        let value = new Attv.DataAttrs.Default();
+        value.attribute = attribute;
+        
+        value.load(element);
+
+        expect(element.getAttribute('data-attrs')).toEqual('{ data_attrs: "{ name: \"\" }" }');
+    });
+
     it('load() should load an alement (with context)', () => {
         let context = { firstName: 'ricky' };
 

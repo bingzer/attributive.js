@@ -8,7 +8,7 @@ interface HTMLElement  {
      * Gets/Sets html.
      * Will execute javascript inside also
      */
-    attvHtml: (html?: string) => string | any;
+    attvHtml: (html?: Attv.HTMLElementOrString) => string | any;
 
     /**
      * Attribute helper.
@@ -27,13 +27,17 @@ interface HTMLElement  {
     attvHide: () => any;
 }
 
-HTMLElement.prototype.attvHtml = function (html?: string): string | any {
+HTMLElement.prototype.attvHtml = function (html?: Attv.HTMLElementOrString): string | any {
     let element = this as HTMLElement;
 
     if (Attv.isUndefined(html)) {
         return element.innerHTML;
     } else {
-        element.innerHTML = html;
+        if (html instanceof HTMLElement) {
+            element.append(html);
+        } else {
+            element.innerHTML = html;
+        }
         
         if (html) { 	
             // look for scripts	

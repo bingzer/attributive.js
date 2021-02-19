@@ -54,5 +54,12 @@
 <script type="text/javascript" src="app.js"></script>
 <script type="text/javascript" src="data.js"></script>
 <script type="text/javascript" src="functions.js"></script>
+
+
+<script type="text/html" data-template="script" id="format-delete-user">
+  <button type="button" class="btn btn-danger" data-attrs="{ onclick: 'fn.deleteUser(\'' + email + '\')', data_content: 'Are you sure you want to delete ' + email + '?' }" data-wall="confirm">Delete</button>
+  <a class="btn btn-secondary"  data-attrs="{ href: '#/users/' + email }">Edit</a>
+</script>
+
 </body>
 </html>
