@@ -80,7 +80,7 @@ namespace Attv.DataApp {
                 return;
             }
             
-            let needManualDispatch = window.location.hash === hash;
+            let needManualDispatch = window.location.hash === Routes.getHash(hash);
 
             window.location.hash = Routes.cleanHash(hash);
 

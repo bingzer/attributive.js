@@ -39,7 +39,7 @@ var app = {
             firstName: 'Jane',
             lastName: 'Doe',
             email: 'jane@example.com',
-            password: '456'
+            password: '123'
         }
     ],
     newTodo: {
