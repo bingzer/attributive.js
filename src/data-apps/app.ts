@@ -70,6 +70,11 @@ namespace Attv.DataApp {
         isDefault?: boolean;
 
         /**
+         * Function to execute when url is not provided
+         */
+        fn?: () => void;
+
+        /**
          * A condition must be true, if this function is defined.
          */
         when?: (() => boolean);

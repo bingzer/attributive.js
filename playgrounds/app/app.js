@@ -27,6 +27,9 @@ var app = {
             path: '/about',
             title: 'About',
             url: 'about.html'
+        },{
+            path: '/logout',
+            fn: function () { fn.logout() }
         }]
     }
 };

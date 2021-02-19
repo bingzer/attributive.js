@@ -40,15 +40,19 @@ namespace Attv.DataApp {
                         continue;
                     }
 
-                    route.container = route.container || app.settings.container;
+                    if (Attv.isType(route.fn, 'function')) {
+                        route.fn();
+                    } else {
+                        route.container = route.container || app.settings.container;
+    
+                        let partialOptions = route as Attv.DataPartial.PartialOptions;
+                        partialOptions.afterRender = (model, element) => {
+                            // set title
+                            document.title = route.title || app.name;
+                        };
 
-                    let partialOptions = route as Attv.DataPartial.PartialOptions;
-                    partialOptions.afterRender = (model, element) => {
-                        // set title
-                        document.title = route.title || app.name;
-                    };
-
-                    Attv.DataPartial.renderPartial(partialOptions);
+                        Attv.DataPartial.renderPartial(partialOptions);
+                    }
 
                     break;
                 }
