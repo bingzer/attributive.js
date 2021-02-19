@@ -2,7 +2,7 @@ var data = {
     user: {
         isAuthorized: false
     },
-    loginInfo: {
+    login: {
         email: 'admin@example.com',
         password: '123'
     },
@@ -10,18 +10,21 @@ var data = {
             firstName: 'John',
             lastName: 'Doe',
             email: 'john@example.com',
-            password: '123'
+            password: '123',
+            todos: []
         }, {
             firstName: 'Jane',
             lastName: 'Doe',
             email: 'jane@example.com',
-            password: '123'
+            password: '123',
+            todos: []
         }, {
             firstName: 'Admin',
             lastName: 'Doe',
             email: 'admin@example.com',
             password: '123',
-            isAdmin: true
+            isAdmin: true,
+            todos: []
         }
     ],
     newTodo: {
@@ -29,8 +32,5 @@ var data = {
         content: '',
         dateTime: '',
         tags: []
-    },
-    todos: [
-
-    ],
+    }
 };

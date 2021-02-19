@@ -3,7 +3,7 @@ var app = {
 
     settings: {
         container: '#main-container',
-        lock: false,
+        lock: true,
         routes: [{
             path: '/',
             url: 'todo.html',
@@ -27,10 +27,11 @@ var app = {
             match: '/users/(.*)',
             url: 'user-detail.html',
             title: 'User Detail',
-            getContext: function (match) {
+            withContext: function (match, fn) {
                 var email = match.routeContext[1];
                 var user = data.users.filter(u => u.email === email)[0];
-                return { user };
+                var context = { user };
+                fn(context);
             },
             when: function() { return data.user.isAdmin; }
         },{

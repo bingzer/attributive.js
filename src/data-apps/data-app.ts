@@ -35,6 +35,15 @@ namespace Attv.DataApp {
 
             document.title = app.name;
 
+            let renderPartial = (route, partialOptions: Attv.DataPartial.PartialOptions) => {
+                partialOptions.afterRender = (model, element) => {
+                    // set title
+                    document.title = route.title || app.name;
+                };
+
+                Attv.DataPartial.renderPartial(partialOptions);
+            };
+
             for (let i = 0; i < routes.length; i++) {
                 let route = routes[i];
                 let routeMatch = Routes.matches(route);
@@ -45,17 +54,14 @@ namespace Attv.DataApp {
                         route.container = route.container || app.settings.container;
     
                         let partialOptions = route as Attv.DataPartial.PartialOptions;
-                        if (route.getContext) {
-                            let context = route.getContext(routeMatch);
-                            partialOptions.context = context;
+                        if (route.withContext) {
+                            route.withContext(routeMatch, (context) => {
+                                partialOptions.context = context;
+                                renderPartial(route, partialOptions);
+                            });
+                        } else {
+                            renderPartial(route, partialOptions);
                         }
-
-                        partialOptions.afterRender = (model, element) => {
-                            // set title
-                            document.title = route.title || app.name;
-                        };
-
-                        Attv.DataPartial.renderPartial(partialOptions);
                     }
 
                     break;

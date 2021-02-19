@@ -1,18 +1,22 @@
 var fn = {
     login: function () {
-        for (var i = 0; i < data.users.length; i++) {
-            var u = data.users[i];
-            if (u.password === data.loginInfo.password && u.email === data.loginInfo.email) {
-                data.user = u;
-                data.user.isAuthorized = true;
+        data.login.result = 'Username/Password does not match';
 
-                break;
-            }
+        var authenticatedUser = data.users.filter(u => (u.password === data.login.password && u.email.equalsIgnoreCase(data.login.email)))[0];
+
+        if (authenticatedUser) {
+            data.user = authenticatedUser;
+            data.user.isAuthorized = !!authenticatedUser;
+            Attv.DataApp.navigate('/');
+
+            data.login.result = undefined;
+        } else {
+            data.user = { isAuthorized: false };
         }
+        
+        Attv.loadElements(undefined, { forceReload: true });
 
-        Attv.DataApp.navigate('/');
-
-        return false;
+        return !!authenticatedUser;
     },
 
     logout: function () {
@@ -25,9 +29,9 @@ var fn = {
 
     addTodo: function () {
         data.newTodo.dateTime = Date.now();
-        data.newTodo.id = data.todos.length;
+        data.newTodo.id = data.user.todos.length;
 
-        data.todos.push(data.newTodo);
+        data.user.todos.push(data.newTodo);
         data.newTodo = {
             id: undefined,
             title: '',
@@ -40,7 +44,7 @@ var fn = {
     },
 
     deleteTodo: function (id) {
-        data.todos.splice(id, 1);
+        data.user.todos.splice(id, 1);
         
         Attv.loadElements(undefined, { forceReload: true });
     },

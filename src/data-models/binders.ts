@@ -77,6 +77,9 @@ namespace Attv.Binders {
         protected bindValueToElement(dataModel: DataModel, table: HTMLTableElement, expression: AliasExpression, model?: any): void {
             let result = expression.evaluate(model);
 
+            if (Attv.isUndefined(result.value))
+                return;
+
             if (Array.isArray(result.value)) {
                 let array = result.filtered as any[];
                 let headers = this.parseHeaders(dataModel, table, array[0]);

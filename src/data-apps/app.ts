@@ -75,9 +75,10 @@ namespace Attv.DataApp {
         isDefault?: boolean;
 
         /**
-         * If specified, returns the context.
+         * If specified then caller can assign 'context' object
+         * to the route which will in turn be assigned to LoadElementOptions context
          */
-        getContext?: (match?: RouteMatch) => any;
+        withContext?: (match?: RouteMatch, fn?: (context?: any) => void) => void;
 
         /**
          * Function to execute when url is not provided
