@@ -1,5 +1,28 @@
 var app = {
     name: 'Todo App',
+
+    settings: {
+        container: '#main-container',
+        routes: [{
+            name: '',
+            path: '/',
+            url: 'todo.html'
+        },{
+            name: 'login',
+            path: '/login',
+            url: 'login.html'
+        },{
+            name: 'profile',
+            path: '/profile',
+            url: 'profile.html'
+        },{
+            name: 'about',
+            path: '/about',
+            url: 'about.html'
+        }]
+    },
+
+
     user: {
         isAuthorized: false
     },
@@ -28,43 +51,4 @@ var app = {
     todos: [
 
     ],
-
-    login: function () {
-        for (var i = 0; i < app.users.length; i++) {
-            var u = app.users[i];
-            if (u.password === app.loginInfo.password && u.email === app.loginInfo.email) {
-                app.user = u;
-                app.user.isAuthorized = true;
-
-                Attv.loadElements(undefined, { forceReload: true });
-                break;
-            }
-        }
-
-        window.location.href = '#/';
-
-        return false;
-    },
-    
-    logout: function () {
-        app.user = {
-            isAuthorized: false
-        };
-        
-        Attv.loadElements(undefined, { forceReload: true });
-
-        window.location.href = '#/login';
-    },
-    
-    addTodo: function () {
-        this.newTodo.dateTime = Date.now();
-
-        app.todos.push(this.newTodo);
-        app.newTodo = {
-            title: '',
-            content: '',
-            dateTime: undefined,
-            tags: []
-        };
-    }
 };

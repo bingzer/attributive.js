@@ -9,12 +9,7 @@
 <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark" aria-label="Ninth navbar example">
         <div class="container-xl">
-          <a class="navbar-brand" href="#" data-model="app.name" 
-              href="#/" 
-              data-partial="nav" 
-              data-url="todo.html" 
-              data-target="#main-container" 
-              data-route="/"></a>
+          <a class="navbar-brand" data-model="app.name" href="#/" ></a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample07XL" aria-controls="navbarsExample07XL" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -22,33 +17,14 @@
           <div class="collapse navbar-collapse" id="navbarsExample07XL" data-if="app.user.isAuthorized">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
               <li class="nav-item">
-                <a class="nav-link" aria-current="page" 
-                  href="#/login" 
-                  data-partial="nav" 
-                  data-url="login.html" 
-                  data-target="#main-container"
-                  data-route="/login"
-                  style="display: none;">Login</a>
+                <a class="nav-link" href="#/profile">Profile</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#/about">About</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" 
-                  href="#/profile" 
-                  data-partial="nav" 
-                  data-url="profile.html" 
-                  data-target="#main-container" 
-                  data-route="/profile">Profile</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" 
-                  href="#/about" 
-                  data-partial="nav" 
-                  data-url="about.html" 
-                  data-target="#main-container" 
-                  data-route="/about">About</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" 
-                  href="javascript: app.logout()"
+                  href="javascript: app.fn.logout()"
                   data-wall="confirm"
                   data-content="Are you sure you want to log out?">Logout</a>
               </li>
@@ -79,5 +55,6 @@
 <script type="text/javascript" src="/build/data-spinners.js"></script>
 <script type="text/javascript" src="/build/data-apps.js"></script>
 <script type="text/javascript" src="app.js"></script>
+<script type="text/javascript" src="functions.js"></script>
 </body>
 </html>

@@ -79,8 +79,15 @@ namespace Attv.DataApp {
             if (Attv.isUndefined(hash)) {
                 return;
             }
+            
+            let needManualDispatch = window.location.hash === hash;
 
             window.location.hash = Routes.cleanHash(hash);
+
+            if (needManualDispatch) {
+                // manually dispatch the hash change event
+                window.dispatchEvent(new HashChangeEvent("hashchange"));
+            }
         }
     }
 

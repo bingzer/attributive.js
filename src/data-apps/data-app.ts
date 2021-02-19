@@ -26,28 +26,18 @@ namespace Attv.DataApp {
             for (let i = 0; i < routes.length; i++) {
                 let route = routes[i];
                 if (Routes.matches(route.path) || route.isDefault) {
+                    route.container = route.container || app.settings.container;
                     Attv.DataPartial.renderPartial(route)
                     return;
                 }
             }
-
-            // let dataRoute = this.attribute.resolve<Attv.DataRoute>(Attv.DataRoute.Key);
-            // let dataPartial = this.attribute.resolve<Attv.DataPartial>(Attv.DataPartial.Key);
-
-            // let routeElements = Attv.toArray<HTMLElement>(element.querySelectorAll(dataRoute.selector()));
-            // routeElements.forEach(routeElement => {
-            //     let route = dataRoute.getRoute(routeElement);
-            //     if (dataRoute.matches(route)) {
-            //         let attValue = dataPartial.getValue<Attv.DataApp.Partial.Nav>(routeElement);
-            //         if (attValue instanceof Attv.DataApp.Partial.Nav) {
-            //             attValue.render(routeElement, options.context);
-            //         } else {
-            //             routeElement.click();
-            //         }
-            //     }
-            // });
         }
 
+    }
+
+    export function navigate(hash: string) {
+        Routes.navigateTo(hash);
+        Attv.loadElements(undefined, { forceReload: true });
     }
 }
 

@@ -1,7 +1,7 @@
 namespace Attv {
 
     export interface PartialOptions extends Attv.Ajax.AjaxOptions, LoadElementOptions {
-        targetElement?: Attv.HTMLElementOrString;
+        container?: Attv.HTMLElementOrString;
         beforeRender?: (sendFn: () => void) => void;
         onRender?: (model: any) => any;
         afterRender?: (model: any, element?: HTMLElement) => void;
@@ -42,7 +42,7 @@ namespace Attv {
         
         export function renderPartial(options?: PartialOptions, model?: any) {
             options.beforeRender = options.beforeRender || ((fn) => fn());
-            options.onRender = options.onRender || (fn => fn(model) as unknown as HTMLElement);
+            options.onRender = options.onRender || (model => model);
             options.afterRender = options.afterRender || (result => {});
 
             let ajaxOptions = options as Attv.Ajax.AjaxOptions;            
@@ -58,7 +58,7 @@ namespace Attv {
             let renderModel = (model: any, options: PartialOptions) => {
                 model = options.onRender(model);
 
-                let targetElement = Attv.select(options.targetElement);
+                let targetElement = Attv.select(options.container);
 
                 if (targetElement) {
                     if (model instanceof HTMLElement) {
@@ -105,7 +105,7 @@ namespace Attv {
                 
                 // [data-target]
                 let dataTarget = this.attribute.resolve<Attv.DataTarget>(Attv.DataTarget.Key);
-                options.targetElement = dataTarget.getTargetElement(element) || element;
+                options.container = dataTarget.getTargetElement(element) || element;
 
                 //return DataPartial.renderPartial(element, options, model);
                 options.beforeRender = sendFn => {

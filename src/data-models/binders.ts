@@ -90,6 +90,10 @@ namespace Attv.Binders {
         // ------------------------------------------------------------ //
 
         private parseHeaders(dataModel: DataModel, table: HTMLTableElement, any: object): AliasExpression[] {
+            if (!any) {
+                return [];
+            }
+
             let settings = dataModel.getSettings<any>(table);
             let headers = settings?.headers as string[];
 
@@ -97,6 +101,8 @@ namespace Attv.Binders {
         }
 
         private bindArrayToElement(table: HTMLTableElement, headers: AliasExpression[], array: any[]) {
+            table.innerHTML = '';
+
             // -- thead
             let thead = table.createTHead();
             let tr = document.createElement('tr');
