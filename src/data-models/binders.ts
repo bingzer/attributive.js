@@ -90,14 +90,14 @@ namespace Attv.Binders {
         // ------------------------------------------------------------ //
 
         private parseHeaders(dataModel: DataModel, table: HTMLTableElement, any: object): AliasExpression[] {
-            if (!any) {
-                return [];
-            }
-
             let settings = dataModel.getSettings<any>(table);
             let headers = settings?.headers as string[];
 
-            return (headers || Object.keys(any)).map<AliasExpression>(head => new AliasExpression(head));
+            let headerKeys = headers || (any && Object.keys(any));
+            if (!headerKeys)
+                return [];
+
+            return headerKeys.map<AliasExpression>(head => new AliasExpression(head));
         }
 
         private bindArrayToElement(table: HTMLTableElement, headers: AliasExpression[], array: any[]) {
