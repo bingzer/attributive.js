@@ -14,61 +14,48 @@ namespace Attv.DataApp {
             }
             
             if (!this.attribute.isLoaded(element)) {
-                window.addEventListener("hashchange", e => this.hashChanged(e, element, options), false)
+                window.addEventListener("hashchange", e => this.hashChanged(app, element, options, e), false)
             };
 
         }
 
 
-        private hashChanged(event: Event, element: HTMLElement, options?: LoadElementOptions) {
-            let dataRoute = this.attribute.resolve<Attv.DataRoute>(Attv.DataRoute.Key);
-            let dataPartial = this.attribute.resolve<Attv.DataPartial>(Attv.DataPartial.Key);
+        private hashChanged(app: App, element: HTMLElement, options?: LoadElementOptions, event?: Event) {
+            let routes = app?.settings?.routes || [];
 
-            let routeElements = Attv.toArray<HTMLElement>(element.querySelectorAll(dataRoute.selector()));
-            routeElements.forEach(routeElement => {
-                let route = dataRoute.getRoute(routeElement);
-                if (dataRoute.matches(route)) {
-                    let attValue = dataPartial.getValue<Attv.DataApp.Partial.Nav>(routeElement);
-                    if (attValue instanceof Attv.DataApp.Partial.Nav) {
-                        attValue.render(routeElement, options.context);
-                    } else {
-                        routeElement.click();
-                    }
+            for (let i = 0; i < routes.length; i++) {
+                let route = routes[i];
+                if (Routes.matches(route.path) || route.isDefault) {
+                    Attv.DataPartial.renderPartial(route)
+                    return;
                 }
-            });
+            }
+
+            // let dataRoute = this.attribute.resolve<Attv.DataRoute>(Attv.DataRoute.Key);
+            // let dataPartial = this.attribute.resolve<Attv.DataPartial>(Attv.DataPartial.Key);
+
+            // let routeElements = Attv.toArray<HTMLElement>(element.querySelectorAll(dataRoute.selector()));
+            // routeElements.forEach(routeElement => {
+            //     let route = dataRoute.getRoute(routeElement);
+            //     if (dataRoute.matches(route)) {
+            //         let attValue = dataPartial.getValue<Attv.DataApp.Partial.Nav>(routeElement);
+            //         if (attValue instanceof Attv.DataApp.Partial.Nav) {
+            //             attValue.render(routeElement, options.context);
+            //         } else {
+            //             routeElement.click();
+            //         }
+            //     }
+            // });
         }
 
     }
-
-    Attv.register(Attv.DataApp.Key, { wildcard: "<jsExpression>", isAutoLoad: true, priority: 0 }, att => {
-        att.deps.uses = [
-            Attv.DataRoute.Key,
-            Attv.DataPartial.Key
-        ];
-    
-        att.map(() => new Attv.DataApp.Default());
-    });
 }
 
-namespace Attv.DataApp.Partial {
-    export class Nav extends Attv.DataPartial.Click {
-        constructor() {
-            super();
-            this.value = "nav";
-            this.deps.requires.push(Attv.DataRoute.Key);
-        }
+Attv.register(Attv.DataApp.Key, { wildcard: "<jsExpression>", isAutoLoad: true, priority: 0 }, att => {
+    att.deps.uses = [
+        Attv.DataRoute.Key,
+        Attv.DataPartial.Key
+    ];
 
-        protected click(ev: Event, element: HTMLElement, options?: PartialOptions) {
-            super.click(ev, element, options);
-
-            let dataRoute = this.attribute.resolve<Attv.DataRoute>(Attv.DataRoute.Key);
-            let hash = dataRoute.getRoute(element);
-            
-            dataRoute.setRoute(hash);
-        }
-    }
-
-    Attv.register(Attv.DataPartial.Key, att => {
-        att.map(() => new Attv.DataApp.Partial.Nav());
-    });
-}
+    att.map(() => new Attv.DataApp.Default());
+});

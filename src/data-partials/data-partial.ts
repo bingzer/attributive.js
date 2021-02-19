@@ -1,6 +1,11 @@
 namespace Attv {
 
-    export type PartialOptions = Attv.Ajax.AjaxOptions | LoadElementOptions;
+    export interface PartialOptions extends Attv.Ajax.AjaxOptions, LoadElementOptions {
+        targetElement?: Attv.HTMLElementOrString;
+        beforeRender?: (sendFn: () => void) => void;
+        onRender?: (model: any) => any;
+        afterRender?: (model: any, element?: HTMLElement) => void;
+    }
     
     /**
      * [data-partial]
@@ -34,6 +39,49 @@ namespace Attv {
     }
 
     export namespace DataPartial {
+        
+        export function renderPartial(options?: PartialOptions, model?: any) {
+            options.beforeRender = options.beforeRender || ((fn) => fn());
+            options.onRender = options.onRender || (fn => fn(model) as unknown as HTMLElement);
+            options.afterRender = options.afterRender || (result => {});
+
+            let ajaxOptions = options as Attv.Ajax.AjaxOptions;            
+            ajaxOptions.callback = (ajaxOptions: Attv.Ajax.AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
+                if (!wasSuccessful) {
+                    return;
+                }
+
+                let model = Attv.parseJsonOrElse(xhr.response);
+                renderModel(model, options);
+            };
+
+            let renderModel = (model: any, options: PartialOptions) => {
+                model = options.onRender(model);
+
+                let targetElement = Attv.select(options.targetElement);
+
+                if (targetElement) {
+                    if (model instanceof HTMLElement) {
+                        targetElement.attvHtml('');
+                        targetElement.append(model);
+                    } else {
+                        targetElement.attvHtml(model);
+                    }
+    
+                    Attv.loadElements(targetElement, options);
+                }
+
+                options.afterRender(model, targetElement);
+            };
+
+            if (model) {
+                options.onRender(model);
+            } else {
+                options.beforeRender(() => {
+                    Attv.Ajax.sendAjax(options);
+                });
+            }
+        }
 
         /**
          * [data-partial='default|lazy']. Default and Laxy load
@@ -52,67 +100,44 @@ namespace Attv {
                     options = this.attribute.getSettings<Ajax.AjaxOptions>(element) || { } as Ajax.AjaxOptions;
                 }
 
-                if (model) {
-                    return this.renderModel(element, model, options);
-                } else {
-                    return this.renderAjax(element, options);
-                }
-            }
+                options.url = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key).getUrl(element);
+                options.method = this.attribute.resolve<DataMethod>(Attv.DataMethod.Key).getMethod(element);
+                
+                // [data-target]
+                let dataTarget = this.attribute.resolve<Attv.DataTarget>(Attv.DataTarget.Key);
+                options.targetElement = dataTarget.getTargetElement(element) || element;
 
-            private renderAjax(element: HTMLElement, options: PartialOptions): void {
-                let ajaxOptions = options as Attv.Ajax.AjaxOptions;
-                ajaxOptions.url = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key).getUrl(element);
-                ajaxOptions.method = this.attribute.resolve<DataMethod>(Attv.DataMethod.Key).getMethod(element);
-                ajaxOptions.callback = (ajaxOptions: Attv.Ajax.AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
-                    if (!wasSuccessful) {
-                        return;
+                //return DataPartial.renderPartial(element, options, model);
+                options.beforeRender = sendFn => {
+                    // [data-timeout]
+                    let dataTimeout = this.attribute.resolve<Attv.DataTimeout>(Attv.DataTimeout.Key);
+                    dataTimeout.timeout(element, () => {
+                        let dataInterval = this.attribute.resolve<Attv.DataInterval>(Attv.DataInterval.Key);
+                        dataInterval.interval(element, () => {
+                            sendFn();
+                        });
+                    });
+                };
+                options.onRender = (model) => {
+                    // [data-source]
+                    let dataSource = this.attribute.resolve<Attv.DataSource>(Attv.DataSource.Key);
+                    let sourceElement = dataSource.getSourceElement(element);
+                    if (sourceElement) {
+                        let dataTemplate = this.attribute.resolve<Attv.DataTemplate>(Attv.DataTemplate.Key);
+                        model = dataTemplate.render(sourceElement, model);
                     }
 
-                    let model = Attv.parseJsonOrElse(xhr.response);
-                    this.renderModel(element, model, options);
-
-                    // [data-callback]
-                    let dataCallback = this.attribute.resolve<DataCallback>(Attv.DataCallback.Key);
-                    dataCallback.callback(element);
+                    return model;
                 };
 
-                this.sendAjax(element, ajaxOptions);
-            }
-
-            private renderModel(element: HTMLElement, model: any, options: PartialOptions): void {
-                let dataTemplate = this.attribute.resolve<DataTemplate>(Attv.DataTemplate.Key);
-                let dataSource = this.attribute.resolve<DataSource>(Attv.DataSource.Key);
-                let dataTarget = this.attribute.resolve<DataTarget>(Attv.DataTarget.Key);
-
-                // [data-source]
-                let sourceElement = dataSource.getSourceElement(element);
-                if (sourceElement) {
-                    model = dataTemplate.render(sourceElement, model);
+                options.afterRender = (model, element) => {
+                    let dataCallback = this.attribute.resolve<Attv.DataCallback>(Attv.DataCallback.Key);
+                    dataCallback.callback(element);
                 }
 
-                // [data-target]
-                let targetElement = dataTarget.getTargetElement(element) || element;
-
-                if (model instanceof HTMLElement) {
-                    targetElement.attvHtml('');
-                    targetElement.append(model);
-                } else {
-                    targetElement.attvHtml(model);
-                }
-
-                Attv.loadElements(targetElement, options);
+                return DataPartial.renderPartial(options, model);
             }
-            
-            private sendAjax(element: HTMLElement, options: Attv.Ajax.AjaxOptions) {
-                // [data-timeout]
-                let dataTimeout = this.attribute.resolve<DataTimeout>(Attv.DataTimeout.Key);
-                dataTimeout.timeout(element, () => {
-                    let dataInterval = this.attribute.resolve<DataInterval>(Attv.DataInterval.Key);
-                    dataInterval.interval(element, () => {
-                        Attv.Ajax.sendAjax(options);
-                    });
-                });
-            }
+
         }
 
         /**
