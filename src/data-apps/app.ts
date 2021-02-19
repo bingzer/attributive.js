@@ -52,7 +52,12 @@ namespace Attv.DataApp {
         /**
          * Path
          */
-        path: string;
+        path?: string;
+
+        /**
+         * Match path
+         */
+        match?: string;
 
         /**
          * Container to put the html in
@@ -70,14 +75,25 @@ namespace Attv.DataApp {
         isDefault?: boolean;
 
         /**
+         * If specified, returns the context.
+         */
+        getContext?: (match?: RouteMatch) => any;
+
+        /**
          * Function to execute when url is not provided
          */
-        fn?: () => void;
+        fn?: (match?: RouteMatch) => void;
 
         /**
          * A condition must be true, if this function is defined.
          */
         when?: (() => boolean);
+    }
+
+    export interface RouteMatch {
+        isMatch: boolean;
+
+        routeContext: any;
     }
 
     /**
@@ -89,23 +105,36 @@ namespace Attv.DataApp {
          * Checks if location route matches/starts-with hash
          * @param hash the hash
          */
-        export function matches(hash: string) {
-            hash = Routes.cleanHash(hash);
+        export function matches(route: Route): RouteMatch {
+            let hash = Routes.cleanHash(route.path || route.match);
             let locationRoute = Routes.getLocationRoute();
+            let isMatch = route.isDefault;
+            let context = undefined;
 
             // TODO: refactor
             if (locationRoute.startsWith(hash)) {
                 // make sure
                 if (locationRoute === hash) {
-                    return true;
+                    isMatch = true;
                 } else {
                     // makes sure there's / after the index
                     let nextChar = locationRoute.substr(locationRoute.indexOf(hash) + hash.length, 1);
-                    return nextChar === '/';
+                    isMatch = nextChar === '/';
                 }
+            } else if (route.match && locationRoute.match(hash)) {
+                isMatch = true;
+                context = locationRoute.match(hash)
             }
 
-            return false;
+            // check when condition
+            if (route.when && !route.when()) {
+                isMatch = false;
+            }
+
+            return {
+                isMatch: isMatch,
+                routeContext: context
+            };
         }
 
         export function appendHash(...hash: string[]) {

@@ -24,6 +24,16 @@ var app = {
             title: 'Admin',
             when: function() { return data.user.isAdmin; }
         },{
+            match: '/users/(.*)',
+            url: 'user-detail.html',
+            title: 'User Detail',
+            getContext: function (match) {
+                var email = match.routeContext[1];
+                var user = data.users.filter(u => u.email === email)[0];
+                return { user };
+            },
+            when: function() { return data.user.isAdmin; }
+        },{
             path: '/about',
             title: 'About',
             url: 'about.html'

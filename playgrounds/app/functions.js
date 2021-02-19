@@ -54,10 +54,11 @@ var fn = {
     },
 
     formatDeleteUser: function (user) {
-        return '<button type="button" class="btn btn-danger" onclick="fn.deleteUser(\'' + user.email +'\')" data-wall="confirm" data-content="Are you sure you want to delete ' + user.email + '?">Delete</a>';
+        return '<button type="button" class="btn btn-danger" onclick="fn.deleteUser(\'' + user.email +'\')" data-wall="confirm" data-content="Are you sure you want to delete ' + user.email + '?">Delete</button>' +
+        '&nbsp;<a href="#/users/' + user.email + '" class="btn btn-secondary">Edit</a>';
     },
 
     formatDeleteTodo: function (todo) {
-        return '<button type="button" class="btn btn-danger" onclick="fn.deleteTodo(\'' + todo.id +'\')" data-wall="confirm" data-content="Are you sure you want to delete ' + todo.title + '?">Delete</a>';
+        return '<button type="button" class="btn btn-danger" onclick="fn.deleteTodo(\'' + todo.id +'\')" data-wall="confirm" data-content="Are you sure you want to delete ' + todo.title + '?">Delete</button>';
     }
 }

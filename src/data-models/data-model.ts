@@ -60,8 +60,7 @@ namespace Attv {
             let propertyChilds = propertyName.split('.');
             
             for (let j = 0; j < propertyChilds.length; j++) {
-                try
-                {
+                try {
                     let child = propertyChilds[j];
                     if (child === 'this') {
                         propertyValue = propertyValue;

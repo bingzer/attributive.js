@@ -11,7 +11,6 @@ namespace Attv.DataApp {
 
                 DataApp.lock(!!app.settings?.lock, app.settings?.lock);
             };
-
         }
 
         private findApp(element: HTMLElement, options?: LoadElementOptions): App {
@@ -24,6 +23,10 @@ namespace Attv.DataApp {
                 Attv.log('fatal', `${expression.expression} not found`);
             }
 
+            // get from settings
+            let settings = this.attribute.getSettings<Attv.DataApp.Settings>(element);
+            app.settings = app.settings || settings;
+
             return app;
         }
 
@@ -34,18 +37,19 @@ namespace Attv.DataApp {
 
             for (let i = 0; i < routes.length; i++) {
                 let route = routes[i];
-                if (Routes.matches(route.path) || route.isDefault) {
-                    // check when condition
-                    if (route.when && !route.when()) {
-                        continue;
-                    }
-
+                let routeMatch = Routes.matches(route);
+                if (routeMatch.isMatch) {
                     if (Attv.isType(route.fn, 'function')) {
-                        route.fn();
+                        route.fn(routeMatch);
                     } else {
                         route.container = route.container || app.settings.container;
     
                         let partialOptions = route as Attv.DataPartial.PartialOptions;
+                        if (route.getContext) {
+                            let context = route.getContext(routeMatch);
+                            partialOptions.context = context;
+                        }
+
                         partialOptions.afterRender = (model, element) => {
                             // set title
                             document.title = route.title || app.name;
