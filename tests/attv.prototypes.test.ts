@@ -42,6 +42,24 @@ describe('Attv.Prototypes for HTMLElement', () => {
         expect(element.innerHTML).toBe('<strong>very strong</strong>');
     });
     
+    it('attvHtml(htmlElement) should append the element', () => {
+        let element = document.createElement('div');
+        let child = document.createElement('p');
+
+        element.attvHtml(child);
+
+        expect(element.firstChild === child).toBeTrue();
+    });
+    
+    it('attvHtml(htmlElement.outerHTML) should not append the element', () => {
+        let element = document.createElement('div');
+        let child = document.createElement('p');
+
+        element.attvHtml(child.outerHTML);
+
+        expect(element.firstChild === child).toBeFalse();
+    });
+    
     it('attvShow() - Should show the element', () => {
         let element = document.createElement('span');
         element.style.display = "none";
