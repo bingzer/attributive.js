@@ -6,6 +6,7 @@ interface HTMLElement  {
 
     /**
      * Gets/Sets html.
+     * If the html is an instanceof HTMLElement, it will keep the reference.
      * Will execute javascript inside also
      */
     attvHtml: (html?: Attv.HTMLElementOrString) => string | any;
@@ -42,6 +43,9 @@ HTMLElement.prototype.attvHtml = function (html?: Attv.HTMLElementOrString): str
         if (html) { 	
             // look for scripts	
             let innerHtmlElement = Attv.Dom.parseDom(html);	
+            if (!(innerHtmlElement instanceof HTMLElement))
+                return;
+
             let scripts = innerHtmlElement.querySelectorAll('script');	
             for (let i = 0; i < scripts.length; i++) {	
                 if(scripts[i].type?.toLowerCase()?.contains('javascript')) {	
