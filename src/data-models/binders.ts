@@ -188,7 +188,7 @@ namespace Attv.Binders {
                     Attv.DataModel.setProperty(expression.propertyName, value, model);
 
                     // data load
-                    this.broadcast(dataModel, element, { forceReload: true });
+                    this.broadcast(dataModel, element, { forceReload: true, context: model });
                 });
             };
         }
