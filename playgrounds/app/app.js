@@ -3,52 +3,30 @@ var app = {
 
     settings: {
         container: '#main-container',
+        lock: false,
         routes: [{
-            name: '',
             path: '/',
-            url: 'todo.html'
+            url: 'todo.html',
+            when: function() { return data.user.isAuthorized; }
         },{
-            name: 'login',
             path: '/login',
-            url: 'login.html'
+            url: 'login.html',
+            title: 'Login',
+            when: function() { return !data.user.isAuthorized; }
         },{
-            name: 'profile',
             path: '/profile',
-            url: 'profile.html'
+            url: 'profile.html',
+            title: 'Profile',
+            when: function() { return data.user.isAuthorized; }
         },{
-            name: 'about',
+            path: '/admin',
+            url: 'admin.html',
+            title: 'Admin',
+            when: function() { return data.user.isAdmin; }
+        },{
             path: '/about',
+            title: 'About',
             url: 'about.html'
         }]
-    },
-
-
-    user: {
-        isAuthorized: false
-    },
-    loginInfo: {
-        email: 'john@example.com',
-        password: '123'
-    },
-    users: [{
-            firstName: 'John',
-            lastName: 'Doe',
-            email: 'john@example.com',
-            password: '123'
-        }, {
-            firstName: 'Jane',
-            lastName: 'Doe',
-            email: 'jane@example.com',
-            password: '123'
-        }
-    ],
-    newTodo: {
-        title: '',
-        content: '',
-        dateTime: '',
-        tags: []
-    },
-    todos: [
-
-    ],
+    }
 };

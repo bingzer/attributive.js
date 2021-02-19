@@ -760,7 +760,7 @@ namespace Attv {
     export namespace Ajax {
         export type AjaxMethod = 'post' | 'put' | 'delete' | 'patch' | 'get' | 'option';
 
-        export interface AjaxOptions extends LoadElementOptions {
+        export interface AjaxOptions {
             url: string;
             method?: AjaxMethod;
             data?: any;

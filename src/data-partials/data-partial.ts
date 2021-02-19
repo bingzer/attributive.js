@@ -1,11 +1,4 @@
 namespace Attv {
-
-    export interface PartialOptions extends Attv.Ajax.AjaxOptions, LoadElementOptions {
-        container?: Attv.HTMLElementOrString;
-        beforeRender?: (sendFn: () => void) => void;
-        onRender?: (model: any) => any;
-        afterRender?: (model: any, element?: HTMLElement) => void;
-    }
     
     /**
      * [data-partial]
@@ -39,48 +32,32 @@ namespace Attv {
     }
 
     export namespace DataPartial {
-        
-        export function renderPartial(options?: PartialOptions, model?: any) {
-            options.beforeRender = options.beforeRender || ((fn) => fn());
-            options.onRender = options.onRender || (model => model);
-            options.afterRender = options.afterRender || (result => {});
 
-            let ajaxOptions = options as Attv.Ajax.AjaxOptions;            
-            ajaxOptions.callback = (ajaxOptions: Attv.Ajax.AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
-                if (!wasSuccessful) {
-                    return;
-                }
-
-                let model = Attv.parseJsonOrElse(xhr.response);
-                renderModel(model, options);
-            };
-
-            let renderModel = (model: any, options: PartialOptions) => {
-                model = options.onRender(model);
-
-                let targetElement = Attv.select(options.container);
-
-                if (targetElement) {
-                    if (model instanceof HTMLElement) {
-                        targetElement.attvHtml('');
-                        targetElement.append(model);
-                    } else {
-                        targetElement.attvHtml(model);
-                    }
+        /**
+         * Partial options (also a union of AjaxOptions and LoadElementOptions) + more
+         */
+        export interface PartialOptions extends Attv.Ajax.AjaxOptions, LoadElementOptions {
     
-                    Attv.loadElements(targetElement, options);
-                }
-
-                options.afterRender(model, targetElement);
-            };
-
-            if (model) {
-                options.onRender(model);
-            } else {
-                options.beforeRender(() => {
-                    Attv.Ajax.sendAjax(options);
-                });
-            }
+            /**
+             * An HTMLElement container to insert to result to
+             */
+            container?: Attv.HTMLElementOrString;
+    
+            /**
+             * Callbacks before rendering.
+             * sendFn() needs to be called to conginue
+             */
+            beforeRender?: (sendFn: () => void) => void;
+    
+            /**
+             * During rendering
+             */
+            onRender?: (model: any) => any;
+    
+            /**
+             * After rendering
+             */
+            afterRender?: (model: any, element?: HTMLElement) => void;
         }
 
         /**
@@ -107,7 +84,7 @@ namespace Attv {
                 let dataTarget = this.attribute.resolve<Attv.DataTarget>(Attv.DataTarget.Key);
                 options.container = dataTarget.getTargetElement(element) || element;
 
-                //return DataPartial.renderPartial(element, options, model);
+                // Before render
                 options.beforeRender = sendFn => {
                     // [data-timeout]
                     let dataTimeout = this.attribute.resolve<Attv.DataTimeout>(Attv.DataTimeout.Key);
@@ -118,6 +95,8 @@ namespace Attv {
                         });
                     });
                 };
+
+                // During model rendering
                 options.onRender = (model) => {
                     // [data-source]
                     let dataSource = this.attribute.resolve<Attv.DataSource>(Attv.DataSource.Key);
@@ -130,7 +109,9 @@ namespace Attv {
                     return model;
                 };
 
+                // After model has been rendered
                 options.afterRender = (model, element) => {
+                    // [data-callback]
                     let dataCallback = this.attribute.resolve<Attv.DataCallback>(Attv.DataCallback.Key);
                     dataCallback.callback(element);
                 }
@@ -182,7 +163,8 @@ namespace Attv {
         }
 
         /**
-         * [data-partial='nonce']
+         * [data-partial='nonce'].
+         * After load this AttributeValue will remove [data-partial] from the element.
          */
         export class Nonce extends Default {
             constructor () {
@@ -196,6 +178,55 @@ namespace Attv {
                 element.removeAttribute(this.attribute.name);
 
                 return true;
+            }
+        }
+
+        // --------------------------------------------------------------------------------------------- //
+        
+        /**
+         * Render partial
+         * 
+         * @param options partial options
+         * @param model optionaly specified model. If model is specified, this call won't make Ajax call
+         */
+        export function renderPartial(options?: PartialOptions, model?: any) {
+            options.beforeRender = options.beforeRender || ((fn) => fn());
+            options.onRender = options.onRender || (model => model);
+            options.afterRender = options.afterRender || (result => {});
+
+            let ajaxOptions = options as Attv.Ajax.AjaxOptions;            
+            ajaxOptions.callback = (ajaxOptions: Attv.Ajax.AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
+                if (!wasSuccessful) {
+                    return;
+                }
+
+                let model = Attv.parseJsonOrElse(xhr.response);
+                renderModel(model, options);
+            };
+
+            let renderModel = (model: any, options: PartialOptions) => {
+                model = options.onRender(model);
+
+                let targetElement = Attv.select(options.container);
+
+                if (targetElement) {
+                    if (model instanceof HTMLElement) {
+                        targetElement.attvHtml('');
+                        targetElement.append(model);
+                    } else {
+                        targetElement.attvHtml(model);
+                    }
+    
+                    Attv.loadElements(targetElement, options);
+                }
+
+                options.afterRender(model, targetElement);
+            };
+
+            if (model) {
+                options.onRender(model);
+            } else {
+                options.beforeRender(() => Attv.Ajax.sendAjax(options));
             }
         }
     }

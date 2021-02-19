@@ -1,11 +1,26 @@
 namespace Attv.DataApp {
 
+    /**
+     * An App object
+     */
     export interface App {
+
+        /**
+         * Name of the app
+         */
         name?: string;
 
+        /**
+         * Settings
+         */
         settings?: Settings;
     }
 
+    /**
+     * Settings object.
+     * Optionally you can define a settings name via [data-app-settings] attribute.
+     * However, this will take precedence
+     */
     export interface Settings {
 
         /**
@@ -13,22 +28,56 @@ namespace Attv.DataApp {
          */
         container: string;
 
+        /**
+         * Message on lock if defined, the app will place a lock on refresh.
+         */
+        lock?: string;
+
+        /**
+         * The routes
+         */
         routes: Route[]
 
     }
 
+    /**
+     * Route object
+     */
     export interface Route extends Ajax.AjaxOptions {
-        (key: string): any;
+        /**
+         * Optional additional property
+         */
+        [key: string]: any;
 
-        name: string;
-
+        /**
+         * Path
+         */
         path: string;
 
+        /**
+         * Container to put the html in
+         */
         container?: string;
 
+        /**
+         * If set. Will be the browser title
+         */
+        title?: string;
+
+        /**
+         * True if default route
+         */
         isDefault?: boolean;
+
+        /**
+         * A condition must be true, if this function is defined.
+         */
+        when?: (() => boolean);
     }
 
+    /**
+     * Routes related functions
+     */
     export namespace Routes {
 
         /**

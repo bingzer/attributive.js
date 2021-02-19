@@ -1,14 +1,10 @@
-var app;
-
-app.fn = {};
-
-(function (fn) {
-    fn.login = function () {
-        for (var i = 0; i < app.users.length; i++) {
-            var u = app.users[i];
-            if (u.password === app.loginInfo.password && u.email === app.loginInfo.email) {
-                app.user = u;
-                app.user.isAuthorized = true;
+var fn = {
+    login: function () {
+        for (var i = 0; i < data.users.length; i++) {
+            var u = data.users[i];
+            if (u.password === data.loginInfo.password && u.email === data.loginInfo.email) {
+                data.user = u;
+                data.user.isAuthorized = true;
 
                 break;
             }
@@ -17,21 +13,21 @@ app.fn = {};
         Attv.DataApp.navigate('/');
 
         return false;
-    };
-    
-    fn.logout = function () {
-        app.user = {
+    },
+
+    logout: function () {
+        data.user = {
             isAuthorized: false
         };
 
         Attv.DataApp.navigate('/login');
     },
-    
-    fn.addTodo = function () {
-        app.newTodo.dateTime = Date.now();
 
-        app.todos.push(app.newTodo);
-        app.newTodo = {
+    addTodo: function () {
+        data.newTodo.dateTime = Date.now();
+
+        data.todos.push(data.newTodo);
+        data.newTodo = {
             title: '',
             content: '',
             dateTime: undefined,
@@ -39,5 +35,17 @@ app.fn = {};
         };
         
         Attv.loadElements(undefined, { forceReload: true });
+    },
+
+    formatDate: function (date) {
+        return new Date(date).toLocaleString();
+    },
+
+    formatEmail: function (email) {
+        return '<a href="mailto:' + email + '">' + email + '</a>';
+    },
+
+    formatDeleteUser: function (user) {
+        return '<button type="button" class="btn btn-danger" onclick="fn.deleteUser(\'' + user.email +'\')" data-wall="confirm" data-content="Are you sure you want to delete ' + user.email + '?">Delete</a>';
     }
-})(app.fn);
+}
