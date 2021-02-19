@@ -25,14 +25,22 @@ var fn = {
 
     addTodo: function () {
         data.newTodo.dateTime = Date.now();
+        data.newTodo.id = data.todos.length;
 
         data.todos.push(data.newTodo);
         data.newTodo = {
+            id: undefined,
             title: '',
             content: '',
             dateTime: undefined,
             tags: []
         };
+        
+        Attv.loadElements(undefined, { forceReload: true });
+    },
+
+    deleteTodo: function (id) {
+        data.todos.splice(id, 1);
         
         Attv.loadElements(undefined, { forceReload: true });
     },
@@ -47,5 +55,9 @@ var fn = {
 
     formatDeleteUser: function (user) {
         return '<button type="button" class="btn btn-danger" onclick="fn.deleteUser(\'' + user.email +'\')" data-wall="confirm" data-content="Are you sure you want to delete ' + user.email + '?">Delete</a>';
+    },
+
+    formatDeleteTodo: function (todo) {
+        return '<button type="button" class="btn btn-danger" onclick="fn.deleteTodo(\'' + todo.id +'\')" data-wall="confirm" data-content="Are you sure you want to delete ' + todo.title + '?">Delete</a>';
     }
 }
