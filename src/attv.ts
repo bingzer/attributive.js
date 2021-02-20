@@ -881,6 +881,11 @@ namespace Attv {
         return any?.startsWith('(') && any?.endsWith(')');
     }
 
+    export function isEvaluatableStatement(any: string) {
+        return (any?.startsWith('{') && any?.endsWith('}')) 
+            || any?.startsWith('[') && any?.endsWith(']');
+    }
+
     export function eval$(any: string, context?: any) {
         context = context || {};
 
@@ -964,12 +969,9 @@ namespace Attv {
         // if string
         if (Attv.isString(any)) {
             let text = any as string;
+            
             // does it look like json object?
-            if (text?.startsWith('{') && text?.endsWith('}')) {
-                text = `(${text})`;
-            }
-            // does it look like json array?
-            if (text?.startsWith('[') && text?.endsWith(']')) {
+            if (Attv.isEvaluatableStatement(text)) {
                 text = `(${text})`;
             }
     

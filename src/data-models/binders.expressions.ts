@@ -167,7 +167,13 @@ namespace Attv.Binders {
      */
     export function evaluateExpression(expression: Expression, context?: any): any {
         // first check if it's a property statement
-        let evaluatedValue = Attv.DataModel.getProperty(expression.propertyName, context);
+        let evaluatedValue: any = undefined;
+        if (Attv.isEvaluatableStatement(expression.propertyName)) {
+            evaluatedValue = Attv.parseJsonOrElse(expression.propertyName, undefined, context);
+        } else {
+            // treat is a property name
+            evaluatedValue = Attv.DataModel.getProperty(expression.propertyName, context);
+        }
 
         // if not check see if we can execute the expression
         if (Attv.isUndefined(evaluatedValue)) {

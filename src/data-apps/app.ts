@@ -4,6 +4,10 @@ namespace Attv.DataApp {
      * An App object
      */
     export interface App {
+        /**
+         * Optional additional property
+         */
+        [key: string]: any;
 
         /**
          * Name of the app
@@ -11,20 +15,7 @@ namespace Attv.DataApp {
         name?: string;
 
         /**
-         * Settings
-         */
-        settings?: Settings;
-    }
-
-    /**
-     * Settings object.
-     * Optionally you can define a settings name via [data-app-settings] attribute.
-     * However, this will take precedence
-     */
-    export interface Settings {
-
-        /**
-         * The default container
+         * The main container
          */
         container: string;
 
@@ -91,9 +82,18 @@ namespace Attv.DataApp {
         when?: (() => boolean);
     }
 
+    /**
+     * Route Matching object
+     */
     export interface RouteMatch {
+        /**
+         * Is it a match?
+         */
         isMatch: boolean;
 
+        /**
+         * Route context
+         */
         routeContext: any;
     }
 

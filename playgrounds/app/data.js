@@ -24,10 +24,17 @@ var data = {
             email: 'admin@example.com',
             password: '123',
             isAdmin: true,
-            todos: []
+            todos: [{
+                id: 0,
+                title: 'This is the admin',
+                content: 'Hello',
+                dateTime: Date.now(),
+                tags: []
+            }]
         }
     ],
     newTodo: {
+        id: undefined,
         title: '',
         content: '',
         dateTime: '',

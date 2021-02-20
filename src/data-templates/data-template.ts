@@ -113,7 +113,7 @@ Attv.register(() => new Attv.DataTemplate(), att => {
     att.map(() => new Attv.DataTemplate.Script());
 
     // register filters
-    Attv.Binders.filters.template = (selector: string) => {
+    Attv.Binders.filters.template = (selector: string, ...args: any) => {
         return (model: any) => {
             let element = Attv.select(selector);
             let template = Attv.DataTemplate.renderTemplate(element, model);

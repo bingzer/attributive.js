@@ -9,7 +9,7 @@ namespace Attv.DataApp {
 
                 window.addEventListener("hashchange", evt => this.onHashChanged(app, element, options, evt), false);
 
-                DataApp.lock(!!app.settings?.lock, app.settings?.lock);
+                DataApp.lock(app.lock);
             };
         }
 
@@ -24,18 +24,25 @@ namespace Attv.DataApp {
             }
 
             // get from settings
-            let settings = this.attribute.getSettings<Attv.DataApp.Settings>(element);
-            app.settings = app.settings || settings;
+            let settings = this.attribute.getSettings<Attv.DataApp.App>(element);
+            if (settings) {
+                // Fill what's missing only
+                Object.keys(settings).forEach(key => {
+                    if (!app[key]) {
+                        app[key] = settings[key];
+                    }
+                })
+            }
 
             return app;
         }
 
         private onHashChanged(app: App, element: HTMLElement, options?: LoadElementOptions, event?: Event) {
-            let routes = app?.settings?.routes || [];
+            let routes = app?.routes || [];
 
             document.title = app.name;
 
-            let renderPartial = (route, partialOptions: Attv.DataPartial.PartialOptions) => {
+            let renderPartial = (route: Route, partialOptions: Attv.DataPartial.PartialOptions) => {
                 partialOptions.afterRender = (model, element) => {
                     // set title
                     document.title = route.title || app.name;
@@ -51,7 +58,7 @@ namespace Attv.DataApp {
                     if (Attv.isType(route.fn, 'function')) {
                         route.fn(routeMatch);
                     } else {
-                        route.container = route.container || app.settings.container;
+                        route.container = route.container || app.container;
     
                         let partialOptions = route as Attv.DataPartial.PartialOptions;
                         if (route.withContext) {
@@ -87,9 +94,9 @@ namespace Attv.DataApp {
      * @param lock true to lock, falsy to unlock
      * @param message optional message. Not every browser support this
      */
-    export function lock(lock?: boolean, message?: string) {
+    export function lock(lock?: boolean | string) {
         if (lock) {
-            window.onbeforeunload = (evt) => message;
+            window.onbeforeunload = (evt) => lock as string;
         } else {
             window.onbeforeunload = undefined;
         }
@@ -98,9 +105,8 @@ namespace Attv.DataApp {
 
 Attv.register(Attv.DataApp.Key, { wildcard: "<jsExpression>", isAutoLoad: true, priority: 0 }, att => {
     att.deps.uses = [
-        Attv.DataRoute.Key,
         Attv.DataPartial.Key
     ];
-
+ 
     att.map(() => new Attv.DataApp.Default());
 });

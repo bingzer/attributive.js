@@ -56,3 +56,6 @@ var fn = {
 Attv.Binders.filters.formatDate = (date) => {
     return new Date(date).toLocaleString()
 };
+Attv.Binders.filters.fullname = (user) => {
+    return user.firstName + " " + user.lastName;
+};
