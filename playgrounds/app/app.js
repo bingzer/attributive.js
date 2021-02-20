@@ -7,26 +7,26 @@ var app = {
     lock: true,
     routes: [{
         path: '/',
-        url: 'todo.html',
+        url: 'partials/todo.html',
         when: function() { return data.user.isAuthorized; }
     },{
         path: '/login',
-        url: 'login.html',
+        url: 'partials/login.html',
         title: 'Login',
         when: function() { return !data.user.isAuthorized; }
     },{
         path: '/profile',
-        url: 'profile.html',
+        url: 'partials/profile.html',
         title: 'Profile',
         when: function() { return data.user.isAuthorized; }
     },{
         path: '/admin',
-        url: 'admin.html',
+        url: 'partials/admin.html',
         title: 'Admin',
         when: function() { return data.user.isAdmin; }
     },{
         match: '/users/(.*)',
-        url: 'user-detail.html',
+        url: 'partials/user-detail.html',
         title: 'User Detail',
         withContext: function (match, fn) {
             var email = match.routeContext[1];
@@ -37,7 +37,7 @@ var app = {
         when: function() { return data.user.isAdmin; }
     },{
         match: '/users/(.*)/todos/(.*)',
-        url: 'todo-detail.html',
+        url: 'partials/todo-detail.html',
         title: 'Todo Detail',
         withContext: function (match, fn) {
             var email = match.routeContext[1];
@@ -49,7 +49,7 @@ var app = {
     },{
         path: '/about',
         title: 'About',
-        url: 'about.html'
+        url: 'partials/about.html'
     },{
         path: '/logout',
         fn: function () { fn.logout() }
