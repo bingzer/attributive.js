@@ -1,8 +1,8 @@
-var fn = {
+var fnx = {
     login: function () {
         data.login.result = 'Username/Password does not match';
 
-        var authenticatedUser = data.users.filter(u => (u.password === data.login.password && u.email.equalsIgnoreCase(data.login.email)))[0];
+        var authenticatedUser = fnx.findUser(data.login.email, data.login.password);
 
         if (authenticatedUser) {
             data.user = authenticatedUser;
@@ -47,15 +47,28 @@ var fn = {
         data.user.todos.splice(id, 1);
         
         Attv.loadElements(undefined, { forceReload: true });
+    },
+
+    findUser: function (email, password) {
+        for (var i = 0; i < data.users.length; i++) {
+            if (data.users[i].email.equalsIgnoreCase(email)) {
+                if (password && data.users[i].password !== password)
+                    continue;
+
+                return data.users[i];
+            }
+        }
+
+        return undefined;
     }
 }
 
 
 
 // register filters
-Attv.Binders.filters.formatDate = (date) => {
+Attv.Binders.filters.formatDate = function (date) {
     return new Date(date).toLocaleString()
 };
-Attv.Binders.filters.fullname = (user) => {
+Attv.Binders.filters.fullname = function (user) {
     return user.firstName + " " + user.lastName;
 };

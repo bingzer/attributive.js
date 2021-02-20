@@ -23,15 +23,21 @@ var app = {
         path: '/admin',
         url: 'partials/admin.html',
         title: 'Admin',
-        when: function() { return data.user.isAdmin; }
+        when: function() { return data.user.isAdmin; },
+        // withContext: function (match, fn) {
+        //     var context = {
+        //         usersUrl: 'partials/users.html'
+        //     };
+        //     fn(context);
+        // },
     },{
         match: '/users/(.*)',
         url: 'partials/user-detail.html',
         title: 'User Detail',
         withContext: function (match, fn) {
             var email = match.routeContext[1];
-            var user = data.users.filter(u => u.email === email)[0];
-            var context = { user };
+            var user = fnx.findUser(email);
+            var context = { user: user };
             fn(context);
         },
         when: function() { return data.user.isAdmin; }
@@ -41,8 +47,8 @@ var app = {
         title: 'Todo Detail',
         withContext: function (match, fn) {
             var email = match.routeContext[1];
-            var user = data.users.filter(u => u.email === email)[0];
-            var context = { user };
+            var user = fnx.findUser(email);
+            var context = { user: user };
             fn(context);
         },
         when: function() { return data.user.isAdmin; }
@@ -52,6 +58,6 @@ var app = {
         url: 'partials/about.html'
     },{
         path: '/logout',
-        fn: function () { fn.logout() }
+        fn: function () { fnx.logout() }
     }]
 };
