@@ -3,7 +3,12 @@
 
     <div class="container mb-4">
         <table data-model="data.user.todos"
-          data-model-settings="{ headers: ['title as Title', 'content as Content', 'dateTime | fn.formatDate as Time', 'this | fn.formatDeleteTodo as Action' ] }"
+          data-model-settings="{ headers: [
+            'title as Title', 
+            'content as Content', 
+            'dateTime | formatDate as Time', 
+            'this | template(\'#format-delete-todo\') as Action' 
+          ] }"
           class="table"></table>
     </div>
 

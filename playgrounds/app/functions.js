@@ -47,24 +47,12 @@ var fn = {
         data.user.todos.splice(id, 1);
         
         Attv.loadElements(undefined, { forceReload: true });
-    },
-
-    formatDate: function (date) {
-        return new Date(date).toLocaleString();
-    },
-
-    formatEmail: function (email) {
-        return '<a href="mailto:' + email + '">' + email + '</a>';
-    },
-
-    formatDeleteUser: function (user) {
-        let template = Attv.DataTemplate.renderTemplate('#format-delete-user', user);
-        return template;
-        // return '<button type="button" class="btn btn-danger" onclick="fn.deleteUser(\'' + user.email +'\')" data-wall="confirm" data-content="Are you sure you want to delete ' + user.email + '?">Delete</button>' +
-        // '&nbsp;<a href="#/users/' + user.email + '" class="btn btn-secondary">Edit</a>';
-    },
-
-    formatDeleteTodo: function (todo) {
-        return '<button type="button" class="btn btn-danger" onclick="fn.deleteTodo(\'' + todo.id +'\')" data-wall="confirm" data-content="Are you sure you want to delete ' + todo.title + '?">Delete</button>';
     }
 }
+
+
+
+// register filters
+Attv.Binders.filters.formatDate = (date) => {
+    return new Date(date).toLocaleString()
+};

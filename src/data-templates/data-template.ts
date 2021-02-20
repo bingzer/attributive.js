@@ -111,4 +111,14 @@ namespace Attv {
 Attv.register(() => new Attv.DataTemplate(), att => {
     att.map(() => new Attv.DataTemplate.Default());
     att.map(() => new Attv.DataTemplate.Script());
+
+    // register filters
+    Attv.Binders.filters.template = (selector: string) => {
+        return (model: any) => {
+            let element = Attv.select(selector);
+            let template = Attv.DataTemplate.renderTemplate(element, model);
+            
+            return template;
+        }
+    }
 });
