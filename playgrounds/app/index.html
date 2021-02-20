@@ -72,14 +72,14 @@
   <button type="button" 
     class="btn btn-danger" 
     data-attrs="{ 
-      onclick: 'fn.deleteUser(\'' + email + '\')', 
-      data_content: 'Are you sure you want to delete ' + email + '?', 
+      onclick: 'fn.deleteUser(\'' + this.email + '\')', 
+      data_content: 'Are you sure you want to delete ' + this.email + '?', 
       disabled: email === data.user.email,
       title: email === data.user.email ? 'Current User' : 'Delete this user'
     }" 
     data-wall="confirm">Delete</button>
 
-  <a class="btn btn-secondary" data-attrs="{ href: '#/users/' + email }">Edit</a>
+  <a class="btn btn-secondary" data-attrs="{ href: '#/users/' + this.email }">Edit</a>
 
 </script>
 
@@ -87,8 +87,8 @@
   <button type="button" 
     class="btn btn-danger" 
     data-attrs="{ 
-      onclick: 'fn.deleteTodo(\'' + id + '\')', 
-      data_content: 'Are you sure you want to delete ' + title + '?' 
+      onclick: 'fn.deleteTodo(\'' + this.id + '\')', 
+      data_content: 'Are you sure you want to delete ' + this.title + '?' 
     }" 
     data-wall="confirm">Delete</button>
 </script>
