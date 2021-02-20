@@ -24,16 +24,10 @@ var app = {
         url: 'partials/admin.html',
         title: 'Admin',
         when: function() { return data.user.isAdmin; },
-        // withContext: function (match, fn) {
-        //     var context = {
-        //         usersUrl: 'partials/users.html'
-        //     };
-        //     fn(context);
-        // },
     },{
-        match: '/users/(.*)',
-        url: 'partials/user-detail.html',
-        title: 'User Detail',
+        match: '/users/(.*)/todos/(.*)',
+        url: 'partials/todo-detail.html',
+        title: 'Todo Detail',
         withContext: function (match, fn) {
             var email = match.routeContext[1];
             var user = fnx.findUser(email);
@@ -42,9 +36,9 @@ var app = {
         },
         when: function() { return data.user.isAdmin; }
     },{
-        match: '/users/(.*)/todos/(.*)',
-        url: 'partials/todo-detail.html',
-        title: 'Todo Detail',
+        match: '/users/(.*)',
+        url: 'partials/user-detail.html',
+        title: 'User Detail',
         withContext: function (match, fn) {
             var email = match.routeContext[1];
             var user = fnx.findUser(email);
