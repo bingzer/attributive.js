@@ -1,47 +1,63 @@
+/**
+ * This the SPA app
+ */
 var app = {
     name: 'Todo App',
-    user: {
-        isAuthorized: false
-    },
-    loginInfo: {
-        email: 'john@example.com',
-        password: '123'
-    },
-    users: [{
-            firstName: 'John',
-            lastName: 'Doe',
-            email: 'john@example.com',
-            password: '123'
-        }, {
-            firstName: 'Jane',
-            lastName: 'Doe',
-            email: 'jane@example.com',
-            password: '456'
-        }
-    ],
-    todos: [
-
-    ],
-
-    login: function () {
-        for (var i = 0; i < app.users.length; i++) {
-            var u = app.users[i];
-            if (u.password === app.loginInfo.password && u.email === app.loginInfo.email) {
-                app.user = u;
-                app.user.isAuthorized = true;
-
-                Attv.loadElements(undefined, { forceReload: true });
-                return true;
-            }
-        }
-
-        return false;
-    },
-    logout: function () {
-        app.user = {
-            isAuthorized: false
-        };
-        
-        Attv.loadElements(undefined, { forceReload: true });
-    }
+    container: '#main-container',
+    lock: true,
+    routes: [{
+        path: '/',
+        url: 'partials/todo.html',
+        when: function() { return data.user.isAuthorized; }
+    },{
+        path: '/login',
+        url: 'partials/login.html',
+        title: 'Login',
+        when: function() { return !data.user.isAuthorized; }
+    },{
+        path: '/profile',
+        url: 'partials/profile.html',
+        title: 'Profile',
+        when: function() { return data.user.isAuthorized; }
+    },{
+        path: '/admin',
+        url: 'partials/admin.html',
+        title: 'Admin',
+        when: function() { return data.user.isAdmin; },
+        // withContext: function (match, fn) {
+        //     var context = {
+        //         usersUrl: 'partials/users.html'
+        //     };
+        //     fn(context);
+        // },
+    },{
+        match: '/users/(.*)',
+        url: 'partials/user-detail.html',
+        title: 'User Detail',
+        withContext: function (match, fn) {
+            var email = match.routeContext[1];
+            var user = fnx.findUser(email);
+            var context = { user: user };
+            fn(context);
+        },
+        when: function() { return data.user.isAdmin; }
+    },{
+        match: '/users/(.*)/todos/(.*)',
+        url: 'partials/todo-detail.html',
+        title: 'Todo Detail',
+        withContext: function (match, fn) {
+            var email = match.routeContext[1];
+            var user = fnx.findUser(email);
+            var context = { user: user };
+            fn(context);
+        },
+        when: function() { return data.user.isAdmin; }
+    },{
+        path: '/about',
+        title: 'About',
+        url: 'partials/about.html'
+    },{
+        path: '/logout',
+        fn: function () { fnx.logout() }
+    }]
 };

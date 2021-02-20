@@ -38,6 +38,13 @@ namespace Attv.Binders {
         filtered: any;
     }
 
+    /**
+     * List of available filters
+     */
+    export const filters: any = {
+        uppercase: (any: string) => any.toLocaleUpperCase(),
+        lowercase: (any: string) => any.toLowerCase()
+    };
 
     /**
      * Array expression with the word 'in'
@@ -81,7 +88,18 @@ namespace Attv.Binders {
             this.filterFn = (value?: any, context?: any) => {
                 if (prop.filterName) {
                     try {
-                        return Attv.eval$(prop.filterName, context)(value, context);
+                        let evalContext = context;
+                        if (Attv.isUndefined(evalContext)) {
+                            evalContext = {};
+                        }
+
+                        Object.keys(filters).forEach(key => {
+                            if (!evalContext[key]) {
+                                evalContext[key] = filters[key];
+                            }
+                        });
+
+                        return Attv.eval$(prop.filterName, evalContext)(value, evalContext);
                     } catch {
                         // ignore
                     }
@@ -149,7 +167,13 @@ namespace Attv.Binders {
      */
     export function evaluateExpression(expression: Expression, context?: any): any {
         // first check if it's a property statement
-        let evaluatedValue = Attv.DataModel.getProperty(expression.propertyName, context);
+        let evaluatedValue: any = undefined;
+        if (Attv.isEvaluatableStatement(expression.propertyName)) {
+            evaluatedValue = Attv.parseJsonOrElse(expression.propertyName, undefined, context);
+        } else {
+            // treat is a property name
+            evaluatedValue = Attv.DataModel.getProperty(expression.propertyName, context);
+        }
 
         // if not check see if we can execute the expression
         if (Attv.isUndefined(evaluatedValue)) {

@@ -760,7 +760,7 @@ namespace Attv {
     export namespace Ajax {
         export type AjaxMethod = 'post' | 'put' | 'delete' | 'patch' | 'get' | 'option';
 
-        export interface AjaxOptions extends LoadElementOptions {
+        export interface AjaxOptions {
             url: string;
             method?: AjaxMethod;
             data?: any;
@@ -881,6 +881,11 @@ namespace Attv {
         return any?.startsWith('(') && any?.endsWith(')');
     }
 
+    export function isEvaluatableStatement(any: string) {
+        return (any?.startsWith('{') && any?.endsWith('}')) 
+            || any?.startsWith('[') && any?.endsWith(']');
+    }
+
     export function eval$(any: string, context?: any) {
         context = context || {};
 
@@ -890,13 +895,19 @@ namespace Attv {
         // be an arrow function
         let evaluateEval = () => {
             try {
-                // Create an args definition list e.g. "arg1 = this.arg1, arg2 = this.arg2"
-                const argsStr = Object.keys(context)
-                    .map(key => `${key} = this.${key}`)
-                    .join(',');
-                const argsDef = argsStr ? `let ${argsStr};` : '';
-    
-                return eval(`${argsDef}${any}`);   
+                // If it's a string then eval right away
+                // 'this' will become the context string
+                if (Attv.isString(context)) {
+                    return eval(any);
+                } else {
+                    // Create an args definition list e.g. "arg1 = this.arg1, arg2 = this.arg2"
+                    const argsStr = Object.keys(context)
+                        .map(key => `${key} = this.${key}`)
+                        .join(',');
+                    const argsDef = argsStr ? `let ${argsStr};` : '';
+        
+                    return eval(`${argsDef}${any}`); 
+                }  
             } catch {
                 return undefined;  // return undefined whatever happened
             }
@@ -958,12 +969,9 @@ namespace Attv {
         // if string
         if (Attv.isString(any)) {
             let text = any as string;
+            
             // does it look like json object?
-            if (text?.startsWith('{') && text?.endsWith('}')) {
-                text = `(${text})`;
-            }
-            // does it look like json array?
-            if (text?.startsWith('[') && text?.endsWith(']')) {
+            if (Attv.isEvaluatableStatement(text)) {
                 text = `(${text})`;
             }
     

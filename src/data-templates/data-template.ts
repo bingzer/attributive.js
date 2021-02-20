@@ -30,6 +30,12 @@ namespace Attv {
     }
 
     export namespace DataTemplate {
+
+        export function renderTemplate(elementOrSelector: HTMLElement | string, model: any): HTMLElement {
+            let dataTemplate = Attv.getAttribute<Attv.DataTemplate>(Attv.DataTemplate.Key);
+            return dataTemplate.render(elementOrSelector, model);
+        }
+
         export class Default extends Attv.AttributeValue {
         
             constructor (attributeValue?: string) {
@@ -105,4 +111,14 @@ namespace Attv {
 Attv.register(() => new Attv.DataTemplate(), att => {
     att.map(() => new Attv.DataTemplate.Default());
     att.map(() => new Attv.DataTemplate.Script());
+
+    // register filters
+    Attv.Binders.filters.template = (selector: string, ...args: any) => {
+        return (model: any) => {
+            let element = Attv.select(selector);
+            let template = Attv.DataTemplate.renderTemplate(element, model);
+            
+            return template;
+        }
+    }
 });

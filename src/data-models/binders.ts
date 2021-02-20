@@ -57,7 +57,7 @@ namespace Attv.Binders {
         }
 
         protected bindValueToElement(dataModel: DataModel, element: HTMLElement, expression: AliasExpression, model?: any): void {
-            element.innerHTML = expression.evaluate(model).filtered || '';
+            element.attvHtml(expression.evaluate(model).filtered || '');
         }
     }
 
@@ -77,6 +77,9 @@ namespace Attv.Binders {
         protected bindValueToElement(dataModel: DataModel, table: HTMLTableElement, expression: AliasExpression, model?: any): void {
             let result = expression.evaluate(model);
 
+            if (Attv.isUndefined(result.value))
+                return;
+
             if (Array.isArray(result.value)) {
                 let array = result.filtered as any[];
                 let headers = this.parseHeaders(dataModel, table, array[0]);
@@ -93,17 +96,23 @@ namespace Attv.Binders {
             let settings = dataModel.getSettings<any>(table);
             let headers = settings?.headers as string[];
 
-            return (headers || Object.keys(any)).map<AliasExpression>(head => new AliasExpression(head));
+            let headerKeys = headers || (any && Object.keys(any));
+            if (!headerKeys)
+                return [];
+
+            return headerKeys.map<AliasExpression>(head => new AliasExpression(head));
         }
 
         private bindArrayToElement(table: HTMLTableElement, headers: AliasExpression[], array: any[]) {
+            table.attvHtml('');
+
             // -- thead
             let thead = table.createTHead();
             let tr = document.createElement('tr');
             thead.append(tr);
             headers.forEach(head => {
                 let th = document.createElement('th');
-                th.innerHTML = head.alias;
+                th.attvHtml(head.alias);
 
                 tr.append(th);
             });
@@ -115,7 +124,7 @@ namespace Attv.Binders {
                 headers.forEach(head => {
                     let td = document.createElement('td');
 
-                    td.innerHTML = head.evaluate(item).filtered;
+                    td.attvHtml(head.evaluate(item).filtered);
 
                     tr.append(td);
                 });
@@ -145,7 +154,7 @@ namespace Attv.Binders {
                 array.forEach(item => {
                     let li = element instanceof HTMLDListElement ? document.createElement('dt') : document.createElement('li');
                     let expression = this.parseItemExpression(dataModel, element, model);
-                    li.innerHTML = expression.evaluate(item).filtered;
+                    li.attvHtml(expression.evaluate(item).filtered);
 
                     element.append(li);
                 });
@@ -182,7 +191,7 @@ namespace Attv.Binders {
                     Attv.DataModel.setProperty(expression.propertyName, value, model);
 
                     // data load
-                    this.broadcast(dataModel, element, { forceReload: true });
+                    this.broadcast(dataModel, element, { forceReload: true, context: model });
                 });
             };
         }

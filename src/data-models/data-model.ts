@@ -60,8 +60,7 @@ namespace Attv {
             let propertyChilds = propertyName.split('.');
             
             for (let j = 0; j < propertyChilds.length; j++) {
-                try
-                {
+                try {
                     let child = propertyChilds[j];
                     if (child === 'this') {
                         propertyValue = propertyValue;
@@ -109,7 +108,7 @@ namespace Attv {
                         return Attv.DataModel.setProperty(propertyName, propertyValue, undefined);
                     }
                     else {
-                        Attv.log('warning', `No property ${childProperty}`, property);
+                        Attv.log('warning', `No property ${propertyName}`, property);
                     }
                 }
             }
@@ -117,7 +116,9 @@ namespace Attv {
             property[propertyChilds[len-1]] = propertyValue;
         }
 
-        private static isGlobalVariable(variableName: string, scoped?: any) {
+        private static isGlobalVariable(variableName: string, scoped?: any): boolean {
+            if (Attv.isUndefined(variableName))
+                return false;
             return !scoped?.hasOwnProperty(variableName) && Attv.globalThis$().hasOwnProperty(variableName);
         }
 

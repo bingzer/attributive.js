@@ -1,0 +1,44 @@
+<div>
+    <h3>Add/Remove your todos</h3>
+
+    <div class="container mb-4">
+        <table data-model="data.user.todos"
+          data-model-settings="{ 
+            headers: [
+              '{ user: data.user, todo: this } | template(\'#format-todo-detail\') as Title', 
+              'content as Content', 
+              'dateTime | formatDate as Time', 
+              'this | template(\'#format-delete-todo\') as Action' 
+            ] 
+          }"
+          class="table"></table>
+    </div>
+
+    <div class="todo row justify-content-center align-items-center mt-4">
+      <form class="form-horizontal col-md-6 p-5 border" onsubmit="fnx.addTodo(); return false;">
+        <h4>New Todo</h4>
+        <div class="form-group row">
+          <label for="title" class="col-sm-2 col-form-label">Title</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="title" placeholder="Title" data-model="data.newTodo.title">
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="content" class="col-sm-2 col-form-label">Content</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="content" placeholder="Content" data-model="data.newTodo.content">
+          </div>
+        </div>
+        <div class="form-group row mt-4">
+            <div class="col-sm-2">
+              <!-- empty -->
+            </div>
+            <div class="col-sm-6">
+                <button type="submit" class="btn btn-primary">Add</button>
+                <button type="reset" class="btn btn-secondary">Reset</button>
+            </div>
+        </div>
+      </form>
+    </div>
+    
+</div>

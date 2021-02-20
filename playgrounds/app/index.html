@@ -3,39 +3,39 @@
     <title>TO DO App</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
 </head>
-<body data-app="App">
+<body data-app="app">
 
 
-<header>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" aria-label="Ninth navbar example">
-        <div class="container-xl">
-          <a class="navbar-brand" href="#" data-model="app.name"></a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample07XL" aria-controls="navbarsExample07XL" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-    
-          <div class="collapse navbar-collapse" id="navbarsExample07XL" data-if="app.user.isAuthorized">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#/todo" data-partial="click" data-url="todo.html" data-target="#main-container" data-route="/todo">Todo</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#/profile" data-partial="click" data-url="profile.html" data-target="#main-container" data-route="/profile">Profile</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="javascript: app.logout()">Logout</a>
-              </li>
-            </ul>
-            <form>
-              <input class="form-control" type="text" placeholder="Search" aria-label="Search">
-            </form>
-          </div>
-        </div>
-      </nav>
-</header>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" aria-label="Ninth navbar example">
+  <div class="container-xl">
+    <a class="navbar-brand" data-model="app.name" href="#/login" data-if="!data.user.isAuthorized"></a>
+    <a class="navbar-brand" data-model="app.name" href="#/" data-if="data.user.isAuthorized"></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample07XL" aria-controls="navbarsExample07XL" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarsExample07XL">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item" data-if="data.user.isAuthorized">
+          <a class="nav-link" href="#/profile">Profile</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#/about">About</a>
+        </li>
+        <li class="nav-item" data-if="data.user.isAdmin">
+          <a class="nav-link" href="#/admin">Admin</a>
+        </li>
+        <li class="nav-item" data-if="data.user.isAuthorized">
+          <a class="nav-link" href="#/logout" data-wall="confirm" data-content="Are you sure you want to log out?">Logout</a>
+        </li>
+      </ul>
+      
+    </div>
+  </div>
+</nav>
 
 <main id="main">
-    <div id="main-container" class="container" data-partial="nonce" data-url="login.html">
+    <div id="main-container" class="container" data-partial="nonce" data-url="partials/login.html">
         <!-- Container Here -->
     </div>
 </main>
@@ -52,5 +52,46 @@
 <script type="text/javascript" src="/build/data-spinners.js"></script>
 <script type="text/javascript" src="/build/data-apps.js"></script>
 <script type="text/javascript" src="app.js"></script>
+<script type="text/javascript" src="data.js"></script>
+<script type="text/javascript" src="functions.js"></script>
+
+<script type="text/html" data-template="script" id="format-email">
+  <a data-attrs="{ 
+    href: 'mailto:' + this
+  }" data-model="this"></a>
+</script>
+
+<script type="text/html" data-template="script" id="format-todo-detail">
+  <a data-attrs="{ 
+    href: '#/users/' + user.email + '/todos/' + todo.id
+  }" data-model="todo.title"></a>
+</script>
+
+<script type="text/html" data-template="script" id="format-delete-user">
+
+  <button type="button" 
+    class="btn btn-danger" 
+    data-attrs="{ 
+      onclick: 'fnx.deleteUser(\'' + this.email + '\')', 
+      data_content: 'Are you sure you want to delete ' + this.email + '?', 
+      disabled: email === data.user.email,
+      title: email === data.user.email ? 'Current User' : 'Delete this user'
+    }" 
+    data-wall="confirm">Delete</button>
+
+  <a class="btn btn-secondary" data-attrs="{ href: '#/users/' + this.email }">Edit</a>
+
+</script>
+
+<script type="text/html" data-template="script" id="format-delete-todo">
+  <button type="button" 
+    class="btn btn-danger" 
+    data-attrs="{ 
+      onclick: 'fnx.deleteTodo(\'' + this.id + '\')', 
+      data_content: 'Are you sure you want to delete ' + this.title + '?' 
+    }" 
+    data-wall="confirm">Delete</button>
+</script>
+
 </body>
 </html>
