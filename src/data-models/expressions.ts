@@ -39,11 +39,24 @@ namespace Attv.Expressions {
         filtered: any;
     }
 
+    /**
+     * A filter object
+     */
     export interface Filter {
         /**
-         * Optional additional property
+         * Optional additional function that returns a string
          */
-        [key: string]: any;
+        [key: string]: (any: string) => string;
+
+        /**
+         * To uppercase
+         */
+        uppercase: (any: string) => string;
+
+        /**
+         * To lower case
+         */
+        lowercase: (any: string) => string;
     }
 
     /**
