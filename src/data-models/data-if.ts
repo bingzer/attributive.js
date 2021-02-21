@@ -7,7 +7,7 @@ namespace Attv.DataIf {
             let expression = this.attribute.raw(element);
             let aliasExpression = new Attv.Expressions.AliasExpression(expression);
             
-            let value = aliasExpression.evaluate(options.context);
+            let value = aliasExpression.evaluate(options?.context);
             if (value?.filtered) {
                 element.attvShow();
             } else {
