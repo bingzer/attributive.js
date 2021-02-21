@@ -59,6 +59,12 @@ namespace Attv {
          * This property is used by other attribute to compare context when loading elements.
          */
         contextId?: string;
+
+        /**
+         * Optional context argument that will be serialized to Attv.eval$() or Attv.parseJsonOrElse()
+         * if those functions are being called
+         */
+        contextArg?: any;
     }
 
     /**
@@ -178,8 +184,10 @@ namespace Attv {
         /**
          * Returns the parsed object from raw()
          * @param element the element
+         * @param context the context
+         * @param arg optional additional arguemnt
          */
-        parseRaw<TAny>(element: HTMLElement, context?: any): TAny {
+        parseRaw<TAny>(element: HTMLElement, context?: any, arg?: any): TAny {
             let raw = this.raw(element);
 
             let escapeQuote = (raw: string): string => {
@@ -205,11 +213,11 @@ namespace Attv {
                     return Attv.select(raw) as any;
                 }
                 case "<jsExpression>":
-                    return Attv.eval$(raw, context) as any;
+                    return Attv.eval$(raw, context, arg) as any;
                 case "<json>":
                     raw = escapeQuote(raw);
                 default:
-                    return Attv.parseJsonOrElse(raw, undefined, context) as TAny;
+                    return Attv.parseJsonOrElse(raw, undefined, context, arg) as TAny;
             }
         }
 
@@ -902,7 +910,13 @@ namespace Attv {
             || any?.startsWith('[') && any?.endsWith(']');
     }
 
-    export function eval$(any: string, context?: any) {
+    /**
+     * Evaluate any code within context optinally with additional argument object
+     * @param any Any script/code to execute
+     * @param context will be the 'this' object
+     * @param arg Additional arguments
+     */
+    export function eval$(any: string, context?: any, arg?: any) {
         context = context || {};
 
         // credit to: https://gist.github.com/softwarespot/76252a838efdcace2df1f9c724e37351
@@ -917,19 +931,39 @@ namespace Attv {
                     return eval(any);
                 } else {
                     // Create an args definition list e.g. "arg1 = this.arg1, arg2 = this.arg2"
-                    const argsStr = Object.keys(context)
+                    const contextString = Object.keys(context)
                         .map(key => `${key} = this.${key}`)
                         .join(',');
-                    const argsDef = argsStr ? `let ${argsStr};` : '';
-        
-                    return eval(`${argsDef}${any}`); 
+                        
+                    const argsDef = (contextString ? `let ${contextString};` : '');// + 
+                                    //(argString ? `let ${argString};` : '');
+
+                    const statement = `${argsDef}${any}`;
+                                    
+                    const result = eval(statement); 
+                    return result;
                 }  
             } catch {
                 return undefined;  // return undefined whatever happened
             }
         };
+
+        let props = [];
+        Object.keys(arg || {}).forEach(key => {
+            if (Attv.isUndefined(context[key])) {
+                context[key] = arg[key];
+                props.push(key);
+            }
+        });
         
-        return evaluateEval.call(context);
+        let result = evaluateEval.call(context);
+
+        // remove props
+        props.forEach(key => {
+            delete context[key];
+        });
+
+        return result;
     }
 
     export function globalThis$() {
@@ -972,7 +1006,7 @@ namespace Attv {
         return [].slice.call(any) as TAny[];
     }
 
-    export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any, context?: any): TAny {  
+    export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any, context?: any, arg?: any): TAny {  
         // Fixed boolean attribute names
         if (any === 'false' || any === 'true') {
             return (any === 'true') as any;
@@ -994,7 +1028,7 @@ namespace Attv {
             // json ex: ({ name: 'value' }). so we just 
             if (Attv.isEvaluatable(text)) {
                 //do eval
-                any = Attv.eval$(text, context);
+                any = Attv.eval$(text, context, arg);
             }
         }
 

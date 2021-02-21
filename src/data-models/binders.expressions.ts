@@ -17,8 +17,9 @@ namespace Attv.Binders {
         /**
          * Evalue this expression and returns the 'result'
          * @param context context object (optional) to evaluate this expression against
+         * @param arg additional object to evaluate
          */
-        evaluate(context?: any): any;
+        evaluate(context?: any, arg?: any): any;
     }
 
     /**
@@ -63,8 +64,8 @@ namespace Attv.Binders {
          * Evaluate propertyName against context
          * @param context the context object
          */
-        evaluate<TAny>(context?: any): TAny[] {
-            let evaluatedValue = Binders.evaluateExpression(this, context);
+        evaluate<TAny>(context?: any, arg?: any): TAny[] {
+            let evaluatedValue = Binders.evaluateExpression(this, context, arg);
 
             return evaluatedValue || [];
         }
@@ -113,7 +114,7 @@ namespace Attv.Binders {
          * Evaluate propertyName against context
          * @param context the context object
          */
-        evaluate(context?: any): AliasValue {
+        evaluate(context?: any, arg?: any): AliasValue {
             let value: any;
             let filteredValue: any;
             
@@ -122,7 +123,7 @@ namespace Attv.Binders {
                 filteredValue = context;
             }
             else {
-                value = Binders.evaluateExpression(this, context);
+                value = Binders.evaluateExpression(this, context, arg);
                 filteredValue = this.filterFn(value, context) || value;
             }
 
@@ -164,12 +165,13 @@ namespace Attv.Binders {
      * Evaluate any expression
      * @param expression expression to evalue
      * @param context context
+     * @param arg additional argument object
      */
-    export function evaluateExpression(expression: Expression, context?: any): any {
+    export function evaluateExpression(expression: Expression, context?: any, arg?: any): any {
         // first check if it's a property statement
         let evaluatedValue: any = undefined;
         if (Attv.isEvaluatableStatement(expression.propertyName)) {
-            evaluatedValue = Attv.parseJsonOrElse(expression.propertyName, undefined, context);
+            evaluatedValue = Attv.parseJsonOrElse(expression.propertyName, undefined, context, arg);
         } else {
             // treat is a property name
             evaluatedValue = Attv.DataModel.getProperty(expression.propertyName, context);
@@ -183,7 +185,7 @@ namespace Attv.Binders {
             }
 
             // try parse
-            let parsed = Attv.parseJsonOrElse(parsedExpression, undefined, context);
+            let parsed = Attv.parseJsonOrElse(parsedExpression, undefined, context, arg);
 
             // if it's not a string then it is an expression
             if (!Attv.isString(parsed) && Attv.isDefined(parsed)) {

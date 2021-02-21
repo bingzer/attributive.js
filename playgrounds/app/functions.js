@@ -43,7 +43,8 @@ var fnx = {
         Attv.loadElements(undefined, { forceReload: true });
     },
 
-    deleteTodo: function (id, user) {
+    deleteTodo: function (id, email) {
+        var user = this.findUser(email);
         user.todos.splice(id, 1);
         
         Attv.loadElements(undefined, { forceReload: true });
