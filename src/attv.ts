@@ -59,12 +59,6 @@ namespace Attv {
          * This property is used by other attribute to compare context when loading elements.
          */
         contextId?: string;
-
-        /**
-         * Optional context argument that will be serialized to Attv.eval$() or Attv.parseJsonOrElse()
-         * if those functions are being called
-         */
-        contextArg?: any;
     }
 
     /**
@@ -849,13 +843,8 @@ namespace Attv {
                 }
             }
     
-            return Object.keys(any)
-                    .sort()
-                    .map(key => {
-                        return window.encodeURIComponent(key)
-                            + '='
-                            + window.encodeURIComponent(any[key]);
-                    })
+            return Object.keys(any).sort()
+                    .map(key => `${window.encodeURIComponent(key)}=${window.encodeURIComponent(any[key])}`)
                     .join('&');
         }
     }
@@ -889,6 +878,10 @@ namespace Attv {
         return typeof(any) === expectedType;
     }
 
+    /**
+     * Concat multiple 'defined' array. If any of the array is undefined, it will get skipped
+     * @param arrays array to concat
+     */
     export function concatArrays(...arrays: any[][]): any[] {
         let target = [];
         for (let i = 0; i < arrays.length; i++) {
@@ -899,6 +892,40 @@ namespace Attv {
         }
 
         return target;
+    }
+
+    /**
+     * Concat properties from 'from' to 'to' objects
+     * @param from object to get the properties from
+     * @param to object to put the extra properties to
+     * @param replacing replace the existing property on 'to' object if this is true
+     * @param tempFn If defined, the concatenation is temporary until tempFn() is called
+     */
+    export function concatObject(from: any, to: any, replacing: boolean = false, tempFn?: () => void) {
+        let replace = (from: any, to: any, key: string, props?: string[]) => {
+            if (!replacing || !to[key]) {
+                to[key] = from[key];
+                props?.push(key);
+            }
+        }
+
+        if (tempFn) {
+            let props = [];
+
+            Object.keys(from).forEach(key => replace(from, to, key, props));
+
+            try {
+                tempFn();
+            } catch (e) {
+                Attv.log('fatal', e);
+            }
+
+            // remove props
+            props.forEach(key => delete from[key]);
+
+        } else {
+            Object.keys(from).forEach(key => replace(from, to, key));
+        }
     }
 
     export function isEvaluatable(any: string) {
@@ -948,22 +975,45 @@ namespace Attv {
             }
         };
 
-        let props = [];
-        Object.keys(arg || {}).forEach(key => {
-            if (Attv.isUndefined(context[key])) {
-                context[key] = arg[key];
-                props.push(key);
-            }
-        });
-        
-        let result = evaluateEval.call(context);
+        let result = undefined;
 
-        // remove props
-        props.forEach(key => {
-            delete context[key];
+        Attv.concatObject(arg || {}, context, false, () => {
+            result = evaluateEval.call(context);
         });
 
         return result;
+    }
+
+    export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any, context?: any, arg?: any): TAny {  
+        // Fixed boolean attribute names
+        if (any === 'false' || any === 'true') {
+            return (any === 'true') as any;
+        }
+        // Fixed boolean actual type
+        if (any === false || any === true) {
+            return (any === true) as any;
+        }
+
+        // if string
+        if (Attv.isString(any)) {
+            let text = any as string;
+            
+            // does it look like json object?
+            if (Attv.isEvaluatableStatement(text)) {
+                text = `(${text})`;
+            }
+    
+            // json ex: ({ name: 'value' }). so we just 
+            if (Attv.isEvaluatable(text)) {
+                //do eval
+                any = Attv.eval$(text, context, arg);
+            }
+        }
+
+        if (Attv.isUndefined(any))
+            return orDefault;
+
+        return any as TAny;
     }
 
     export function globalThis$() {
@@ -1004,38 +1054,6 @@ namespace Attv {
 
     export function toArray<TAny>(any: any): TAny[] {
         return [].slice.call(any) as TAny[];
-    }
-
-    export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any, context?: any, arg?: any): TAny {  
-        // Fixed boolean attribute names
-        if (any === 'false' || any === 'true') {
-            return (any === 'true') as any;
-        }
-        // Fixed boolean actual type
-        if (any === false || any === true) {
-            return (any === true) as any;
-        }
-
-        // if string
-        if (Attv.isString(any)) {
-            let text = any as string;
-            
-            // does it look like json object?
-            if (Attv.isEvaluatableStatement(text)) {
-                text = `(${text})`;
-            }
-    
-            // json ex: ({ name: 'value' }). so we just 
-            if (Attv.isEvaluatable(text)) {
-                //do eval
-                any = Attv.eval$(text, context, arg);
-            }
-        }
-
-        if (Attv.isUndefined(any))
-            return orDefault;
-
-        return any as TAny;
     }
 
     export function generateElementId(attributeId: string) {

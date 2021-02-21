@@ -42,7 +42,7 @@ namespace Attv.Binders {
     /**
      * List of available filters
      */
-    export const filters: any = {
+    export const filters: object = {
         uppercase: (any: string) => any.toLocaleUpperCase(),
         lowercase: (any: string) => any.toLowerCase()
     };
@@ -77,7 +77,7 @@ namespace Attv.Binders {
     export class AliasExpression implements Expression {
         readonly alias: string;
         readonly propertyName: string;
-        readonly filterFn: (value?: any, context?: any) => string;
+        readonly filterFn: (value?: any, context?: any, arg?: any) => string;
 
         constructor(public readonly expression: string) {
             let split = expression?.split(" as ");
@@ -86,24 +86,15 @@ namespace Attv.Binders {
             this.propertyName = prop.propertyName;
             this.alias = this.cleanString((split[1] || this.propertyName)?.trim());
 
-            this.filterFn = (value?: any, context?: any) => {
+            this.filterFn = (value?: any, context?: any, arg?: any) => {
                 if (prop.filterName) {
-                    try {
-                        let evalContext = context;
-                        if (Attv.isUndefined(evalContext)) {
-                            evalContext = {};
-                        }
+                    let result = undefined;
 
-                        Object.keys(filters).forEach(key => {
-                            if (!evalContext[key]) {
-                                evalContext[key] = filters[key];
-                            }
-                        });
-
-                        return Attv.eval$(prop.filterName, evalContext)(value, evalContext);
-                    } catch {
-                        // ignore
-                    }
+                    Attv.concatObject(filters, arg || {}, false, () => {
+                        result = Attv.eval$(prop.filterName, context, arg)(value, context, arg);
+                    });
+                    
+                    return result;
                 }
                     
                 return value;
@@ -124,7 +115,7 @@ namespace Attv.Binders {
             }
             else {
                 value = Binders.evaluateExpression(this, context, arg);
-                filteredValue = this.filterFn(value, context) || value;
+                filteredValue = this.filterFn(value, context, arg) || value;
             }
 
             return {

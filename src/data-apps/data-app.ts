@@ -31,7 +31,7 @@ namespace Attv.DataApp {
                     if (!app[key]) {
                         app[key] = settings[key];
                     }
-                })
+                });
             }
 
             return app;
