@@ -46,7 +46,7 @@ namespace Attv.Expressions {
         /**
          * Optional additional function that returns a string
          */
-        [key: string]: (any: string) => string;
+        [key: string]: (any: any) => any;
 
         /**
          * To uppercase
@@ -189,7 +189,7 @@ namespace Attv.Expressions {
             evaluatedValue = Attv.parseJsonOrElse(expression.propertyName, undefined, context, arg);
         } else {
             // treat is a property name
-            evaluatedValue = Attv.DataModel.getProperty(expression.propertyName, context);
+            evaluatedValue = Attv.Expressions.getProperty(expression.propertyName, context);
         }
 
         // if not check see if we can execute the expression
@@ -211,5 +211,81 @@ namespace Attv.Expressions {
         evaluatedValue = Attv.isDefined(evaluatedValue) ? evaluatedValue : undefined;
 
         return evaluatedValue;
+    }
+        
+    /**
+     * Returns a property of an object
+     * @param model the object
+     * @param propertyName the property name
+     */
+    export function getProperty(propertyName: string, model?: any): any {
+        if (!model) {
+            model = Attv.globalThis$();
+        }
+
+        let propertyValue = model;
+        let propertyChilds = propertyName.split('.');
+        
+        for (let j = 0; j < propertyChilds.length; j++) {
+            try {
+                let child = propertyChilds[j];
+                if (child === 'this') {
+                    propertyValue = propertyValue;
+                } else {
+                    // see if the propertyName is a global variable
+                    if (j == 0 && isGlobalVariable(child, propertyValue)) {
+                        propertyValue = Attv.globalThis$()[child];
+                    }
+                    else {
+                        propertyValue = propertyValue[child];
+                    }
+                }
+            }
+            catch (e) {
+                propertyValue = undefined;
+                break;
+            }
+        }
+
+        return Attv.parseJsonOrElse(propertyValue);
+    }
+
+    /**
+     * Sets a property in an object
+     * @param model the object
+     * @param propertyName the property name
+     * @param propertyValue the property value
+     */
+    export function setProperty(propertyName: string, propertyValue: any, model: any) {
+        if (!model) {
+            model = Attv.globalThis$();
+        }
+
+        let property = model;
+        let propertyChilds = propertyName.split('.');
+        
+        let len = propertyChilds.length;
+        for (let j = 0; j < len - 1; j++) {
+            let childProperty = propertyChilds[j];
+            property = property[childProperty];
+
+            // throw warning
+            if (Attv.isUndefined(property)) {
+                if (isGlobalVariable(property)) {
+                    return Attv.Expressions.setProperty(propertyName, propertyValue, undefined);
+                }
+                else {
+                    Attv.log('warning', `No property ${propertyName}`, property);
+                }
+            }
+        }
+
+        property[propertyChilds[len-1]] = propertyValue;
+    }
+
+    function isGlobalVariable(variableName: string, scoped?: any): boolean {
+        if (Attv.isUndefined(variableName))
+            return false;
+        return !scoped?.hasOwnProperty(variableName) && Attv.globalThis$().hasOwnProperty(variableName);
     }
 }
