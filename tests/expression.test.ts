@@ -1,5 +1,5 @@
-/// <reference path="../../src/attv.ts" />
-/// <reference path="../../src/data-models/expressions.ts" />
+/// <reference path="../src/attv.ts" />
+/// <reference path="../src/expressions.ts" />
 // ------------------------------------------------- //
 
 describe("Attv.Expressions", () => {
@@ -58,7 +58,7 @@ describe("Attv.Expressions.AliasExpression", () => {
 
 });
 
-describe("Attv.Binders.ArrayExpression", () => {
+describe("Attv.Expressions.ArrayExpression", () => {
     it('Should declared its global variables', () => {
         expect(Attv.Expressions.ArrayExpression).toBeDefined();
     });
@@ -92,4 +92,98 @@ describe("Attv.Binders.ArrayExpression", () => {
         expect(expected.length).toEqual(2);
     });
 
+});
+
+describe("Attv.Expressions.getProperty()", () => {
+    
+    it('getProperty() should get property from global', () => {
+        let property = Attv.Expressions.getProperty('this');
+
+        expect(property).toBeDefined();
+    });
+
+    it('getProperty() should get property from model', () => {
+        let context = { employee: { firstName: "ricky" } };
+
+        let property = Attv.Expressions.getProperty('employee.firstName', context);
+
+        expect(property).toEqual('ricky');
+    });
+
+    it('getProperty() should get property from model #2', () => {
+        let context = { employee: { firstName: "ricky", data: { key: 'pad' } } };
+
+        let property = Attv.Expressions.getProperty('employee.data.key', context);
+
+        expect(property).toEqual('pad');
+    });
+
+    it('getProperty() should get property from model (boolean)', () => {
+        let context = { employee: { firstName: "ricky", wantsCandy: true } };
+
+        let property = Attv.Expressions.getProperty('employee.wantsCandy', context);
+
+        expect(property).toEqual(true);
+    });
+
+    it('getProperty() should get property from model (number)', () => {
+        let context = { employee: { firstName: "ricky", age: 280 } };
+
+        let property = Attv.Expressions.getProperty('employee.age', context);
+
+        expect(property).toEqual(280);
+    });
+});
+
+describe("Attv.Expressions.setProperty", () => {
+
+
+    it('setProperty() should get property (using model)', () => {
+        let context = { employee: { firstName: "ricky", age: 280 } };
+
+        Attv.Expressions.setProperty('employee.age', 30, context);
+
+        expect(context.employee.age).toEqual(30);
+    });
+
+    it('setProperty() should get property (using model #2)', () => {
+        let context = { employee: { firstName: "ricky", age: 280, data: { key: 'pad' } } };
+
+        Attv.Expressions.setProperty('employee.data.key', 'board', context);
+
+        expect(context.employee.data.key).toEqual("board");
+    });
+});
+
+describe("Attv.Expressions.isGlobal", () => {
+
+    it('isGlobal() should return true', () => {
+        let global = Attv.globalThis$();
+        global["foo"] = "bar";
+        
+        expect(Attv.Expressions.isGlobal("foo")).toBeTrue();
+
+        delete global["foo"];
+    });
+
+    it('isGlobal() should return false', () => {
+        let global = Attv.globalThis$();
+        
+        expect(Attv.Expressions.isGlobal("foo")).toBeFalse();
+
+        delete global["foo"];
+    });
+
+    it('isGlobal() should return false (because it exists in the scoped object)', () => {
+        let global = Attv.globalThis$();
+        global["foo"] = "bar";
+
+        let scopedObject = {
+            foo: "bar"
+        };
+        
+        expect(Attv.Expressions.isGlobal("foo", scopedObject)).toBeFalse();
+
+        delete global["foo"];
+    });
 });

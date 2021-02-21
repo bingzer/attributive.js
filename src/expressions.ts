@@ -233,7 +233,7 @@ namespace Attv.Expressions {
                     propertyValue = propertyValue;
                 } else {
                     // see if the propertyName is a global variable
-                    if (j == 0 && isGlobalVariable(child, propertyValue)) {
+                    if (j == 0 && isGlobal(child, propertyValue)) {
                         propertyValue = Attv.globalThis$()[child];
                     }
                     else {
@@ -271,7 +271,7 @@ namespace Attv.Expressions {
 
             // throw warning
             if (Attv.isUndefined(property)) {
-                if (isGlobalVariable(property)) {
+                if (isGlobal(property)) {
                     return Attv.Expressions.setProperty(propertyName, propertyValue, undefined);
                 }
                 else {
@@ -283,9 +283,32 @@ namespace Attv.Expressions {
         property[propertyChilds[len-1]] = propertyValue;
     }
 
-    function isGlobalVariable(variableName: string, scoped?: any): boolean {
-        if (Attv.isUndefined(variableName))
+    /**
+     * Checks to see if property name is part of a global context
+     * @param propertyName variable name to check
+     * @param scoped optionally object to check if propertyName actually belongs the scoped object
+     */
+    export function isGlobal(propertyName: string, scoped?: any): boolean {
+        if (Attv.isUndefined(propertyName))
             return false;
-        return !scoped?.hasOwnProperty(variableName) && Attv.globalThis$().hasOwnProperty(variableName);
+        return !scoped?.hasOwnProperty(propertyName) && Attv.globalThis$().hasOwnProperty(propertyName);
+    }
+
+    /**
+     * TODO: needs to refactor
+     * @param any 
+     */
+    export function escapeQuote(any: string): string {
+        if (!any)
+            return any;
+
+        const regex = /([`])(?:(?=(\\?))\2.)*?\1/gi;
+        let match = any.match(regex);
+        match?.forEach(match => {
+            let replacement = match.replace('`', "\\'\' + ").replace('`', " + \'\\'");
+            any = any.replace(match, replacement);
+        });
+        
+        return any;
     }
 }
