@@ -63,8 +63,8 @@ namespace Attv {
             
             load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
                 let dataModel = this.attribute as DataModel;
-                let binderId = options.contextId;
-                return dataModel.bindTo(element, options.context, binderId);
+                let binderId = options?.contextId;
+                return dataModel.bindTo(element, options?.context, binderId);
             }
         }
     }

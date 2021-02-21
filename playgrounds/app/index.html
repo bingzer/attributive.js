@@ -40,19 +40,23 @@
     </div>
 </main>
 
+<div data-partial="nonce" data-url="partials/templates.html"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="/dist/attv.min.js"></script>
+
+<!-- 
+  <script type="text/javascript" src="/dist/attv.min.js"></script>
 <script type="text/javascript" src="/dist/data-attributes.min.js"></script>
 <script type="text/javascript" src="/dist/data-models.min.js"></script>
 <script type="text/javascript" src="/dist/data-templates.min.js"></script>
 <script type="text/javascript" src="/dist/data-partials.min.js"></script>
 <script type="text/javascript" src="/dist/data-walls.min.js"></script>
 <script type="text/javascript" src="/dist/data-spinners.min.js"></script>
-<script type="text/javascript" src="/dist/data-apps.min.js"></script>
+<script type="text/javascript" src="/dist/data-apps.min.js"></script> 
+-->
 
-<!-- 
+
 <script type="text/javascript" src="/build/attv.js"></script>
 <script type="text/javascript" src="/build/data-attributes.js"></script>
 <script type="text/javascript" src="/build/data-models.js"></script>
@@ -61,44 +65,11 @@
 <script type="text/javascript" src="/build/data-walls.js"></script>
 <script type="text/javascript" src="/build/data-spinners.js"></script>
 <script type="text/javascript" src="/build/data-apps.js"></script>
- -->
+
 <script type="text/javascript" src="app.js"></script>
 <script type="text/javascript" src="data.js"></script>
 <script type="text/javascript" src="functions.js"></script>
 
-<script type="text/html" data-template="script" id="format-email">
-  <a data-attrs="{ href: 'mailto: ${this}' }" data-model="this"></a>
-</script>
-
-<script type="text/html" data-template="script" id="format-todo-detail">
-  <a data-attrs="{ href: '#/users/${user.email}/todos/${todo.id}' }" data-model="todo.title"></a>
-</script>
-
-<script type="text/html" data-template="script" id="format-delete-user">
-
-  <button type="button" 
-    class="btn btn-danger" 
-    data-attrs="{ 
-      onclick: 'fnx.deleteUser(`${this.email}`)', 
-      data_content: 'Are you sure you want to delete ${this.email}?', 
-      disabled: email === data.user.email,
-      title: email === data.user.email ? 'Current User' : 'Delete this user'
-    }" 
-    data-wall="confirm">Delete</button>
-
-  <a class="btn btn-secondary" data-attrs="{ href: '#/users/' + this.email }">Edit</a>
-
-</script>
-
-<script type="text/html" data-template="script" id="format-delete-todo">
-  <button type="button" 
-    class="btn btn-danger" 
-    data-attrs="{ 
-      onclick: 'fnx.deleteTodo(`${todo.id}`, `${user.email}`)', 
-      data_content: 'Are you sure you want to delete ${todo.title}?' 
-    }" 
-    data-wall="confirm">Delete</button>
-</script>
 
 </body>
 </html>

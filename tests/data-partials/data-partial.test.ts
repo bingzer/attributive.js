@@ -77,3 +77,17 @@ describe("Attv.DataPartial.Click", () => {
         expect(valType.options.indexOf(Attv.DataTarget.Key)).toBeGreaterThanOrEqual(0);
     });
 });
+
+describe("Attv.DataPartial.Nonce", () => {
+    it('Should declared its global variables', () => {
+        expect(Attv.DataPartial.Nonce).toBeDefined();
+    });
+
+    it("should create an instance of DataPartial.Nonce", () => {
+        let value = new Attv.DataPartial.Nonce();
+
+        let valType = value.validators.filter(val => val.name === Attv.Validators.NeedAttrKeys)[0] as Attv.Validators.ValidatingObj;
+        expect(valType).toBeDefined();
+        expect(valType.options.indexOf(Attv.DataUrl.Key)).toBeGreaterThanOrEqual(0);
+    });
+});

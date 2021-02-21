@@ -130,7 +130,7 @@ namespace Attv {
             }
 
             load(element: HTMLElement, options?: PartialOptions): BooleanOrVoid {
-                this.render(element, options.context);
+                this.render(element, options?.context);
 
                 return true;
             }
@@ -172,12 +172,14 @@ namespace Attv {
             }
 
             load(element: HTMLElement, options?: PartialOptions): BooleanOrVoid {
-                this.render(element, options.context);
+                this.render(element, options?.context);
 
                 // remove data partial
                 element.removeAttribute(this.attribute.name);
+                element.removeAttribute(this.attribute.loadedName());
+                element.removeAttribute(this.attribute.settingsName());
 
-                return true;
+                return false;
             }
         }
 

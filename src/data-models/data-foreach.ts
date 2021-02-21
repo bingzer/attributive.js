@@ -25,7 +25,7 @@ namespace Attv.DataForEach {
                 });
             }
 
-            let expression = this.parseExpression(element, options.context);
+            let expression = this.parseExpression(element, options?.context);
             expression.array.forEach(item => {
                 let context = {};
                 context[expression.name] = item;
