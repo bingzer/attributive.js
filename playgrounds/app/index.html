@@ -56,15 +56,11 @@
 <script type="text/javascript" src="functions.js"></script>
 
 <script type="text/html" data-template="script" id="format-email">
-  <a data-attrs="{ 
-    href: 'mailto:' + this
-  }" data-model="this"></a>
+  <a data-attrs="{ href: 'mailto: ${this}' }" data-model="this"></a>
 </script>
 
 <script type="text/html" data-template="script" id="format-todo-detail">
-  <a data-attrs="{ 
-    href: '#/users/' + user.email + '/todos/' + todo.id
-  }" data-model="todo.title"></a>
+  <a data-attrs="{ href: '#/users/${user.email}/todos/${todo.id}' }" data-model="todo.title"></a>
 </script>
 
 <script type="text/html" data-template="script" id="format-delete-user">
@@ -87,7 +83,7 @@
   <button type="button" 
     class="btn btn-danger" 
     data-attrs="{ 
-      onclick: 'fnx.deleteTodo(\'${todo.id}\', \'${user.email}\')', 
+      onclick: 'fnx.deleteTodo(`${todo.id}`, `${user.email}`)', 
       data_content: 'Are you sure you want to delete ${todo.title}?' 
     }" 
     data-wall="confirm">Delete</button>
