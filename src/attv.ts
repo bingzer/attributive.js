@@ -903,7 +903,7 @@ namespace Attv {
      */
     export function concatObject(from: any, to: any, replacing: boolean = false, tempFn?: () => void) {
         let replace = (from: any, to: any, key: string, props?: string[]) => {
-            if (!replacing || !to[key]) {
+            if (replacing || Attv.isUndefined(to[key])) {
                 to[key] = from[key];
                 props?.push(key);
             }
@@ -921,7 +921,7 @@ namespace Attv {
             }
 
             // remove props
-            props.forEach(key => delete from[key]);
+            props.forEach(key => delete to[key]);
 
         } else {
             Object.keys(from).forEach(key => replace(from, to, key));
@@ -1056,10 +1056,14 @@ namespace Attv {
         return [].slice.call(any) as TAny[];
     }
 
-    export function generateElementId(attributeId: string) {
-        attributeId = attributeId.camelCaseToDash();
+    /**
+     * Generates an id
+     * @param prefix prefix of the id
+     */
+    export function generateId(prefix: string) {
+        prefix = prefix.camelCaseToDash();
         idCounter++;
-        return attributeId + '-' + idCounter;
+        return prefix + '-' + idCounter;
     }
 
     export function log(...data: any[]) {

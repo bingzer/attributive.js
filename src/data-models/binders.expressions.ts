@@ -89,9 +89,13 @@ namespace Attv.Binders {
             this.filterFn = (value?: any, context?: any, arg?: any) => {
                 if (prop.filterName) {
                     let result = undefined;
+                    let argx = arg || {};
 
-                    Attv.concatObject(filters, arg || {}, false, () => {
-                        result = Attv.eval$(prop.filterName, context, arg)(value, context, arg);
+                    Attv.concatObject(filters, argx, false, () => {
+                        let evalFn = Attv.eval$(prop.filterName, context, argx);
+                        if (Attv.isUndefined(evalFn))
+                            throw new Error('Not a function: ' + prop.filterName);
+                        result = evalFn(value, context, argx);
                     });
                     
                     return result;

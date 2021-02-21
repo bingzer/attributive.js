@@ -25,7 +25,7 @@ var data = {
             password: '123',
             isAdmin: true,
             todos: [{
-                id: 0,
+                id: 'todo-sample',
                 title: 'This is the admin',
                 content: 'Hello',
                 dateTime: Date.now(),

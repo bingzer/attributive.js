@@ -236,8 +236,8 @@ describe('Attv functions', () => {
     describe('Attv.generateElementId()', () => {
 
         it('Should generate unique ids', () => {
-            let id1 = Attv.generateElementId('attv');
-            let id2 = Attv.generateElementId('attv');
+            let id1 = Attv.generateId('attv');
+            let id2 = Attv.generateId('attv');
     
             expect(id1 !== id2).toBeTrue();
         });
