@@ -108,7 +108,7 @@ namespace Attv.DataApp {
          */
         export function matches(route: Route): RouteMatch {
             let hash = Routes.cleanHash(route.path || route.match);
-            let locationRoute = Routes.getLocationRoute();
+            let locationRoute = Routes.currentHash();
             let isMatch = route.isDefault;
             let context = undefined;
 
@@ -143,7 +143,7 @@ namespace Attv.DataApp {
             return Routes.cleanHash(result);
         }
 
-        export function getLocationRoute(): string {
+        export function currentHash(): string {
             return Routes.cleanHash(window.location.hash);
         }
 

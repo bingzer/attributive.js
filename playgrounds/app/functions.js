@@ -47,7 +47,7 @@ var fnx = {
         var user = this.findUser(email);
         user.todos.splice(id, 1);
         
-        Attv.loadElements(undefined, { forceReload: true });
+        Attv.DataApp.refresh();
     },
 
     findUser: function (email, password) {
