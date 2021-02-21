@@ -295,19 +295,36 @@ namespace Attv.Expressions {
     }
 
     /**
-     * TODO: needs to refactor
+     * Escape single quote and extract variable using ${} or `
      * @param any 
      */
     export function escapeQuote(any: string): string {
         if (!any)
             return any;
 
-        const regex = /([`])(?:(?=(\\?))\2.)*?\1/gi;
-        let match = any.match(regex);
-        match?.forEach(match => {
-            let replacement = match.replace('`', "\\'\' + ").replace('`', " + \'\\'");
-            any = any.replace(match, replacement);
-        });
+        let escapeVar = (text: string) => {
+            const regex = /(\$\{.*?\})/gi;
+            let match = text.match(regex);
+            match?.forEach(match => {
+                let replacement = match.replace('${', "\' + ").replace('}', " + \'");
+                text = text.replace(match, replacement);
+            });
+
+            return text;
+        };
+
+        let escapeTick = (text: string) => {
+            const regex = /([`])(?:(?=(\\?))\2.)*?\1/gi;
+            let match = text.match(regex);
+            match?.forEach(match => {
+                let replacement = match.replace('`', "\\'").replace('`', "\\'");
+                text = text.replace(match, replacement);
+            });
+
+            return text;
+        };
+
+        any = escapeVar(escapeTick(any));
         
         return any;
     }

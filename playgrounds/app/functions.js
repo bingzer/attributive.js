@@ -67,9 +67,9 @@ var fnx = {
 
 
 // register filters
-Attv.Binders.filters.formatDate = function (date) {
+Attv.Expressions.filters.formatDate = function (date) {
     return new Date(date).toLocaleString()
 };
-Attv.Binders.filters.fullname = function (user) {
+Attv.Expressions.filters.fullname = function (user) {
     return user.firstName + " " + user.lastName;
 };

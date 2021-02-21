@@ -187,3 +187,65 @@ describe("Attv.Expressions.isGlobal", () => {
         delete global["foo"];
     });
 });
+
+
+
+describe("Attv.Expressions.escapeQuote", () => {
+
+    it('Should escape properly (variant #1)', () => {
+        let expression = "${foo}";
+
+        let expected = Attv.Expressions.escapeQuote(expression);
+
+        expect(expected).toEqual("' + foo + '");
+    });
+
+    it('Should escape properly (variant #2)', () => {
+        let expression = "`${foo}`";
+
+        let expected = Attv.Expressions.escapeQuote(expression);
+
+        expect(expected).toEqual("\\'' + foo + '\\'");
+    });
+
+    it('Should escape properly (variant #3)', () => {
+        let expression = "`foo`";
+
+        let expected = Attv.Expressions.escapeQuote(expression);
+
+        expect(expected).toEqual("\\'foo\\'");
+    });
+
+    it('Should escape properly (variant #4)', () => {
+        let expression = "foo";
+
+        let expected = Attv.Expressions.escapeQuote(expression);
+
+        expect(expected).toEqual("foo");
+    });
+
+    it('Should escape properly (variant #5)', () => {
+        let expression = "'`${foo}`'";
+
+        let expected = Attv.Expressions.escapeQuote(expression);
+
+        expect(expected).toEqual("'\\'' + foo + '\\''");
+    });
+
+    it('Should escape properly (variant #6)', () => {
+        let expression = "${foo";
+
+        let expected = Attv.Expressions.escapeQuote(expression);
+
+        expect(expected).toEqual("${foo");
+    });
+
+    it('Should escape properly (variant #7)', () => {
+        let expression = "foo}";
+
+        let expected = Attv.Expressions.escapeQuote(expression);
+
+        expect(expected).toEqual("foo}");
+    });
+
+});
