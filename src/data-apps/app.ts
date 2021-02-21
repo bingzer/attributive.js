@@ -169,8 +169,23 @@ namespace Attv.DataApp {
             window.location.hash = Routes.cleanHash(hash);
 
             if (needManualDispatch) {
-                // manually dispatch the hash change event
-                window.dispatchEvent(new HashChangeEvent("hashchange"));
+                if (typeof HashChangeEvent !== "undefined") {
+                    window.dispatchEvent(new HashChangeEvent("hashchange"));
+                    return;
+                }
+            
+                // HashChangeEvent is not available on all browsers. Use the plain Event.
+                try {
+                    window.dispatchEvent(new Event("hashchange"));
+                    return;
+                } catch (error) {
+                    // but that fails on ie
+                }
+            
+                // IE workaround
+                const ieEvent = document.createEvent("Event");
+                ieEvent.initEvent("hashchange", true, true);
+                window.dispatchEvent(ieEvent);
             }
         }
     }
