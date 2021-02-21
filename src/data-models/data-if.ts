@@ -5,7 +5,7 @@ namespace Attv.DataIf {
         
         load(element: HTMLElement, options: LoadElementOptions): BooleanOrVoid {
             let expression = this.attribute.raw(element);
-            let aliasExpression = new Attv.Binders.AliasExpression(expression);
+            let aliasExpression = new Attv.Expressions.AliasExpression(expression);
             
             let value = aliasExpression.evaluate(options.context);
             if (value?.filtered) {

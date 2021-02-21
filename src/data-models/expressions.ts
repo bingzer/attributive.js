@@ -1,4 +1,4 @@
-namespace Attv.Binders {
+namespace Attv.Expressions {
     /**
      * An expression
      */
@@ -39,10 +39,17 @@ namespace Attv.Binders {
         filtered: any;
     }
 
+    export interface Filter {
+        /**
+         * Optional additional property
+         */
+        [key: string]: any;
+    }
+
     /**
      * List of available filters
      */
-    export const filters: object = {
+    export const filters: Filter = {
         uppercase: (any: string) => any.toLocaleUpperCase(),
         lowercase: (any: string) => any.toLowerCase()
     };
@@ -65,7 +72,7 @@ namespace Attv.Binders {
          * @param context the context object
          */
         evaluate<TAny>(context?: any, arg?: any): TAny[] {
-            let evaluatedValue = Binders.evaluateExpression(this, context, arg);
+            let evaluatedValue = Expressions.evaluateExpression(this, context, arg);
 
             return evaluatedValue || [];
         }
@@ -118,7 +125,7 @@ namespace Attv.Binders {
                 filteredValue = context;
             }
             else {
-                value = Binders.evaluateExpression(this, context, arg);
+                value = Expressions.evaluateExpression(this, context, arg);
                 filteredValue = this.filterFn(value, context, arg) || value;
             }
 

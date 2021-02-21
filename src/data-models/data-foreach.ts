@@ -59,7 +59,7 @@ namespace Attv.DataForEach {
 
         private parseExpression(element: HTMLElement, context: any): { name: string, array: any[], createTemplate: () => HTMLElement } {
             let expressionValue = this.attribute.raw(element);
-            let expression = new Attv.Binders.ArrayExpression(expressionValue);
+            let expression = new Attv.Expressions.ArrayExpression(expressionValue);
 
             let dataContent = this.attribute.resolve(Attv.DataContent.Key);
             let dataId = this.attribute.resolve(Attv.DataId.Key);
