@@ -35,7 +35,7 @@ namespace Attv {
             if (!rawValue)
                 return false;
                 
-            let expression = new Attv.Binders.AliasExpression(rawValue);
+            let expression = new Attv.Expressions.AliasExpression(rawValue);
 
             let binder = this.binders.filter(b => b.accept(this, element))[0];
             if (binder) {

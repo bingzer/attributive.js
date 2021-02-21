@@ -15,7 +15,7 @@ namespace Attv.DataApp {
 
         private findApp(element: HTMLElement, options?: LoadElementOptions): App {
             let value = this.attribute.raw(element);
-            let expression = new Attv.Binders.AliasExpression(value);
+            let expression = new Attv.Expressions.AliasExpression(value);
             let evaluated = expression.evaluate(options.context);
             let app = evaluated.value;
 
@@ -31,7 +31,7 @@ namespace Attv.DataApp {
                     if (!app[key]) {
                         app[key] = settings[key];
                     }
-                })
+                });
             }
 
             return app;

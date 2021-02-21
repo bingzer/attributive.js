@@ -1,23 +1,23 @@
 /// <reference path="../../src/attv.ts" />
-/// <reference path="../../src/data-models/binders.expressions.ts" />
+/// <reference path="../../src/data-models/expressions.ts" />
 // ------------------------------------------------- //
 
-describe("Attv.Binders", () => {
+describe("Attv.Expressions", () => {
     it('Should declared its global variables', () => {
-        expect(Attv.Binders).toBeDefined();
-        expect(Attv.Binders.ArrayExpression).toBeDefined();
-        expect(Attv.Binders.AliasExpression).toBeDefined();
+        expect(Attv.Expressions).toBeDefined();
+        expect(Attv.Expressions.ArrayExpression).toBeDefined();
+        expect(Attv.Expressions.AliasExpression).toBeDefined();
     });
 
 });
 
-describe("Attv.Binders.AliasExpression", () => {
+describe("Attv.Expressions.AliasExpression", () => {
     it('Should declared its global variables', () => {
-        expect(Attv.Binders.ArrayExpression).toBeDefined();
+        expect(Attv.Expressions.ArrayExpression).toBeDefined();
     });
 
     it('Should create an AliasExpression', () => {
-        let expression = new Attv.Binders.AliasExpression("employee as emp");
+        let expression = new Attv.Expressions.AliasExpression("employee as emp");
 
         expect(expression.alias).toEqual('emp');
         expect(expression.propertyName).toEqual('employee');
@@ -26,7 +26,7 @@ describe("Attv.Binders.AliasExpression", () => {
     });
 
     it('Should create an AliasExpression (not an expression)', () => {
-        let expression = new Attv.Binders.AliasExpression("employee");
+        let expression = new Attv.Expressions.AliasExpression("employee");
 
         expect(expression.alias).toEqual('employee');
         expect(expression.propertyName).toEqual('employee');
@@ -44,7 +44,7 @@ describe("Attv.Binders.AliasExpression", () => {
                 return any.toUpperCase();
             }
         };
-        let expression = new Attv.Binders.AliasExpression("employee.firstName | toUpperCase as firstName");
+        let expression = new Attv.Expressions.AliasExpression("employee.firstName | toUpperCase as firstName");
 
         expect(expression.alias).toEqual('firstName');
         expect(expression.propertyName).toEqual('employee.firstName');
@@ -60,11 +60,11 @@ describe("Attv.Binders.AliasExpression", () => {
 
 describe("Attv.Binders.ArrayExpression", () => {
     it('Should declared its global variables', () => {
-        expect(Attv.Binders.ArrayExpression).toBeDefined();
+        expect(Attv.Expressions.ArrayExpression).toBeDefined();
     });
 
     it('Should create an ArrayExpression', () => {
-        let expression = new Attv.Binders.ArrayExpression("emp in employees");
+        let expression = new Attv.Expressions.ArrayExpression("emp in employees");
 
         expect(expression.itemName).toEqual('emp');
         expect(expression.propertyName).toEqual('employees');
@@ -82,7 +82,7 @@ describe("Attv.Binders.ArrayExpression", () => {
                 lastName: 'Doe'
             }]
         };
-        let expression = new Attv.Binders.ArrayExpression("emp in employees");
+        let expression = new Attv.Expressions.ArrayExpression("emp in employees");
 
         expect(expression.itemName).toEqual('emp');
         expect(expression.propertyName).toEqual('employees');

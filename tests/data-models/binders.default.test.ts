@@ -1,5 +1,6 @@
 /// <reference path="../../src/attv.ts" />
 /// <reference path="../../src/data-models/binders.ts" />
+/// <reference path="../../src/data-models/expressions.ts" />
 // ------------------------------------------------- //
 
 describe('Attv.Binders', () => {
@@ -80,7 +81,7 @@ describe('Attv.Binders.Default', () => {
 
         let binder = new Attv.Binders.Default();
 
-        let expression = new Attv.Binders.AliasExpression("employee.firstName");
+        let expression = new Attv.Expressions.AliasExpression("employee.firstName");
 
         binder.bind(dataModel, element, expression, context);
 
@@ -98,7 +99,7 @@ describe('Attv.Binders.Default', () => {
 
         let binder = new Attv.Binders.Default();
 
-        let expression = new Attv.Binders.AliasExpression("employee.nickname");
+        let expression = new Attv.Expressions.AliasExpression("employee.nickname");
 
         binder.bind(dataModel, element, expression, context);
 
@@ -116,7 +117,7 @@ describe('Attv.Binders.Default', () => {
 
         let binder = new Attv.Binders.Default();
 
-        let expression = new Attv.Binders.AliasExpression("employee.firstName");
+        let expression = new Attv.Expressions.AliasExpression("employee.firstName");
 
         binder.bind(dataModel, element, expression, context);
         binder.stamp(dataModel, element, 'binder-1');

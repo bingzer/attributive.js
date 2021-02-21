@@ -142,6 +142,64 @@ describe('Attv functions', () => {
 
     });
 
+    describe('Attv.concatObject()', () => {
+        it('Should concat object but not replacing the existing properties', () => {
+            let from: any = {
+                name: 'from',
+                data: 'data'
+            };
+
+            let to: any = {
+                name: 'to'
+            }
+
+            Attv.concatObject(from, to);
+
+            expect(to.name).toEqual('to');
+            expect(to.data).toEqual('data');
+
+        });
+
+        it('Should concat object and replacing the existing properties', () => {
+            let from: any = {
+                name: 'from',
+                data: 'data'
+            };
+
+            let to: any = {
+                name: 'to'
+            }
+
+            Attv.concatObject(from, to, true);
+
+            expect(to.name).toEqual('from');
+            expect(to.data).toEqual('data');
+
+        });
+
+        it('Should concat object but not replacing the existing properties and using a temporary function', () => {
+            let tempFnIsCalled = false;
+            let from: any = {
+                name: 'from',
+                data: 'data'
+            };
+
+            let to: any = {
+                name: 'to'
+            }
+
+            Attv.concatObject(from, to, false, () => {
+                tempFnIsCalled = true;
+                expect(to.data).toEqual('data');
+            });
+
+            expect(to.name).toEqual('to');
+            expect(to.data).toBeUndefined();
+            expect(tempFnIsCalled).toBeTrue();
+
+        });
+    });
+
     describe('Attv.isEvaluatable()', () => {
         
         it('Should returns true if starts with ( and ends with )', () => {
@@ -151,6 +209,18 @@ describe('Attv functions', () => {
         it('Should returns false if starts with ( and ends with )', () => {
             expect(Attv.isEvaluatable('{}')).toBeFalse();
             expect(Attv.isEvaluatable('[]')).toBeFalse();
+        });
+
+    });
+
+    describe('Attv.isEvaluatableStatement()', () => {
+        
+        it('Should returns true if starts with { and ends with }', () => {
+            expect(Attv.isEvaluatableStatement('{}')).toBeTrue();
+        });
+        
+        it('Should returns true if starts with [ and ends with ]', () => {
+            expect(Attv.isEvaluatableStatement('[]')).toBeTrue();
         });
 
     });
@@ -236,8 +306,8 @@ describe('Attv functions', () => {
     describe('Attv.generateElementId()', () => {
 
         it('Should generate unique ids', () => {
-            let id1 = Attv.generateElementId('attv');
-            let id2 = Attv.generateElementId('attv');
+            let id1 = Attv.generateId('attv');
+            let id2 = Attv.generateId('attv');
     
             expect(id1 !== id2).toBeTrue();
         });

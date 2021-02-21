@@ -23,10 +23,10 @@ namespace Attv.Binders {
             }
         }
 
-        abstract bind(dataModel: DataModel, element: TElement, expression: AliasExpression, model?: any): void;
+        abstract bind(dataModel: DataModel, element: TElement, expression: Expressions.AliasExpression, model?: any): void;
 
         protected abstract canBind(element: TElement): boolean;
-        protected abstract bindValueToElement(dataModel: DataModel, element: TElement, expression: AliasExpression, model?: any): void;
+        protected abstract bindValueToElement(dataModel: DataModel, element: TElement, expression: Expressions.AliasExpression, model?: any): void;
 
     }
     
@@ -37,7 +37,7 @@ namespace Attv.Binders {
      */
     export abstract class OneWayBinder<TElement extends HTMLElement> extends Binder<TElement> {
 
-        bind(dataModel: DataModel, element: TElement, expression: AliasExpression, model?: any) {
+        bind(dataModel: DataModel, element: TElement, expression: Expressions.AliasExpression, model?: any) {
             this.bindValueToElement(dataModel, element, expression, model);
         }
         
@@ -48,7 +48,7 @@ namespace Attv.Binders {
      */
     export class Default extends OneWayBinder<HTMLElement> {
         
-        bind(dataModel: DataModel, element: HTMLElement, expression: AliasExpression, model?: any): void {
+        bind(dataModel: DataModel, element: HTMLElement, expression: Expressions.AliasExpression, model?: any): void {
             this.bindValueToElement(dataModel, element, expression, model);
         }
 
@@ -56,7 +56,7 @@ namespace Attv.Binders {
             return true;
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLElement, expression: AliasExpression, model?: any): void {
+        protected bindValueToElement(dataModel: DataModel, element: HTMLElement, expression: Expressions.AliasExpression, model?: any): void {
             element.attvHtml(expression.evaluate(model).filtered || '');
         }
     }
@@ -66,7 +66,7 @@ namespace Attv.Binders {
      */
     export class Table extends OneWayBinder<HTMLTableElement> {
         
-        bind(dataModel: DataModel, element: HTMLTableElement, expression: AliasExpression, model?: any): void {
+        bind(dataModel: DataModel, element: HTMLTableElement, expression: Expressions.AliasExpression, model?: any): void {
             this.bindValueToElement(dataModel, element, expression, model);
         }
 
@@ -74,7 +74,7 @@ namespace Attv.Binders {
             return element instanceof HTMLTableElement;
         }
 
-        protected bindValueToElement(dataModel: DataModel, table: HTMLTableElement, expression: AliasExpression, model?: any): void {
+        protected bindValueToElement(dataModel: DataModel, table: HTMLTableElement, expression: Expressions.AliasExpression, model?: any): void {
             let result = expression.evaluate(model);
 
             if (Attv.isUndefined(result.value))
@@ -92,7 +92,7 @@ namespace Attv.Binders {
 
         // ------------------------------------------------------------ //
 
-        private parseHeaders(dataModel: DataModel, table: HTMLTableElement, any: object): AliasExpression[] {
+        private parseHeaders(dataModel: DataModel, table: HTMLTableElement, any: object): Expressions.AliasExpression[] {
             let settings = dataModel.getSettings<any>(table);
             let headers = settings?.headers as string[];
 
@@ -100,10 +100,10 @@ namespace Attv.Binders {
             if (!headerKeys)
                 return [];
 
-            return headerKeys.map<AliasExpression>(head => new AliasExpression(head));
+            return headerKeys.map<Expressions.AliasExpression>(head => new Expressions.AliasExpression(head));
         }
 
-        private bindArrayToElement(table: HTMLTableElement, headers: AliasExpression[], array: any[], model: any) {
+        private bindArrayToElement(table: HTMLTableElement, headers: Expressions.AliasExpression[], array: any[], model: any) {
             table.attvHtml('');
 
             // -- thead
@@ -146,7 +146,7 @@ namespace Attv.Binders {
             return element instanceof HTMLOListElement || element instanceof HTMLUListElement || element instanceof HTMLDListElement;
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLListELement, expression: AliasExpression, model?: any): void {
+        protected bindValueToElement(dataModel: DataModel, element: HTMLListELement, expression: Expressions.AliasExpression, model?: any): void {
             let result = expression.evaluate(model);
 
             if (Array.isArray(result.value)) {
@@ -163,11 +163,11 @@ namespace Attv.Binders {
             }
         }
 
-        private parseItemExpression(dataModel: DataModel, element: HTMLListELement, any: object): AliasExpression {
+        private parseItemExpression(dataModel: DataModel, element: HTMLListELement, any: object): Expressions.AliasExpression {
             let settings = dataModel.getSettings<any>(element);
             let itemExpression = settings?.item as string || "";
 
-            return new AliasExpression(itemExpression);
+            return new Expressions.AliasExpression(itemExpression);
         }
     }
 
@@ -182,7 +182,7 @@ namespace Attv.Binders {
             super();
         }
 
-        bind(dataModel: DataModel, element: TElement, expression: AliasExpression, model?: any): void {
+        bind(dataModel: DataModel, element: TElement, expression: Expressions.AliasExpression, model?: any): void {
             this.bindValueToElement(dataModel, element, expression, model);
 
             if (!dataModel.isLoaded(element) && !!this.eventName) {
@@ -222,7 +222,7 @@ namespace Attv.Binders {
             return element instanceof HTMLInputElement && this.types.some(t => t.equalsIgnoreCase(element.type));
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLInputElement, expression: AliasExpression, model?: any): void {
+        protected bindValueToElement(dataModel: DataModel, element: HTMLInputElement, expression: Expressions.AliasExpression, model?: any): void {
             element.value = expression.evaluate(model).filtered || '';
         }
 
@@ -245,7 +245,7 @@ namespace Attv.Binders {
             return element instanceof HTMLTextAreaElement;
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLTextAreaElement, expression: AliasExpression, model?: any): void {
+        protected bindValueToElement(dataModel: DataModel, element: HTMLTextAreaElement, expression: Expressions.AliasExpression, model?: any): void {
             element.value = expression.evaluate(model).filtered || '';
         }
 
@@ -268,7 +268,7 @@ namespace Attv.Binders {
             return(element instanceof HTMLInputElement && element.type?.equalsIgnoreCase("checkbox"));
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLInputElement, expression: AliasExpression, model?: any): void {
+        protected bindValueToElement(dataModel: DataModel, element: HTMLInputElement, expression: Expressions.AliasExpression, model?: any): void {
             element.checked = !!(expression.evaluate(model).value);
         }
 
@@ -288,7 +288,7 @@ namespace Attv.Binders {
             super("change");
         }
         
-        bind(dataModel: DataModel, element: HTMLSelectElement, expression: AliasExpression, model?: any): void {
+        bind(dataModel: DataModel, element: HTMLSelectElement, expression: Expressions.AliasExpression, model?: any): void {
             if (dataModel.isLoaded(element)) {
                 Attv.loadElements(element.querySelector('option'), { forceReload: true });
                 this.bindValueToElement(dataModel, element, expression, model);
@@ -302,7 +302,7 @@ namespace Attv.Binders {
             return element instanceof HTMLSelectElement && !element.hasAttribute('multiple');
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLSelectElement, expression: AliasExpression, model?: any): void {
+        protected bindValueToElement(dataModel: DataModel, element: HTMLSelectElement, expression: Expressions.AliasExpression, model?: any): void {
             let propertyValue = expression.evaluate(model).filtered;
 
             Attv.toArray(element.options).forEach((opt: HTMLOptionElement) => {
@@ -327,7 +327,7 @@ namespace Attv.Binders {
             return element instanceof HTMLSelectElement && element.hasAttribute('multiple');
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLSelectElement, expression: AliasExpression, model?: any): void {
+        protected bindValueToElement(dataModel: DataModel, element: HTMLSelectElement, expression: Expressions.AliasExpression, model?: any): void {
             let result = expression.evaluate(model);
             
             if (Array.isArray(result.value)) {
@@ -356,7 +356,7 @@ namespace Attv.Binders {
             super("change");
         }
         
-        bind(dataModel: DataModel, element: HTMLInputElement, expression: AliasExpression, model?: any): void {
+        bind(dataModel: DataModel, element: HTMLInputElement, expression: Expressions.AliasExpression, model?: any): void {
             super.bind(dataModel, element, expression, model);
 
             if (!dataModel.isLoaded(element)) {
@@ -376,7 +376,7 @@ namespace Attv.Binders {
             return(element instanceof HTMLInputElement && element.type?.equalsIgnoreCase("radio"));
         }
 
-        protected bindValueToElement(dataModel: DataModel, element: HTMLInputElement, expression: AliasExpression, model?: any): void {
+        protected bindValueToElement(dataModel: DataModel, element: HTMLInputElement, expression: Expressions.AliasExpression, model?: any): void {
             element.checked = element.value === expression.evaluate(model).value;
         }
 

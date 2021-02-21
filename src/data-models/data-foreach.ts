@@ -9,7 +9,7 @@ namespace Attv.DataForEach {
             let dataContent = this.attribute.resolve(Attv.DataContent.Key);
             let dataId = this.attribute.resolve(Attv.DataId.Key);
             let dataRef = this.attribute.resolve(Attv.DataRef.Key);
-            let id = element.attvAttr('id') || dataId.raw(element) || Attv.generateElementId('foreach');
+            let id = element.attvAttr('id') || dataId.raw(element) || Attv.generateId('foreach');
 
             if (!this.attribute.isLoaded(element)) {
                 // if it's not leaded
@@ -59,7 +59,7 @@ namespace Attv.DataForEach {
 
         private parseExpression(element: HTMLElement, context: any): { name: string, array: any[], createTemplate: () => HTMLElement } {
             let expressionValue = this.attribute.raw(element);
-            let expression = new Attv.Binders.ArrayExpression(expressionValue);
+            let expression = new Attv.Expressions.ArrayExpression(expressionValue);
 
             let dataContent = this.attribute.resolve(Attv.DataContent.Key);
             let dataId = this.attribute.resolve(Attv.DataId.Key);
