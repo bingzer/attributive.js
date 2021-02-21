@@ -932,6 +932,10 @@ namespace Attv {
         return any?.startsWith('(') && any?.endsWith(')');
     }
 
+    /**
+     * Checks to see if a statement is an evaluatble statement
+     * @param any any string
+     */
     export function isEvaluatableStatement(any: string) {
         return (any?.startsWith('{') && any?.endsWith('}')) 
             || any?.startsWith('[') && any?.endsWith(']');

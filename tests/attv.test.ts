@@ -213,6 +213,18 @@ describe('Attv functions', () => {
 
     });
 
+    describe('Attv.isEvaluatableStatement()', () => {
+        
+        it('Should returns true if starts with { and ends with }', () => {
+            expect(Attv.isEvaluatableStatement('{}')).toBeTrue();
+        });
+        
+        it('Should returns true if starts with [ and ends with ]', () => {
+            expect(Attv.isEvaluatableStatement('[]')).toBeTrue();
+        });
+
+    });
+
     describe('Attv.eval$()', () => {
         
         it('Should returns truthy', () => {
