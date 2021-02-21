@@ -10,6 +10,7 @@
   "files": [
     "prototypes.ts",
     "helpers.ts",
+    "expressions.ts",
     "attv.ts"
   ],
   "exclude": [

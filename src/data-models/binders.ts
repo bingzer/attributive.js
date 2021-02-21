@@ -188,7 +188,7 @@ namespace Attv.Binders {
             if (!dataModel.isLoaded(element) && !!this.eventName) {
                 element.addEventListener(this.eventName, e => {
                     let value = this.getValueFromElement(element);
-                    Attv.DataModel.setProperty(expression.propertyName, value, model);
+                    Attv.Expressions.setProperty(expression.propertyName, value, model);
 
                     // data load
                     this.broadcast(dataModel, element, { forceReload: true, context: model });

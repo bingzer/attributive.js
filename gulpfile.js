@@ -20,6 +20,7 @@ const components = [ {
         files: [
             'src/prototypes.ts', 
             'src/helpers.ts', 
+            'src/expressions.ts', 
             'src/attv.ts',  
         ]
     }, { 

@@ -184,20 +184,6 @@ namespace Attv {
         parseRaw<TAny>(element: HTMLElement, context?: any, arg?: any): TAny {
             let raw = this.raw(element);
 
-            let escapeQuote = (raw: string): string => {
-                if (!raw)
-                    return raw;
-    
-                const regex = /([`])(?:(?=(\\?))\2.)*?\1/gi;
-                let match = raw.match(regex);
-                match?.forEach(match => {
-                    let replacement = match.replace('`', "\\'\' + ").replace('`', " + \'\\'");
-                    raw = raw.replace(match, replacement);
-                });
-                
-                return raw;
-            }
-
             switch (this.wildcard) {
                 case "<querySelector>": {
                     if (raw === 'this') {
@@ -209,7 +195,7 @@ namespace Attv {
                 case "<jsExpression>":
                     return Attv.eval$(raw, context, arg) as any;
                 case "<json>":
-                    raw = escapeQuote(raw);
+                    raw = Attv.Expressions.escapeQuote(raw);
                 default:
                     return Attv.parseJsonOrElse(raw, undefined, context, arg) as TAny;
             }
