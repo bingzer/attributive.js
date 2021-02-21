@@ -29,7 +29,7 @@ var fnx = {
 
     addTodo: function () {
         data.newTodo.dateTime = Date.now();
-        data.newTodo.id = data.user.todos.length;
+        data.newTodo.id = Attv.generateElementId('todo');
 
         data.user.todos.push(data.newTodo);
         data.newTodo = {
@@ -43,10 +43,11 @@ var fnx = {
         Attv.loadElements(undefined, { forceReload: true });
     },
 
-    deleteTodo: function (id) {
-        data.user.todos.splice(id, 1);
+    deleteTodo: function (id, email) {
+        var user = this.findUser(email);
+        user.todos.splice(id, 1);
         
-        Attv.loadElements(undefined, { forceReload: true });
+        Attv.DataApp.refresh();
     },
 
     findUser: function (email, password) {

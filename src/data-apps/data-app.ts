@@ -4,13 +4,13 @@ namespace Attv.DataApp {
     export class Default extends Attv.AttributeValue {
         
         load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
-            if (!this.attribute.isLoaded(element)) {
-                let app = this.findApp(element, options);
+            let app = this.findApp(element, options);
 
+            if (!this.attribute.isLoaded(element)) {
                 window.addEventListener("hashchange", evt => this.onHashChanged(app, element, options, evt), false);
 
                 DataApp.lock(app.lock);
-            };
+            }
         }
 
         private findApp(element: HTMLElement, options?: LoadElementOptions): App {
@@ -87,6 +87,16 @@ namespace Attv.DataApp {
     export function navigate(hash: string) {
         Routes.navigateTo(hash);
         Attv.loadElements(undefined, { forceReload: true });
+    }
+
+    /**
+     * Navigate to a hash location.
+     * You should always use this function rather than window.location.hash due to
+     * event dispatching when the hash is not changed
+     * @param hash hash location
+     */
+    export function refresh() {
+        navigate(Routes.currentHash());
     }
 
     /**

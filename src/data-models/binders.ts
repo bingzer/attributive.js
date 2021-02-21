@@ -84,7 +84,7 @@ namespace Attv.Binders {
                 let array = result.filtered as any[];
                 let headers = this.parseHeaders(dataModel, table, array[0]);
                 
-                this.bindArrayToElement(table, headers, array);
+                this.bindArrayToElement(table, headers, array, model);
             } else {
                 throw new Error();
             }
@@ -103,7 +103,7 @@ namespace Attv.Binders {
             return headerKeys.map<AliasExpression>(head => new AliasExpression(head));
         }
 
-        private bindArrayToElement(table: HTMLTableElement, headers: AliasExpression[], array: any[]) {
+        private bindArrayToElement(table: HTMLTableElement, headers: AliasExpression[], array: any[], model: any) {
             table.attvHtml('');
 
             // -- thead
@@ -124,7 +124,7 @@ namespace Attv.Binders {
                 headers.forEach(head => {
                     let td = document.createElement('td');
 
-                    td.attvHtml(head.evaluate(item).filtered);
+                    td.attvHtml(head.evaluate(item, model).filtered);
 
                     tr.append(td);
                 });
