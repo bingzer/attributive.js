@@ -794,10 +794,12 @@ namespace Attv {
             callback?: (wasSuccessful: boolean, xhr: XMLHttpRequest, ajaxOptions?: AjaxOptions) => void;
             headers?: {name: string, value: string}[];
             createHttpRequest?: () => XMLHttpRequest;
+            withCredentials?: boolean;
         }
             
         export function sendAjax(options: AjaxOptions) {
             options.method = options.method || 'get';
+            options.withCredentials = options.withCredentials || true;
     
             let xhr = options.createHttpRequest ? options.createHttpRequest() : new XMLHttpRequest();
             xhr.onreadystatechange = (e: Event) => {
@@ -833,6 +835,8 @@ namespace Attv {
             options.headers?.forEach(header => {
                 xhr.setRequestHeader(header.name, header.value);
             });
+
+            xhr.withCredentials = options.withCredentials;
             xhr.send(data);
         }
     

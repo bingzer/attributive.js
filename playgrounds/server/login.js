@@ -7,7 +7,7 @@ module.exports = (req, res, next) => {
 
         let user = users.filter(u => u.email === req.body.email && u.password === req.body.password)[0];
         if (user) {
-            res.status(200).cookie('auth', user.id, { maxAge: maxAge, httpOnly: true, sameSite: 'lax' }).json(user);
+            res.status(200).cookie('auth', user.id, { maxAge: maxAge, httpOnly: true}).json(user);
         } else {
             res.status(400).json(req.body)
         }

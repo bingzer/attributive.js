@@ -6,18 +6,28 @@ var fnx = {
                 if (!wasSuccessful)
                     return;
 
-                    console.log(xhr.response);
-                data.user = xhr.response;
+                data.user = JSON.parse(xhr.response);
+                data.user.isAuthorized = true;
+
+                Attv.DataApp.navigate('/');
             }
         });
     },
 
     logout: function () {
-        data.user = {
-            isAuthorized: false
-        };
+        Attv.Ajax.sendAjax({
+            url: app.api + '/account/logout',
+            callback: function (wasSuccessful, xhr) {
+                if (!wasSuccessful)
+                    return;
+                    
+                data.user = {
+                    isAuthorized: false
+                };
 
-        Attv.DataApp.navigate('/login');
+                Attv.DataApp.navigate('/login');
+            }
+        });
     },
 
     addTodo: function () {
