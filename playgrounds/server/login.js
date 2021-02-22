@@ -2,39 +2,44 @@
 module.exports = (req, res, next) => {
     // --- /account/login
     if (req.method == 'POST' && req.path == '/account/login') {
-        let users = require('./index')().users;
-        let user = users.filter(u => u.email === req.body.username && u.password === req.body.password)[0];
+        const users = require('./index')().users;
+        const maxAge = 36000000;
+
+        let user = users.filter(u => u.email === req.body.email && u.password === req.body.password)[0];
         if (user) {
-            res.status(200).cookie('auth', user.id, { maxAge: 360000, httpOnly: true }).json(user);
+            res.status(200).cookie('auth', user.id, { maxAge: maxAge, httpOnly: true, sameSite: 'lax' }).json(user);
         } else {
-            res.status(400).json({ message: 'wrong password' })
+            res.status(400).json(req.body)
         }
     } 
     // --- /account/logout
     else if ((req.method == 'POST' || req.method == 'GET') && req.path == '/account/logout') {
         const maxAge = 0;
-        let expires = Date.now() - 36000;
-        res.status(200).cookie('auth', undefined, { maxAge: maxAge, expires: expires }).json({});
+        let expire = Date.now() - 36000;
+        res.status(200).cookie('auth', undefined, { maxAge: maxAge, expire: expire }).json({});
     } 
     // --- /account
     else if ((req.method == 'POST' || req.method == 'GET') && req.path == '/account') {
         let users = require('./index')().users;
         let cookies = req.headers["cookie"];
         let user = undefined;
-        cookies.split(';').forEach(cookie => {
-            let kvp = cookie.split('=');
-            let key = kvp[0].trim();
-            let value = kvp[1].trim();
-            if (key === 'auth') {
-                user = users.filter(u => u.id === value)[0];
-            }
-        });
-
-        if (user) {
-            res.status(200).json(user);
-        } else {
-            res.status(401).json({});
+        if (cookies) {
+            cookies.split(';').forEach(cookie => {
+                let kvp = cookie.split('=');
+                let key = kvp[0].trim();
+                let value = kvp[1].trim();
+                if (key === 'auth') {
+                    user = users.filter(u => u.id === value)[0];
+                }
+            });
+    
+            if (user) {
+                res.status(200).json(user);
+                return;
+            } 
         }
+
+        res.status(401).json({});
     } 
     // --- /words/random
     else if (req.method == 'GET' && req.path == '/words/random') {

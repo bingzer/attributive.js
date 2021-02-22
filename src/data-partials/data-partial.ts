@@ -20,7 +20,8 @@ namespace Attv {
                 Attv.DataTarget.Key,
                 Attv.DataSource.Key,
                 Attv.DataTemplate.Key,
-                Attv.DataTemplateUrl.Key
+                Attv.DataTemplateUrl.Key,
+                Attv.DataData.Key
             ]
         }
 
@@ -90,6 +91,10 @@ namespace Attv {
 
                 // Before render
                 options.beforeRender = sendFn => {
+                    // [data-data]
+                    let dataData = this.attribute.resolve<Attv.DataData>(Attv.DataData.Key);
+                    options.data = dataData.parseRaw(element, options.context);
+
                     // [data-timeout]
                     let dataTimeout = this.attribute.resolve<Attv.DataTimeout>(Attv.DataTimeout.Key);
                     dataTimeout.timeout(element, () => {
@@ -119,7 +124,7 @@ namespace Attv {
                     } else if (dataTemplateUrl.exists(element)) {
                         let templateAjaxOptions = dataTemplateUrl.getSettings<Ajax.AjaxOptions>(element) || {} as Ajax.AjaxOptions;
                         templateAjaxOptions.url = templateAjaxOptions.url || dataTemplateUrl.raw(element);
-                        templateAjaxOptions.callback = (ajaxOptions, wasSuccessful, xhr) => {
+                        templateAjaxOptions.callback = (wasSuccessful, xhr) => {
                             if (!wasSuccessful)
                                 return;  // TODO log?
                             
@@ -248,7 +253,7 @@ namespace Attv {
             options.afterRender = options.afterRender || (result => {});
 
             let ajaxOptions = options as Attv.Ajax.AjaxOptions;            
-            ajaxOptions.callback = (ajaxOptions: Attv.Ajax.AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
+            ajaxOptions.callback = (wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
                 if (!wasSuccessful) {
                     return;
                 }

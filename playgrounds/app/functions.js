@@ -1,24 +1,15 @@
 var fnx = {
-    loginCallback: function (data) {
-        console.log(data);
-        alert('callback');
-        // data.login.result = 'Username/Password does not match';
+    authenticate: function () {
+        Attv.Ajax.sendAjax({
+            url: app.api + '/account',
+            callback: function (wasSuccessful, xhr) {
+                if (!wasSuccessful)
+                    return;
 
-        // var authenticatedUser = fnx.findUser(data.login.email, data.login.password);
-
-        // if (authenticatedUser) {
-        //     data.user = authenticatedUser;
-        //     data.user.isAuthorized = !!authenticatedUser;
-        //     Attv.DataApp.navigate('/');
-
-        //     data.login.result = undefined;
-        // } else {
-        //     data.user = { isAuthorized: false };
-        // }
-        
-        // Attv.loadElements(undefined, { forceReload: true });
-
-        // return !!authenticatedUser;
+                    console.log(xhr.response);
+                data.user = xhr.response;
+            }
+        });
     },
 
     logout: function () {

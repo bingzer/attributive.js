@@ -43,6 +43,13 @@
 // };
 
 var data = {
+    /**
+     * Login
+     */
+    login: {
+        email: 'admin@example.com',
+        password: '123'
+    },
     
     /**
      * Current user

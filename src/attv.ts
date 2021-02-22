@@ -791,7 +791,7 @@ namespace Attv {
             url: string;
             method?: AjaxMethod;
             data?: any;
-            callback?: (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest) => void;
+            callback?: (wasSuccessful: boolean, xhr: XMLHttpRequest, ajaxOptions?: AjaxOptions) => void;
             headers?: {name: string, value: string}[];
             createHttpRequest?: () => XMLHttpRequest;
         }
@@ -806,27 +806,34 @@ namespace Attv {
                     let wasSuccessful = request.status >= 200 && request.status < 400;
     
                     if (options?.callback) {
-                        options?.callback(options, wasSuccessful, request);
+                        options?.callback(wasSuccessful, request, options);
                     }
                 }
             };
             xhr.onerror = (e: ProgressEvent<EventTarget>) => {
                 let request = e.target as XMLHttpRequest;
                 if (options?.callback) {
-                    options?.callback(options, false, request);
+                    options?.callback(false, request, options);
                 }
             }
+
+            xhr.open(options.method, options.url, true);
     
             // last check
             if (Attv.isUndefined(options.url))
                 throw new Error('No url');
-    
-            xhr.open(options.method, options.url, true);
+
+            let data = options.data ? JSON.stringify(options.data) : undefined;
+            if (data) {
+                options.headers = options.headers || [];
+                options.headers.push({ name: "content-type", value: "application/json" });
+            }
 
             // headers must be set after open()
-            options.headers?.forEach(header => xhr.setRequestHeader(header.name, header.value));
-
-            xhr.send();
+            options.headers?.forEach(header => {
+                xhr.setRequestHeader(header.name, header.value);
+            });
+            xhr.send(data);
         }
     
         export function buildUrl(option: AjaxOptions): string {
