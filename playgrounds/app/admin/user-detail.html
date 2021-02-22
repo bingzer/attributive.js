@@ -1,0 +1,9 @@
+<div class="login row justify-content-center align-items-center mt-4">
+  
+  <div data-partial="auto" data-url="partials/profile.html" data-partial-settings="{ context: { user: user } }"></div>
+
+  <div class="col-md-10 p-5 border">
+    <h4>List of <span data-model="user.email"></span> TODOs</h4>
+    <div class="container mb-4" data-partial="auto" data-url="partials/user-todos.html" data-partial-settings="{ context: { user: user } }"></div>
+  </div>
+</div>

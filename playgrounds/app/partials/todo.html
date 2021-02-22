@@ -1,18 +1,7 @@
 <div>
     <h3>Add/Remove your todos</h3>
 
-    <div class="container mb-4">
-        <table data-model="data.user.todos"
-          data-model-settings="{ 
-            headers: [
-              '{ user: data.user, todo: this } | template(\'#format-todo-detail\') as Title', 
-              'content as Content', 
-              'dateTime | formatDate as Time', 
-              '{ user: data.user, todo: this } | template(\'#format-delete-todo\') as Action' 
-            ] 
-          }"
-          class="table"></table>
-    </div>
+    <div data-partial="auto" data-url="partials/user-todos.html" data-partial-settings="{ context: { user: data.user } }"></div>
 
     <div class="todo row justify-content-center align-items-center mt-4">
       <form class="form-horizontal col-md-6 p-5 border" onsubmit="fnx.addTodo(); return false;">

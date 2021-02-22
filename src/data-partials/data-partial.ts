@@ -33,6 +33,10 @@ namespace Attv {
 
     export namespace DataPartial {
 
+        export interface Settings {
+            context?: any;
+        }
+
         /**
          * Partial options (also a union of AjaxOptions and LoadElementOptions) + more
          */
@@ -77,6 +81,9 @@ namespace Attv {
                     options = this.attribute.getSettings<Ajax.AjaxOptions>(element) || { } as Ajax.AjaxOptions;
                 }
 
+                // deep copy options
+                options = JSON.parse(JSON.stringify(options));
+
                 options.url = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key).getUrl(element);
                 options.method = this.attribute.resolve<DataMethod>(Attv.DataMethod.Key).getMethod(element);
                 
@@ -106,6 +113,12 @@ namespace Attv {
                         model = dataTemplate.render(sourceElement, model);
                     }
 
+                    // [data-settings]
+                    let settings = this.attribute.getSettings<Settings>(element);
+                    if (settings) {
+                        options.context = settings.context || options.context;
+                    }
+
                     return model;
                 };
 
@@ -130,7 +143,7 @@ namespace Attv {
             }
 
             load(element: HTMLElement, options?: PartialOptions): BooleanOrVoid {
-                this.render(element, options?.context);
+                this.render(element, undefined, options);
 
                 return true;
             }
@@ -172,7 +185,7 @@ namespace Attv {
             }
 
             load(element: HTMLElement, options?: PartialOptions): BooleanOrVoid {
-                this.render(element, options?.context);
+                this.render(element, undefined, options);
 
                 // remove data partial
                 element.removeAttribute(this.attribute.name);
@@ -212,12 +225,7 @@ namespace Attv {
                 let targetElement = Attv.select(options.container);
 
                 if (targetElement) {
-                    if (model instanceof HTMLElement) {
-                        targetElement.attvHtml('');
-                        targetElement.append(model);
-                    } else {
-                        targetElement.attvHtml(model);
-                    }
+                    targetElement.attvHtml(model);
     
                     Attv.loadElements(targetElement, options);
                 }
