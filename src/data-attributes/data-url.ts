@@ -16,16 +16,17 @@ namespace Attv {
 
         raw(element: HTMLElement): string {
             let rawValue = super.raw(element);
+            let context = this.getContext(element);
 
             // <form action='/'></form>
             if (!rawValue && element?.tagName?.equalsIgnoreCase('form')) {
                 // get from action attribute
-                rawValue = element.attvAttr('action');
+                rawValue = Attv.Expressions.replaceVar(element.attvAttr('action'), context);
             }
 
-            // <a href='/'></form>
+            // <a href='/'></a>
             if (!rawValue && element?.tagName?.equalsIgnoreCase('a')) {
-                rawValue = element.attvAttr('href');
+                rawValue = Attv.Expressions.replaceVar(element.attvAttr('href'), context);
             }
 
             return rawValue;

@@ -13,7 +13,7 @@ namespace Attv {
 
             if (!rawValue && element?.tagName?.equalsIgnoreCase('form')) {
                 // get from method attribute
-                rawValue = element.attvAttr('method');
+                rawValue = element.attvAttr('method') || 'post';
             }
 
             return rawValue || 'get';

@@ -328,4 +328,16 @@ namespace Attv.Expressions {
         
         return any;
     }
+
+    export function replaceVar(any: string, context?: any, arg?: any): string {
+        const regex = /(\$\{.*?\})/gi;
+        let match = any.match(regex);
+        match?.forEach(match => {
+            let variableName = match.replace(/(\$\{|\})/gi, '');
+            let replacement = Attv.eval$(variableName, context, arg);
+            any = any.replace(match, replacement);
+        });
+
+        return any;
+    }
 }

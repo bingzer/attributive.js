@@ -1,5 +1,5 @@
 <div class="login row justify-content-center align-items-center mt-4">
-  <form class="col-md-6 p-5 border" onsubmit="fnx.login(); return false">
+  <form class="col-md-6 p-5 border" data-partial="form" action="${app.api}/login" data-callback="Attv.loadElements()">
     <div class="form-group row">
       <label for="email" class="col-sm-2 col-form-label">Email</label>
       <div class="col-sm-10">
@@ -9,7 +9,8 @@
     <div class="form-group row">
       <label for="password" class="col-sm-2 col-form-label">Password</label>
       <div class="col-sm-10">
-        <input type="password" class="form-control" id="password" placeholder="Password" data-model="data.login.password">
+        <input type="password" class="form-control" id="password" placeholder="Password"
+          data-model="data.login.password">
       </div>
     </div>
     <div class="form-group row">
@@ -23,17 +24,18 @@
       </div>
     </div>
     <div class="form-group row mt-2">
-        <div class="col-sm-2">
+      <div class="col-sm-2">
 
-        </div>
-        <div class="col-sm-10">
-            <button type="submit" class="btn btn-primary">Login</button>
-            <button type="reset" class="btn btn-secondary">Reset</button>
-        </div>
+      </div>
+      <div class="col-sm-10">
+        <button type="submit" class="btn btn-primary">Login</button>
+        <button type="reset" class="btn btn-secondary">Reset</button>
+      </div>
     </div>
   </form>
 
-  <div data-partial="auto" data-url="http://localhost:3000/words/donec" 
-    data-partial-settings="{ context: { word: this, data: { key: 'machine' } } }" 
+  <div data-partial="auto"
+    data-context="{ app: app, word: this }"
+    data-url="${app.api}/words/random"
     data-template-url="partials/word.html"></div>
 </div>

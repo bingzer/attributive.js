@@ -34,10 +34,6 @@ namespace Attv {
 
     export namespace DataPartial {
 
-        export interface Settings {
-            context?: any;
-        }
-
         /**
          * Partial options (also a union of AjaxOptions and LoadElementOptions) + more
          */
@@ -106,11 +102,8 @@ namespace Attv {
 
                 // During model rendering
                 options.onRender = (model, renderFn) => {
-                    // [data-settings]
-                    let settings = this.attribute.getSettings<Settings>(element);
-                    if (settings) {
-                        options.context = settings.context || options.context;
-                    }
+                    // [data-context]
+                    options.context = this.attribute.getContext(element);
 
                     // [data-source] vs [data-template-url]
                     let dataSource = this.attribute.resolve<Attv.DataSource>(Attv.DataSource.Key);
@@ -220,6 +213,27 @@ namespace Attv {
             }
         }
 
+        export class Form extends Default {
+            constructor () {
+                super('form');
+
+                this.validators = [
+                    { name: Attv.Validators.NeedElements, options: [ 'form' ] }
+                ];
+            }
+
+            load(element: HTMLElement, options?: PartialOptions): BooleanOrVoid {
+                if (!this.attribute.isLoaded(element)) {
+                    element.onsubmit = (ev: Event) => {
+                        this.render(element, undefined, options);
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+
         // --------------------------------------------------------------------------------------------- //
         
         /**
@@ -273,4 +287,5 @@ Attv.register(() => new Attv.DataPartial(), att => {
     att.map(() => new Attv.DataPartial.Auto());
     att.map(() => new Attv.DataPartial.Click());
     att.map(() => new Attv.DataPartial.Nonce());
+    att.map(() => new Attv.DataPartial.Form());
 });

@@ -111,7 +111,7 @@ namespace Attv {
         /**
          * The dependencies
          */
-        public readonly deps: Dependency = {};
+        public readonly deps: Dependency = { };
 
         /**
          * This attribute name. Most of the time,
@@ -172,7 +172,14 @@ namespace Attv {
          * @param element the element
          */
         raw(element: HTMLElement): string {
-            return element?.getAttribute(this.name) || undefined;
+            let rawValue = element?.getAttribute(this.name) || undefined;
+            if (Attv.isDefined(rawValue)) {
+                // see if there's any data-context
+                let context = this.getContext(element);
+                rawValue = Attv.Expressions.replaceVar(rawValue, context);
+            }
+
+            return rawValue;
         }
 
         /**
@@ -251,6 +258,13 @@ namespace Attv {
             let setting = Attv.parseJsonOrElse<TAny>(attribute);
 
             return setting || undefined;
+        }
+
+        getContext<TAny>(element: HTMLElement): TAny {
+            let dataContext = Attv.getAttribute(Attv.DataContext.Key);
+            let context = Attv.parseJsonOrElse<TAny>(element.attvAttr(dataContext.name));
+            
+            return context;
         }
 
         /**
@@ -453,12 +467,13 @@ namespace Attv {
                 Attv.configuration = new Configuration();
             }
             Attv.log('Attv v.' + Attv.version);
+
+            Attv.register(Attv.DataContext.Key, { wildcard: "<json>", isAutoLoad: false });
     
             isInitialized = true;
         }
     
         function registerAllAttributes() {
-            //for (let i = registrations.length - 1; i >= 0; i--) {
             for (let i = 0; i < registrations.length; i++) {
                 let attribute = registrations[i].register();
     
@@ -758,6 +773,14 @@ namespace Attv {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////// DataContext ///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+
+    export namespace DataContext {
+        export const Key: string = "data-context";
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////// Attv.Ajax ///////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////
     
@@ -888,6 +911,9 @@ namespace Attv {
      * @param tempFn If defined, the concatenation is temporary until tempFn() is called
      */
     export function concatObject(from: any, to: any, replacing: boolean = false, tempFn?: () => void) {
+        from = from || {};
+        to = to || {};
+
         let replace = (from: any, to: any, key: string, props?: {key: string, value: any}[]) => {
             if (replacing || Attv.isUndefined(to[key])) {
                 to[key] = from[key];

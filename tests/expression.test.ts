@@ -249,3 +249,36 @@ describe("Attv.Expressions.escapeQuote", () => {
     });
 
 });
+
+
+describe("Attv.Expressions.replaceVar", () => {
+
+    it('Should replace properly (variant #1)', () => {
+        let context = {
+            app: {
+                name: 'yolo'
+            }
+        }
+
+        let expression = "${app.name}";
+
+        let expected = Attv.Expressions.replaceVar(expression, context);
+
+        expect(expected).toEqual("yolo");
+    });
+
+    it('Should not replace anything properly (variant #1)', () => {
+        let context = {
+            app: {
+                name: 'yolo'
+            }
+        }
+
+        let expression = "none";
+
+        let expected = Attv.Expressions.replaceVar(expression, context);
+
+        expect(expected).toEqual("none");
+    });
+
+});
