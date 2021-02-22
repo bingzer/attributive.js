@@ -18,10 +18,13 @@ var app = {
         path: '/profile',
         url: 'partials/profile.html',
         title: 'Profile',
+        withContext: function (match, fn) {
+            fn({ user: data.user });
+        },
         when: function() { return data.user.isAuthorized; }
     },{
         path: '/admin',
-        url: 'partials/admin.html',
+        url: 'admin/index.html',
         title: 'Admin',
         when: function() { return data.user.isAdmin; },
     },{
@@ -30,20 +33,23 @@ var app = {
         title: 'Todo Detail',
         withContext: function (match, fn) {
             var email = match.routeContext[1];
+            var todoId = match.routeContext[2];
+
             var user = fnx.findUser(email);
-            var context = { user: user };
-            fn(context);
+            var todo = fnx.findTodo(todoId, email);
+
+            fn({ user: user, todo: todo });
         },
         when: function() { return data.user.isAdmin; }
     },{
         match: '/users/(.*)',
-        url: 'partials/user-detail.html',
+        url: 'admin/user-detail.html',
         title: 'User Detail',
         withContext: function (match, fn) {
             var email = match.routeContext[1];
             var user = fnx.findUser(email);
-            var context = { user: user };
-            fn(context);
+            
+            fn({ user: user });
         },
         when: function() { return data.user.isAdmin; }
     },{
