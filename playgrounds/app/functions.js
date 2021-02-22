@@ -29,7 +29,7 @@ var fnx = {
 
     addTodo: function () {
         data.newTodo.dateTime = Date.now();
-        data.newTodo.id = Attv.generateElementId('todo');
+        data.newTodo.id = Attv.generateId('todo');
 
         data.user.todos.push(data.newTodo);
         data.newTodo = {

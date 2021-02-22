@@ -5,6 +5,7 @@ var app = {
     name: 'Todo App',
     container: '#main-container',
     lock: true,
+    api: 'http://localhost:3000',
     routes: [{
         path: '/',
         url: 'partials/todo.html',

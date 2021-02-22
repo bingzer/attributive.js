@@ -9,5 +9,6 @@
 /// <reference path="../data-attributes/data-target.ts" />
 /// <reference path="../data-attributes/data-source.ts" />
 /// <reference path="../data-templates/data-template.ts" />
+/// <reference path="../data-templates/data-template-url.ts" />
 namespace Attv {
 }

@@ -888,15 +888,15 @@ namespace Attv {
      * @param tempFn If defined, the concatenation is temporary until tempFn() is called
      */
     export function concatObject(from: any, to: any, replacing: boolean = false, tempFn?: () => void) {
-        let replace = (from: any, to: any, key: string, props?: string[]) => {
+        let replace = (from: any, to: any, key: string, props?: {key: string, value: any}[]) => {
             if (replacing || Attv.isUndefined(to[key])) {
                 to[key] = from[key];
-                props?.push(key);
+                props?.push({key: key, value: to[key]});
             }
         }
 
         if (tempFn) {
-            let props = [];
+            let props: {key: string, value: any}[] = [];
 
             Object.keys(from).forEach(key => replace(from, to, key, props));
 
@@ -907,7 +907,7 @@ namespace Attv {
             }
 
             // remove props
-            props.forEach(key => delete to[key]);
+            props.forEach(key => delete to[key.key]);
 
         } else {
             Object.keys(from).forEach(key => replace(from, to, key));

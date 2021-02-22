@@ -202,6 +202,10 @@ namespace Attv.Binders {
             let settings = dataModel.getSettings<Attv.DataModel.Settings>(element);
             let selector = settings?.refresh;
 
+            if (selector === 'none') {
+                return;                
+            }
+
             Attv.loadElements(selector, options);
         }
 

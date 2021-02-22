@@ -19,7 +19,8 @@ namespace Attv {
                 Attv.DataCallback.Key,
                 Attv.DataTarget.Key,
                 Attv.DataSource.Key,
-                Attv.DataTemplate.Key
+                Attv.DataTemplate.Key,
+                Attv.DataTemplateUrl.Key
             ]
         }
 
@@ -56,7 +57,7 @@ namespace Attv {
             /**
              * During rendering
              */
-            onRender?: (model: any) => any;
+            onRender?: (model: any, renderFn: (model: any) => void) => void;
     
             /**
              * After rendering
@@ -104,22 +105,45 @@ namespace Attv {
                 };
 
                 // During model rendering
-                options.onRender = (model) => {
-                    // [data-source]
-                    let dataSource = this.attribute.resolve<Attv.DataSource>(Attv.DataSource.Key);
-                    let sourceElement = dataSource.getSourceElement(element);
-                    if (sourceElement) {
-                        let dataTemplate = this.attribute.resolve<Attv.DataTemplate>(Attv.DataTemplate.Key);
-                        model = dataTemplate.render(sourceElement, model);
-                    }
-
+                options.onRender = (model, renderFn) => {
                     // [data-settings]
                     let settings = this.attribute.getSettings<Settings>(element);
                     if (settings) {
                         options.context = settings.context || options.context;
                     }
 
-                    return model;
+                    // [data-source] vs [data-template-url]
+                    let dataSource = this.attribute.resolve<Attv.DataSource>(Attv.DataSource.Key);
+                    let dataTemplateUrl = this.attribute.resolve(Attv.DataTemplateUrl.Key);
+
+                    if (dataSource.exists(element)) {
+                        let sourceElement = dataSource.getSourceElement(element);
+                        
+                        let dataTemplate = this.attribute.resolve<Attv.DataTemplate>(Attv.DataTemplate.Key);
+                        model = dataTemplate.render(sourceElement, model);
+                        
+                        renderFn(model);
+                    } else if (dataTemplateUrl.exists(element)) {
+                        let templateAjaxOptions = dataTemplateUrl.getSettings<Ajax.AjaxOptions>(element) || {} as Ajax.AjaxOptions;
+                        templateAjaxOptions.url = templateAjaxOptions.url || dataTemplateUrl.raw(element);
+                        templateAjaxOptions.callback = (ajaxOptions, wasSuccessful, xhr) => {
+                            if (!wasSuccessful)
+                                return;  // TODO log?
+                            
+                            let template = Attv.Dom.parseDom(xhr.response);
+                            
+                            Attv.concatObject(model, options.context, true, () => {
+                                Attv.loadElements(template, options);
+                            });
+
+                            renderFn(template);
+                        };
+
+                        Ajax.sendAjax(templateAjaxOptions);
+
+                    } else {
+                        renderFn(model);
+                    }
                 };
 
                 // After model has been rendered
@@ -205,8 +229,8 @@ namespace Attv {
          * @param model optionaly specified model. If model is specified, this call won't make Ajax call
          */
         export function renderPartial(options?: PartialOptions, model?: any) {
-            options.beforeRender = options.beforeRender || ((fn) => fn());
-            options.onRender = options.onRender || (model => model);
+            options.beforeRender = options.beforeRender || (fn => fn());
+            options.onRender = options.onRender || ((model, renderFn) => renderFn(model));
             options.afterRender = options.afterRender || (result => {});
 
             let ajaxOptions = options as Attv.Ajax.AjaxOptions;            
@@ -220,21 +244,21 @@ namespace Attv {
             };
 
             let renderModel = (model: any, options: PartialOptions) => {
-                model = options.onRender(model);
-
-                let targetElement = Attv.select(options.container);
-
-                if (targetElement) {
-                    targetElement.attvHtml(model);
+                options.onRender(model, (model) => {
+                    let targetElement = Attv.select(options.container);
     
-                    Attv.loadElements(targetElement, options);
-                }
-
-                options.afterRender(model, targetElement);
+                    if (targetElement) {
+                        targetElement.attvHtml(model);
+        
+                        Attv.loadElements(targetElement, options);
+                    }
+    
+                    options.afterRender(model, targetElement);
+                });
             };
 
             if (model) {
-                options.onRender(model);
+                renderModel(model, options);
             } else {
                 options.beforeRender(() => Attv.Ajax.sendAjax(options));
             }
