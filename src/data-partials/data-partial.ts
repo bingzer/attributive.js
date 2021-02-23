@@ -129,17 +129,15 @@ namespace Attv {
                                 return;  // TODO log?
                             
                             let template = Attv.Dom.parseDom(xhr.response);
+
+                            let tempContext = options.context;
                             
-                            Attv.concatObject(model, options.context, true, (result) => {
-                                let tempContext = options.context;
-                                
-                                // [data-context]
-                                options.context = this.attribute.getContext(element, result);
+                            options.context = Attv.merge(options.context, model, true);
+                            options.context = this.attribute.getContext(element, options.context);
 
-                                Attv.loadElements(template, options);
+                            Attv.loadElements(template, options);
 
-                                options.context = tempContext;
-                            });
+                            options.context = tempContext;
 
                             renderFn(template);
                         };

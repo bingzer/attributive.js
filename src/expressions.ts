@@ -109,14 +109,19 @@ namespace Attv.Expressions {
             this.filterFn = (value?: any, context?: any, arg?: any) => {
                 if (prop.filterName) {
                     let result = undefined;
-                    let argx = arg || {};
 
-                    Attv.concatObject(filters, argx, false, () => {
-                        let evalFn = Attv.eval$(prop.filterName, context, argx);
-                        if (Attv.isUndefined(evalFn))
-                            throw new Error('Not a function: ' + prop.filterName);
-                        result = evalFn(value, context, argx);
-                    });
+                    let argx = Attv.merge(filters, arg);
+                    let evalFn = Attv.eval$(prop.filterName, context, argx);
+                    if (Attv.isUndefined(evalFn))
+                        throw new Error('Not a function: ' + prop.filterName);
+                    result = evalFn(value, context, argx);
+
+                    // Attv.concatObject(filters, argx, false, () => {
+                    //     let evalFn = Attv.eval$(prop.filterName, context, argx);
+                    //     if (Attv.isUndefined(evalFn))
+                    //         throw new Error('Not a function: ' + prop.filterName);
+                    //     result = evalFn(value, context, argx);
+                    // });
                     
                     return result;
                 }

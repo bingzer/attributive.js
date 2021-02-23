@@ -922,49 +922,65 @@ namespace Attv {
      * @param replacing replace the existing property on 'to' object if this is true
      * @param tempFn If defined, the concatenation is temporary until tempFn() is called
      */
-    export function concatObject(from: any, to: any, replacing: boolean = false, tempFn?: (result) => void) {
+    // export function concatObject(from: any, to: any, replacing: boolean = false, tempFn?: (result) => void) {
+    //     from = from || {};
+    //     to = to || {};
+
+    //     let replace = (from: any, to: any, key: string, props?: {key: string, value: any}[]) => {
+    //         if (Array.isArray(from)) {
+    //             let array = from as [];
+    //             array.forEach((value, index) => {
+    //                 to[index] = value;
+    //             });
+    //         } else {
+    //             if (replacing || Attv.isUndefined(to[key])) {
+    //                 to[key] = from[key];
+    //                 props?.push({key: key, value: to[key]});
+    //             }
+    //         }
+    //     }
+
+    //     if (Array.isArray(from) && !Array.isArray(to)) {
+    //         // conver to to array
+    //         let tempTo = to;
+    //         to = [];
+    //         from.forEach((value, index) => to[index] = value);
+    //         Object.keys(tempTo).forEach(key => to[key] = tempTo[key]);
+    //     }
+
+    //     if (tempFn) {
+    //         let props: {key: string, value: any}[] = [];
+
+    //         Object.keys(from).forEach(key => replace(from, to, key, props));
+
+    //         try {
+    //             tempFn(to);
+    //         } catch (e) {
+    //             Attv.log('fatal', e);
+    //         }
+
+    //         // remove props
+    //         props.forEach(key => delete to[key.key]);
+
+    //     } else {
+    //         Object.keys(from).forEach(key => replace(from, to, key));
+    //     }
+    // }
+
+    export function merge(from: object, to: object, replaceTo?: boolean): object {
         from = from || {};
         to = to || {};
 
-        let replace = (from: any, to: any, key: string, props?: {key: string, value: any}[]) => {
-            if (Array.isArray(from)) {
-                let array = from as [];
-                array.forEach((value, index) => {
-                    to[index] = value;
-                });
-            } else {
-                if (replacing || Attv.isUndefined(to[key])) {
-                    to[key] = from[key];
-                    props?.push({key: key, value: to[key]});
-                }
-            }
-        }
+        let result = Array.isArray(from) ? [] : {};
 
-        if (Array.isArray(from) && !Array.isArray(to)) {
-            // conver to to array
-            let tempTo = to;
-            to = [];
-            from.forEach((value, index) => to[index] = value);
-            Object.keys(tempTo).forEach(key => to[key] = tempTo[key]);
-        }
+        // copy everything from 'from' to result
+        Object.keys(from).forEach(key => result[key] = from[key]);
+        Object.keys(to).forEach(key => {
+            (replaceTo || Attv.isUndefined(result[key]))
+                result[key] = to[key]
+        });
 
-        if (tempFn) {
-            let props: {key: string, value: any}[] = [];
-
-            Object.keys(from).forEach(key => replace(from, to, key, props));
-
-            try {
-                tempFn(to);
-            } catch (e) {
-                Attv.log('fatal', e);
-            }
-
-            // remove props
-            props.forEach(key => delete to[key.key]);
-
-        } else {
-            Object.keys(from).forEach(key => replace(from, to, key));
-        }
+        return result;
     }
 
     export function isEvaluatable(any: string) {
@@ -1019,11 +1035,8 @@ namespace Attv {
             }
         };
 
-        let evaluatedResult = undefined;
-
-        Attv.concatObject(arg || {}, context, false, result => {
-            evaluatedResult = evaluateEval.call(context);
-        });
+        let realContext = Attv.merge(context, arg);
+        let evaluatedResult = evaluateEval.call(realContext);
 
         return evaluatedResult;
     }
