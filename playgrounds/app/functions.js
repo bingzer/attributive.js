@@ -3,13 +3,14 @@ var fnx = {
         Attv.Ajax.sendAjax({
             url: app.api + '/account',
             callback: function (wasSuccessful, xhr) {
-                if (!wasSuccessful)
-                    return;
-
-                data.user = JSON.parse(xhr.response);
-                data.user.isAuthorized = true;
-
-                Attv.DataApp.navigate('/');
+                if (wasSuccessful) {
+                    data.user = JSON.parse(xhr.response);
+                    data.user.isAuthorized = true;
+    
+                    Attv.DataApp.navigate('/');
+                } else {
+                    Attv.DataApp.navigate('/login');
+                }
             }
         });
     },
@@ -87,3 +88,7 @@ Attv.Expressions.filters.formatDate = function (date) {
 Attv.Expressions.filters.fullname = function (user) {
     return user.firstName + " " + user.lastName;
 };
+
+Attv.whenReady(function () {
+    fnx.authenticate();
+});

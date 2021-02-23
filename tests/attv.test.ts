@@ -198,6 +198,21 @@ describe('Attv functions', () => {
             expect(tempFnIsCalled).toBeTrue();
 
         });
+
+        it('Should concat array', () => {
+            let tempFnIsCalled = false;
+            let from: any = ["a", "b", "c"];
+
+            let to: any = {
+                name: 'to'
+            }
+
+            Attv.concatObject(from, to);
+
+            expect(from.length).toEqual(to.length);
+            expect(to.name).toBe('to');
+
+        });
     });
 
     describe('Attv.isEvaluatable()', () => {

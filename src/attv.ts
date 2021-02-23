@@ -260,11 +260,12 @@ namespace Attv {
             return setting || undefined;
         }
 
-        getContext<TAny>(element: HTMLElement): TAny {
+        getContext<TAny>(element: HTMLElement, context?: any, arg?: any): TAny {
             let dataContext = Attv.getAttribute(Attv.DataContext.Key);
-            let context = Attv.parseJsonOrElse<TAny>(element.attvAttr(dataContext.name));
+            let rawValue = element.getAttribute(dataContext.name);
+            let ctx = Attv.parseJsonOrElse<TAny>(rawValue, undefined, context, arg);
             
-            return context;
+            return ctx;
         }
 
         /**
@@ -921,15 +922,30 @@ namespace Attv {
      * @param replacing replace the existing property on 'to' object if this is true
      * @param tempFn If defined, the concatenation is temporary until tempFn() is called
      */
-    export function concatObject(from: any, to: any, replacing: boolean = false, tempFn?: () => void) {
+    export function concatObject(from: any, to: any, replacing: boolean = false, tempFn?: (result) => void) {
         from = from || {};
         to = to || {};
 
         let replace = (from: any, to: any, key: string, props?: {key: string, value: any}[]) => {
-            if (replacing || Attv.isUndefined(to[key])) {
-                to[key] = from[key];
-                props?.push({key: key, value: to[key]});
+            if (Array.isArray(from)) {
+                let array = from as [];
+                array.forEach((value, index) => {
+                    to[index] = value;
+                });
+            } else {
+                if (replacing || Attv.isUndefined(to[key])) {
+                    to[key] = from[key];
+                    props?.push({key: key, value: to[key]});
+                }
             }
+        }
+
+        if (Array.isArray(from) && !Array.isArray(to)) {
+            // conver to to array
+            let tempTo = to;
+            to = [];
+            from.forEach((value, index) => to[index] = value);
+            Object.keys(tempTo).forEach(key => to[key] = tempTo[key]);
         }
 
         if (tempFn) {
@@ -938,7 +954,7 @@ namespace Attv {
             Object.keys(from).forEach(key => replace(from, to, key, props));
 
             try {
-                tempFn();
+                tempFn(to);
             } catch (e) {
                 Attv.log('fatal', e);
             }
@@ -986,6 +1002,7 @@ namespace Attv {
                 } else {
                     // Create an args definition list e.g. "arg1 = this.arg1, arg2 = this.arg2"
                     const contextString = Object.keys(context)
+                        .filter(key => isNaN(parseInt(key))) // filter out number if context is an array
                         .map(key => `${key} = this.${key}`)
                         .join(',');
                         
@@ -1002,13 +1019,13 @@ namespace Attv {
             }
         };
 
-        let result = undefined;
+        let evaluatedResult = undefined;
 
-        Attv.concatObject(arg || {}, context, false, () => {
-            result = evaluateEval.call(context);
+        Attv.concatObject(arg || {}, context, false, result => {
+            evaluatedResult = evaluateEval.call(context);
         });
 
-        return result;
+        return evaluatedResult;
     }
 
     export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any, context?: any, arg?: any): TAny {  
