@@ -153,10 +153,10 @@ describe('Attv functions', () => {
                 name: 'to'
             }
 
-            Attv.concatObject(from, to);
+            let expected = Attv.concatObject<any>(from, to);
 
-            expect(to.name).toEqual('to');
-            expect(to.data).toEqual('data');
+            expect(expected.name).toEqual('to');
+            expect(expected.data).toEqual('data');
 
         });
 
@@ -170,32 +170,10 @@ describe('Attv functions', () => {
                 name: 'to'
             }
 
-            Attv.concatObject(from, to, true);
+            let expected = Attv.concatObject<any>(from, to, true);
 
-            expect(to.name).toEqual('from');
-            expect(to.data).toEqual('data');
-
-        });
-
-        it('Should concat object but not replacing the existing properties and using a temporary function', () => {
-            let tempFnIsCalled = false;
-            let from: any = {
-                name: 'from',
-                data: 'data'
-            };
-
-            let to: any = {
-                name: 'to'
-            }
-
-            Attv.concatObject(from, to, false, () => {
-                tempFnIsCalled = true;
-                expect(to.data).toEqual('data');
-            });
-
-            expect(to.name).toEqual('to');
-            expect(to.data).toBeUndefined();
-            expect(tempFnIsCalled).toBeTrue();
+            expect(expected.name).toEqual('from');
+            expect(expected.data).toEqual('data');
 
         });
 
@@ -207,10 +185,10 @@ describe('Attv functions', () => {
                 name: 'to'
             }
 
-            Attv.concatObject(from, to);
+            let expected = Attv.concatObject(from, to) as any;
 
-            expect(from.length).toEqual(to.length);
-            expect(to.name).toBe('to');
+            expect(expected.name).toEqual(to.name);
+            expect(expected.length).toEqual(from.length);
 
         });
     });

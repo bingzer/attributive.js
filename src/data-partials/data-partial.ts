@@ -132,7 +132,7 @@ namespace Attv {
 
                             let tempContext = options.context;
                             
-                            options.context = Attv.merge(options.context, model, true);
+                            options.context = Attv.concatObject(options.context, model, true);
                             options.context = this.attribute.getContext(element, options.context);
 
                             Attv.loadElements(template, options);

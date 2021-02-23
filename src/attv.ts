@@ -916,72 +916,31 @@ namespace Attv {
     }
 
     /**
-     * Concat properties from 'from' to 'to' objects
+     * Concat properties from 'from' to 'to' objects.
+     * If either from/to is an array the result will be an array.
      * @param from object to get the properties from
      * @param to object to put the extra properties to
      * @param replacing replace the existing property on 'to' object if this is true
-     * @param tempFn If defined, the concatenation is temporary until tempFn() is called
+     * @returns an object/an array with all the properties
      */
-    // export function concatObject(from: any, to: any, replacing: boolean = false, tempFn?: (result) => void) {
-    //     from = from || {};
-    //     to = to || {};
-
-    //     let replace = (from: any, to: any, key: string, props?: {key: string, value: any}[]) => {
-    //         if (Array.isArray(from)) {
-    //             let array = from as [];
-    //             array.forEach((value, index) => {
-    //                 to[index] = value;
-    //             });
-    //         } else {
-    //             if (replacing || Attv.isUndefined(to[key])) {
-    //                 to[key] = from[key];
-    //                 props?.push({key: key, value: to[key]});
-    //             }
-    //         }
-    //     }
-
-    //     if (Array.isArray(from) && !Array.isArray(to)) {
-    //         // conver to to array
-    //         let tempTo = to;
-    //         to = [];
-    //         from.forEach((value, index) => to[index] = value);
-    //         Object.keys(tempTo).forEach(key => to[key] = tempTo[key]);
-    //     }
-
-    //     if (tempFn) {
-    //         let props: {key: string, value: any}[] = [];
-
-    //         Object.keys(from).forEach(key => replace(from, to, key, props));
-
-    //         try {
-    //             tempFn(to);
-    //         } catch (e) {
-    //             Attv.log('fatal', e);
-    //         }
-
-    //         // remove props
-    //         props.forEach(key => delete to[key.key]);
-
-    //     } else {
-    //         Object.keys(from).forEach(key => replace(from, to, key));
-    //     }
-    // }
-
-    export function merge(from: object, to: object, replaceTo?: boolean): object {
+    export function concatObject<TAny extends any>(from: object, to: object, replacing?: boolean): TAny {
         from = from || {};
-        to = to || {};
+        to = to || (Array.isArray(from) ? [] : {});
 
-        let result = Array.isArray(from) ? [] : {};
+        let result = Array.isArray(to) ? [] : (Array.isArray(from) ? [] : {});
 
+        // copy everything from 'to' to result
+        Object.keys(to).forEach(key => result[key] = to[key]);
         // copy everything from 'from' to result
-        Object.keys(from).forEach(key => result[key] = from[key]);
-        Object.keys(to).forEach(key => {
-            (replaceTo || Attv.isUndefined(result[key]))
-                result[key] = to[key]
+        Object.keys(from).forEach(key => {
+            if (replacing || Attv.isUndefined(result[key])) {
+                result[key] = from[key]
+            }
         });
 
-        return result;
+        return result as TAny;
     }
+
 
     export function isEvaluatable(any: string) {
         return any?.startsWith('(') && any?.endsWith(')');
@@ -1003,7 +962,7 @@ namespace Attv {
      * @param arg Additional arguments
      */
     export function eval$(any: string, context?: any, arg?: any) {
-        context = context || {};
+        let realContext = Attv.concatObject(context, arg);
 
         // credit to: https://gist.github.com/softwarespot/76252a838efdcace2df1f9c724e37351
         // Call is used to define where "this" within the evaluated code should reference.
@@ -1013,11 +972,11 @@ namespace Attv {
             try {
                 // If it's a string then eval right away
                 // 'this' will become the context string
-                if (Attv.isString(context)) {
+                if (Attv.isString(realContext)) {
                     return eval(any);
                 } else {
                     // Create an args definition list e.g. "arg1 = this.arg1, arg2 = this.arg2"
-                    const contextString = Object.keys(context)
+                    const contextString = Object.keys(realContext)
                         .filter(key => isNaN(parseInt(key))) // filter out number if context is an array
                         .map(key => `${key} = this.${key}`)
                         .join(',');
@@ -1035,7 +994,6 @@ namespace Attv {
             }
         };
 
-        let realContext = Attv.merge(context, arg);
         let evaluatedResult = evaluateEval.call(realContext);
 
         return evaluatedResult;
