@@ -19,7 +19,7 @@ namespace Attv.Expressions {
          * @param context context object (optional) to evaluate this expression against
          * @param arg additional object to evaluate
          */
-        evaluate(context?: any, arg?: any): any;
+        evaluate(context?: any, arg?: any, options?: LoadElementOptions): any;
     }
 
     /**
@@ -84,7 +84,7 @@ namespace Attv.Expressions {
          * Evaluate propertyName against context
          * @param context the context object
          */
-        evaluate<TAny>(context?: any, arg?: any): TAny[] {
+        evaluate<TAny>(context?: any, arg?: any, options?: LoadElementOptions): TAny[] {
             let evaluatedValue = Expressions.evaluateExpression(this, context, arg);
 
             return evaluatedValue || [];
@@ -97,7 +97,7 @@ namespace Attv.Expressions {
     export class AliasExpression implements Expression {
         readonly alias: string;
         readonly propertyName: string;
-        readonly filterFn: (value?: any, context?: any, arg?: any) => string;
+        readonly filterFn: (value?: any, context?: any, arg?: any, options?: LoadElementOptions) => string;
 
         constructor(public readonly expression: string) {
             let split = expression?.split(" as ");
@@ -106,7 +106,7 @@ namespace Attv.Expressions {
             this.propertyName = prop.propertyName;
             this.alias = this.cleanString((split[1] || this.propertyName)?.trim());
 
-            this.filterFn = (value?: any, context?: any, arg?: any) => {
+            this.filterFn = (value?: any, context?: any, arg?: any, options?: LoadElementOptions) => {
                 if (prop.filterName) {
                     let result = undefined;
 
@@ -114,7 +114,7 @@ namespace Attv.Expressions {
                     let evalFn = Attv.eval$(prop.filterName, context, argx);
                     if (Attv.isUndefined(evalFn))
                         throw new Error('Not a function: ' + prop.filterName);
-                    result = evalFn(value, context, argx);
+                    result = evalFn(value, context, argx, options);
                     
                     return result;
                 }
@@ -127,7 +127,7 @@ namespace Attv.Expressions {
          * Evaluate propertyName against context
          * @param context the context object
          */
-        evaluate(context?: any, arg?: any): AliasValue {
+        evaluate(context?: any, arg?: any, options?: LoadElementOptions): AliasValue {
             let value: any;
             let filteredValue: any;
             
@@ -137,7 +137,7 @@ namespace Attv.Expressions {
             }
             else {
                 value = Expressions.evaluateExpression(this, context, arg);
-                filteredValue = this.filterFn(value, context, arg) || value;
+                filteredValue = this.filterFn(value, context, arg, options) || value;
             }
 
             return {

@@ -38,7 +38,7 @@ namespace Attv {
         /**
          * Partial options (also a union of AjaxOptions and LoadElementOptions) + more
          */
-        export interface PartialOptions extends Attv.Ajax.AjaxOptions, LoadElementOptions {
+        export interface PartialOptions extends Attv.Ajax.AjaxOptions, LoadElementOptions, LoadElementCaller {
     
             /**
              * An HTMLElement container to insert to result to
@@ -76,7 +76,7 @@ namespace Attv {
 
             render(element: HTMLElement, model?: any, options?: PartialOptions): void {
                 if (!options) {
-                    options = this.attribute.getSettings<Ajax.AjaxOptions>(element) || { } as Ajax.AjaxOptions;
+                    options = this.attribute.getSettings<PartialOptions>(element) || { } as PartialOptions;
                 }
 
                 // deep copy options
@@ -105,6 +105,8 @@ namespace Attv {
                     });
                 };
 
+                let tempContext = options.context;
+
                 // During model rendering
                 options.onRender = (model, renderFn) => {
                     // [data-context]
@@ -130,14 +132,13 @@ namespace Attv {
                             
                             let template = Attv.Dom.parseDom(xhr.response);
 
-                            let tempContext = options.context;
+                            tempContext = options.context;
                             
                             options.context = Attv.concatObject(options.context, model, true);
                             options.context = this.attribute.getContext(element, options.context);
 
-                            Attv.loadElements(template, options);
-
-                            options.context = tempContext;
+                            options.attribute = this.attribute;
+                            options.element = element;
 
                             renderFn(template);
                         };
@@ -154,6 +155,8 @@ namespace Attv {
                     // [data-callback]
                     let dataCallback = this.attribute.resolve<Attv.DataCallback>(Attv.DataCallback.Key);
                     dataCallback.callback(element);
+
+                    options.context = tempContext;
                 }
 
                 return DataPartial.renderPartial(options, model);
@@ -275,7 +278,7 @@ namespace Attv {
                         targetElement.attvHtml('');
                         targetElement.attvHtml(model);
         
-                        Attv.loadElements(targetElement, options);
+                        Attv.loadElements(targetElement, options, options);
                     }
     
                     options.afterRender(model, targetElement);

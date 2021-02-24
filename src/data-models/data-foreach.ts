@@ -7,15 +7,13 @@ namespace Attv.DataForEach {
         load(element: HTMLElement, options: LoadElementOptions): BooleanOrVoid {
             let html = element.outerHTML;
             let dataContent = this.attribute.resolve(Attv.DataContent.Key);
-            let dataId = this.attribute.resolve(Attv.DataId.Key);
-            let dataRef = this.attribute.resolve(Attv.DataRef.Key);
-            let id = element.attvAttr('id') || dataId.raw(element) || Attv.generateId('foreach');
+            let dataId = this.attribute.resolve(Attv.DataContext.Id.Key);
+            let dataRef = this.attribute.resolve(Attv.DataContext.Ref.Key);
 
             if (!this.attribute.isLoaded(element)) {
                 // if it's not leaded
                 // add custom attributes
                 element.attvAttr(dataContent, html);
-                element.attvAttr(dataId, id);
                 element.attvHtml('');
             } else {
                 // already been loaded
@@ -33,11 +31,7 @@ namespace Attv.DataForEach {
                 let template = expression.createTemplate();
 
                 // load the elemen in the template
-                Attv.loadElements(template, {
-                    includeSelf: true,
-                    context: context,
-                    contextId: id
-                }); 
+                Attv.loadElements(template, { includeSelf: true, context: context }, { attribute: this.attribute, element: element }); 
 
                 element.parentElement.appendChild(template);
             });
@@ -62,8 +56,8 @@ namespace Attv.DataForEach {
             let expression = new Attv.Expressions.ArrayExpression(expressionValue);
 
             let dataContent = this.attribute.resolve(Attv.DataContent.Key);
-            let dataId = this.attribute.resolve(Attv.DataId.Key);
-            let dataRef = this.attribute.resolve(Attv.DataRef.Key);
+            let dataId = this.attribute.resolve(Attv.DataContext.Id.Key);
+            let dataRef = this.attribute.resolve(Attv.DataContext.Ref.Key);
 
             return {
                 name: expression.itemName,
@@ -91,7 +85,6 @@ namespace Attv.DataForEach {
 
 Attv.register(Attv.DataForEach.Key, { wildcard: "*", isAutoLoad: true, priority: 1 }, att => {
     att.deps.internals = [Attv.DataContent.Key, Attv.DataModel.Key];
-    att.deps.uses = [Attv.DataId.Key, Attv.DataRef.Key];
 
     att.map(() => new Attv.DataForEach.Default());
 });

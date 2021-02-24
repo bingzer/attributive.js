@@ -61,6 +61,13 @@ namespace Attv {
         contextId?: string;
     }
 
+    export interface LoadElementCaller {
+
+        attribute: Attv.Attribute;
+
+        element: HTMLElement;
+    }
+
     /**
      * Dependency object used by Attv.Attribute and Attv.AttributeValue
      */
@@ -142,6 +149,11 @@ namespace Attv {
          */
         constructor (public key: string) {
             this.name = key;
+            this.deps.internals = [
+                Attv.DataContext.Key,
+                Attv.DataContext.Id.Key,
+                Attv.DataContext.Ref.Key
+            ]
         }
 
         loadedName() {
@@ -261,11 +273,29 @@ namespace Attv {
         }
 
         getContext<TAny>(element: HTMLElement, context?: any, arg?: any): TAny {
-            let dataContext = Attv.getAttribute(Attv.DataContext.Key);
+            let dataContext = this.resolve(Attv.DataContext.Key);
             let rawValue = element.getAttribute(dataContext.name);
             let ctx = Attv.parseJsonOrElse<TAny>(rawValue, undefined, context, arg);
             
             return ctx;
+        }
+
+        setContextId(element: HTMLElement, context?: any, contextId?: string): string {
+            if (context) {
+                let dataContextId = this.resolve(Attv.DataContext.Id.Key);
+                contextId = contextId || element.attvAttr('id') || dataContextId.raw(element) || Attv.generateId(this.key);
+
+                element.attvAttr(dataContextId, contextId);
+            }
+
+            return contextId;
+        }
+
+        setContextRef(element: HTMLElement, contextId?: string) {
+            if (contextId) {
+                let dataContextRef = this.resolve(Attv.DataContext.Ref.Key);
+                element.attvAttr(dataContextRef, contextId);
+            }
         }
 
         /**
@@ -470,6 +500,8 @@ namespace Attv {
             Attv.log('Attv v.' + Attv.version);
 
             Attv.register(Attv.DataContext.Key, { wildcard: "<json>", isAutoLoad: false });
+            Attv.register(Attv.DataContext.Id.Key, { isAutoLoad: false });
+            Attv.register(Attv.DataContext.Ref.Key, { isAutoLoad: false });
     
             isInitialized = true;
         }
@@ -779,6 +811,14 @@ namespace Attv {
 
     export namespace DataContext {
         export const Key: string = "data-context";
+
+        export namespace Id {
+            export const Key: string = "data-context-id";
+        }
+
+        export namespace Ref {
+            export const Key: string = "data-context-ref";
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
@@ -1131,7 +1171,7 @@ namespace Attv {
         }
     }
 
-    export function loadElements(root?: HTMLElementOrString, options: LoadElementOptions = {}): void {
+    export function loadElements(root?: HTMLElementOrString, options: LoadElementOptions = {}, caller?: LoadElementCaller): void {
         let rootElements: HTMLElement[];
 
         Attv.log('debug', `loadElements()`);
@@ -1147,6 +1187,11 @@ namespace Attv {
             rootElements = Attv.selectAll(root as string);
         } else if (root instanceof HTMLElement) {
             rootElements = [root as HTMLElement];
+        }
+
+        // if there's a caller
+        if (caller?.attribute) {
+            options.contextId = caller.attribute.setContextId(caller.element, options.context, options.contextId);
         }
         
         // auto load all attvs that are marked auto load

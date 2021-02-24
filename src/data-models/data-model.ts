@@ -22,7 +22,6 @@ namespace Attv {
                 new Attv.Binders.Default()
             ];
             this.deps.uses = [ 
-                Attv.DataBinder.Key,
                 Attv.DataModelBehavior.Key
             ];
         }
@@ -37,7 +36,7 @@ namespace Attv {
                 let closest = element.closest<HTMLElement>(dataModelBehavior.selector());
                 if (closest) {
                     let behaviorSettings = dataModelBehavior.parseRaw<Attv.DataModel.Settings>(closest);
-                    settings.refresh = behaviorSettings.refresh;
+                    settings.refresh = behaviorSettings?.refresh;
                 }
             }
 
@@ -54,17 +53,17 @@ namespace Attv {
          * @param element the element to bind
          * @param model the model
          */
-        bindTo(element: HTMLElement, model?: any, binderId?: string): BooleanOrVoid {
+        bindTo(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
             let rawValue = this.raw(element);
             if (!rawValue)
                 return false;
                 
             let expression = new Attv.Expressions.AliasExpression(rawValue);
 
-            let binder = this.binders.filter(b => b.accept(this, element))[0];
+            let binder = this.binders.filter(b => b.accept(this, element, options))[0];
             if (binder) {
-                binder.bind(this, element, expression, model);
-                binder.stamp(this, element, binderId);
+                binder.bind(this, element, expression, options);
+                this.setContextRef(element, options?.contextId);
             }
 
             return true;
@@ -81,14 +80,18 @@ namespace Attv {
              */
             refresh?: string;
             
+            /**
+             * Loader
+             */
+            loader?: string;
         }
         
         export class Value extends Attv.AttributeValue {
             
             load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
                 let dataModel = this.attribute as DataModel;
-                let binderId = options?.contextId;
-                return dataModel.bindTo(element, options?.context, binderId);
+                
+                return dataModel.bindTo(element, options);
             }
         }
     }

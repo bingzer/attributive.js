@@ -20,20 +20,20 @@ namespace Attv {
          * @param elementOrSelector element or a selector
          * @param model the model
          */
-        render(elementOrSelector: HTMLElement | string, model: any): HTMLElement {
+        render(elementOrSelector: HTMLElement | string, model: any, options?: LoadElementOptions): HTMLElement {
             let sourceElement = Attv.select(elementOrSelector);
 
             let attributeValue: DataTemplate.Default = this.getValue<DataTemplate.Default>(sourceElement);
 
-            return attributeValue.render(sourceElement, model);
+            return attributeValue.render(sourceElement, model, options);
         }
     }
 
     export namespace DataTemplate {
 
-        export function renderTemplate(elementOrSelector: HTMLElement | string, model: any): HTMLElement {
+        export function renderTemplate(elementOrSelector: HTMLElement | string, model: any, options?: LoadElementOptions): HTMLElement {
             let dataTemplate = Attv.getAttribute<Attv.DataTemplate>(Attv.DataTemplate.Key);
-            return dataTemplate.render(elementOrSelector, model);
+            return dataTemplate.render(elementOrSelector, model, options);
         }
 
         export class Default extends Attv.AttributeValue {
@@ -71,12 +71,13 @@ namespace Attv {
                 return dom as HTMLElement;
             }
     
-            render(element: HTMLElement, model?: any): HTMLElement {
+            render(element: HTMLElement, model?: any, options?: LoadElementOptions): HTMLElement {
                 let template = this.getTemplateElement(element).cloneNode(true) as HTMLElement;
                 
                 Attv.loadElements(template, {
                     includeSelf: true,
-                    context: model
+                    context: model,
+                    contextId: options?.contextId
                 });
 
                 template.attvAttr('data-template-container', 'container');
@@ -114,9 +115,9 @@ Attv.register(() => new Attv.DataTemplate(), att => {
 
     // register filters
     Attv.Expressions.filters.template = (selector: string) => {
-        return (model: any) => {
+        return (model: any, context: any, arg: any, options?: Attv.LoadElementOptions) => {
             let element = Attv.select(selector);
-            let template = Attv.DataTemplate.renderTemplate(element, model);
+            let template = Attv.DataTemplate.renderTemplate(element, model, options);
             
             return template;
         }
