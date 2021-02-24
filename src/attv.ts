@@ -1171,6 +1171,11 @@ namespace Attv {
         }
     }
 
+    export function reloadElements(root?: HTMLElementOrString, options: LoadElementOptions = {}, caller?: LoadElementCaller): void {
+        options.forceReload = true;
+        loadElements(root, options, caller);
+    }
+
     export function loadElements(root?: HTMLElementOrString, options: LoadElementOptions = {}, caller?: LoadElementCaller): void {
         let rootElements: HTMLElement[];
 

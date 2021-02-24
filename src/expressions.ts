@@ -333,7 +333,11 @@ namespace Attv.Expressions {
         match?.forEach(match => {
             let variableName = match.replace(/(\$\{|\})/gi, '');
             let replacement = Attv.eval$(variableName, context, arg);
-            any = any.replace(match, replacement);
+
+            // if there's a replacemebnt
+            if (replacement) {
+                any = any.replace(match, replacement);
+            }
         });
 
         return any;

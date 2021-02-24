@@ -31,27 +31,14 @@ var fnx = {
         });
     },
 
-    addTodo: function () {
-        data.newTodo.dateTime = Date.now();
-        data.newTodo.id = Attv.generateId('todo');
-
-        data.user.todos.push(data.newTodo);
-        data.newTodo = {
-            id: undefined,
-            title: '',
-            content: '',
-            dateTime: undefined,
-            tags: []
-        };
-        
-        Attv.loadElements(undefined, { forceReload: true });
-    },
-
-    deleteTodo: function (id, email) {
-        var user = this.findUser(email);
-        user.todos.splice(id, 1);
-        
-        Attv.DataApp.refresh();
+    deleteTodo: function(id) {
+        Attv.Ajax.sendAjax({
+            url: app.api + '/todos/' + id,
+            method: 'delete',
+            callback: function () {
+                Attv.reloadElements();
+            }
+        })
     },
 
     findTodo: function (id, email) {
