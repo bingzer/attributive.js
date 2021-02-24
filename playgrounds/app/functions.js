@@ -40,30 +40,6 @@ var fnx = {
             }
         })
     },
-
-    findTodo: function (id, email) {
-        var user = this.findUser(email);
-        for (var i = 0; i < user.todos.length; i++) {
-            if (user.todos[i].id === id) {
-                return user.todos[i];
-            }
-        }
-
-        return undefined;
-    },
-
-    findUser: function (email, password) {
-        for (var i = 0; i < data.users.length; i++) {
-            if (data.users[i].email.equalsIgnoreCase(email)) {
-                if (password && data.users[i].password !== password)
-                    continue;
-
-                return data.users[i];
-            }
-        }
-
-        return undefined;
-    }
 }
 
 

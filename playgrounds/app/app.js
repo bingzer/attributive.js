@@ -36,10 +36,7 @@ var app = {
             var email = match.routeContext[1];
             var todoId = match.routeContext[2];
 
-            var user = fnx.findUser(email);
-            var todo = fnx.findTodo(todoId, email);
-
-            fn({ user: user, todo: todo });
+            fn({ email: email, todoId: todoId });
         },
         when: function() { return data.user.isAdmin; }
     },{
