@@ -86,7 +86,7 @@ namespace Attv.DataApp {
      */
     export function navigate(hash: string) {
         Routes.navigateTo(hash);
-        Attv.loadElements(undefined, { forceReload: true });
+        Attv.reloadElements();
     }
 
     /**

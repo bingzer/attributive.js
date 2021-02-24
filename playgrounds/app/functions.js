@@ -70,7 +70,7 @@ var fnx = {
 
 // register filters
 Attv.Expressions.filters.formatDate = function (date) {
-    return new Date(date).toLocaleString()
+    return new Date(parseInt(date)).toLocaleString()
 };
 Attv.Expressions.filters.fullname = function (user) {
     return user.firstName + " " + user.lastName;

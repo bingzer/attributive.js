@@ -80,7 +80,10 @@ namespace Attv {
                 }
 
                 // deep copy options
-                options = JSON.parse(JSON.stringify(options));
+                options = JSON.parse(JSON.stringify(options, (key, value) => {
+                    if (key === "attribute") return undefined;
+                    return value;
+                }));
 
                 options.url = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key).getUrl(element);
                 options.method = this.attribute.resolve<DataMethod>(Attv.DataMethod.Key).getMethod(element);
@@ -134,11 +137,11 @@ namespace Attv {
 
                             tempContext = options.context;
                             
-                            options.context = Attv.concatObject(options.context, model, true);
-                            options.context = this.attribute.getContext(element, options.context);
-
+                            // modify the load options
+                            options.context = this.attribute.getContext(element, Attv.concatObject(options.context, model, true));
                             options.attribute = this.attribute;
                             options.element = element;
+                            options.includeSelf = false;
 
                             renderFn(template);
                         };

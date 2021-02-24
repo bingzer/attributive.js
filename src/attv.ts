@@ -1228,6 +1228,7 @@ namespace Attv {
                     let isLoaded = attributeValue.load(element, options);
                     if (Attv.isUndefined(isLoaded) || isLoaded) {
                         attribute.markLoaded(element, true);
+                        attribute.setContextRef(element, options?.contextId);
                     }
                 }
                 catch (error) {

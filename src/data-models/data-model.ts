@@ -63,7 +63,6 @@ namespace Attv {
             let binder = this.binders.filter(b => b.accept(this, element, options))[0];
             if (binder) {
                 binder.bind(this, element, expression, options);
-                this.setContextRef(element, options?.contextId);
             }
 
             return true;
