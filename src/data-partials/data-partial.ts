@@ -272,6 +272,7 @@ namespace Attv {
                     let targetElement = Attv.select(options.container);
     
                     if (targetElement) {
+                        targetElement.attvHtml('');
                         targetElement.attvHtml(model);
         
                         Attv.loadElements(targetElement, options);

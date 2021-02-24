@@ -56,5 +56,14 @@ var data = {
      */
     user: {
         isAuthorized: false
+    },
+
+    /**
+     * New todo object
+     */
+    newTodo: {
+        content: '',
+        dateTime: '',
+        tags: []
     }
 };
