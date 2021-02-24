@@ -196,7 +196,7 @@ namespace Attv.Binders {
         }
 
         bind(dataModel: DataModel, element: TElement, expression: Expressions.AliasExpression, options?: LoadElementOptions): void {
-            this.bindValueToElement(dataModel, element, expression, options?.context);
+            this.bindValueToElement(dataModel, element, expression, options);
 
             if (!dataModel.isLoaded(element) && !!this.eventName) {
                 element.addEventListener(this.eventName, e => {
