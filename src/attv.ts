@@ -918,6 +918,7 @@ namespace Attv {
     /**
      * Concat properties from 'from' to 'to' objects.
      * If either from/to is an array the result will be an array.
+     * **Important**: The object returned as a new object.
      * @param from object to get the properties from
      * @param to object to put the extra properties to
      * @param replacing replace the existing property on 'to' object if this is true
@@ -962,41 +963,56 @@ namespace Attv {
      * @param arg Additional arguments
      */
     export function eval$(any: string, context?: any, arg?: any) {
-        let realContext = Attv.concatObject(context, arg);
+        context = context || {};
+
+        // if context is a string
+        // just eval
+        if (Attv.isString(context)) {
+            return eval(any);
+        }
 
         // credit to: https://gist.github.com/softwarespot/76252a838efdcace2df1f9c724e37351
         // Call is used to define where "this" within the evaluated code should reference.
         // eval does not accept the likes of eval.call(...) or eval.apply(...) and cannot
         // be an arrow function
         let evaluateEval = () => {
-            try {
-                // If it's a string then eval right away
-                // 'this' will become the context string
-                if (Attv.isString(realContext)) {
-                    return eval(any);
-                } else {
-                    // Create an args definition list e.g. "arg1 = this.arg1, arg2 = this.arg2"
-                    const contextString = Object.keys(realContext)
-                        .filter(key => isNaN(parseInt(key))) // filter out number if context is an array
-                        .map(key => `${key} = this.${key}`)
-                        .join(',');
-                        
-                    const argsDef = (contextString ? `let ${contextString};` : '');// + 
-                                    //(argString ? `let ${argString};` : '');
+            try {  
 
-                    const statement = `${argsDef}${any}`;
-                                    
-                    const result = eval(statement); 
-                    return result;
-                }  
+                // Create an args definition list e.g. "arg1 = this.arg1, arg2 = this.arg2"
+                const contextString = Object.keys(context)
+                    .filter(key => isNaN(parseInt(key))) // filter out number if context is an array
+                    .map(key => `${key} = this.${key}`)
+                    .join(',');
+                    
+                const argsDef = (contextString ? `let ${contextString};` : '');// + 
+                                //(argString ? `let ${argString};` : '');
+
+                const statement = `${argsDef}${any}`;
+                                
+                const result = eval(statement); 
+                return result;
             } catch {
                 return undefined;  // return undefined whatever happened
             }
         };
 
-        let evaluatedResult = evaluateEval.call(realContext);
+        // if there's arg
+        // append arg to context TEMPORARILY
+        let props = [];
+        Object.keys(arg || {}).forEach(key => {
+            context[key] = arg[key];
+            props.push(key);
+        });
 
-        return evaluatedResult;
+        try {
+            let evaluatedResult = evaluateEval.call(context);
+    
+            return evaluatedResult;
+        } finally {
+            props.forEach(key => {
+                delete context[key]
+            });
+        }
     }
 
     export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any, context?: any, arg?: any): TAny {  

@@ -30,6 +30,10 @@ describe('Attv.eval$() (with different variants of tests)', () => {
         expect(Attv.eval$('Attv.versioned')).toBeUndefined();
     });
 
+    it('Should return a string', () => {
+        expect(Attv.eval$('"yolo"')).toBe("yolo");
+    });
+
     
     it('TEST WITH ARG', () => {
         let employee = { 
