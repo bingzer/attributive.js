@@ -52,29 +52,42 @@ describe("Attv.DataUrl", () => {
         expect(expected).toEqual("https://github.com");
     });
 
-    it('getUrl() should returns url (with other attributes)', () => {
+    it('raw() should returns url (with other attributes)', () => {
         let element = document.createElement('div');
         element.setAttribute('data-url', 'https://github.com');
         element.setAttribute('data-method', 'post');
         element.setAttribute('data-cache', 'true');
 
         let dataUrl = new Attv.DataUrl();
-        let expected = dataUrl.getUrl(element);
+        let expected = dataUrl.raw(element);
 
         expect(expected).toEqual("https://github.com");
     });
 
-    it('getUrl() should returns url (with other attributes) #2', () => {
+    it('raw() should returns url (with other attributes) #2', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-url', 'https://github.com');
+        element.setAttribute('data-method', 'post');
+        element.setAttribute('data-cache', 'true');
+
+        let dataUrl = new Attv.DataUrl();
+        let expected = dataUrl.raw(element);
+
+        expect(expected.indexOf('https://github.com')).toBe(0);  // starts with
+        expect(expected.indexOf('?_')).toBeGreaterThan(-1);
+    });
+
+    it('raw() should returns url (with other attributes - no cache) #3', () => {
         let element = document.createElement('div');
         element.setAttribute('data-url', 'https://github.com');
         element.setAttribute('data-method', 'post');
         element.setAttribute('data-cache', 'false');
 
         let dataUrl = new Attv.DataUrl();
-        let expected = dataUrl.getUrl(element);
+        let expected = dataUrl.raw(element);
 
         expect(expected.indexOf('https://github.com')).toBe(0);  // starts with
-        expect(expected.indexOf('?_')).toBeGreaterThan(-1);
+        expect(expected.indexOf('?_')).toEqual(-1);
     });
     
 });

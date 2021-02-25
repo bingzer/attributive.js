@@ -1,14 +1,5 @@
+namespace Attv.DataActive {
+    export const Key: string = "data-active";
 
-namespace Attv {
-    export class DataActive extends Attv.Attribute {
-        static readonly Key: string = 'data-active';
-
-        constructor() {
-            super(Attv.DataActive.Key);
-            this.wildcard = "<boolean>";
-            this.isAutoLoad = false;
-        }
-    } 
+    Attv.register(Attv.DataActive.Key, { wildcard: "<boolean>", isAutoLoad: false });
 }
-
-Attv.register(() => new Attv.DataActive());

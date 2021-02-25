@@ -54,7 +54,7 @@ describe("Attv.DataForEach.Default", () => {
         let dataId = element.getAttribute('data-id');
 
         let parentElement = element.parentElement;
-        expect(parentElement.querySelector('[data-ref=' + dataId + ']')).toBeInstanceOf(HTMLElement);
+        expect(parentElement.querySelector('[data-context-ref=' + dataId + ']')).toBeInstanceOf(HTMLElement);
     });
 
 });
