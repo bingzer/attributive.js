@@ -7,15 +7,13 @@ namespace Attv.DataForEach {
         load(element: HTMLElement, options: LoadElementOptions): BooleanOrVoid {
             let html = element.outerHTML;
             let dataContent = this.attribute.resolve(Attv.DataContent.Key);
-            let dataId = this.attribute.resolve(Attv.DataId.Key);
-            let dataRef = this.attribute.resolve(Attv.DataRef.Key);
-            let id = element.attvAttr('id') || dataId.raw(element) || Attv.generateId('foreach');
+            let dataId = this.attribute.resolve(Attv.DataContext.Id.Key);
+            let dataRef = this.attribute.resolve(Attv.DataContext.Ref.Key);
 
             if (!this.attribute.isLoaded(element)) {
                 // if it's not leaded
                 // add custom attributes
                 element.attvAttr(dataContent, html);
-                element.attvAttr(dataId, id);
                 element.attvHtml('');
             } else {
                 // already been loaded
@@ -33,11 +31,12 @@ namespace Attv.DataForEach {
                 let template = expression.createTemplate();
 
                 // load the elemen in the template
-                Attv.loadElements(template, {
-                    includeSelf: true,
-                    context: context,
-                    contextId: id
-                }); 
+                Attv.loadElements(template, { includeSelf: true, context: context }, { attribute: this.attribute, element: element }); 
+
+                let id = element.attvAttr(dataId);
+                if (id) {
+                    template.attvAttr(dataRef, id);
+                }
 
                 element.parentElement.appendChild(template);
             });
@@ -58,20 +57,17 @@ namespace Attv.DataForEach {
         }
 
         private parseExpression(element: HTMLElement, context: any): { name: string, array: any[], createTemplate: () => HTMLElement } {
-            let expressionValue = this.attribute.raw(element);
+            let expressionValue = this.attribute.raw(element, context);
             let expression = new Attv.Expressions.ArrayExpression(expressionValue);
 
             let dataContent = this.attribute.resolve(Attv.DataContent.Key);
-            let dataId = this.attribute.resolve(Attv.DataId.Key);
-            let dataRef = this.attribute.resolve(Attv.DataRef.Key);
+            let dataId = this.attribute.resolve(Attv.DataContext.Id.Key);
 
             return {
                 name: expression.itemName,
                 array: expression.evaluate<any>(context),
                 createTemplate: () => {
                     let child = Attv.Dom.parseDom(element.attvAttr(dataContent)).firstElementChild as HTMLElement;
-
-                    child.attvAttr(dataRef, element.getAttribute(dataId.name));
                     
                     // IT IS important to remove unnecessary attributes otherwise we stuck in the for-each loops
                     child.removeAttribute('id'); // [id]
@@ -91,7 +87,6 @@ namespace Attv.DataForEach {
 
 Attv.register(Attv.DataForEach.Key, { wildcard: "*", isAutoLoad: true, priority: 1 }, att => {
     att.deps.internals = [Attv.DataContent.Key, Attv.DataModel.Key];
-    att.deps.uses = [Attv.DataId.Key, Attv.DataRef.Key];
 
     att.map(() => new Attv.DataForEach.Default());
 });

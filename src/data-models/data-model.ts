@@ -1,4 +1,5 @@
 namespace Attv {
+
     export class DataModel extends Attv.Attribute {
         static readonly Key: string = 'data-model';
 
@@ -21,8 +22,30 @@ namespace Attv {
                 new Attv.Binders.Default()
             ];
             this.deps.uses = [ 
-                Attv.DataBinder.Key
+                Attv.DataModelBehavior.Key
             ];
+        }
+
+        
+        getSettings<TAny>(element: HTMLElement): TAny {
+            let settings = super.getSettings<Attv.DataModel.Settings>(element) || {} as Attv.DataModel.Settings;
+
+            // #1. find the closes data-model-behavior
+            if (Attv.isUndefined(settings.refresh)) {
+                let dataModelBehavior = this.resolve(Attv.DataModelBehavior.Key);
+                let closest = element.closest<HTMLElement>(dataModelBehavior.selector());
+                if (closest) {
+                    let behaviorSettings = dataModelBehavior.parseRaw<Attv.DataModel.Settings>(closest);
+                    settings.refresh = behaviorSettings?.refresh;
+                }
+            }
+
+            // #2. Use the static object
+            if (Attv.isUndefined(settings.refresh)) {
+                settings.refresh = Attv.DataModelBehavior.Settings.refresh;
+            }
+
+            return settings as any;
         }
 
         /**
@@ -30,17 +53,16 @@ namespace Attv {
          * @param element the element to bind
          * @param model the model
          */
-        bindTo(element: HTMLElement, model?: any, binderId?: string): BooleanOrVoid {
-            let rawValue = this.raw(element);
+        bindTo(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
+            let rawValue = this.raw(element, options?.context);
             if (!rawValue)
                 return false;
                 
             let expression = new Attv.Expressions.AliasExpression(rawValue);
 
-            let binder = this.binders.filter(b => b.accept(this, element))[0];
+            let binder = this.binders.filter(b => b.accept(this, element, options))[0];
             if (binder) {
-                binder.bind(this, element, expression, model);
-                binder.stamp(this, element, binderId);
+                binder.bind(this, element, expression, options);
             }
 
             return true;
@@ -55,16 +77,20 @@ namespace Attv {
             /**
              * Refresh
              */
-            refresh: string;
+            refresh?: string;
             
+            /**
+             * Loader
+             */
+            loader?: string;
         }
         
         export class Value extends Attv.AttributeValue {
             
             load(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
                 let dataModel = this.attribute as DataModel;
-                let binderId = options?.contextId;
-                return dataModel.bindTo(element, options?.context, binderId);
+                
+                return dataModel.bindTo(element, options);
             }
         }
     }

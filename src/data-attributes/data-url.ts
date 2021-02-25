@@ -14,38 +14,34 @@ namespace Attv {
             ];
         }
 
-        raw(element: HTMLElement): string {
-            let rawValue = super.raw(element);
+        raw(element: HTMLElement, context?: any, arg?: any): string {
+            let url = super.raw(element, context, arg);
+            context = this.getContext(element, context, arg);
 
             // <form action='/'></form>
-            if (!rawValue && element?.tagName?.equalsIgnoreCase('form')) {
+            if (!url && element?.tagName?.equalsIgnoreCase('form')) {
                 // get from action attribute
-                rawValue = element.attvAttr('action');
+                url = Attv.Expressions.replaceVar(element.attvAttr('action'), context);
             }
 
-            // <a href='/'></form>
-            if (!rawValue && element?.tagName?.equalsIgnoreCase('a')) {
-                rawValue = element.attvAttr('href');
+            // <a href='/'></a>
+            if (!url && element?.tagName?.equalsIgnoreCase('a')) {
+                url = Attv.Expressions.replaceVar(element.attvAttr('href'), context);
             }
-
-            return rawValue;
-        }
-
-        getUrl(element: HTMLElement): string {
-            let url = this.raw(element);
 
             // [data-method]
-            let method = this.resolve<DataMethod>(Attv.DataMethod.Key).getMethod(element);
+            let method = this.resolve<DataMethod>(Attv.DataMethod.Key).parseRaw<Ajax.AjaxMethod>(element);
 
             if (method.equalsIgnoreCase('get')) {
                 // [data-data]
-                let data = this.resolve(Attv.DataData.Key).parseRaw(element);
+                let data = this.resolve(Attv.DataData.Key).parseRaw<any>(element);
 
                 url = Attv.Ajax.buildUrl({ url: url, method: method, data: data });
             }
 
             // [data-cache]
-            if (!this.resolve<DataCache>(Attv.DataCache.Key).useCache(element)) {
+            let useCache = this.resolve(Attv.DataCache.Key).parseRaw<boolean>(element);
+            if (Attv.isUndefined(useCache) ? false : useCache) {
                 if (url.contains('?')) {
                     url += `&_=${Date.now()}`;
                 } else {

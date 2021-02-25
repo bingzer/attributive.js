@@ -61,6 +61,13 @@ namespace Attv {
         contextId?: string;
     }
 
+    export interface LoadElementCaller {
+
+        attribute: Attv.Attribute;
+
+        element: HTMLElement;
+    }
+
     /**
      * Dependency object used by Attv.Attribute and Attv.AttributeValue
      */
@@ -111,7 +118,7 @@ namespace Attv {
         /**
          * The dependencies
          */
-        public readonly deps: Dependency = {};
+        public readonly deps: Dependency = { };
 
         /**
          * This attribute name. Most of the time,
@@ -142,6 +149,11 @@ namespace Attv {
          */
         constructor (public key: string) {
             this.name = key;
+            this.deps.internals = [
+                Attv.DataContext.Key,
+                Attv.DataContext.Id.Key,
+                Attv.DataContext.Ref.Key
+            ]
         }
 
         loadedName() {
@@ -170,9 +182,18 @@ namespace Attv {
         /**
          * Returns raw string. If empty it will return 'undefined'
          * @param element the element
+         * @param context the context
+         * @param arg optional additional arguemnt
          */
-        raw(element: HTMLElement): string {
-            return element?.getAttribute(this.name) || undefined;
+        raw(element: HTMLElement, context?: any, arg?: any): string {
+            let rawValue = element?.getAttribute(this.name) || undefined;
+            if (Attv.isDefined(rawValue)) {
+                // see if there's any data-context
+                let rawContext = this.getContext(element, context, arg) || context;
+                rawValue = Attv.Expressions.replaceVar(rawValue, rawContext, arg);
+            }
+
+            return rawValue;
         }
 
         /**
@@ -182,7 +203,7 @@ namespace Attv {
          * @param arg optional additional arguemnt
          */
         parseRaw<TAny>(element: HTMLElement, context?: any, arg?: any): TAny {
-            let raw = this.raw(element);
+            let raw = this.raw(element, context, arg);
 
             switch (this.wildcard) {
                 case "<querySelector>": {
@@ -197,7 +218,7 @@ namespace Attv {
                 case "<json>":
                     raw = Attv.Expressions.escapeQuote(raw);
                 default:
-                    return Attv.parseJsonOrElse(raw, undefined, context, arg) as TAny;
+                    return Attv.parseJsonOrElse(raw, context, arg) as TAny;
             }
         }
 
@@ -251,6 +272,32 @@ namespace Attv {
             let setting = Attv.parseJsonOrElse<TAny>(attribute);
 
             return setting || undefined;
+        }
+
+        getContext<TAny>(element: HTMLElement, context?: any, arg?: any): TAny {
+            let dataContext = this.resolve(Attv.DataContext.Key);
+            let rawValue = element.getAttribute(dataContext.name);
+            let ctx = Attv.parseJsonOrElse<TAny>(rawValue, context, arg);
+            
+            return ctx;
+        }
+
+        setContextId(element: HTMLElement, context?: any, contextId?: string): string {
+            if (context) {
+                let dataContextId = this.resolve(Attv.DataContext.Id.Key);
+                contextId = contextId || element.attvAttr('id') || dataContextId.raw(element, context) || Attv.generateId(this.key);
+
+                element.attvAttr(dataContextId, contextId);
+            }
+
+            return contextId;
+        }
+
+        setContextRef(element: HTMLElement, contextId?: string) {
+            if (contextId) {
+                let dataContextRef = this.resolve(Attv.DataContext.Ref.Key);
+                element.attvAttr(dataContextRef, contextId);
+            }
         }
 
         /**
@@ -453,12 +500,15 @@ namespace Attv {
                 Attv.configuration = new Configuration();
             }
             Attv.log('Attv v.' + Attv.version);
+
+            Attv.register(Attv.DataContext.Key, { wildcard: "<json>", isAutoLoad: false });
+            Attv.register(Attv.DataContext.Id.Key, { isAutoLoad: false });
+            Attv.register(Attv.DataContext.Ref.Key, { isAutoLoad: false });
     
             isInitialized = true;
         }
     
         function registerAllAttributes() {
-            //for (let i = registrations.length - 1; i >= 0; i--) {
             for (let i = 0; i < registrations.length; i++) {
                 let attribute = registrations[i].register();
     
@@ -758,6 +808,22 @@ namespace Attv {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////// DataContext ///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+
+    export namespace DataContext {
+        export const Key: string = "data-context";
+
+        export namespace Id {
+            export const Key: string = "data-context-id";
+        }
+
+        export namespace Ref {
+            export const Key: string = "data-context-ref";
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////// Attv.Ajax ///////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////
     
@@ -768,13 +834,15 @@ namespace Attv {
             url: string;
             method?: AjaxMethod;
             data?: any;
-            callback?: (ajaxOptions: AjaxOptions, wasSuccessful: boolean, xhr: XMLHttpRequest) => void;
+            callback?: (wasSuccessful: boolean, xhr: XMLHttpRequest, ajaxOptions?: AjaxOptions) => void;
             headers?: {name: string, value: string}[];
             createHttpRequest?: () => XMLHttpRequest;
+            withCredentials?: boolean;
         }
             
         export function sendAjax(options: AjaxOptions) {
             options.method = options.method || 'get';
+            options.withCredentials = options.withCredentials || true;
     
             let xhr = options.createHttpRequest ? options.createHttpRequest() : new XMLHttpRequest();
             xhr.onreadystatechange = (e: Event) => {
@@ -783,27 +851,36 @@ namespace Attv {
                     let wasSuccessful = request.status >= 200 && request.status < 400;
     
                     if (options?.callback) {
-                        options?.callback(options, wasSuccessful, request);
+                        options?.callback(wasSuccessful, request, options);
                     }
                 }
             };
             xhr.onerror = (e: ProgressEvent<EventTarget>) => {
                 let request = e.target as XMLHttpRequest;
                 if (options?.callback) {
-                    options?.callback(options, false, request);
+                    options?.callback(false, request, options);
                 }
             }
+
+            xhr.open(options.method, options.url, true);
     
             // last check
             if (Attv.isUndefined(options.url))
                 throw new Error('No url');
-    
-            xhr.open(options.method, options.url, true);
+
+            let data = options.data ? JSON.stringify(options.data) : undefined;
+            if (data) {
+                options.headers = options.headers || [];
+                options.headers.push({ name: "content-type", value: "application/json" });
+            }
 
             // headers must be set after open()
-            options.headers?.forEach(header => xhr.setRequestHeader(header.name, header.value));
+            options.headers?.forEach(header => {
+                xhr.setRequestHeader(header.name, header.value);
+            });
 
-            xhr.send();
+            xhr.withCredentials = options.withCredentials;
+            xhr.send(data);
         }
     
         export function buildUrl(option: AjaxOptions): string {
@@ -881,38 +958,32 @@ namespace Attv {
     }
 
     /**
-     * Concat properties from 'from' to 'to' objects
+     * Concat properties from 'from' to 'to' objects.
+     * If either from/to is an array the result will be an array.
+     * **Important**: The object returned as a new object.
      * @param from object to get the properties from
      * @param to object to put the extra properties to
      * @param replacing replace the existing property on 'to' object if this is true
-     * @param tempFn If defined, the concatenation is temporary until tempFn() is called
+     * @returns an object/an array with all the properties
      */
-    export function concatObject(from: any, to: any, replacing: boolean = false, tempFn?: () => void) {
-        let replace = (from: any, to: any, key: string, props?: string[]) => {
-            if (replacing || Attv.isUndefined(to[key])) {
-                to[key] = from[key];
-                props?.push(key);
+    export function concatObject<TAny extends any>(from: object, to: object, replacing?: boolean): TAny {
+        from = from || {};
+        to = to || (Array.isArray(from) ? [] : {});
+
+        let result = Array.isArray(to) ? [] : (Array.isArray(from) ? [] : {});
+
+        // copy everything from 'to' to result
+        Object.keys(to).forEach(key => result[key] = to[key]);
+        // copy everything from 'from' to result
+        Object.keys(from).forEach(key => {
+            if (replacing || Attv.isUndefined(result[key])) {
+                result[key] = from[key]
             }
-        }
+        });
 
-        if (tempFn) {
-            let props = [];
-
-            Object.keys(from).forEach(key => replace(from, to, key, props));
-
-            try {
-                tempFn();
-            } catch (e) {
-                Attv.log('fatal', e);
-            }
-
-            // remove props
-            props.forEach(key => delete to[key]);
-
-        } else {
-            Object.keys(from).forEach(key => replace(from, to, key));
-        }
+        return result as TAny;
     }
+
 
     export function isEvaluatable(any: string) {
         return any?.startsWith('(') && any?.endsWith(')');
@@ -936,45 +1007,57 @@ namespace Attv {
     export function eval$(any: string, context?: any, arg?: any) {
         context = context || {};
 
+        // if context is a string
+        // just eval
+        if (Attv.isString(context)) {
+            return eval(any);
+        }
+
         // credit to: https://gist.github.com/softwarespot/76252a838efdcace2df1f9c724e37351
         // Call is used to define where "this" within the evaluated code should reference.
         // eval does not accept the likes of eval.call(...) or eval.apply(...) and cannot
         // be an arrow function
         let evaluateEval = () => {
-            try {
-                // If it's a string then eval right away
-                // 'this' will become the context string
-                if (Attv.isString(context)) {
-                    return eval(any);
-                } else {
-                    // Create an args definition list e.g. "arg1 = this.arg1, arg2 = this.arg2"
-                    const contextString = Object.keys(context)
-                        .map(key => `${key} = this.${key}`)
-                        .join(',');
-                        
-                    const argsDef = (contextString ? `let ${contextString};` : '');// + 
-                                    //(argString ? `let ${argString};` : '');
+            try {  
 
-                    const statement = `${argsDef}${any}`;
-                                    
-                    const result = eval(statement); 
-                    return result;
-                }  
+                // Create an args definition list e.g. "arg1 = this.arg1, arg2 = this.arg2"
+                const contextString = Object.keys(context)
+                    .filter(key => isNaN(parseInt(key))) // filter out number if context is an array
+                    .map(key => `${key} = this.${key}`)
+                    .join(',');
+                    
+                const argsDef = (contextString ? `let ${contextString};` : '');// + 
+                                //(argString ? `let ${argString};` : '');
+
+                const statement = `${argsDef}${any}`;
+                                
+                const result = eval(statement); 
+                return result;
             } catch {
                 return undefined;  // return undefined whatever happened
             }
         };
 
-        let result = undefined;
-
-        Attv.concatObject(arg || {}, context, false, () => {
-            result = evaluateEval.call(context);
+        // if there's arg
+        // append arg to context TEMPORARILY
+        let props = [];
+        Object.keys(arg || {}).forEach(key => {
+            context[key] = arg[key];
+            props.push(key);
         });
 
-        return result;
+        try {
+            let evaluatedResult = evaluateEval.call(context);
+    
+            return evaluatedResult;
+        } finally {
+            props.forEach(key => {
+                delete context[key]
+            });
+        }
     }
 
-    export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any, context?: any, arg?: any): TAny {  
+    export function parseJsonOrElse<TAny extends any>(any: any, context?: any, arg?: any): TAny {  
         // Fixed boolean attribute names
         if (any === 'false' || any === 'true') {
             return (any === 'true') as any;
@@ -999,9 +1082,6 @@ namespace Attv {
                 any = Attv.eval$(text, context, arg);
             }
         }
-
-        if (Attv.isUndefined(any))
-            return orDefault;
 
         return any as TAny;
     }
@@ -1090,7 +1170,12 @@ namespace Attv {
         }
     }
 
-    export function loadElements(root?: HTMLElementOrString, options: LoadElementOptions = {}): void {
+    export function reloadElements(root?: HTMLElementOrString, options: LoadElementOptions = {}, caller?: LoadElementCaller): void {
+        options.forceReload = true;
+        loadElements(root, options, caller);
+    }
+
+    export function loadElements(root?: HTMLElementOrString, options: LoadElementOptions = {}, caller?: LoadElementCaller): void {
         let rootElements: HTMLElement[];
 
         Attv.log('debug', `loadElements()`);
@@ -1106,6 +1191,11 @@ namespace Attv {
             rootElements = Attv.selectAll(root as string);
         } else if (root instanceof HTMLElement) {
             rootElements = [root as HTMLElement];
+        }
+
+        // if there's a caller
+        if (caller?.attribute) {
+            options.contextId = caller.attribute.setContextId(caller.element, options.context, options.contextId);
         }
         
         // auto load all attvs that are marked auto load
@@ -1137,6 +1227,7 @@ namespace Attv {
                     let isLoaded = attributeValue.load(element, options);
                     if (Attv.isUndefined(isLoaded) || isLoaded) {
                         attribute.markLoaded(element, true);
+                        attribute.setContextRef(element, options?.contextId);
                     }
                 }
                 catch (error) {

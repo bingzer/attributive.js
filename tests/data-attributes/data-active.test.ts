@@ -15,47 +15,4 @@ describe("Attv.DataActive", () => {
         expect(attribute.key).toEqual(Attv.DataActive.Key);
         expect(attribute.wildcard).toEqual("<boolean>");
     });
-
-    it('constructor() should create an instance', () => {
-        let dataActive = new Attv.DataActive();
-        expect(dataActive).toBeInstanceOf(Attv.Attribute);
-    });
-
-    it('isActive() should return true', () => {
-        let element = document.createElement('div');
-        element.setAttribute('data-active', 'true');
-
-        let dataActive = new Attv.DataActive();
-        let expected = dataActive.isActive(element);
-
-        expect(expected).toEqual(true);
-    });
-
-    it('isActive() should return false', () => {
-        let element = document.createElement('div');
-        element.setAttribute('data-active', 'false');
-
-        let dataActive = new Attv.DataActive();
-        let expected = dataActive.isActive(element);
-
-        expect(expected).toEqual(false);
-    });
-
-    it('setActive() should set to true', () => {
-        let element = document.createElement('div');
-
-        let dataActive = new Attv.DataActive();
-        dataActive.setActive(element, true);
-
-        expect(element.getAttribute('data-active')).toEqual("true");
-    });
-
-    it('setActive() should set to false', () => {
-        let element = document.createElement('div');
-
-        let dataActive = new Attv.DataActive();
-        dataActive.setActive(element, false);
-
-        expect(element.getAttribute('data-active')).toEqual("false");
-    });
 });

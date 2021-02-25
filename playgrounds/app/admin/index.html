@@ -1,7 +1,11 @@
 <div>
     This is admin
 
-    <div>
-        <div data-partial="auto" data-url="admin/users.html"></div>
+    <div data-partial="auto" 
+        data-url="${app.api}/users"
+        data-template-url="admin/users.html"
+        data-context="{ users: this }"
+        id="users-table-partial">
+        <span data-spinner="default"></span>
     </div>
 </div>

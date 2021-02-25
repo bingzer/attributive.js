@@ -16,18 +16,12 @@ describe("Attv.DataSource", () => {
         expect(attribute.isAutoLoad).toEqual(false);
     });
 
-    it('constructor() should create an instance', () => {
-        let dataSource = new Attv.DataSource();
-
-        expect(dataSource).toBeInstanceOf(Attv.Attribute);
-    });
-
     it('getSourceElement() should return an element', () => {
         let element = document.createElement('div');
         element.setAttribute('data-source', 'body');
 
-        let dataSource = new Attv.DataSource();
-        let expected = dataSource.getSourceElement(element);
+        let attribute = Attv.getAttribute(Attv.DataSource.Key);
+        let expected = attribute.parseRaw<HTMLElement>(element);
 
         expect(expected).toBeInstanceOf(HTMLBodyElement);
     });

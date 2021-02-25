@@ -240,6 +240,20 @@ if (!Element.prototype.remove) {
     }
 }
 
+if (!Element.prototype.closest) {
+    Element.prototype.closest = function (selector: string) {
+        var el = this;
+    
+        do {
+          if (Element.prototype.matches.call(el, selector)) {
+              return el;
+          }
+          el = el.parentElement || el.parentNode;
+        } while (el !== null && el.nodeType === 1);
+        return undefined;
+    }
+}
+
 if (!Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'selectedOptions')) {
     Object.defineProperty(HTMLSelectElement.prototype, 'selectedOptions', { 
         get: function () {
@@ -264,4 +278,26 @@ if (!Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'selectedOptio
 
     CustomEvent.prototype = window.Event.prototype;
     (window as any).CustomEvent = CustomEvent;
+})();
+
+// -- FormData polyfill
+(() => {
+    if (FormData.prototype.forEach)
+        return;
+
+    class IEFormData {
+        constructor (public form: HTMLFormElement) {
+            // do nothing
+        }
+
+        forEach(callbackfn: (value: FormDataEntryValue, key: string, parent?: FormData) => void, thisArg?: any): void {
+            Attv.toArray(this.form.querySelectorAll('input'))
+                .filter(elem => elem instanceof HTMLInputElement)
+                .forEach((elem: HTMLInputElement) => {
+                    callbackfn(elem.value, elem.name);
+                });
+        }
+    }
+
+    (window as any).FormData = IEFormData;
 })();

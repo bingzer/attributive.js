@@ -51,10 +51,10 @@ describe("Attv.DataForEach.Default", () => {
         
         value.load(element, { context: context });
 
-        let dataId = element.getAttribute('data-id');
+        let dataId = element.getAttribute('data-context-id');
 
         let parentElement = element.parentElement;
-        expect(parentElement.querySelector('[data-ref=' + dataId + ']')).toBeInstanceOf(HTMLElement);
+        expect(parentElement.querySelector('[data-context-ref=' + dataId + ']')).toBeInstanceOf(HTMLElement);
     });
 
 });

@@ -16,18 +16,12 @@ describe("Attv.DataTarget", () => {
         expect(attribute.isAutoLoad).toEqual(false);
     });
 
-    it('constructor() should create an instance', () => {
-        let dataTarget = new Attv.DataTarget();
-
-        expect(dataTarget).toBeInstanceOf(Attv.Attribute);
-    });
-
     it('getTargetElement() should return an element', () => {
         let element = document.createElement('div');
         element.setAttribute('data-target', 'body');
 
-        let dataSource = new Attv.DataTarget();
-        let expected = dataSource.getTargetElement(element);
+        let attribute = Attv.getAttribute(Attv.DataTarget.Key);
+        let expected = attribute.parseRaw<HTMLElement>(element);
 
         expect(expected).toBeInstanceOf(HTMLBodyElement);
     });

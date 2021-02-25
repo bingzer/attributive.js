@@ -1,43 +1,31 @@
 var data = {
-    user: {
-        isAuthorized: false
-    },
+    /**
+     * Login
+     */
     login: {
         email: 'admin@example.com',
         password: '123'
     },
-    users: [{
-            firstName: 'John',
-            lastName: 'Doe',
-            email: 'john@example.com',
-            password: '123',
-            todos: []
-        }, {
-            firstName: 'Jane',
-            lastName: 'Doe',
-            email: 'jane@example.com',
-            password: '123',
-            todos: []
-        }, {
-            firstName: 'Admin',
-            lastName: 'Doe',
-            email: 'admin@example.com',
-            password: '123',
-            isAdmin: true,
-            todos: [{
-                id: 'todo-sample',
-                title: 'This is the admin',
-                content: 'Hello',
-                dateTime: Date.now(),
-                tags: []
-            }]
-        }
-    ],
+    
+    /**
+     * Current user
+     */
+    user: {
+        isAuthorized: false
+    },
+
+    /**
+     * New todo object
+     */
     newTodo: {
-        id: undefined,
-        title: '',
         content: '',
         dateTime: '',
         tags: []
-    }
+    },
+
+    loremList: [
+        "Lorem ipsum dolor sit amet",
+        "Consectetuer adipiscing elit",
+        "Aliquam tincidunt mauris eu risus"
+    ]
 };

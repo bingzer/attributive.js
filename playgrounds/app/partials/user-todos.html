@@ -1,11 +1,11 @@
 <div class="container mb-4">
-    <table data-model="user.todos"
+    <table data-model="todos"
         data-model-settings="{ 
             headers: [
-            '{ user: user, todo: this } | template(\'#format-todo-detail\') as Title', 
-            'content as Content', 
-            'dateTime | formatDate as Time', 
-            '{ user: user, todo: this } | template(\'#format-delete-todo\') as Action' 
+                '{ user: user, todo: this } | template(\'#format-todo-detail\') as Title', 
+                'content as Content', 
+                'dateTime | formatDate as Time', 
+                '{ user: user, todo: this } | template(\'#format-delete-todo\') as Action' 
             ] 
         }"
         class="table"></table>

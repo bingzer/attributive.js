@@ -7,7 +7,9 @@
 /// <reference path="../data-attributes/data-timeout.ts" />
 /// <reference path="../data-attributes/data-callback.ts" />
 /// <reference path="../data-attributes/data-target.ts" />
+/// <reference path="../data-attributes/data-data.ts" />
 /// <reference path="../data-attributes/data-source.ts" />
 /// <reference path="../data-templates/data-template.ts" />
+/// <reference path="../data-templates/data-template-url.ts" />
 namespace Attv {
 }

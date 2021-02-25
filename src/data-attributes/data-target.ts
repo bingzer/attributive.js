@@ -1,23 +1,5 @@
+namespace Attv.DataTarget {
+    export const Key: string = "data-target";
 
-namespace Attv {
-    export class DataTarget extends Attv.Attribute {
-        static readonly Key: string = 'data-target';
-
-        constructor() {
-            super(Attv.DataTarget.Key);
-            this.wildcard = "<querySelector>";
-            this.isAutoLoad = false;
-        }
-
-        getTargetElement(element: HTMLElement): HTMLElement {
-            let querySelector = this.raw(element);
-            try {
-                return Attv.select(querySelector);
-            } catch (e) {
-                return undefined;
-            }
-        }
-    } 
+    Attv.register(Attv.DataTarget.Key, { wildcard: "<querySelector>", isAutoLoad: false });
 }
-
-Attv.register(() => new Attv.DataTarget());

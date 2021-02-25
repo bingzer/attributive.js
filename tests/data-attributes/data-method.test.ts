@@ -51,31 +51,31 @@ describe("Attv.DataMethod", () => {
         expect(expected).toEqual('get');
     });
 
-    it('getMethod() should return correct method name', () => {
+    it('raw() should return correct method name', () => {
         let element = document.createElement('div');
         element.setAttribute('data-method', 'post');
 
         let dataMethod = new Attv.DataMethod();
-        let expected = dataMethod.getMethod(element);
+        let expected = dataMethod.raw(element);
 
         expect(expected).toEqual('post');
     });
 
-    it('getMethod() should return correct method name (form)', () => {
+    it('raw() should return correct method name (form)', () => {
         let element = document.createElement('form');
         element.setAttribute('method', 'post');
 
         let dataMethod = new Attv.DataMethod();
-        let expected = dataMethod.getMethod(element);
+        let expected = dataMethod.raw(element);
 
         expect(expected).toEqual('post');
     });
 
-    it('getMethod() should return default method (get)', () => {
+    it('raw() should return default method (get)', () => {
         let element = document.createElement('div');
 
         let dataMethod = new Attv.DataMethod();
-        let expected = dataMethod.getMethod(element);
+        let expected = dataMethod.raw(element);
 
         expect(expected).toEqual('get');
     });

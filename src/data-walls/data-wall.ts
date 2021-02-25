@@ -11,6 +11,7 @@ namespace Attv {
 
             this.isAutoLoad = true;
             this.wildcard = "none";
+            this.priority = 1;
             this.deps.uses = [ Attv.DataContent.Key, Attv.DataCallback.Key ];
         }
     }
@@ -33,32 +34,37 @@ namespace Attv {
                         let dataCallback = this.attribute.resolve<DataCallback>(Attv.DataCallback.Key);
                         element.attvAttr(dataCallback, onclick);
                         element.removeAttribute('onclick');
-                        element.onclick = undefined;
                     }
-    
-                    element.onclick = (ev: Event) => this.click(element, ev);
+
+                    element.onclick = (ev: Event) => {
+                        if (!ev.cancelBubble || !ev.defaultPrevented) {
+                            return this.click(ev, element, options);
+                        }
+
+                        return true;
+                    }
                 }
             }
 
-            protected click(element: HTMLElement, ev: Event): boolean {
+            protected click(ev: Event, element: HTMLElement, options?: LoadElementOptions): boolean {
                 let dataContent = this.attribute.resolve(Attv.DataContent.Key);
-                let content = dataContent.raw(element);
+                let content = dataContent.raw(element, options?.context);
 
                 alert(content);
 
-                return this.continue(element);
+                return this.continue(ev, element, options);
             }
 
-            protected continue(element: HTMLElement): boolean {
+            protected continue(ev: Event, element: HTMLElement, options?: LoadElementOptions): boolean {
                 let dataUrl = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key);
-                let url = dataUrl.getUrl(element);
-                
-                let dataCallback = this.attribute.resolve<DataCallback>(Attv.DataCallback.Key);
-                if (dataCallback.raw(element)) {
-                    dataCallback.callback(element);
-                } else if (element?.tagName?.equalsIgnoreCase('a')) {
+                let url = dataUrl.raw(element, options?.context);
+
+                if (url && (element?.tagName?.equalsIgnoreCase('a'))) {
                     let target = element.attvAttr('target');
                     Attv.DataWall.navigate(url || '', target);
+                } else {
+                    let dataCallback = this.attribute.resolve<DataCallback>(Attv.DataCallback.Key);
+                    dataCallback.callback(element);
                 }
 
                 return false;
@@ -74,12 +80,15 @@ namespace Attv {
                 super(attributeValue);
             }
 
-            protected click(element: HTMLElement, ev: Event): boolean {
+            protected click(ev: Event, element: HTMLElement, options?: LoadElementOptions): boolean {
                 let dataContent = this.attribute.resolve(Attv.DataContent.Key);
-                let content = dataContent.raw(element);
+                let content = dataContent.raw(element, options?.context);
 
                 if (confirm(content)) {
-                    return this.continue(element);
+                    return this.continue(ev, element, options);
+                } else {
+                    ev.stopPropagation();
+                    ev.preventDefault();
                 }
 
                 return false;

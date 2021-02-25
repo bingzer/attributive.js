@@ -17,7 +17,7 @@ describe('Attv.Attribute', () => {
 
         expect(attribute.key).toBe('data-attr');
         expect(attribute.name).toBe('data-attr');
-        expect(attribute.deps).toHaveSize(0);
+        expect(attribute.deps.internals).toHaveSize(3);
         expect(attribute.loadedName()).toBe('data-attr-loaded');
         expect(attribute.settingsName()).toBe('data-attr-settings');
         expect(attribute.allowsWildcard()).toBe(true);
@@ -71,6 +71,18 @@ describe('Attv.Attribute', () => {
         let attribute = new Attv.Attribute('data-attr');
 
         expect(attribute.raw(element)).toBeUndefined();
+    });
+
+    it('raw() with context', () => {
+        let element = document.createElement('div');
+        element.setAttribute('data-context', '{ app: { name: "APP NAME" }}');
+        element.setAttribute('data-attr', '${app.name}')
+
+        let attribute = new Attv.Attribute('data-attr');
+
+        let expected = attribute.raw(element);
+
+        expect(expected).toEqual("APP NAME");
     });
 
     it('parseRaw() should return an object', () => {
