@@ -74,7 +74,6 @@ describe("Attv.DataPartial.Click", () => {
         let valType = value.validators.filter(val => val.name === Attv.Validators.NeedAttrKeys)[0] as Attv.Validators.ValidatingObj;
         expect(valType).toBeDefined();
         expect(valType.options.indexOf(Attv.DataUrl.Key)).toBeGreaterThanOrEqual(0);
-        expect(valType.options.indexOf(Attv.DataTarget.Key)).toBeGreaterThanOrEqual(0);
     });
 });
 
