@@ -40,7 +40,8 @@ namespace Attv {
             }
 
             // [data-cache]
-            if (!this.resolve<DataCache>(Attv.DataCache.Key).parseRaw<boolean>(element)) {
+            let useCache = this.resolve<DataCache>(Attv.DataCache.Key).parseRaw<boolean>(element);
+            if (Attv.isUndefined(useCache) ? false : useCache) {
                 if (url.contains('?')) {
                     url += `&_=${Date.now()}`;
                 } else {
