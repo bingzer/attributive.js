@@ -54,7 +54,7 @@ namespace Attv {
          * @param model the model
          */
         bindTo(element: HTMLElement, options?: LoadElementOptions): BooleanOrVoid {
-            let rawValue = this.raw(element, options.context);
+            let rawValue = this.raw(element, options?.context);
             if (!rawValue)
                 return false;
                 

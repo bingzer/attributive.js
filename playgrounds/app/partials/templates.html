@@ -10,16 +10,17 @@
   <script type="text/html" data-template="script" id="format-delete-user">
   
     <button type="button" 
-      class="btn btn-danger" 
-      data-attrs="{ 
-        onclick: 'fnx.deleteUser(`${this.email}`)', 
-        data_content: 'Are you sure you want to delete ${this.email}?', 
-        disabled: email === data.user.email,
-        title: email === data.user.email ? 'Current User' : 'Delete this user'
-      }" 
-      data-wall="confirm">Delete</button>
+        class="btn btn-danger" 
+        data-partial="click"
+        data-url="${app.api}/users/${this.id}"
+        data-content="Are you sure you want to delete ${this.email}?"
+        data-attrs="{ 
+          disabled: data.user.email === this.email,
+          title: data.user.email === this.email ? 'Current User' : 'Delete this user'
+        }" 
+        data-wall="confirm">Delete</button>
   
-    <a class="btn btn-secondary" data-attrs="{ href: '#/users/' + this.email }">Edit</a>
+    <a class="btn btn-secondary" data-attrs="{ href: '#/users/${this.email}' }">Edit</a>
   
   </script>
   

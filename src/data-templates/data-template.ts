@@ -115,7 +115,7 @@ Attv.register(() => new Attv.DataTemplate(), att => {
 
     // register filters
     Attv.Expressions.filters.template = (selector: string) => {
-        return (model: any, context: any, arg: any, options?: Attv.LoadElementOptions) => {
+        return (model: any, context?: any, arg?: any, options?: Attv.LoadElementOptions) => {
             let element = Attv.select(selector);
             let template = Attv.DataTemplate.renderTemplate(element, model, options);
             

@@ -42,7 +42,7 @@ namespace Attv {
 
             protected click(ev: Event, element: HTMLElement, options?: LoadElementOptions): boolean {
                 let dataContent = this.attribute.resolve(Attv.DataContent.Key);
-                let content = dataContent.raw(element, options.context);
+                let content = dataContent.raw(element, options?.context);
 
                 alert(content);
 
@@ -51,7 +51,7 @@ namespace Attv {
 
             protected continue(element: HTMLElement, options?: LoadElementOptions): boolean {
                 let dataUrl = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key);
-                let url = dataUrl.raw(element, options.context);
+                let url = dataUrl.raw(element, options?.context);
                 
                 let dataCallback = this.attribute.resolve<DataCallback>(Attv.DataCallback.Key);
                 if (url) {
@@ -76,7 +76,7 @@ namespace Attv {
 
             protected click(ev: Event, element: HTMLElement, options?: LoadElementOptions): boolean {
                 let dataContent = this.attribute.resolve(Attv.DataContent.Key);
-                let content = dataContent.raw(element, options.context);
+                let content = dataContent.raw(element, options?.context);
 
                 if (confirm(content)) {
                     return this.continue(element);

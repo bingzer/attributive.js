@@ -133,7 +133,7 @@ namespace Attv.Binders {
                     let td = document.createElement('td');
 
                     let tempContextId = options.contextId;
-                    options.contextId = dataModel.setContextId(table, options.context);
+                    options.contextId = dataModel.setContextId(table, options?.context);
 
                     td.attvHtml(head.evaluate(item, options?.context, options).filtered);
 

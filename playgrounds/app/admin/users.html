@@ -1,14 +1,15 @@
 <div>
     <table 
+        id="users-table"
         data-model="users"
         data-model-settings="{ 
             headers: [ 
                 'firstName as First Name', 
                 'lastName as Last Name', 
                 'this | fullname as Full Name',
-                'email | template(`#format-email`) as Email Address', 
+                'email | template(\'#format-email\') as Email Address', 
                 'password as Password', 
-                'this | template(`#format-delete-user`) as Action' 
+                'this | template(\'#format-delete-user\') as Action' 
             ] 
         }"
         class="table"></table>

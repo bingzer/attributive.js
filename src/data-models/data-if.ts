@@ -4,7 +4,7 @@ namespace Attv.DataIf {
     export class Default extends Attv.AttributeValue {
         
         load(element: HTMLElement, options: LoadElementOptions): BooleanOrVoid {
-            let expression = this.attribute.raw(element, options.context);
+            let expression = this.attribute.raw(element, options?.context);
             let aliasExpression = new Attv.Expressions.AliasExpression(expression);
             
             let value = aliasExpression.evaluate(options?.context);

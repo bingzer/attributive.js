@@ -85,18 +85,18 @@ namespace Attv {
                     return value;
                 }));
 
-                options.url = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key).raw(element, options.context);
-                options.method = this.attribute.resolve<DataMethod>(Attv.DataMethod.Key).parseRaw<Ajax.AjaxMethod>(element, options.context);
+                options.url = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key).raw(element, options?.context);
+                options.method = this.attribute.resolve<DataMethod>(Attv.DataMethod.Key).parseRaw<Ajax.AjaxMethod>(element, options?.context);
                 
                 // [data-target]
                 let dataTarget = this.attribute.resolve<Attv.DataTarget>(Attv.DataTarget.Key);
-                options.container = dataTarget.parseRaw<HTMLElement>(element, options.context) || element;
+                options.container = dataTarget.parseRaw<HTMLElement>(element, options?.context) || element;
 
                 // Before render
                 options.beforeRender = sendFn => {
                     // [data-data]
                     let dataData = this.attribute.resolve<Attv.DataData>(Attv.DataData.Key);
-                    options.data = dataData.parseRaw(element, options.context);
+                    options.data = dataData.parseRaw(element, options?.context);
 
                     // [data-timeout]
                     let dataTimeout = this.attribute.resolve<Attv.DataTimeout>(Attv.DataTimeout.Key);
@@ -108,7 +108,7 @@ namespace Attv {
                     });
                 };
 
-                let tempContext = options.context;
+                let tempContext = options?.context;
 
                 // During model rendering
                 options.onRender = (model, renderFn) => {
@@ -120,7 +120,7 @@ namespace Attv {
                     let dataTemplateUrl = this.attribute.resolve(Attv.DataTemplateUrl.Key);
 
                     if (dataSource.exists(element)) {
-                        let sourceElement = dataSource.parseRaw<HTMLElement>(element, options.context);
+                        let sourceElement = dataSource.parseRaw<HTMLElement>(element, options?.context);
                         
                         let dataTemplate = this.attribute.resolve<Attv.DataTemplate>(Attv.DataTemplate.Key);
                         model = dataTemplate.render(sourceElement, model);
@@ -128,7 +128,7 @@ namespace Attv {
                         renderFn(model);
                     } else if (dataTemplateUrl.exists(element)) {
                         let templateAjaxOptions = dataTemplateUrl.getSettings<Ajax.AjaxOptions>(element) || {} as Ajax.AjaxOptions;
-                        templateAjaxOptions.url = templateAjaxOptions.url || dataTemplateUrl.raw(element, options.context);
+                        templateAjaxOptions.url = templateAjaxOptions.url || dataTemplateUrl.raw(element, options?.context);
                         templateAjaxOptions.callback = (wasSuccessful, xhr) => {
                             if (!wasSuccessful)
                                 return;  // TODO log?
@@ -138,7 +138,7 @@ namespace Attv {
                             tempContext = options.context;
                             
                             // modify the load options
-                            options.context = this.attribute.getContext(element, Attv.concatObject(options.context, model, true));
+                            options.context = this.attribute.getContext(element, Attv.concatObject(options?.context, model, true));
                             options.attribute = this.attribute;
                             options.element = element;
                             options.includeSelf = false;

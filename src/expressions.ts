@@ -110,7 +110,7 @@ namespace Attv.Expressions {
                 if (prop.filterName) {
                     let result = undefined;
 
-                    let argx = Attv.concatObject(filters, arg);
+                    let argx = Attv.concatObject(Attv.Expressions.filters, arg);
                     let evalFn = Attv.eval$(prop.filterName, context, argx);
                     if (Attv.isUndefined(evalFn))
                         throw new Error('Not a function: ' + prop.filterName);
