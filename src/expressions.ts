@@ -77,7 +77,7 @@ namespace Attv.Expressions {
         constructor(public readonly expression: string){
             let split = expression.split(" in ");
             this.itemName = split[0]?.trim();
-            this.propertyName = split[1]?.trim();
+            this.propertyName = split[1]?.trim() || this.itemName;
         }
 
         /**

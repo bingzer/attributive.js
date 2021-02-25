@@ -29,6 +29,21 @@ var fnx = {
                 Attv.DataApp.navigate('/login');
             }
         });
+    },
+
+    getTodos: function (fn, context, options) {
+        window.setTimeout(function () {
+            var url = Attv.Expressions.replaceVar('${app.api}/todos?userId=${user.id}', context);
+            Attv.Ajax.sendAjax({
+                url: url,
+                callback: function (wasSuccessful, xhr) {
+                    var data = JSON.parse(xhr.response);
+                    fn(data);
+                }
+            });
+        }, 2000);
+
+        return this;
     }
 }
 

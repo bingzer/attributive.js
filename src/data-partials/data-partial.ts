@@ -21,7 +21,8 @@ namespace Attv {
                 Attv.DataSource.Key,
                 Attv.DataTemplate.Key,
                 Attv.DataTemplateUrl.Key,
-                Attv.DataData.Key
+                Attv.DataData.Key,
+                Attv.DataPartialCall.Key
             ]
         }
 
@@ -44,6 +45,11 @@ namespace Attv {
              * An HTMLElement container to insert to result to
              */
             container?: Attv.HTMLElementOrString;
+
+            /**
+             * Partial call
+             */
+            partialCall: (callFn: DataPartialCall.Call, context?: any, options?: PartialOptions) => void;
     
             /**
              * Callbacks before rendering.
@@ -88,6 +94,7 @@ namespace Attv {
 
                 options.url = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key).raw(element, options.context);
                 options.method = this.attribute.resolve<DataMethod>(Attv.DataMethod.Key).parseRaw<Ajax.AjaxMethod>(element, options.context);
+                options.partialCall = this.attribute.resolve(Attv.DataPartialCall.Key).parseRaw<any>(element, options.context);
                 
                 // [data-target]
                 let dataTarget = this.attribute.resolve<Attv.DataTarget>(Attv.DataTarget.Key);
@@ -101,6 +108,9 @@ namespace Attv {
                     // [data-data]
                     let dataData = this.attribute.resolve<Attv.DataData>(Attv.DataData.Key);
                     options.data = dataData.parseRaw(element, options.context);
+
+                    // [data-context]
+                    options.context = this.attribute.getContext(element, options.context);
 
                     // [data-timeout]
                     let dataTimeout = this.attribute.resolve<Attv.DataTimeout>(Attv.DataTimeout.Key);
@@ -292,7 +302,18 @@ namespace Attv {
             if (model) {
                 renderModel(model, options);
             } else {
-                options.beforeRender(() => Attv.Ajax.sendAjax(options));
+                options.beforeRender(() => {
+                    if (options.partialCall) {
+                        options.partialCall((data, error) => {
+                            if (error) {
+                                throw error;
+                            }
+                            renderModel(data, options);
+                        }, options.context, options);
+                    } else {
+                        Attv.Ajax.sendAjax(options)
+                    }
+                });
             }
         }
     }

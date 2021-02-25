@@ -33,6 +33,11 @@ namespace Attv.DataForEach {
                 // load the elemen in the template
                 Attv.loadElements(template, { includeSelf: true, context: context }, { attribute: this.attribute, element: element }); 
 
+                let id = element.attvAttr(dataId);
+                if (id) {
+                    template.attvAttr(dataRef, id);
+                }
+
                 element.parentElement.appendChild(template);
             });
 
@@ -57,15 +62,12 @@ namespace Attv.DataForEach {
 
             let dataContent = this.attribute.resolve(Attv.DataContent.Key);
             let dataId = this.attribute.resolve(Attv.DataContext.Id.Key);
-            let dataRef = this.attribute.resolve(Attv.DataContext.Ref.Key);
 
             return {
                 name: expression.itemName,
                 array: expression.evaluate<any>(context),
                 createTemplate: () => {
                     let child = Attv.Dom.parseDom(element.attvAttr(dataContent)).firstElementChild as HTMLElement;
-
-                    child.attvAttr(dataRef, element.getAttribute(dataId.name));
                     
                     // IT IS important to remove unnecessary attributes otherwise we stuck in the for-each loops
                     child.removeAttribute('id'); // [id]

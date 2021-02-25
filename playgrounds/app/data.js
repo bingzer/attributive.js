@@ -21,5 +21,11 @@ var data = {
         content: '',
         dateTime: '',
         tags: []
-    }
+    },
+
+    loremList: [
+        "Lorem ipsum dolor sit amet",
+        "Consectetuer adipiscing elit",
+        "Aliquam tincidunt mauris eu risus"
+    ]
 };

@@ -2,6 +2,7 @@
     <h3>Add/Remove your todos</h3>
 
     <div data-partial="auto" 
+        data-partial-call="fnx.getTodos"
         data-url="${app.api}/todos?userId=${user.id}"
         data-template-url="partials/user-todos.html"
         data-context="{ user: data.user, todos: this }">
