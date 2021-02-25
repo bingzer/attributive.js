@@ -97,7 +97,7 @@ namespace Attv {
                 options.partialCall = this.attribute.resolve(Attv.DataPartialCall.Key).parseRaw<any>(element, options.context);
                 
                 // [data-target]
-                let dataTarget = this.attribute.resolve<Attv.DataTarget>(Attv.DataTarget.Key);
+                let dataTarget = this.attribute.resolve(Attv.DataTarget.Key);
                 // if there's no data-target but there's a callback
                 // leave the container empty
                 let containerMaybeEmpty = (!dataTarget.exists(element) && this.attribute.resolve(Attv.DataCallback.Key).exists(element));
@@ -130,7 +130,7 @@ namespace Attv {
                     options.context = this.attribute.getContext(element);
 
                     // [data-source] vs [data-template-url]
-                    let dataSource = this.attribute.resolve<Attv.DataSource>(Attv.DataSource.Key);
+                    let dataSource = this.attribute.resolve(Attv.DataSource.Key);
                     let dataTemplateUrl = this.attribute.resolve(Attv.DataTemplateUrl.Key);
 
                     if (dataSource.exists(element)) {
