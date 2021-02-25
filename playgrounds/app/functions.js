@@ -41,7 +41,7 @@ var fnx = {
                     fn(data);
                 }
             });
-        }, 2000);
+        }, 100);
 
         return this;
     }

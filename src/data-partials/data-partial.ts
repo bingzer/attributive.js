@@ -215,7 +215,9 @@ namespace Attv {
             }
 
             protected click(ev: Event, element: HTMLElement, options?: PartialOptions) {
-                this.render(element, undefined, options);
+                if (!ev.cancelBubble || !ev.defaultPrevented) {
+                    this.render(element, undefined, options);
+                }
             }
         }
 

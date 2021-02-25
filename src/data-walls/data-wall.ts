@@ -34,10 +34,15 @@ namespace Attv {
                         let dataCallback = this.attribute.resolve<DataCallback>(Attv.DataCallback.Key);
                         element.attvAttr(dataCallback, onclick);
                         element.removeAttribute('onclick');
-                        element.onclick = undefined;
                     }
-    
-                    element.onclick = (ev: Event) => this.click(ev, element, options);
+
+                    element.onclick = (ev: Event) => {
+                        if (!ev.cancelBubble || !ev.defaultPrevented) {
+                            return this.click(ev, element, options);
+                        }
+
+                        return true;
+                    }
                 }
             }
 
@@ -81,6 +86,9 @@ namespace Attv {
 
                 if (confirm(content)) {
                     return this.continue(ev, element, options);
+                } else {
+                    ev.stopPropagation();
+                    ev.preventDefault();
                 }
 
                 return false;
