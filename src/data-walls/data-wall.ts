@@ -11,6 +11,7 @@ namespace Attv {
 
             this.isAutoLoad = true;
             this.wildcard = "none";
+            this.priority = 1;
             this.deps.uses = [ Attv.DataContent.Key, Attv.DataCallback.Key ];
         }
     }
@@ -46,10 +47,10 @@ namespace Attv {
 
                 alert(content);
 
-                return this.continue(element);
+                return this.continue(ev, element, options);
             }
 
-            protected continue(element: HTMLElement, options?: LoadElementOptions): boolean {
+            protected continue(ev: Event, element: HTMLElement, options?: LoadElementOptions): boolean {
                 let dataUrl = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key);
                 let url = dataUrl.raw(element, options?.context);
 
@@ -79,7 +80,7 @@ namespace Attv {
                 let content = dataContent.raw(element, options?.context);
 
                 if (confirm(content)) {
-                    return this.continue(element);
+                    return this.continue(ev, element, options);
                 }
 
                 return false;
