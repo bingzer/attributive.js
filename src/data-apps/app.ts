@@ -148,7 +148,7 @@ namespace Attv.DataApp {
         }
 
         export function cleanHash(hash: string): string {
-            return hash?.replace('#', '')?.replace(/\/\//, '/');
+            return hash?.replace('#', '')?.replace(/\/\//, '/').split('?')[0];
         }
 
         export function getHash(hash: string): string {

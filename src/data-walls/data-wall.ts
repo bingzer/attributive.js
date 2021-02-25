@@ -52,13 +52,13 @@ namespace Attv {
             protected continue(element: HTMLElement, options?: LoadElementOptions): boolean {
                 let dataUrl = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key);
                 let url = dataUrl.raw(element, options?.context);
-                
-                let dataCallback = this.attribute.resolve<DataCallback>(Attv.DataCallback.Key);
-                if (url) {
-                    dataCallback.callback(element);
-                } else if (element?.tagName?.equalsIgnoreCase('a')) {
+
+                if (url && (element?.tagName?.equalsIgnoreCase('a'))) {
                     let target = element.attvAttr('target');
                     Attv.DataWall.navigate(url || '', target);
+                } else {
+                    let dataCallback = this.attribute.resolve<DataCallback>(Attv.DataCallback.Key);
+                    dataCallback.callback(element);
                 }
 
                 return false;
