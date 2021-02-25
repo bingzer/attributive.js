@@ -14,6 +14,7 @@
         data-partial="click"
         data-url="${app.api}/users/${this.id}"
         data-content="Are you sure you want to delete ${this.email}?"
+        data-callback="Attv.reloadElements()"
         data-attrs="{ 
           disabled: data.user.email === this.email,
           title: data.user.email === this.email ? 'Current User' : 'Delete this user'
@@ -26,11 +27,11 @@
   
   <script type="text/html" data-template="script" id="format-delete-todo">
     <button type="button" 
-      class="btn btn-danger" 
-      data-partial="click"
-      data-url="${app.api}/todos/${todo.id}"
-      data-content="Are you sure you want to delete ${todo.title}?"
-      data-method="delete"
-      data-callback="Attv.reloadElements()"
-      data-wall="confirm">Delete</button>
+        class="btn btn-danger" 
+        data-partial="click"
+        data-url="${app.api}/todos/${todo.id}"
+        data-content="Are you sure you want to delete ${todo.title}?"
+        data-method="delete"
+        data-callback="Attv.reloadElements()"
+        data-wall="confirm">Delete</button>
   </script>

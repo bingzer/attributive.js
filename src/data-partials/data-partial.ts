@@ -54,12 +54,13 @@ namespace Attv {
             /**
              * During rendering
              */
-            onRender?: (model: any, renderFn: (model: any) => void) => void;
+            onRender?: (model: any, renderFn: (model: any, element: HTMLElement) => void) => void;
     
             /**
              * After rendering
              */
-            afterRender?: (model: any, element?: HTMLElement) => void;
+            afterRender?: (model: any, element: HTMLElement, targetElement?: HTMLElement) => void;
+
         }
 
         /**
@@ -85,18 +86,21 @@ namespace Attv {
                     return value;
                 }));
 
-                options.url = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key).raw(element, options?.context);
-                options.method = this.attribute.resolve<DataMethod>(Attv.DataMethod.Key).parseRaw<Ajax.AjaxMethod>(element, options?.context);
+                options.url = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key).raw(element, options.context);
+                options.method = this.attribute.resolve<DataMethod>(Attv.DataMethod.Key).parseRaw<Ajax.AjaxMethod>(element, options.context);
                 
                 // [data-target]
                 let dataTarget = this.attribute.resolve<Attv.DataTarget>(Attv.DataTarget.Key);
-                options.container = dataTarget.parseRaw<HTMLElement>(element, options?.context) || element;
+                // if there's no data-target but there's a callback
+                // leave the container empty
+                let containerMaybeEmpty = (!dataTarget.exists(element) && this.attribute.resolve(Attv.DataCallback.Key).exists(element));
+                options.container = dataTarget.parseRaw<HTMLElement>(element, options.context) || (containerMaybeEmpty ? undefined : element);
 
                 // Before render
                 options.beforeRender = sendFn => {
                     // [data-data]
                     let dataData = this.attribute.resolve<Attv.DataData>(Attv.DataData.Key);
-                    options.data = dataData.parseRaw(element, options?.context);
+                    options.data = dataData.parseRaw(element, options.context);
 
                     // [data-timeout]
                     let dataTimeout = this.attribute.resolve<Attv.DataTimeout>(Attv.DataTimeout.Key);
@@ -108,7 +112,7 @@ namespace Attv {
                     });
                 };
 
-                let tempContext = options?.context;
+                let tempContext = options.context;
 
                 // During model rendering
                 options.onRender = (model, renderFn) => {
@@ -120,15 +124,15 @@ namespace Attv {
                     let dataTemplateUrl = this.attribute.resolve(Attv.DataTemplateUrl.Key);
 
                     if (dataSource.exists(element)) {
-                        let sourceElement = dataSource.parseRaw<HTMLElement>(element, options?.context);
+                        let sourceElement = dataSource.parseRaw<HTMLElement>(element, options.context);
                         
                         let dataTemplate = this.attribute.resolve<Attv.DataTemplate>(Attv.DataTemplate.Key);
                         model = dataTemplate.render(sourceElement, model);
                         
-                        renderFn(model);
+                        renderFn(model, element);
                     } else if (dataTemplateUrl.exists(element)) {
                         let templateAjaxOptions = dataTemplateUrl.getSettings<Ajax.AjaxOptions>(element) || {} as Ajax.AjaxOptions;
-                        templateAjaxOptions.url = templateAjaxOptions.url || dataTemplateUrl.raw(element, options?.context);
+                        templateAjaxOptions.url = templateAjaxOptions.url || dataTemplateUrl.raw(element, options.context);
                         templateAjaxOptions.callback = (wasSuccessful, xhr) => {
                             if (!wasSuccessful)
                                 return;  // TODO log?
@@ -138,23 +142,23 @@ namespace Attv {
                             tempContext = options.context;
                             
                             // modify the load options
-                            options.context = this.attribute.getContext(element, Attv.concatObject(options?.context, model, true));
-                            options.attribute = this.attribute;
+                            options.context = this.attribute.getContext(element, Attv.concatObject(options.context, model, true));
                             options.element = element;
+                            options.attribute = this.attribute;
                             options.includeSelf = false;
 
-                            renderFn(template);
+                            renderFn(template, element);
                         };
 
                         Ajax.sendAjax(templateAjaxOptions);
 
                     } else {
-                        renderFn(model);
+                        renderFn(model, element);
                     }
                 };
 
                 // After model has been rendered
-                options.afterRender = (model, element) => {
+                options.afterRender = (model, element, targetElement) => {
                     // [data-callback]
                     let dataCallback = this.attribute.resolve<Attv.DataCallback>(Attv.DataCallback.Key);
                     dataCallback.callback(element);
@@ -257,8 +261,8 @@ namespace Attv {
          */
         export function renderPartial(options?: PartialOptions, model?: any) {
             options.beforeRender = options.beforeRender || (fn => fn());
-            options.onRender = options.onRender || ((model, renderFn) => renderFn(model));
-            options.afterRender = options.afterRender || (result => {});
+            options.onRender = options.onRender || ((model, renderFn) => renderFn(model, undefined));
+            options.afterRender = options.afterRender || ((model, element, targetElement) => {});
 
             let ajaxOptions = options as Attv.Ajax.AjaxOptions;            
             ajaxOptions.callback = (wasSuccessful: boolean, xhr: XMLHttpRequest): void => {
@@ -271,7 +275,7 @@ namespace Attv {
             };
 
             let renderModel = (model: any, options: PartialOptions) => {
-                options.onRender(model, (model) => {
+                options.onRender(model, (model, element) => {
                     let targetElement = Attv.select(options.container);
     
                     if (targetElement) {
@@ -281,7 +285,7 @@ namespace Attv {
                         Attv.loadElements(targetElement, options, options);
                     }
     
-                    options.afterRender(model, targetElement);
+                    options.afterRender(model, element, targetElement);
                 });
             };
 

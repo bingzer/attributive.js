@@ -29,17 +29,7 @@ var fnx = {
                 Attv.DataApp.navigate('/login');
             }
         });
-    },
-
-    deleteTodo: function(id) {
-        Attv.Ajax.sendAjax({
-            url: app.api + '/todos/' + id,
-            method: 'delete',
-            callback: function () {
-                Attv.reloadElements();
-            }
-        })
-    },
+    }
 }
 
 
