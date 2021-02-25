@@ -1,6 +1,6 @@
 /// <reference path="../../src/attv.ts" />
+/// <reference path="../../src/expressions.ts" />
 /// <reference path="../../src/data-models/binders.ts" />
-/// <reference path="../../src/data-models/expressions.ts" />
 // ------------------------------------------------- //
 
 describe('Attv.Binders', () => {
@@ -48,11 +48,15 @@ describe('Attv.Binders.Default', () => {
         let dataModel = new Attv.DataModel();
 
         let element = document.createElement('div');
-        element.setAttribute('data-binder', 'binder-1');
+        element.setAttribute('data-context-ref', 'binder-1');
 
         let binder = new Attv.Binders.Default();
 
-        let expected = binder.accept(dataModel, element, 'binder-1');
+        let options = {
+            contextId: 'binder-1'
+        };
+
+        let expected = binder.accept(dataModel, element, options);
 
         expect(expected).toEqual(true);
     });
@@ -61,11 +65,15 @@ describe('Attv.Binders.Default', () => {
         let dataModel = new Attv.DataModel();
 
         let element = document.createElement('div');
-        element.setAttribute('data-binder', 'binder-1');
+        element.setAttribute('data-context-ref', 'binder-1');
 
         let binder = new Attv.Binders.Default();
 
-        let expected = binder.accept(dataModel, element, 'binder-2');
+        let options = {
+            contextId: 'binder-2'
+        };
+
+        let expected = binder.accept(dataModel, element, options);
 
         expect(expected).toEqual(false);
     });
@@ -81,9 +89,11 @@ describe('Attv.Binders.Default', () => {
 
         let binder = new Attv.Binders.Default();
 
+        let options = { context };
+
         let expression = new Attv.Expressions.AliasExpression("employee.firstName");
 
-        binder.bind(dataModel, element, expression, context);
+        binder.bind(dataModel, element, expression, options);
 
         expect(element.innerHTML).toEqual('Ricky');
     });
@@ -99,31 +109,13 @@ describe('Attv.Binders.Default', () => {
 
         let binder = new Attv.Binders.Default();
 
+        let options = { context };
+
         let expression = new Attv.Expressions.AliasExpression("employee.nickname");
 
-        binder.bind(dataModel, element, expression, context);
+        binder.bind(dataModel, element, expression, options);
 
         expect(element.innerHTML).toEqual('');
-    });
-
-    it('stamp() should stamp the binder id', () => {
-        let context = {
-            employee: { firstName: 'Ricky' }
-        };
-
-        let dataModel = new Attv.DataModel();
-
-        let element = document.createElement('div');
-
-        let binder = new Attv.Binders.Default();
-
-        let expression = new Attv.Expressions.AliasExpression("employee.firstName");
-
-        binder.bind(dataModel, element, expression, context);
-        binder.stamp(dataModel, element, 'binder-1');
-
-        expect(element.innerHTML).toEqual('Ricky');
-        expect(element.getAttribute('data-binder')).toEqual('binder-1');
     });
     
 });

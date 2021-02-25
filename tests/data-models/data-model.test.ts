@@ -26,10 +26,10 @@ describe("Attv.DataModel", () => {
 
         let context = { employee: { firstName: "ricky" } };
 
-        let refId = undefined; // "data-foreach-1";
+        let options = { context: context };
 
         let dataModel = new Attv.DataModel();
-        let expected = dataModel.bindTo(element, context, refId);
+        let expected = dataModel.bindTo(element, options);
 
         expect(expected).toEqual(true);
         expect(element.innerHTML).toBe('ricky');
@@ -39,15 +39,16 @@ describe("Attv.DataModel", () => {
         let element = document.createElement('div');
         element.setAttribute('data-model', 'employee.firstName');
 
-        let context = { employee: { firstName: "ricky" } };
-
         let refId = "data-foreach-1";
 
+        let context = { employee: { firstName: "ricky" } };
+
+        let options = { context: context, contextId: refId };
+
         let dataModel = new Attv.DataModel();
-        let expected = dataModel.bindTo(element, context, refId);
+        let expected = dataModel.bindTo(element, options);
 
         expect(expected).toEqual(true);
-        expect(element.getAttribute('data-binder')).toEqual(refId);
         expect(element.innerHTML).toBe('ricky');
     });
 

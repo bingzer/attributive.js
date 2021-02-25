@@ -17,7 +17,7 @@ describe('Attv.Attribute', () => {
 
         expect(attribute.key).toBe('data-attr');
         expect(attribute.name).toBe('data-attr');
-        expect(attribute.deps).toHaveSize(0);
+        expect(attribute.deps.internals).toHaveSize(3);
         expect(attribute.loadedName()).toBe('data-attr-loaded');
         expect(attribute.settingsName()).toBe('data-attr-settings');
         expect(attribute.allowsWildcard()).toBe(true);
