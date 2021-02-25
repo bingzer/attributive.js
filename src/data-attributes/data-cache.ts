@@ -1,14 +1,5 @@
+namespace Attv.DataCache {
+    export const Key: string = "data-cache";
 
-namespace Attv {
-    export class DataCache extends Attv.Attribute {
-        static readonly Key: string = 'data-cache';
-
-        constructor() {
-            super(Attv.DataCache.Key);
-            this.wildcard = "<boolean>";
-            this.isAutoLoad = false;
-        }
-    } 
+    Attv.register(Attv.DataCache.Key, { wildcard: "<boolean>", isAutoLoad: false });
 }
-
-Attv.register(() => new Attv.DataCache());

@@ -61,7 +61,8 @@ describe("Attv.DataUrl", () => {
         let dataUrl = new Attv.DataUrl();
         let expected = dataUrl.raw(element);
 
-        expect(expected).toEqual("https://github.com");
+        expect(expected.indexOf("https://github.com")).toBeGreaterThan(-1); // exists
+        expect(expected.indexOf("?_")).toBeGreaterThan(-1); // exists
     });
 
     it('raw() should returns url (with other attributes) #2', () => {

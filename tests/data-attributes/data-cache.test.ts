@@ -16,28 +16,22 @@ describe("Attv.DataCache", () => {
         expect(attribute.isAutoLoad).toEqual(false);
     });
 
-    it('constructor() should create an instance', () => {
-        let dataActive = new Attv.DataCache();
-
-        expect(dataActive).toBeInstanceOf(Attv.Attribute);
-    });
-
     it('useCache() should return true', () => {
         let element = document.createElement('div');
         element.setAttribute('data-cache', 'true');
 
-        let dataActive = new Attv.DataCache();
+        let attribute = Attv.getAttribute(Attv.DataCache.Key);
 
-        expect(dataActive.useCache(element)).toBeTrue();
+        expect(attribute.parseRaw<boolean>(element)).toBeTrue();
     });
 
     it('useCache() should return false', () => {
         let element = document.createElement('div');
         element.setAttribute('data-cache', 'false');
-        
-        let dataActive = new Attv.DataCache();
 
-        expect(dataActive.useCache(element)).toBeFalse();
+        let attribute = Attv.getAttribute(Attv.DataCache.Key);
+
+        expect(attribute.parseRaw<boolean>(element)).toBeFalse();
     });
 
 });

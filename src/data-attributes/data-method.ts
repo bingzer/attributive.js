@@ -8,7 +8,7 @@ namespace Attv {
             this.isAutoLoad = false;
         }
 
-        raw(element: HTMLElement, context: any, arg: any): string {
+        raw(element: HTMLElement, context?: any, arg?: any): string {
             let rawValue = super.raw(element, context, arg);
 
             if (!rawValue && element?.tagName?.equalsIgnoreCase('form')) {
