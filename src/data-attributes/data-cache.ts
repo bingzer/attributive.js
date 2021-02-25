@@ -8,14 +8,6 @@ namespace Attv {
             this.wildcard = "<boolean>";
             this.isAutoLoad = false;
         }
-        
-        useCache(element: HTMLElement) {
-            let value = this.raw(element);
-            if (Attv.isUndefined(value) || value === null)
-                return true;
-    
-            return value?.equalsIgnoreCase('true');
-        }
     } 
 }
 

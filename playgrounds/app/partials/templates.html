@@ -26,9 +26,10 @@
   <script type="text/html" data-template="script" id="format-delete-todo">
     <button type="button" 
       class="btn btn-danger" 
-      data-attrs="{ 
-        onclick: 'fnx.deleteTodo(`${todo.id}`, `${user.email}`)', 
-        data_content: 'Are you sure you want to delete ${todo.title}?' 
-      }" 
+      data-partial="click"
+      data-url="${app.api}/todos/${todo.id}"
+      data-content="Are you sure you want to delete ${todo.title}?"
+      data-method="delete"
+      data-callback="Attv.reloadElements()"
       data-wall="confirm">Delete</button>
   </script>

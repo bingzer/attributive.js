@@ -85,12 +85,12 @@ namespace Attv {
                     return value;
                 }));
 
-                options.url = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key).getUrl(element);
-                options.method = this.attribute.resolve<DataMethod>(Attv.DataMethod.Key).getMethod(element);
+                options.url = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key).raw(element, options.context);
+                options.method = this.attribute.resolve<DataMethod>(Attv.DataMethod.Key).parseRaw<Ajax.AjaxMethod>(element, options.context);
                 
                 // [data-target]
                 let dataTarget = this.attribute.resolve<Attv.DataTarget>(Attv.DataTarget.Key);
-                options.container = dataTarget.getTargetElement(element) || element;
+                options.container = dataTarget.parseRaw<HTMLElement>(element, options.context) || element;
 
                 // Before render
                 options.beforeRender = sendFn => {
@@ -120,7 +120,7 @@ namespace Attv {
                     let dataTemplateUrl = this.attribute.resolve(Attv.DataTemplateUrl.Key);
 
                     if (dataSource.exists(element)) {
-                        let sourceElement = dataSource.getSourceElement(element);
+                        let sourceElement = dataSource.parseRaw<HTMLElement>(element, options.context);
                         
                         let dataTemplate = this.attribute.resolve<Attv.DataTemplate>(Attv.DataTemplate.Key);
                         model = dataTemplate.render(sourceElement, model);
@@ -128,7 +128,7 @@ namespace Attv {
                         renderFn(model);
                     } else if (dataTemplateUrl.exists(element)) {
                         let templateAjaxOptions = dataTemplateUrl.getSettings<Ajax.AjaxOptions>(element) || {} as Ajax.AjaxOptions;
-                        templateAjaxOptions.url = templateAjaxOptions.url || dataTemplateUrl.raw(element);
+                        templateAjaxOptions.url = templateAjaxOptions.url || dataTemplateUrl.raw(element, options.context);
                         templateAjaxOptions.callback = (wasSuccessful, xhr) => {
                             if (!wasSuccessful)
                                 return;  // TODO log?
@@ -189,15 +189,12 @@ namespace Attv {
             constructor () {
                 super('click');
 
-                this.deps.requires = [ Attv.DataTarget.Key ];
-                this.validators = [
-                    { name: Attv.Validators.NeedAttrKeys, options: [Attv.DataUrl.Key, Attv.DataTarget.Key] }
-                ];
+                this.deps.uses = [ Attv.DataTarget.Key ];
             }
 
             load(element: HTMLElement, options?: PartialOptions): BooleanOrVoid {
                 if (!this.attribute.isLoaded(element)) {
-                    element.onclick = (ev: Event) => this.click(ev, element, options);
+                    element.addEventListener('click', ev => this.click(ev, element, options));
                 }
 
                 return true;

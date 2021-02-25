@@ -182,13 +182,15 @@ namespace Attv {
         /**
          * Returns raw string. If empty it will return 'undefined'
          * @param element the element
+         * @param context the context
+         * @param arg optional additional arguemnt
          */
-        raw(element: HTMLElement): string {
+        raw(element: HTMLElement, context?: any, arg?: any): string {
             let rawValue = element?.getAttribute(this.name) || undefined;
             if (Attv.isDefined(rawValue)) {
                 // see if there's any data-context
-                let context = this.getContext(element);
-                rawValue = Attv.Expressions.replaceVar(rawValue, context);
+                let rawContext = this.getContext(element, context, arg) || context;
+                rawValue = Attv.Expressions.replaceVar(rawValue, rawContext, arg);
             }
 
             return rawValue;
@@ -201,7 +203,7 @@ namespace Attv {
          * @param arg optional additional arguemnt
          */
         parseRaw<TAny>(element: HTMLElement, context?: any, arg?: any): TAny {
-            let raw = this.raw(element);
+            let raw = this.raw(element, context, arg);
 
             switch (this.wildcard) {
                 case "<querySelector>": {
@@ -216,7 +218,7 @@ namespace Attv {
                 case "<json>":
                     raw = Attv.Expressions.escapeQuote(raw);
                 default:
-                    return Attv.parseJsonOrElse(raw, undefined, context, arg) as TAny;
+                    return Attv.parseJsonOrElse(raw, context, arg) as TAny;
             }
         }
 
@@ -275,7 +277,7 @@ namespace Attv {
         getContext<TAny>(element: HTMLElement, context?: any, arg?: any): TAny {
             let dataContext = this.resolve(Attv.DataContext.Key);
             let rawValue = element.getAttribute(dataContext.name);
-            let ctx = Attv.parseJsonOrElse<TAny>(rawValue, undefined, context, arg);
+            let ctx = Attv.parseJsonOrElse<TAny>(rawValue, context, arg);
             
             return ctx;
         }
@@ -283,7 +285,7 @@ namespace Attv {
         setContextId(element: HTMLElement, context?: any, contextId?: string): string {
             if (context) {
                 let dataContextId = this.resolve(Attv.DataContext.Id.Key);
-                contextId = contextId || element.attvAttr('id') || dataContextId.raw(element) || Attv.generateId(this.key);
+                contextId = contextId || element.attvAttr('id') || dataContextId.raw(element, context) || Attv.generateId(this.key);
 
                 element.attvAttr(dataContextId, contextId);
             }
@@ -1055,7 +1057,7 @@ namespace Attv {
         }
     }
 
-    export function parseJsonOrElse<TAny extends any>(any: any, orDefault?: any, context?: any, arg?: any): TAny {  
+    export function parseJsonOrElse<TAny extends any>(any: any, context?: any, arg?: any): TAny {  
         // Fixed boolean attribute names
         if (any === 'false' || any === 'true') {
             return (any === 'true') as any;
@@ -1080,9 +1082,6 @@ namespace Attv {
                 any = Attv.eval$(text, context, arg);
             }
         }
-
-        if (Attv.isUndefined(any))
-            return orDefault;
 
         return any as TAny;
     }

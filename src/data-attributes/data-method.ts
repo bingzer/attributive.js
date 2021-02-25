@@ -8,8 +8,8 @@ namespace Attv {
             this.isAutoLoad = false;
         }
 
-        raw(element: HTMLElement): string {
-            let rawValue = super.raw(element);
+        raw(element: HTMLElement, context: any, arg: any): string {
+            let rawValue = super.raw(element, context, arg);
 
             if (!rawValue && element?.tagName?.equalsIgnoreCase('form')) {
                 // get from method attribute
@@ -17,10 +17,6 @@ namespace Attv {
             }
 
             return rawValue || 'get';
-        }
-
-        getMethod(element: HTMLElement): Ajax.AjaxMethod {
-            return this.raw(element) as Ajax.AjaxMethod;
         }
     } 
 }

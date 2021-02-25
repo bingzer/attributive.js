@@ -8,15 +8,6 @@ namespace Attv {
             this.wildcard = "<querySelector>";
             this.isAutoLoad = false;
         }
-
-        getSourceElement(element: HTMLElement): HTMLElement | undefined {
-            let querySelector = this.raw(element);
-            try {
-                return Attv.select(querySelector);
-            } catch (e) {
-                return undefined;
-            }
-        }
     } 
 }
 

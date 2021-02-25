@@ -36,25 +36,25 @@ namespace Attv {
                         element.onclick = undefined;
                     }
     
-                    element.onclick = (ev: Event) => this.click(element, ev);
+                    element.onclick = (ev: Event) => this.click(ev, element, options);
                 }
             }
 
-            protected click(element: HTMLElement, ev: Event): boolean {
+            protected click(ev: Event, element: HTMLElement, options?: LoadElementOptions): boolean {
                 let dataContent = this.attribute.resolve(Attv.DataContent.Key);
-                let content = dataContent.raw(element);
+                let content = dataContent.raw(element, options.context);
 
                 alert(content);
 
                 return this.continue(element);
             }
 
-            protected continue(element: HTMLElement): boolean {
+            protected continue(element: HTMLElement, options?: LoadElementOptions): boolean {
                 let dataUrl = this.attribute.resolve<DataUrl>(Attv.DataUrl.Key);
-                let url = dataUrl.getUrl(element);
+                let url = dataUrl.raw(element, options.context);
                 
                 let dataCallback = this.attribute.resolve<DataCallback>(Attv.DataCallback.Key);
-                if (dataCallback.raw(element)) {
+                if (url) {
                     dataCallback.callback(element);
                 } else if (element?.tagName?.equalsIgnoreCase('a')) {
                     let target = element.attvAttr('target');
@@ -74,9 +74,9 @@ namespace Attv {
                 super(attributeValue);
             }
 
-            protected click(element: HTMLElement, ev: Event): boolean {
+            protected click(ev: Event, element: HTMLElement, options?: LoadElementOptions): boolean {
                 let dataContent = this.attribute.resolve(Attv.DataContent.Key);
-                let content = dataContent.raw(element);
+                let content = dataContent.raw(element, options.context);
 
                 if (confirm(content)) {
                     return this.continue(element);

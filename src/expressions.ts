@@ -184,7 +184,7 @@ namespace Attv.Expressions {
         // first check if it's a property statement
         let evaluatedValue: any = undefined;
         if (Attv.isEvaluatableStatement(expression.propertyName)) {
-            evaluatedValue = Attv.parseJsonOrElse(expression.propertyName, undefined, context, arg);
+            evaluatedValue = Attv.parseJsonOrElse(expression.propertyName, context, arg);
         } else {
             // treat is a property name
             evaluatedValue = Attv.Expressions.getProperty(expression.propertyName, context);
@@ -198,7 +198,7 @@ namespace Attv.Expressions {
             }
 
             // try parse
-            let parsed = Attv.parseJsonOrElse(parsedExpression, undefined, context, arg);
+            let parsed = Attv.parseJsonOrElse(parsedExpression, context, arg);
 
             // if it's not a string then it is an expression
             if (!Attv.isString(parsed) && Attv.isDefined(parsed)) {

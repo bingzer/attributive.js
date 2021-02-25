@@ -9,15 +9,6 @@ namespace Attv {
             this.isAutoLoad = false;
         }
 
-        /**
-         * Assume everything is enabled except when specifically set to 'false'
-         * @param element the element
-         */
-        isEnabled(element: HTMLElement) {
-            let rawValue = this.raw(element);
-
-            return !rawValue?.equalsIgnoreCase('false');
-        }
     } 
 }
 

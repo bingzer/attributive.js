@@ -8,16 +8,6 @@ namespace Attv {
             this.wildcard = "<boolean>";
             this.isAutoLoad = false;
         }
-        
-        isActive(element: HTMLElement) {
-            let rawValue = this.raw(element);
-
-            return rawValue?.equalsIgnoreCase('true');
-        }
-
-        setActive(element: HTMLElement, isActive: boolean) {
-            element.attvAttr(this, isActive);
-        }
     } 
 }
 
