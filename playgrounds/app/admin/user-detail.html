@@ -4,6 +4,13 @@
 
   <div class="col-md-10 p-5 border">
     <h4>List of <span data-model="user.email"></span> TODOs</h4>
-    <div class="container mb-4" data-partial="auto" data-url="partials/user-todos.html" data-context="{ user: this }"></div>
+    <div class="container mb-4" 
+      data-partial="auto" 
+      data-partial-call="fnx.getTodos"
+      data-url="${app.api}/todos?userId=${user.id}"
+      data-template-url="partials/user-todos.html"
+      data-context="{ user: user, todos: this }">
+      <span data-spinner="default"></span>
+    </div>
   </div>
 </div>
