@@ -33,8 +33,8 @@ var app = {
         url: 'partials/todo-detail.html',
         title: 'Todo Detail',
         withContext: function (match, fn) {
-            var email = match.routeContext[1];
-            var todoId = match.routeContext[2];
+            var email = match.matches[1];
+            var todoId = match.matches[2];
 
             fn({ email: email, todoId: todoId });
         },
@@ -44,10 +44,18 @@ var app = {
         url: 'admin/user-detail.html',
         title: 'User Detail',
         withContext: function (match, fn) {
-            var email = match.routeContext[1];
-            var user = fnx.findUser(email);
+            var email = match.matches[1];
+            Attv.Ajax.sendAjax({
+                url: app.api + '/users?email=' + email,
+                callback: function (wasSuccessful, xhr) {
+                    if (!wasSuccessful)
+                        return;
+
+                    var users = JSON.parse(xhr.response);
             
-            fn({ user: user });
+                    fn({ user: users[0] });
+                }
+            });
         },
         when: function() { return data.user.isAdmin; }
     },{

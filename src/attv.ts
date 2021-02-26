@@ -277,9 +277,13 @@ namespace Attv {
         getContext<TAny>(element: HTMLElement, context?: any, arg?: any): TAny {
             let dataContext = this.resolve(Attv.DataContext.Key);
             let rawValue = element.getAttribute(dataContext.name);
-            let ctx = Attv.parseJsonOrElse<TAny>(rawValue, context, arg);
+
+            // is defined an NOT an empty string
+            if (rawValue) {
+                context = Attv.parseJsonOrElse<TAny>(rawValue, context, arg);
+            }
             
-            return ctx;
+            return context;
         }
 
         setContextId(element: HTMLElement, context?: any, contextId?: string): string {
@@ -1070,6 +1074,11 @@ namespace Attv {
         // if string
         if (Attv.isString(any)) {
             let text = any as string;
+
+            // if 'this'
+            if (any === 'this') {
+                return context;
+            }
             
             // does it look like json object?
             if (Attv.isEvaluatableStatement(text)) {

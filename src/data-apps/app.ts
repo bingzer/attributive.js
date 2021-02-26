@@ -92,9 +92,19 @@ namespace Attv.DataApp {
         isMatch: boolean;
 
         /**
-         * Route context
+         * Matches
          */
-        routeContext: any;
+        matches: RegExpMatchArray;
+
+        /**
+         * The route that's being match
+         */
+        route: Route;
+
+        /**
+         * Current location
+         */
+        currentHash: string;
     }
 
     /**
@@ -110,7 +120,7 @@ namespace Attv.DataApp {
             let hash = Routes.cleanHash(route.path || route.match);
             let locationRoute = Routes.currentHash();
             let isMatch = route.isDefault;
-            let context = undefined;
+            let matches = undefined;
 
             // TODO: refactor
             if (locationRoute.startsWith(hash)) {
@@ -124,7 +134,7 @@ namespace Attv.DataApp {
                 }
             } else if (route.match && locationRoute.match(hash)) {
                 isMatch = true;
-                context = locationRoute.match(hash)
+                matches = locationRoute.match(hash)
             }
 
             // check when condition
@@ -134,7 +144,9 @@ namespace Attv.DataApp {
 
             return {
                 isMatch: isMatch,
-                routeContext: context
+                currentHash: locationRoute,
+                route: route,
+                matches: matches
             };
         }
 

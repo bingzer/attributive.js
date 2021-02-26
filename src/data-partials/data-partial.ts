@@ -127,7 +127,7 @@ namespace Attv {
                 // During model rendering
                 options.onRender = (model, renderFn) => {
                     // [data-context]
-                    options.context = this.attribute.getContext(element);
+                    options.context = this.attribute.getContext(element, options.context);
 
                     // [data-source] vs [data-template-url]
                     let dataSource = this.attribute.resolve(Attv.DataSource.Key);
